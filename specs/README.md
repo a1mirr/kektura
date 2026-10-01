@@ -28,9 +28,11 @@ meaningful. `git grep "AC-3" -- '*0001*' 'src' 'tests'` finds a criterion's spec
 | Server actions (Supabase mocked) | next to the action, e.g. `src/app/[locale]/dashboard/actions.test.ts` | Node |
 | Client components | `src/components/*.test.tsx`, first line `// @vitest-environment jsdom` | jsdom + Testing Library |
 | Cross-cutting checks (generated data, translations) | `tests/*.test.ts` | Node |
+| User flows through the real app and database | `e2e/*.spec.ts` (Playwright, `npm run e2e`) | Test server (spec 0006) |
 
 Async Server Components (pages) can't be rendered by Vitest: keep their logic in `src/lib` and test
-it there; list the page-level behaviour as `manual` until there are end-to-end tests.
+it there, and cover the page-level behaviour with a few E2E tests. E2E tests sign in as a fresh
+dummy user each (`signInAsNewUser` in `e2e/helpers.ts`), so they never depend on each other.
 
 ## Regression gate
 
@@ -38,7 +40,8 @@ it there; list the page-level behaviour as `manual` until there are end-to-end t
 Claude Code is about to finish a turn with changed source files: typecheck, lint and tests in
 parallel. A failure is sent back to Claude to fix (up to 3 attempts, then you get a message). If app
 code changed but no spec and no test did, it asks once for the spec/test update or a one-line reason
-why none is needed. Run the same checks yourself with `npm run check`.
+why none is needed. Run the same checks yourself with `npm run check`. E2E tests need Docker, so the
+hook doesn't run them: run `npm run e2e` before committing changes to user flows.
 
 ## Index
 
@@ -49,3 +52,4 @@ why none is needed. Run the same checks yourself with `npm run check`.
 | [0003](0003-map-route-planner.md) | Map lines and the route planner | Done |
 | [0004](0004-trail-data.md) | Generated trail data and seeds | Done |
 | [0005](0005-auth-routing-i18n.md) | Sign-in, routing, translations | Done |
+| [0006](0006-test-server.md) | Test server with dummy login, E2E tests | Done |

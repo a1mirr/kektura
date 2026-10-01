@@ -50,6 +50,7 @@ Choosing the stamp date (it is always the day of the write); notes; photo upload
 | AC | Test |
 | --- | --- |
 | AC-1 ... AC-8 | `src/app/[locale]/dashboard/actions.test.ts` |
+| AC-3, AC-4 end to end (real database, RLS) | `e2e/stamping.spec.ts` |
 | AC-9, AC-10, AC-11 (buttons) | `src/components/ActionButton.test.tsx` |
 | AC-10, AC-11 (map popup) | manual: map click on a stamp, "Mark as walked" with the network offline / after signing out in another tab |
 | RLS | manual: Supabase advisors (`get_advisors`) clean; policies in `0006_rls_initplan.sql` |

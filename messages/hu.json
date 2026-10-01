@@ -1,12 +1,16 @@
 {
   "app": {
-    "title": "Kéktúra — haladásom"
+    "title": "Kéktúra — haladásom",
+    "testBanner": "Tesztszerver: helyi adatok és tesztbelépés. Nem éles környezet."
   },
   "home": {
     "headline": "Járd végig az Országos Kéktúrát — bélyegről bélyegre",
     "subtitle": "Jelöld a bélyegzőhelyeket, és kövesd a statisztikáidat.",
     "signIn": "Bejelentkezés Google-lel",
-    "authError": "A bejelentkezés sikertelen, próbáld újra."
+    "authError": "A bejelentkezés sikertelen, próbáld újra.",
+    "testLoginEmail": "Tesztbelépés: bármilyen e-mail-cím (a fiók az első belépéskor jön létre)",
+    "testLoginButton": "Belépés tesztfelhasználóként",
+    "testLoginNote": "Csak a tesztszerveren. Az adatok a helyi tesztadatbázisban vannak."
   },
   "dashboard": {
     "title": "Haladásom",

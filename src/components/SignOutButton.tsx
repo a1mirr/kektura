@@ -1,22 +1,16 @@
-"use client";
+import { getLocale, getTranslations } from "next-intl/server";
 
-import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
-import { createClient } from "@/lib/supabase/client";
-
-export default function SignOutButton() {
-  const t = useTranslations("dashboard");
-  const router = useRouter();
+// A plain form (no client JS): see src/app/auth/sign-out/route.ts.
+export default async function SignOutButton() {
+  const t = await getTranslations("dashboard");
+  const locale = await getLocale();
 
   return (
-    <button
-      className="text-sm text-stone-600 hover:underline"
-      onClick={async () => {
-        await createClient().auth.signOut();
-        router.replace("/");
-      }}
-    >
-      {t("signOut")}
-    </button>
+    <form action="/auth/sign-out" method="post">
+      <input type="hidden" name="locale" value={locale} />
+      <button type="submit" className="text-sm text-stone-600 hover:underline">
+        {t("signOut")}
+      </button>
+    </form>
   );
 }

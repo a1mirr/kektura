@@ -100,14 +100,14 @@ export default async function Dashboard({
         </div>
       </header>
 
-      <section className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {cards.map((c) => (
           <div key={c.label} className="rounded-lg bg-white p-4 shadow-sm">
-            <div className="text-sm text-stone-500">{c.label}</div>
-            <div className="text-2xl font-semibold">{c.value}</div>
+            <dt className="text-sm text-stone-500">{c.label}</dt>
+            <dd className="text-2xl font-semibold">{c.value}</dd>
           </div>
         ))}
-      </section>
+      </dl>
 
       {mapPoints.length > 0 && (
         <section className="rounded-lg bg-white p-4 shadow-sm">

@@ -22,11 +22,15 @@ complete in all three languages.
   shows the sign-in error on failure.
 - **AC-5**: All three message files have exactly the same keys, the same ICU placeholders per key,
   and no empty strings.
+- **AC-6**: "Sign out" is a plain form POST to `/auth/sign-out`: it works before the page has
+  hydrated, revokes the session at Supabase from the server, clears the session cookies and returns
+  to the landing page in the current locale.
 
 ## Coverage
 
 | AC | Test |
 | --- | --- |
 | AC-1 | `src/proxy.test.ts` |
-| AC-2, AC-3, AC-4 | manual (async Server Components / route handler; candidates for E2E tests): open `/` while signed in -> dashboard; open `/ru/dashboard` signed out -> `/ru`; `/auth/callback?locale=xx` -> `/ru?error=auth` |
+| AC-2, AC-3, AC-6 | `e2e/auth.spec.ts` (test server, spec 0006) |
+| AC-4 | manual: `/auth/callback?locale=xx` -> `/ru?error=auth` (needs a real OAuth round trip for the success path) |
 | AC-5 | `tests/messages.test.ts` |

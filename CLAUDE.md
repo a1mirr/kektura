@@ -7,7 +7,15 @@ Web app for tracking progress on the Országos Kéktúra (Hungary's Blue Trail):
 - next-intl for i18n: locales `ru` (default), `en`, `hu`; messages in `messages/*.json`; routes under `src/app/[locale]`. Add every new string to all three files.
 - Supabase: Google OAuth + Postgres with RLS. Schema in `supabase/migrations`, seed in `supabase/seed.sql`.
 - Recharts for charts.
-- Vitest (+ Testing Library/jsdom for components) for tests.
+- Vitest (+ Testing Library/jsdom for components) for unit tests; Playwright for E2E against the test server.
+
+## Environments (spec 0006)
+- **Production**: Supabase cloud project, Google sign-in only. `npm run dev` (port 3000) uses it via `.env.local`.
+- **Test server**: local Supabase in Docker (`supabase/config.toml`: same migrations + both seeds; realtime/storage/edge/analytics off) and `npm run dev:test` on port 3001 (`scripts/test-env.mjs` injects the local URL/key from `supabase status`, `TEST_LOGIN=1`, and builds into `.next-test` so it runs next to the normal dev server). Start the DB with `npm run testdb:start`, rebuild it with `npm run testdb:reset`.
+- The dummy login (`src/lib/test-login.ts`, `POST /auth/test-login`, `TestLoginForm`) signs in any email with a fixed password, creating the account on first use. It only exists with `TEST_LOGIN=1` AND a localhost Supabase URL; otherwise the form is hidden and the route 404s. Keep both guards. The test server also shows a "Test server" banner.
+- E2E: `npm run e2e` (Playwright, `e2e/`, Chromium) builds and starts a production build of the test server (`build:e2e` + `start:e2e`, port 3002, build folder `.next-e2e`) so it never collides with a manual `dev:test` on :3001. Don't point it at `next dev`: the dashboard re-render after each stamp takes 15-20 s in dev mode under parallel tests. Every test signs in as a fresh user (`signInAsNewUser`); wait for hydration (`expandAllStages`) before clicking client-side buttons. Not part of the Stop hook (needs Docker): run it before committing user-flow changes.
+- Sign-out is a form POST to `src/app/auth/sign-out/route.ts` (server-side `signOut`, works before hydration), like the dummy login.
+- Docker Desktop on this machine can't delete its own Unix-socket files (Windows error 1920), so after an unclean shutdown it crashes on start ("initializing Inference manager … dockerInference"). Workaround: quit Docker, rename `%LOCALAPPDATA%\Docker\run` (and `%LOCALAPPDATA%\docker-secrets-engine` if named in the error) aside, start again.
 
 ## Workflow: spec first, tests prove it
 - Every feature, behaviour change or non-trivial bug fix starts with a spec in `specs/` (copy `specs/_template.md` to `specs/NNNN-slug.md`; numbered acceptance criteria `AC-n`). Show the spec to the user and settle open questions before implementing. See `specs/README.md`.
@@ -36,3 +44,4 @@ Web app for tracking progress on the Országos Kéktúra (Hungary's Blue Trail):
 - `npm run dev` — dev server
 - `npm run build` — production build (needs `NEXT_PUBLIC_SUPABASE_*` env vars, see `.env.example`)
 - `npm test` — all tests once (`npm run test:watch` while working); `npm run check` — typecheck + lint + tests, the same gate the Stop hook runs
+- `npm run testdb:start` / `testdb:stop` / `testdb:reset` — local test Supabase (Docker); `npm run dev:test` — test server on :3001 with the dummy login; `npm run e2e` — Playwright E2E suite

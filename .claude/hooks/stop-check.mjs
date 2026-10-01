@@ -1,7 +1,7 @@
 // Claude Code Stop hook: the regression gate of the spec-driven workflow (specs/README.md).
 //
 // When Claude is about to finish and source files differ from the last green run, run typecheck,
-// lint and tests in parallel. On failure exit 2: stderr goes back to Claude, which keeps working.
+// lint and unit tests in parallel (E2E needs Docker and is run by hand: `npm run e2e`). On failure exit 2: stderr goes back to Claude, which keeps working.
 // After MAX_ATTEMPTS failed attempts in a row it lets the turn end and tells the user instead of
 // looping. Once checks pass, app code changed without any spec or test change gets one nudge.
 import { spawn, spawnSync } from "node:child_process";
@@ -14,6 +14,7 @@ const WATCHED = [
   "specs",
   "src",
   "tests",
+  "e2e",
   "scripts",
   "supabase",
   "messages",
@@ -21,6 +22,7 @@ const WATCHED = [
   "package.json",
   "tsconfig.json",
   "vitest.config.mts",
+  "playwright.config.ts",
   "next.config.ts",
   "eslint.config.mjs",
 ];
@@ -109,7 +111,7 @@ state.attempts = 0;
 save();
 
 // Spec-driven nudge (once per change set): app code changed, but no spec and no test did.
-const isTest = (f) => /\.test\.[cm]?[jt]sx?$/.test(f) || f.startsWith("tests/");
+const isTest = (f) => /\.test\.[cm]?[jt]sx?$/.test(f) || f.startsWith("tests/") || f.startsWith("e2e/");
 const appCode = changed.filter((f) => /^src\/.*\.(ts|tsx)$/.test(f) && !isTest(f) && !f.endsWith(".types.ts"));
 const specOrTest = changed.some((f) => f.startsWith("specs/") || isTest(f));
 if (appCode.length && !specOrTest && !input.stop_hook_active) {

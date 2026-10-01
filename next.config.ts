@@ -7,6 +7,8 @@ import type { NextConfig } from "next";
 const requestConfig = "./src/i18n/request.ts";
 
 const nextConfig: NextConfig = {
+  // The test server (scripts/test-env.mjs) builds into .next-test, so it can run next to `npm run dev`.
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   turbopack: {
     resolveAlias: { "next-intl/config": requestConfig },
   },

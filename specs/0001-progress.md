@@ -50,5 +50,6 @@ Elevation-based stats; walked time; stamps outside the official 161 (see extra s
 | AC | Test |
 | --- | --- |
 | AC-1, AC-2, AC-3, AC-4, AC-5 (counting), AC-6, AC-7 | `src/lib/progress.test.ts` |
+| AC-3, AC-4, AC-7 on the real dashboard | `e2e/stamping.spec.ts` |
 | AC-5 (localized labels) | manual: switch locale on the dashboard, check month labels and tooltip |
 | AC-8, AC-9 | `src/components/StageSection.test.tsx` |

@@ -1,12 +1,16 @@
 {
   "app": {
-    "title": "Kektura — my progress"
+    "title": "Kektura — my progress",
+    "testBanner": "Test server: local data and a dummy login. Not production."
   },
   "home": {
     "headline": "Hike the Országos Kéktúra — one stamp at a time",
     "subtitle": "Mark stamping points and see your progress statistics.",
     "signIn": "Sign in with Google",
-    "authError": "Sign-in failed, please try again."
+    "authError": "Sign-in failed, please try again.",
+    "testLoginEmail": "Test login: any email (the account is created on first sign-in)",
+    "testLoginButton": "Sign in as test user",
+    "testLoginNote": "Test server only. The data lives in the local test database."
   },
   "dashboard": {
     "title": "My progress",
