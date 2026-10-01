@@ -53,9 +53,9 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0004](0004-trail-data.md) | Generated trail data and seeds | Done |
 | [0005](0005-auth-routing-i18n.md) | Sign-in, routing, translations | Done |
 | [0006](0006-test-server.md) | Test server with dummy login, E2E tests | Done |
-| [0007](0007-ci.md) | CI, generated-types check, Dependabot | Accepted |
+| [0007](0007-ci.md) | CI, generated-types check, Dependabot | Done |
 | [0008](0008-action-logging.md) | Server-side logging of failed stamp actions | Accepted |
 | [0009](0009-fast-stamping.md) | Cached reference data, instant stamp buttons | Accepted |
 | [0010](0010-typed-translations.md) | Typed translation keys | Accepted |
 | [0011](0011-trailmap-split.md) | Split TrailMap, map E2E safety net | Accepted |
-| [0012](0012-backups.md) | Weekly backup of production user data | Accepted |
+| [0012](0012-backups.md) | Weekly backup of production user data | Done |

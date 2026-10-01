@@ -1,0 +1,52 @@
+# Spec 0007. The regression gate on GitHub: the same checks Claude Code's Stop hook runs, plus the
+# end-to-end tests against a local Supabase. Needs no secrets.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Typecheck, lint, unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+
+  e2e:
+    name: End-to-end tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # The Supabase CLI is the version pinned in package-lock.json. The app only needs the database,
+      # the API gateway, auth and PostgREST; skip the rest to save image pulls.
+      - name: Start local Supabase
+        run: npx supabase start -x studio,mailpit,imgproxy,vector,logflare,supavisor,edge-runtime,realtime,storage-api
+      - name: Generated types are up to date
+        run: npm run types:check
+      - run: npx playwright install --with-deps chromium
+      # Builds the test server through scripts/test-env.mjs (reads `supabase status`) and runs it.
+      - run: npm run e2e
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14

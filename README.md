@@ -17,7 +17,12 @@ Spec first: every task gets a spec with numbered acceptance criteria in `specs/`
 
 - `npm test`: unit and regression tests (Vitest); `npm run test:watch` while working.
 - `npm run check`: typecheck + lint + tests. Claude Code runs the same gate automatically before
-  finishing a turn (`.claude/settings.json`).
+  finishing a turn (`.claude/settings.json`). GitHub Actions run the same checks plus the E2E tests
+  on every push and pull request (`.github/workflows/ci.yml`, spec 0007).
+- `npm run types:gen`: regenerates `src/lib/supabase/database.types.ts` from the local test database
+  after a migration change (`npm run types:check` fails in CI when the file is stale).
+- A weekly workflow (`.github/workflows/backup.yml`, spec 0012) dumps users and their stamps from
+  production into a workflow artifact; it needs the `SUPABASE_DB_URL` repository secret.
 
 ## Test server
 A second environment with its own local database and a dummy login (no Google account needed).
