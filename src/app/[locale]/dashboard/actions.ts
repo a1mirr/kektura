@@ -4,29 +4,42 @@ import type { User } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/action-result";
+import { logStampActionError, logStampActionInvalidInput, type StampAction, type StampStage } from "@/lib/log";
 
-// See specs/0002-stamping.md.
+// See specs/0002-stamping.md; failures are logged per specs/0008-action-logging.md.
 const MAX_PLACES = 200;
 const ok: ActionResult = { ok: true };
 const unauthorized: ActionResult = { ok: false, reason: "unauthorized" };
 const failed: ActionResult = { ok: false, reason: "failed" };
 
-type Session = { supabase: Awaited<ReturnType<typeof createClient>>; user: User };
+type Session = {
+  supabase: Awaited<ReturnType<typeof createClient>>;
+  user: User;
+  // Logs a database error and gives the client its plain `failed`.
+  fail: (stage: Exclude<StampStage, "exception">, error: unknown) => ActionResult;
+};
 
 // Runs `write` for the signed-in user and refreshes the dashboard after a successful write. Never
-// throws: a thrown error reaches the client as an opaque message. Everything runs under the user's
-// RLS policies, so only their own stamps can ever be touched.
-async function asUser(write: (session: Session) => Promise<ActionResult>): Promise<ActionResult> {
+// throws: a thrown error reaches the client as an opaque message, so it is logged here instead.
+// Everything runs under the user's RLS policies, so only their own stamps can ever be touched.
+async function asUser(action: StampAction, write: (session: Session) => Promise<ActionResult>): Promise<ActionResult> {
+  let userId: string | undefined;
   try {
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return unauthorized;
-    const result = await write({ supabase, user });
+    userId = user.id;
+    const fail: Session["fail"] = (stage, error) => {
+      logStampActionError(action, stage, error, user.id);
+      return failed;
+    };
+    const result = await write({ supabase, user, fail });
     if (result.ok) revalidatePath("/[locale]/dashboard", "page");
     return result;
-  } catch {
+  } catch (error) {
+    logStampActionError(action, "exception", error, userId);
     return failed;
   }
 }
@@ -41,11 +54,13 @@ export async function setPlacesStamped(placeKeys: string[], stamped: boolean): P
     placeKeys.some((k) => typeof k !== "string" || k.length > 64) ||
     typeof stamped !== "boolean"
   ) {
+    logStampActionInvalidInput("setPlacesStamped");
     return failed;
   }
-  return asUser(async ({ supabase, user }) => {
+  return asUser("setPlacesStamped", async ({ supabase, user, fail }) => {
     const { data: rows, error } = await supabase.from("checkpoints").select("id").in("place_key", placeKeys);
-    if (error || !rows?.length) return failed;
+    if (error) return fail("read", error);
+    if (!rows?.length) return failed;
     const ids = rows.map((r) => r.id);
 
     // ignoreDuplicates (ON CONFLICT DO NOTHING): re-stamping keeps the original stamped_on date.
@@ -54,14 +69,17 @@ export async function setPlacesStamped(placeKeys: string[], stamped: boolean): P
           .from("user_stamps")
           .upsert(ids.map((id) => ({ user_id: user.id, checkpoint_id: id })), { ignoreDuplicates: true })
       : await supabase.from("user_stamps").delete().eq("user_id", user.id).in("checkpoint_id", ids);
-    return writeError ? failed : ok;
+    return writeError ? fail("write", writeError) : ok;
   });
 }
 
 // Extra (non-official) stamps are tracked separately from the official 161 places.
 export async function setExtraStamped(extraId: number, stamped: boolean): Promise<ActionResult> {
-  if (!Number.isInteger(extraId) || typeof stamped !== "boolean") return failed;
-  return asUser(async ({ supabase, user }) => {
+  if (!Number.isInteger(extraId) || typeof stamped !== "boolean") {
+    logStampActionInvalidInput("setExtraStamped");
+    return failed;
+  }
+  return asUser("setExtraStamped", async ({ supabase, user, fail }) => {
     // ignoreDuplicates (ON CONFLICT DO NOTHING): an already-stamped row must not need an UPDATE
     // policy, which user_extra_stamps doesn't have.
     const { error } = stamped
@@ -69,6 +87,6 @@ export async function setExtraStamped(extraId: number, stamped: boolean): Promis
           .from("user_extra_stamps")
           .upsert({ user_id: user.id, extra_id: extraId }, { ignoreDuplicates: true })
       : await supabase.from("user_extra_stamps").delete().eq("user_id", user.id).eq("extra_id", extraId);
-    return error ? failed : ok;
+    return error ? fail("write", error) : ok;
   });
 }

@@ -1,5 +1,8 @@
+import { notFound } from "next/navigation";
+import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
 import { testLoginEnabled } from "@/lib/test-login";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
@@ -15,6 +18,7 @@ export default async function Home({
 }) {
   const { locale } = await params;
   const { error } = await searchParams;
+  if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
 
   // Signed-in users go straight to their dashboard. Same check as the dashboard's own guard
