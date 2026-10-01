@@ -31,6 +31,44 @@ and safe to regenerate whenever MTSZ (or heyjoe.hu) publishes a new file.
 
 Downloading the source files (done by hand from kektura.hu / heyjoe.hu); stamp artwork.
 
+## Notes
+
+**Sources.**
+- Official MTSZ GPX files from https://www.kektura.hu/okt-szakaszok: `okt_bh_<date>.gpx` (stamping
+  points) and `okt_teljes_bh_<date>.gpx` (full route).
+- Stage table: `scripts/data/okt-stages.json`, extracted by hand from MTSZ's section table PDF
+  (https://turistaterkepek.hu/kekturahu/tablazatok/okt_szakasz_adatok.pdf). Re-extract it when MTSZ
+  changes stages.
+- Extra stamps: heyjoe.hu's `okt_pecsetek.gpx` (https://heyjoe.hu/pecset_gpx.php?mozgalom=okt).
+
+**Regenerating.** Run `node scripts/build-data.mjs <stamps.gpx> <route.gpx> [okt_pecsetek.gpx]`. It
+writes `supabase/seed.sql`, `public/data/okt-route.json`, `okt-route-detail.json`, `okt-hops.json`
+and, with the third argument, `supabase/seed_extra.sql`. Never edit those by hand. Then:
+1. Run `npm test` (this spec's checks).
+2. Run `npm run testdb:reset` and `npm run e2e`.
+3. Apply the seeds to production.
+
+**Places and variants.** 220 checkpoint rows form 161 places, the official count.
+- Alternative stamps at one place (`_1`/`_2`/`_3`) share a `place_key`, and stamping one stamps them
+  all.
+- `_B`/`_C` points are separate places.
+- The `place_key` regex lives in `build-data.mjs` and, historically, in migration 0003.
+
+**Distances.** `km_from_start` is the stamp's snapped distance along the track. A place sits at the km
+of its furthest-along variant: variants can be ~3 km apart, and the MTSZ table measures to that one.
+This applies in both `src/lib/progress.ts` and `build-data.mjs` (`placeKm`).
+
+**Stages.** A stamp belongs to the stage it ends. Írott-kő (1.1) and Nagymaros (17.1, after the
+Visegrád ferry gap) are the only stage starts that get a number. `build-data.mjs` fails loudly if a
+place name has no stage.
+
+**Hops.** `okt-hops.json` has 160 hops between neighbouring places, from the stage table. The table
+totals are 1183.1 km, 31915 m ascent, 32500 m descent and 347:45 forward time.
+
+**Extra stamps.** 72 extra stamps: everything in heyjoe.hu's list that is more than 60 m from an
+official point. They live in `user_extra_stamps` and never count towards the 161. No stamp artwork
+exists in any open source (MTSZ owns it), so don't scrape for it; the plan is user-uploaded photos.
+
 ## Coverage
 
 | AC | Test |

@@ -35,9 +35,33 @@ From `public/data/okt-hops.json`: 160 hops between neighbouring places, from the
 - **AC-7**: Choosing the same place twice, or a place not on the chain, gives no numbers.
 - **AC-8**: Times are shown as `h:mm` (e.g. 347:45 for the whole trail).
 
+### Map UI
+
+- **AC-9**: The map draws the route from `okt-route.json` (~30 m simplification) and swaps to
+  `okt-route-detail.json` (~3 m) at zoom >= 9, loading it on first need; if loading fails it stays on
+  the overview and retries on the next zoom change. Tiles: OpenStreetMap, with attribution.
+- **AC-10**: Layer toggles under the map: walked stretches and official stamps (on by default), extra
+  stamps (with their count) and restaurants (off by default; shown once their data has loaded). Each
+  choice persists in localStorage.
+- **AC-11**: The fullscreen button uses the native Fullscreen API with a CSS overlay fallback; Esc or
+  the button leaves it and the page scrolls normally again.
+- **AC-12**: Hovering a stamp shows its name. Clicking one opens a popup: route from here, route to
+  here, mark/unmark walked (official places and extra stamps; same results as 0002 AC-10, AC-11), and
+  show in list. "Show in list" leaves fullscreen, opens the stamp's stage if collapsed, scrolls to its
+  row (`place-<key>` / `extra-<id>`) and flashes it.
+- **AC-13**: The 📍 button in a list row flies the map to that stamp (zoom >= 12) and labels it; for an
+  extra stamp it also switches the extra-stamps layer on.
+- **AC-14**: Restaurants (`public/data/restaurants.json`: within 5 km of the trail, built by
+  `scripts/build-restaurants.mjs` from an etteremhet.hu results page): hover shows name and distance,
+  click pins a popup with a link to the restaurant's page.
+- **AC-15**: Popup contents are built from DOM text nodes, never `innerHTML`, so names in the data can't
+  inject markup; restaurant links are only emitted for `https:` URLs.
+- **AC-16**: Updating stamps keeps the map's position and zoom (new data is pushed into the existing
+  map, not a new one).
+
 ## Out of scope
 
-Routing off the trail; restaurant and extra-stamp layers (display only, no rules).
+Routing off the trail.
 
 ## Coverage
 
@@ -47,3 +71,4 @@ Routing off the trail; restaurant and extra-stamp layers (display only, no rules
 | AC-2 (toggle), AC-3 (fit) | manual: dashboard map |
 | AC-4 ... AC-8 | `src/lib/route-stats.test.ts` |
 | Table totals | `tests/trail-data.test.ts` (0004 AC-6) |
+| AC-9 ... AC-16 | manual (canvas interactions; spec 0011 adds E2E where the DOM allows) |
