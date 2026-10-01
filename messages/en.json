@@ -1,0 +1,72 @@
+{
+  "app": {
+    "title": "Kektura — my progress"
+  },
+  "home": {
+    "headline": "Hike the Országos Kéktúra — one stamp at a time",
+    "subtitle": "Mark stamping points and see your progress statistics.",
+    "signIn": "Sign in with Google",
+    "authError": "Sign-in failed, please try again."
+  },
+  "dashboard": {
+    "title": "My progress",
+    "signOut": "Sign out",
+    "stamps": "Stamps",
+    "percent": "Completed",
+    "km": "Kilometres",
+    "remaining": "Remaining, km",
+    "map": "Trail map",
+    "mapLegend": "Blue line — walked stretches (between two neighbouring stamped places), grey dashes — the rest.",
+    "perMonth": "Stamps per month",
+    "checkpoints": "Stamping points",
+    "stamp": "Add stamp",
+    "unstamp": "Remove",
+    "empty": "No checkpoints loaded yet. Run supabase/seed.sql.",
+    "showExtras": "Show extra stamps ({count})",
+    "extraStamps": "Extra stamps",
+    "extraNote": "Unofficial stamps near the trail (castles, museums, other hiking movements). Not counted in the main total. Source: heyjoe.hu.",
+    "offTrail": "{m} m off the trail",
+    "showOnMap": "Show on map",
+    "showRestaurants": "Show restaurants ({count})",
+    "restaurantDist": "{km} km from the trail as the crow flies",
+    "openRestaurantSite": "Open on etteremhet.hu",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "showWalked": "Walked stretches",
+    "showStamps": "Stamps",
+    "stageTitle": "Stage {n}",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "stampStage": "Stamp stage",
+    "unstampStage": "Clear stage",
+    "stageHint": "“Stamp stage” marks every stamp of the stage plus its starting point; “Clear stage” removes only the stage's own stamps.",
+    "routeFromHere": "Route from here",
+    "routeToHere": "Route to here",
+    "markStamped": "Mark as walked",
+    "unmarkStamped": "Remove mark",
+    "showInList": "Show in list",
+    "kmFromStart": "{km} km from Írott-kő",
+    "routeKm": "Distance: {km} km",
+    "routeUp": "ascent {m} m",
+    "routeDown": "descent {m} m",
+    "routeTime": "time ~{time}",
+    "routeTimeFerry": "time ~{time} + ferry",
+    "routePickTo": "Now pick the end stamp: “Route to here”.",
+    "routePickFrom": "Now pick the start stamp: “Route from here”.",
+    "routeNoData": "No data for these points.",
+    "routeClear": "Clear",
+    "routeNote": "From the MTSZ table (hops between neighbouring stamps); time excludes breaks, in the walking direction.",
+    "routeFerryOnly": "ferry (no time in the table)",
+    "actionFailed": "Couldn't save, try again.",
+    "kmValue": "{km} km",
+    "mapAttribution": "© OpenStreetMap contributors · route: MTSZ"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "retry": "Try again"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "back": "Back to the start"
+  }
+}

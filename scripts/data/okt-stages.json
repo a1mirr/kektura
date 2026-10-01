@@ -1,0 +1,1867 @@
+{
+ "source": "MTSZ, Az Országos Kéktúra szakaszai (2026-09-10), turistaterkepek.hu/kekturahu/tablazatok/okt_szakasz_adatok.pdf",
+ "stages": [
+  {
+   "stage": 1,
+   "start": "Írott-kő",
+   "end": "Sárvár",
+   "km": 71.7,
+   "places": [
+    "Írott-kő",
+    "Hét-forrás",
+    "Kőszeg",
+    "Tömörd",
+    "Ablánci malom",
+    "Szeleste",
+    "Bögöt",
+    "Csényeújmajor",
+    "Sárvár"
+   ],
+   "hops": [
+    {
+     "from": "Írott-kő",
+     "to": "Hét-forrás",
+     "km": 8.2,
+     "up": 125,
+     "down": 570,
+     "tf": 130,
+     "tb": 180
+    },
+    {
+     "from": "Hét-forrás",
+     "to": "Kőszeg",
+     "km": 4.9,
+     "up": 95,
+     "down": 255,
+     "tf": 80,
+     "tb": 100
+    },
+    {
+     "from": "Kőszeg",
+     "to": "Tömörd",
+     "km": 15.8,
+     "up": 130,
+     "down": 180,
+     "tf": 250,
+     "tb": 250
+    },
+    {
+     "from": "Tömörd",
+     "to": "Ablánci malom",
+     "km": 9.8,
+     "up": 70,
+     "down": 110,
+     "tf": 150,
+     "tb": 160
+    },
+    {
+     "from": "Ablánci malom",
+     "to": "Szeleste",
+     "km": 12.4,
+     "up": 90,
+     "down": 110,
+     "tf": 190,
+     "tb": 200
+    },
+    {
+     "from": "Szeleste",
+     "to": "Bögöt",
+     "km": 7.7,
+     "up": 35,
+     "down": 25,
+     "tf": 120,
+     "tb": 120
+    },
+    {
+     "from": "Bögöt",
+     "to": "Csényeújmajor",
+     "km": 7.4,
+     "up": 5,
+     "down": 10,
+     "tf": 110,
+     "tb": 110
+    },
+    {
+     "from": "Csényeújmajor",
+     "to": "Sárvár",
+     "km": 5.5,
+     "up": 5,
+     "down": 10,
+     "tf": 80,
+     "tb": 80
+    }
+   ]
+  },
+  {
+   "stage": 2,
+   "start": "Sárvár",
+   "end": "Sümeg",
+   "km": 72.6,
+   "places": [
+    "Gérce",
+    "Rózsáskerti erdészház",
+    "Hidegkúti vadászház",
+    "Káld",
+    "Hosszúpereszteg",
+    "Szajki erdészház",
+    "Ötvös",
+    "Kisvásárhely",
+    "Sümeg"
+   ],
+   "hops": [
+    {
+     "from": "Sárvár",
+     "to": "Gérce",
+     "km": 10.1,
+     "up": 90,
+     "down": 70,
+     "tf": 160,
+     "tb": 160
+    },
+    {
+     "from": "Gérce",
+     "to": "Rózsáskerti erdészház",
+     "km": 2.5,
+     "up": 25,
+     "down": 20,
+     "tf": 40,
+     "tb": 40
+    },
+    {
+     "from": "Rózsáskerti erdészház",
+     "to": "Hidegkúti vadászház",
+     "km": 4.7,
+     "up": 20,
+     "down": 35,
+     "tf": 70,
+     "tb": 70
+    },
+    {
+     "from": "Hidegkúti vadászház",
+     "to": "Káld",
+     "km": 6.6,
+     "up": 75,
+     "down": 80,
+     "tf": 110,
+     "tb": 110
+    },
+    {
+     "from": "Káld",
+     "to": "Hosszúpereszteg",
+     "km": 10.9,
+     "up": 90,
+     "down": 105,
+     "tf": 170,
+     "tb": 170
+    },
+    {
+     "from": "Hosszúpereszteg",
+     "to": "Szajki erdészház",
+     "km": 5.8,
+     "up": 35,
+     "down": 30,
+     "tf": 90,
+     "tb": 90
+    },
+    {
+     "from": "Szajki erdészház",
+     "to": "Ötvös",
+     "km": 15.3,
+     "up": 55,
+     "down": 55,
+     "tf": 240,
+     "tb": 240
+    },
+    {
+     "from": "Ötvös",
+     "to": "Kisvásárhely",
+     "km": 8,
+     "up": 25,
+     "down": 50,
+     "tf": 120,
+     "tb": 120
+    },
+    {
+     "from": "Kisvásárhely",
+     "to": "Sümeg",
+     "km": 8.7,
+     "up": 35,
+     "down": 5,
+     "tf": 130,
+     "tb": 130
+    }
+   ]
+  },
+  {
+   "stage": 3,
+   "start": "Sümeg",
+   "end": "Keszthely",
+   "km": 44.6,
+   "places": [
+    "Sarvaly erdészház",
+    "Zalaszántó",
+    "Rezi",
+    "Gyöngyösi csárda",
+    "Hévíz",
+    "Keszthely"
+   ],
+   "hops": [
+    {
+     "from": "Sümeg",
+     "to": "Sarvaly erdészház",
+     "km": 6.4,
+     "up": 80,
+     "down": 45,
+     "tf": 100,
+     "tb": 100
+    },
+    {
+     "from": "Sarvaly erdészház",
+     "to": "Zalaszántó",
+     "km": 14.4,
+     "up": 345,
+     "down": 355,
+     "tf": 250,
+     "tb": 250
+    },
+    {
+     "from": "Zalaszántó",
+     "to": "Rezi",
+     "km": 7.1,
+     "up": 235,
+     "down": 175,
+     "tf": 130,
+     "tb": 120
+    },
+    {
+     "from": "Rezi",
+     "to": "Gyöngyösi csárda",
+     "km": 2.6,
+     "up": 15,
+     "down": 155,
+     "tf": 40,
+     "tb": 55
+    },
+    {
+     "from": "Gyöngyösi csárda",
+     "to": "Hévíz",
+     "km": 7.2,
+     "up": 55,
+     "down": 75,
+     "tf": 110,
+     "tb": 120
+    },
+    {
+     "from": "Hévíz",
+     "to": "Keszthely",
+     "km": 6.9,
+     "up": 55,
+     "down": 55,
+     "tf": 110,
+     "tb": 110
+    }
+   ]
+  },
+  {
+   "stage": 4,
+   "start": "Keszthely",
+   "end": "Tapolca",
+   "km": 29.3,
+   "places": [
+    "Vállus",
+    "Lesenceistvánd",
+    "Tapolca"
+   ],
+   "hops": [
+    {
+     "from": "Keszthely",
+     "to": "Vállus",
+     "km": 13.4,
+     "up": 345,
+     "down": 225,
+     "tf": 240,
+     "tb": 220
+    },
+    {
+     "from": "Vállus",
+     "to": "Lesenceistvánd",
+     "km": 6.8,
+     "up": 190,
+     "down": 290,
+     "tf": 120,
+     "tb": 130
+    },
+    {
+     "from": "Lesenceistvánd",
+     "to": "Tapolca",
+     "km": 9.1,
+     "up": 25,
+     "down": 30,
+     "tf": 140,
+     "tb": 140
+    }
+   ]
+  },
+  {
+   "stage": 5,
+   "start": "Tapolca",
+   "end": "Badacsonytördemic",
+   "km": 17.2,
+   "places": [
+    "Szent György-hegy",
+    "Szigliget",
+    "Badacsonytördemic"
+   ],
+   "hops": [
+    {
+     "from": "Tapolca",
+     "to": "Szent György-hegy",
+     "km": 6,
+     "up": 160,
+     "down": 10,
+     "tf": 110,
+     "tb": 90
+    },
+    {
+     "from": "Szent György-hegy",
+     "to": "Szigliget",
+     "km": 7.8,
+     "up": 205,
+     "down": 300,
+     "tf": 140,
+     "tb": 150
+    },
+    {
+     "from": "Szigliget",
+     "to": "Badacsonytördemic",
+     "km": 3.4,
+     "up": 15,
+     "down": 75,
+     "tf": 50,
+     "tb": 60
+    }
+   ]
+  },
+  {
+   "stage": 6,
+   "start": "Badacsonytördemic",
+   "end": "Nagyvázsony",
+   "km": 49.7,
+   "places": [
+    "Badacsony",
+    "Káptalantóti",
+    "Csobánc",
+    "Szentbékkálla",
+    "Balatonhenye",
+    "Csicsói erdészház",
+    "Nagyvázsony"
+   ],
+   "hops": [
+    {
+     "from": "Badacsonytördemic",
+     "to": "Badacsony",
+     "km": 4.3,
+     "up": 405,
+     "down": 80,
+     "tf": 100,
+     "tb": 70
+    },
+    {
+     "from": "Badacsony",
+     "to": "Káptalantóti",
+     "km": 9.1,
+     "up": 165,
+     "down": 475,
+     "tf": 150,
+     "tb": 180
+    },
+    {
+     "from": "Káptalantóti",
+     "to": "Csobánc",
+     "km": 4,
+     "up": 255,
+     "down": 30,
+     "tf": 80,
+     "tb": 60
+    },
+    {
+     "from": "Csobánc",
+     "to": "Szentbékkálla",
+     "km": 9.5,
+     "up": 240,
+     "down": 420,
+     "tf": 170,
+     "tb": 180
+    },
+    {
+     "from": "Szentbékkálla",
+     "to": "Balatonhenye",
+     "km": 8.7,
+     "up": 260,
+     "down": 210,
+     "tf": 160,
+     "tb": 150
+    },
+    {
+     "from": "Balatonhenye",
+     "to": "Csicsói erdészház",
+     "km": 6.2,
+     "up": 170,
+     "down": 75,
+     "tf": 110,
+     "tb": 100
+    },
+    {
+     "from": "Csicsói erdészház",
+     "to": "Nagyvázsony",
+     "km": 7.9,
+     "up": 80,
+     "down": 140,
+     "tf": 130,
+     "tb": 130
+    }
+   ]
+  },
+  {
+   "stage": 7,
+   "start": "Nagyvázsony",
+   "end": "Városlőd",
+   "km": 24.7,
+   "places": [
+    "Kab-hegy",
+    "Úrkút",
+    "Városlőd"
+   ],
+   "hops": [
+    {
+     "from": "Nagyvázsony",
+     "to": "Kab-hegy",
+     "km": 9.6,
+     "up": 375,
+     "down": 95,
+     "tf": 180,
+     "tb": 150
+    },
+    {
+     "from": "Kab-hegy",
+     "to": "Úrkút",
+     "km": 5.6,
+     "up": 20,
+     "down": 150,
+     "tf": 90,
+     "tb": 100
+    },
+    {
+     "from": "Úrkút",
+     "to": "Városlőd",
+     "km": 9.5,
+     "up": 120,
+     "down": 230,
+     "tf": 160,
+     "tb": 170
+    }
+   ]
+  },
+  {
+   "stage": 8,
+   "start": "Városlőd",
+   "end": "Zirc",
+   "km": 40.1,
+   "places": [
+    "Németbánya",
+    "Bakonybél",
+    "Kőris-hegy",
+    "Borzavár",
+    "Zirc"
+   ],
+   "hops": [
+    {
+     "from": "Városlőd",
+     "to": "Németbánya",
+     "km": 10.2,
+     "up": 180,
+     "down": 150,
+     "tf": 170,
+     "tb": 170
+    },
+    {
+     "from": "Németbánya",
+     "to": "Bakonybél",
+     "km": 8.8,
+     "up": 180,
+     "down": 245,
+     "tf": 150,
+     "tb": 160
+    },
+    {
+     "from": "Bakonybél",
+     "to": "Kőris-hegy",
+     "km": 7.1,
+     "up": 460,
+     "down": 15,
+     "tf": 150,
+     "tb": 110
+    },
+    {
+     "from": "Kőris-hegy",
+     "to": "Borzavár",
+     "km": 8.8,
+     "up": 145,
+     "down": 450,
+     "tf": 150,
+     "tb": 180
+    },
+    {
+     "from": "Borzavár",
+     "to": "Zirc",
+     "km": 5.2,
+     "up": 140,
+     "down": 165,
+     "tf": 90,
+     "tb": 90
+    }
+   ]
+  },
+  {
+   "stage": 9,
+   "start": "Zirc",
+   "end": "Bodajk",
+   "km": 57.8,
+   "places": [
+    "Bakonynána",
+    "Jásd",
+    "Csőszpuszta",
+    "Kisgyón",
+    "Bakonykúti",
+    "Fehérvárcsurgó",
+    "Bodajk"
+   ],
+   "hops": [
+    {
+     "from": "Zirc",
+     "to": "Bakonynána",
+     "km": 10,
+     "up": 130,
+     "down": 205,
+     "tf": 160,
+     "tb": 170
+    },
+    {
+     "from": "Bakonynána",
+     "to": "Jásd",
+     "km": 6.2,
+     "up": 100,
+     "down": 175,
+     "tf": 100,
+     "tb": 110
+    },
+    {
+     "from": "Jásd",
+     "to": "Csőszpuszta",
+     "km": 4.1,
+     "up": 240,
+     "down": 35,
+     "tf": 80,
+     "tb": 60
+    },
+    {
+     "from": "Csőszpuszta",
+     "to": "Kisgyón",
+     "km": 6.7,
+     "up": 65,
+     "down": 285,
+     "tf": 110,
+     "tb": 130
+    },
+    {
+     "from": "Kisgyón",
+     "to": "Bakonykúti",
+     "km": 11.7,
+     "up": 220,
+     "down": 240,
+     "tf": 200,
+     "tb": 200
+    },
+    {
+     "from": "Bakonykúti",
+     "to": "Fehérvárcsurgó",
+     "km": 9.6,
+     "up": 220,
+     "down": 265,
+     "tf": 160,
+     "tb": 170
+    },
+    {
+     "from": "Fehérvárcsurgó",
+     "to": "Bodajk",
+     "km": 9.5,
+     "up": 245,
+     "down": 245,
+     "tf": 170,
+     "tb": 170
+    }
+   ]
+  },
+  {
+   "stage": 10,
+   "start": "Bodajk",
+   "end": "Szárliget",
+   "km": 56.2,
+   "places": [
+    "Csókakő",
+    "Gánt",
+    "Mindszentpuszta",
+    "Kőhányás",
+    "Várgesztes",
+    "Szárliget"
+   ],
+   "hops": [
+    {
+     "from": "Bodajk",
+     "to": "Csókakő",
+     "km": 8.5,
+     "up": 180,
+     "down": 40,
+     "tf": 150,
+     "tb": 130
+    },
+    {
+     "from": "Csókakő",
+     "to": "Gánt",
+     "km": 14.2,
+     "up": 265,
+     "down": 340,
+     "tf": 240,
+     "tb": 250
+    },
+    {
+     "from": "Gánt",
+     "to": "Mindszentpuszta",
+     "km": 5.7,
+     "up": 185,
+     "down": 70,
+     "tf": 100,
+     "tb": 90
+    },
+    {
+     "from": "Mindszentpuszta",
+     "to": "Kőhányás",
+     "km": 7.4,
+     "up": 195,
+     "down": 205,
+     "tf": 130,
+     "tb": 130
+    },
+    {
+     "from": "Kőhányás",
+     "to": "Várgesztes",
+     "km": 4.9,
+     "up": 95,
+     "down": 140,
+     "tf": 80,
+     "tb": 90
+    },
+    {
+     "from": "Várgesztes",
+     "to": "Szárliget",
+     "km": 15.5,
+     "up": 450,
+     "down": 495,
+     "tf": 280,
+     "tb": 280
+    }
+   ]
+  },
+  {
+   "stage": 11,
+   "start": "Szárliget",
+   "end": "Dorog",
+   "km": 69.2,
+   "places": [
+    "Somlyóvár",
+    "Koldusszállás",
+    "Bánya-hegyi erdészház",
+    "Gerecse üdülő",
+    "Pusztamarót",
+    "Péliföldszentkereszt",
+    "Mogyorósbánya",
+    "Tokodi pincék",
+    "Tokod",
+    "Nagy-Gete",
+    "Dorog"
+   ],
+   "hops": [
+    {
+     "from": "Szárliget",
+     "to": "Somlyóvár",
+     "km": 13.1,
+     "up": 385,
+     "down": 225,
+     "tf": 230,
+     "tb": 220
+    },
+    {
+     "from": "Somlyóvár",
+     "to": "Koldusszállás",
+     "km": 7.9,
+     "up": 130,
+     "down": 320,
+     "tf": 130,
+     "tb": 150
+    },
+    {
+     "from": "Koldusszállás",
+     "to": "Bánya-hegyi erdészház",
+     "km": 11.5,
+     "up": 360,
+     "down": 130,
+     "tf": 210,
+     "tb": 180
+    },
+    {
+     "from": "Bánya-hegyi erdészház",
+     "to": "Gerecse üdülő",
+     "km": 4.3,
+     "up": 130,
+     "down": 80,
+     "tf": 80,
+     "tb": 70
+    },
+    {
+     "from": "Gerecse üdülő",
+     "to": "Pusztamarót",
+     "km": 2.5,
+     "up": 10,
+     "down": 155,
+     "tf": 40,
+     "tb": 50
+    },
+    {
+     "from": "Pusztamarót",
+     "to": "Péliföldszentkereszt",
+     "km": 8.2,
+     "up": 225,
+     "down": 405,
+     "tf": 140,
+     "tb": 160
+    },
+    {
+     "from": "Péliföldszentkereszt",
+     "to": "Mogyorósbánya",
+     "km": 5.4,
+     "up": 205,
+     "down": 210,
+     "tf": 100,
+     "tb": 100
+    },
+    {
+     "from": "Mogyorósbánya",
+     "to": "Tokodi pincék",
+     "km": 2.7,
+     "up": 125,
+     "down": 155,
+     "tf": 50,
+     "tb": 55
+    },
+    {
+     "from": "Tokodi pincék",
+     "to": "Tokod",
+     "km": 3.4,
+     "up": 175,
+     "down": 180,
+     "tf": 70,
+     "tb": 70
+    },
+    {
+     "from": "Tokod",
+     "to": "Nagy-Gete",
+     "km": 2.8,
+     "up": 335,
+     "down": 10,
+     "tf": 80,
+     "tb": 45
+    },
+    {
+     "from": "Nagy-Gete",
+     "to": "Dorog",
+     "km": 7.4,
+     "up": 95,
+     "down": 415,
+     "tf": 120,
+     "tb": 150
+    }
+   ]
+  },
+  {
+   "stage": 12,
+   "start": "Dorog",
+   "end": "Piliscsaba",
+   "km": 18.5,
+   "places": [
+    "Klastrompuszta",
+    "Piliscsaba"
+   ],
+   "hops": [
+    {
+     "from": "Dorog",
+     "to": "Klastrompuszta",
+     "km": 10.6,
+     "up": 365,
+     "down": 185,
+     "tf": 190,
+     "tb": 180
+    },
+    {
+     "from": "Klastrompuszta",
+     "to": "Piliscsaba",
+     "km": 7.9,
+     "up": 165,
+     "down": 240,
+     "tf": 140,
+     "tb": 140
+    }
+   ]
+  },
+  {
+   "stage": 13,
+   "start": "Piliscsaba",
+   "end": "Hűvösvölgy",
+   "km": 23.7,
+   "places": [
+    "Zsíros-hegy",
+    "Hűvösvölgy"
+   ],
+   "hops": [
+    {
+     "from": "Piliscsaba",
+     "to": "Zsíros-hegy",
+     "km": 13.9,
+     "up": 500,
+     "down": 335,
+     "tf": 260,
+     "tb": 240
+    },
+    {
+     "from": "Zsíros-hegy",
+     "to": "Hűvösvölgy",
+     "km": 9.8,
+     "up": 145,
+     "down": 315,
+     "tf": 160,
+     "tb": 180
+    }
+   ]
+  },
+  {
+   "stage": 14,
+   "start": "Hűvösvölgy",
+   "end": "Rozália téglagyár",
+   "km": 14.1,
+   "places": [
+    "Hármashatár-hegy",
+    "Virágos-nyereg",
+    "Rozália téglagyár"
+   ],
+   "hops": [
+    {
+     "from": "Hűvösvölgy",
+     "to": "Hármashatár-hegy",
+     "km": 8,
+     "up": 420,
+     "down": 165,
+     "tf": 160,
+     "tb": 140
+    },
+    {
+     "from": "Hármashatár-hegy",
+     "to": "Virágos-nyereg",
+     "km": 1.7,
+     "up": 50,
+     "down": 170,
+     "tf": 30,
+     "tb": 40
+    },
+    {
+     "from": "Virágos-nyereg",
+     "to": "Rozália téglagyár",
+     "km": 4.4,
+     "up": 55,
+     "down": 290,
+     "tf": 70,
+     "tb": 90
+    }
+   ]
+  },
+  {
+   "stage": 15,
+   "start": "Rozália téglagyár",
+   "end": "Dobogókő",
+   "km": 22.8,
+   "places": [
+    "Kevély-nyereg",
+    "Pilisszentkereszt",
+    "Dobogókő"
+   ],
+   "hops": [
+    {
+     "from": "Rozália téglagyár",
+     "to": "Kevély-nyereg",
+     "km": 6.7,
+     "up": 405,
+     "down": 105,
+     "tf": 140,
+     "tb": 110
+    },
+    {
+     "from": "Kevély-nyereg",
+     "to": "Pilisszentkereszt",
+     "km": 11.9,
+     "up": 285,
+     "down": 370,
+     "tf": 210,
+     "tb": 210
+    },
+    {
+     "from": "Pilisszentkereszt",
+     "to": "Dobogókő",
+     "km": 4.2,
+     "up": 370,
+     "down": 15,
+     "tf": 100,
+     "tb": 60
+    }
+   ]
+  },
+  {
+   "stage": 16,
+   "start": "Dobogókő",
+   "end": "Visegrád",
+   "km": 24.7,
+   "places": [
+    "Sikárosi erdészház",
+    "Pilisszentlászló",
+    "Pap-réti erdészház",
+    "Nagy-Villám",
+    "Visegrád"
+   ],
+   "hops": [
+    {
+     "from": "Dobogókő",
+     "to": "Sikárosi erdészház",
+     "km": 6.4,
+     "up": 35,
+     "down": 405,
+     "tf": 100,
+     "tb": 140
+    },
+    {
+     "from": "Sikárosi erdészház",
+     "to": "Pilisszentlászló",
+     "km": 4.1,
+     "up": 125,
+     "down": 90,
+     "tf": 70,
+     "tb": 70
+    },
+    {
+     "from": "Pilisszentlászló",
+     "to": "Pap-réti erdészház",
+     "km": 3.1,
+     "up": 190,
+     "down": 75,
+     "tf": 70,
+     "tb": 55
+    },
+    {
+     "from": "Pap-réti erdészház",
+     "to": "Nagy-Villám",
+     "km": 8.5,
+     "up": 240,
+     "down": 380,
+     "tf": 150,
+     "tb": 160
+    },
+    {
+     "from": "Nagy-Villám",
+     "to": "Visegrád",
+     "km": 2.6,
+     "up": 20,
+     "down": 255,
+     "tf": 40,
+     "tb": 60
+    }
+   ]
+  },
+  {
+   "stage": 17,
+   "start": "Nagymaros",
+   "end": "Nógrád",
+   "km": 41,
+   "places": [
+    "Nagymaros",
+    "Julianus-kilátó",
+    "Törökmező turistaház",
+    "Kisinóci turistaház",
+    "Nagy-Hideg-hegy",
+    "Csóványos",
+    "Nógrád"
+   ],
+   "hops": [
+    {
+     "from": "Nagymaros",
+     "to": "Julianus-kilátó",
+     "km": 4.4,
+     "up": 400,
+     "down": 25,
+     "tf": 100,
+     "tb": 70
+    },
+    {
+     "from": "Julianus-kilátó",
+     "to": "Törökmező turistaház",
+     "km": 6.5,
+     "up": 105,
+     "down": 345,
+     "tf": 110,
+     "tb": 130
+    },
+    {
+     "from": "Törökmező turistaház",
+     "to": "Kisinóci turistaház",
+     "km": 9.5,
+     "up": 335,
+     "down": 245,
+     "tf": 180,
+     "tb": 170
+    },
+    {
+     "from": "Kisinóci turistaház",
+     "to": "Nagy-Hideg-hegy",
+     "km": 5.7,
+     "up": 580,
+     "down": 55,
+     "tf": 140,
+     "tb": 90
+    },
+    {
+     "from": "Nagy-Hideg-hegy",
+     "to": "Csóványos",
+     "km": 3,
+     "up": 225,
+     "down": 140,
+     "tf": 70,
+     "tb": 60
+    },
+    {
+     "from": "Csóványos",
+     "to": "Nógrád",
+     "km": 11.9,
+     "up": 95,
+     "down": 815,
+     "tf": 190,
+     "tb": 260
+    }
+   ]
+  },
+  {
+   "stage": 18,
+   "start": "Nógrád",
+   "end": "Becske",
+   "km": 59.9,
+   "places": [
+    "Lokó-pihenő",
+    "Magyarkút",
+    "Katalinpuszta",
+    "Naszály",
+    "Ősagárd",
+    "Felsőpetény",
+    "Alsópetény",
+    "Romhány",
+    "Kétbodony",
+    "Becske"
+   ],
+   "hops": [
+    {
+     "from": "Nógrád",
+     "to": "Lokó-pihenő",
+     "km": 4.4,
+     "up": 245,
+     "down": 85,
+     "tf": 90,
+     "tb": 70
+    },
+    {
+     "from": "Lokó-pihenő",
+     "to": "Magyarkút",
+     "km": 3.9,
+     "up": 10,
+     "down": 240,
+     "tf": 60,
+     "tb": 80
+    },
+    {
+     "from": "Magyarkút",
+     "to": "Katalinpuszta",
+     "km": 5.5,
+     "up": 160,
+     "down": 90,
+     "tf": 100,
+     "tb": 90
+    },
+    {
+     "from": "Katalinpuszta",
+     "to": "Naszály",
+     "km": 7.9,
+     "up": 580,
+     "down": 145,
+     "tf": 180,
+     "tb": 130
+    },
+    {
+     "from": "Naszály",
+     "to": "Ősagárd",
+     "km": 7.1,
+     "up": 110,
+     "down": 485,
+     "tf": 120,
+     "tb": 150
+    },
+    {
+     "from": "Ősagárd",
+     "to": "Felsőpetény",
+     "km": 6.7,
+     "up": 130,
+     "down": 225,
+     "tf": 110,
+     "tb": 120
+    },
+    {
+     "from": "Felsőpetény",
+     "to": "Alsópetény",
+     "km": 4.4,
+     "up": 80,
+     "down": 50,
+     "tf": 70,
+     "tb": 70
+    },
+    {
+     "from": "Alsópetény",
+     "to": "Romhány",
+     "km": 6.9,
+     "up": 225,
+     "down": 280,
+     "tf": 130,
+     "tb": 130
+    },
+    {
+     "from": "Romhány",
+     "to": "Kétbodony",
+     "km": 2.8,
+     "up": 55,
+     "down": 35,
+     "tf": 50,
+     "tb": 45
+    },
+    {
+     "from": "Kétbodony",
+     "to": "Becske",
+     "km": 10.3,
+     "up": 285,
+     "down": 240,
+     "tf": 180,
+     "tb": 180
+    }
+   ]
+  },
+  {
+   "stage": 19,
+   "start": "Becske",
+   "end": "Mátraverebély",
+   "km": 74.4,
+   "places": [
+    "Szandaváralja",
+    "Cserhátsurány",
+    "Nógrádsipek",
+    "Hollókő",
+    "Bableves csárda",
+    "Tepke",
+    "Nagybárkány",
+    "Mátraverebély"
+   ],
+   "hops": [
+    {
+     "from": "Becske",
+     "to": "Szandaváralja",
+     "km": 6,
+     "up": 265,
+     "down": 245,
+     "tf": 120,
+     "tb": 110
+    },
+    {
+     "from": "Szandaváralja",
+     "to": "Cserhátsurány",
+     "km": 10.1,
+     "up": 250,
+     "down": 310,
+     "tf": 180,
+     "tb": 180
+    },
+    {
+     "from": "Cserhátsurány",
+     "to": "Nógrádsipek",
+     "km": 10.5,
+     "up": 320,
+     "down": 290,
+     "tf": 190,
+     "tb": 190
+    },
+    {
+     "from": "Nógrádsipek",
+     "to": "Hollókő",
+     "km": 11.7,
+     "up": 450,
+     "down": 345,
+     "tf": 220,
+     "tb": 210
+    },
+    {
+     "from": "Hollókő",
+     "to": "Bableves csárda",
+     "km": 10.1,
+     "up": 290,
+     "down": 285,
+     "tf": 180,
+     "tb": 180
+    },
+    {
+     "from": "Bableves csárda",
+     "to": "Tepke",
+     "km": 3.5,
+     "up": 240,
+     "down": 0,
+     "tf": 80,
+     "tb": 50
+    },
+    {
+     "from": "Tepke",
+     "to": "Nagybárkány",
+     "km": 10.1,
+     "up": 240,
+     "down": 585,
+     "tf": 180,
+     "tb": 210
+    },
+    {
+     "from": "Nagybárkány",
+     "to": "Mátraverebély",
+     "km": 12.4,
+     "up": 345,
+     "down": 390,
+     "tf": 220,
+     "tb": 230
+    }
+   ]
+  },
+  {
+   "stage": 20,
+   "start": "Mátraverebély",
+   "end": "Mátraháza",
+   "km": 26.2,
+   "places": [
+    "Ágasvár turistaház",
+    "Mátraszentistván",
+    "Galyatető",
+    "Vércverés",
+    "Vörösmarty fogadó",
+    "Mátraháza"
+   ],
+   "hops": [
+    {
+     "from": "Mátraverebély",
+     "to": "Ágasvár turistaház",
+     "km": 8.3,
+     "up": 550,
+     "down": 90,
+     "tf": 180,
+     "tb": 130
+    },
+    {
+     "from": "Ágasvár turistaház",
+     "to": "Mátraszentistván",
+     "km": 4.2,
+     "up": 195,
+     "down": 105,
+     "tf": 80,
+     "tb": 70
+    },
+    {
+     "from": "Mátraszentistván",
+     "to": "Galyatető",
+     "km": 5,
+     "up": 295,
+     "down": 95,
+     "tf": 100,
+     "tb": 80
+    },
+    {
+     "from": "Galyatető",
+     "to": "Vércverés",
+     "km": 3.6,
+     "up": 65,
+     "down": 300,
+     "tf": 60,
+     "tb": 80
+    },
+    {
+     "from": "Vércverés",
+     "to": "Vörösmarty fogadó",
+     "km": 3.1,
+     "up": 105,
+     "down": 165,
+     "tf": 55,
+     "tb": 60
+    },
+    {
+     "from": "Vörösmarty fogadó",
+     "to": "Mátraháza",
+     "km": 2,
+     "up": 110,
+     "down": 35,
+     "tf": 40,
+     "tb": 35
+    }
+   ]
+  },
+  {
+   "stage": 21,
+   "start": "Mátraháza",
+   "end": "Sirok",
+   "km": 26.1,
+   "places": [
+    "Kékestető",
+    "Hármashatár erdészház",
+    "Sirok"
+   ],
+   "hops": [
+    {
+     "from": "Mátraháza",
+     "to": "Kékestető",
+     "km": 3.6,
+     "up": 345,
+     "down": 45,
+     "tf": 90,
+     "tb": 60
+    },
+    {
+     "from": "Kékestető",
+     "to": "Hármashatár erdészház",
+     "km": 5.7,
+     "up": 90,
+     "down": 470,
+     "tf": 90,
+     "tb": 130
+    },
+    {
+     "from": "Hármashatár erdészház",
+     "to": "Sirok",
+     "km": 16.8,
+     "up": 595,
+     "down": 1065,
+     "tf": 310,
+     "tb": 360
+    }
+   ]
+  },
+  {
+   "stage": 22,
+   "start": "Sirok",
+   "end": "Szarvaskő",
+   "km": 18,
+   "places": [
+    "Rozsnakpuszta",
+    "Szarvaskő"
+   ],
+   "hops": [
+    {
+     "from": "Sirok",
+     "to": "Rozsnakpuszta",
+     "km": 6.4,
+     "up": 265,
+     "down": 200,
+     "tf": 120,
+     "tb": 120
+    },
+    {
+     "from": "Rozsnakpuszta",
+     "to": "Szarvaskő",
+     "km": 11.6,
+     "up": 320,
+     "down": 320,
+     "tf": 210,
+     "tb": 210
+    }
+   ]
+  },
+  {
+   "stage": 23,
+   "start": "Szarvaskő",
+   "end": "Putnok",
+   "km": 62.8,
+   "places": [
+    "Telekessy vendégház",
+    "Bélapátfalva",
+    "Cserepes-kői-barlang",
+    "Bánkút",
+    "Mályinka",
+    "Uppony",
+    "Putnok"
+   ],
+   "hops": [
+    {
+     "from": "Szarvaskő",
+     "to": "Telekessy vendégház",
+     "km": 7.2,
+     "up": 455,
+     "down": 305,
+     "tf": 150,
+     "tb": 140
+    },
+    {
+     "from": "Telekessy vendégház",
+     "to": "Bélapátfalva",
+     "km": 3.8,
+     "up": 65,
+     "down": 120,
+     "tf": 60,
+     "tb": 70
+    },
+    {
+     "from": "Bélapátfalva",
+     "to": "Cserepes-kői-barlang",
+     "km": 9.9,
+     "up": 660,
+     "down": 205,
+     "tf": 210,
+     "tb": 170
+    },
+    {
+     "from": "Cserepes-kői-barlang",
+     "to": "Bánkút",
+     "km": 11.2,
+     "up": 480,
+     "down": 400,
+     "tf": 220,
+     "tb": 210
+    },
+    {
+     "from": "Bánkút",
+     "to": "Mályinka",
+     "km": 8,
+     "up": 120,
+     "down": 675,
+     "tf": 130,
+     "tb": 190
+    },
+    {
+     "from": "Mályinka",
+     "to": "Uppony",
+     "km": 9.7,
+     "up": 170,
+     "down": 270,
+     "tf": 160,
+     "tb": 170
+    },
+    {
+     "from": "Uppony",
+     "to": "Putnok",
+     "km": 13,
+     "up": 305,
+     "down": 355,
+     "tf": 220,
+     "tb": 230
+    }
+   ]
+  },
+  {
+   "stage": 24,
+   "start": "Putnok",
+   "end": "Bódvaszilas",
+   "km": 62.5,
+   "places": [
+    "Kelemér",
+    "Gömörszőlős",
+    "Zádorfalva",
+    "Aggtelek",
+    "Jósvafő",
+    "Derenk",
+    "Szabó-pallag erdészház",
+    "Bódvaszilas"
+   ],
+   "hops": [
+    {
+     "from": "Putnok",
+     "to": "Kelemér",
+     "km": 11.3,
+     "up": 285,
+     "down": 225,
+     "tf": 200,
+     "tb": 190
+    },
+    {
+     "from": "Kelemér",
+     "to": "Gömörszőlős",
+     "km": 2.3,
+     "up": 35,
+     "down": 15,
+     "tf": 40,
+     "tb": 35
+    },
+    {
+     "from": "Gömörszőlős",
+     "to": "Zádorfalva",
+     "km": 5.5,
+     "up": 95,
+     "down": 105,
+     "tf": 90,
+     "tb": 90
+    },
+    {
+     "from": "Zádorfalva",
+     "to": "Aggtelek",
+     "km": 13.1,
+     "up": 320,
+     "down": 215,
+     "tf": 230,
+     "tb": 220
+    },
+    {
+     "from": "Aggtelek",
+     "to": "Jósvafő",
+     "km": 6.2,
+     "up": 225,
+     "down": 340,
+     "tf": 110,
+     "tb": 130
+    },
+    {
+     "from": "Jósvafő",
+     "to": "Derenk",
+     "km": 12.5,
+     "up": 340,
+     "down": 215,
+     "tf": 220,
+     "tb": 210
+    },
+    {
+     "from": "Derenk",
+     "to": "Szabó-pallag erdészház",
+     "km": 7,
+     "up": 285,
+     "down": 135,
+     "tf": 130,
+     "tb": 120
+    },
+    {
+     "from": "Szabó-pallag erdészház",
+     "to": "Bódvaszilas",
+     "km": 4.6,
+     "up": 40,
+     "down": 360,
+     "tf": 70,
+     "tb": 100
+    }
+   ]
+  },
+  {
+   "stage": 25,
+   "start": "Bódvaszilas",
+   "end": "Boldogkőváralja",
+   "km": 71.1,
+   "places": [
+    "Bódvarákó",
+    "Martonyi kolostorrom",
+    "Tornabarakony",
+    "Rakacaszend",
+    "Irota",
+    "Felsővadász",
+    "Abaújszolnok",
+    "Baktakék",
+    "Fancsal",
+    "Encs",
+    "Gibárt",
+    "Hernádcéce",
+    "Boldogkőváralja"
+   ],
+   "hops": [
+    {
+     "from": "Bódvaszilas",
+     "to": "Bódvarákó",
+     "km": 4.6,
+     "up": 30,
+     "down": 35,
+     "tf": 70,
+     "tb": 70
+    },
+    {
+     "from": "Bódvarákó",
+     "to": "Martonyi kolostorrom",
+     "km": 4.1,
+     "up": 315,
+     "down": 75,
+     "tf": 90,
+     "tb": 70
+    },
+    {
+     "from": "Martonyi kolostorrom",
+     "to": "Tornabarakony",
+     "km": 9.7,
+     "up": 195,
+     "down": 400,
+     "tf": 170,
+     "tb": 190
+    },
+    {
+     "from": "Tornabarakony",
+     "to": "Rakacaszend",
+     "km": 3.9,
+     "up": 80,
+     "down": 95,
+     "tf": 70,
+     "tb": 70
+    },
+    {
+     "from": "Rakacaszend",
+     "to": "Irota",
+     "km": 9,
+     "up": 185,
+     "down": 185,
+     "tf": 150,
+     "tb": 150
+    },
+    {
+     "from": "Irota",
+     "to": "Felsővadász",
+     "km": 6.7,
+     "up": 125,
+     "down": 145,
+     "tf": 110,
+     "tb": 110
+    },
+    {
+     "from": "Felsővadász",
+     "to": "Abaújszolnok",
+     "km": 5.7,
+     "up": 185,
+     "down": 170,
+     "tf": 100,
+     "tb": 100
+    },
+    {
+     "from": "Abaújszolnok",
+     "to": "Baktakék",
+     "km": 5.1,
+     "up": 115,
+     "down": 130,
+     "tf": 90,
+     "tb": 90
+    },
+    {
+     "from": "Baktakék",
+     "to": "Fancsal",
+     "km": 3.2,
+     "up": 110,
+     "down": 75,
+     "tf": 60,
+     "tb": 55
+    },
+    {
+     "from": "Fancsal",
+     "to": "Encs",
+     "km": 6.5,
+     "up": 55,
+     "down": 115,
+     "tf": 100,
+     "tb": 110
+    },
+    {
+     "from": "Encs",
+     "to": "Gibárt",
+     "km": 3.4,
+     "up": 0,
+     "down": 5,
+     "tf": 50,
+     "tb": 50
+    },
+    {
+     "from": "Gibárt",
+     "to": "Hernádcéce",
+     "km": 5.2,
+     "up": 75,
+     "down": 45,
+     "tf": 90,
+     "tb": 80
+    },
+    {
+     "from": "Hernádcéce",
+     "to": "Boldogkőváralja",
+     "km": 4,
+     "up": 55,
+     "down": 50,
+     "tf": 70,
+     "tb": 70
+    }
+   ]
+  },
+  {
+   "stage": 26,
+   "start": "Boldogkőváralja",
+   "end": "Nagy-nyugodó",
+   "km": 51.8,
+   "places": [
+    "Regéc",
+    "Istvánkúti vadászház",
+    "Eszkála erdészház",
+    "Makkoshotyka",
+    "Cirkáló-tanya",
+    "Nagy-nyugodó"
+   ],
+   "hops": [
+    {
+     "from": "Boldogkőváralja",
+     "to": "Regéc",
+     "km": 14.9,
+     "up": 490,
+     "down": 245,
+     "tf": 270,
+     "tb": 250
+    },
+    {
+     "from": "Regéc",
+     "to": "Istvánkúti vadászház",
+     "km": 8.3,
+     "up": 330,
+     "down": 230,
+     "tf": 160,
+     "tb": 150
+    },
+    {
+     "from": "Istvánkúti vadászház",
+     "to": "Eszkála erdészház",
+     "km": 7.4,
+     "up": 180,
+     "down": 210,
+     "tf": 130,
+     "tb": 130
+    },
+    {
+     "from": "Eszkála erdészház",
+     "to": "Makkoshotyka",
+     "km": 9.8,
+     "up": 145,
+     "down": 465,
+     "tf": 160,
+     "tb": 190
+    },
+    {
+     "from": "Makkoshotyka",
+     "to": "Cirkáló-tanya",
+     "km": 2.8,
+     "up": 100,
+     "down": 60,
+     "tf": 50,
+     "tb": 50
+    },
+    {
+     "from": "Cirkáló-tanya",
+     "to": "Nagy-nyugodó",
+     "km": 8.6,
+     "up": 400,
+     "down": 235,
+     "tf": 170,
+     "tb": 150
+    }
+   ]
+  },
+  {
+   "stage": 27,
+   "start": "Nagy-nyugodó",
+   "end": "Hollóháza",
+   "km": 52.4,
+   "places": [
+    "Vágáshuta",
+    "Nagyhuta",
+    "Füzérradvány",
+    "Füzér",
+    "Nagy-Milic",
+    "Bodó-rét",
+    "Hollóháza"
+   ],
+   "hops": [
+    {
+     "from": "Nagy-nyugodó",
+     "to": "Vágáshuta",
+     "km": 10.7,
+     "up": 395,
+     "down": 555,
+     "tf": 200,
+     "tb": 220
+    },
+    {
+     "from": "Vágáshuta",
+     "to": "Nagyhuta",
+     "km": 5.5,
+     "up": 160,
+     "down": 120,
+     "tf": 100,
+     "tb": 90
+    },
+    {
+     "from": "Nagyhuta",
+     "to": "Füzérradvány",
+     "km": 8.3,
+     "up": 90,
+     "down": 135,
+     "tf": 130,
+     "tb": 140
+    },
+    {
+     "from": "Füzérradvány",
+     "to": "Füzér",
+     "km": 14.4,
+     "up": 575,
+     "down": 400,
+     "tf": 270,
+     "tb": 250
+    },
+    {
+     "from": "Füzér",
+     "to": "Nagy-Milic",
+     "km": 5.1,
+     "up": 580,
+     "down": 60,
+     "tf": 130,
+     "tb": 80
+    },
+    {
+     "from": "Nagy-Milic",
+     "to": "Bodó-rét",
+     "km": 4,
+     "up": 20,
+     "down": 280,
+     "tf": 60,
+     "tb": 90
+    },
+    {
+     "from": "Bodó-rét",
+     "to": "Hollóháza",
+     "km": 4.4,
+     "up": 30,
+     "down": 340,
+     "tf": 70,
+     "tb": 100
+    }
+   ]
+  }
+ ]
+}

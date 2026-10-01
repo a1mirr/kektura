@@ -1,36 +1,20 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kektura tracker
 
-## Getting Started
+## Setup
+1. Create a project at https://supabase.com.
+2. In the SQL editor run every file in `supabase/migrations/` in numeric order (`0001_init.sql` … `0006_rls_initplan.sql`), then `supabase/seed.sql` and `supabase/seed_extra.sql` (re-run the seeds whenever they are regenerated).
+3. Google login:
+   - Google Cloud Console → APIs & Services → Credentials → OAuth client ID (Web).
+   - Authorized redirect URI: `https://<project-ref>.supabase.co/auth/v1/callback`.
+   - Supabase → Authentication → Providers → Google: paste the client ID and secret.
+   - Supabase → Authentication → URL Configuration: add `http://localhost:3000/**` to Redirect URLs (and your production URL with `/**` later). The wildcard matters: the app redirects to `/auth/callback?locale=<locale>`, query string included.
+4. Copy `.env.example` to `.env.local` and fill in the project URL and anon key (Supabase → Project Settings → API).
+5. `npm run dev` and open http://localhost:3000.
 
-First, run the development server:
+## Development
+Spec first: every task gets a spec with numbered acceptance criteria in `specs/` (see
+[`specs/README.md`](specs/README.md)), and tests cite those criteria.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm test`: unit and regression tests (Vitest); `npm run test:watch` while working.
+- `npm run check`: typecheck + lint + tests. Claude Code runs the same gate automatically before
+  finishing a turn (`.claude/settings.json`).

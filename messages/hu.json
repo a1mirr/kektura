@@ -1,0 +1,72 @@
+{
+  "app": {
+    "title": "Kéktúra — haladásom"
+  },
+  "home": {
+    "headline": "Járd végig az Országos Kéktúrát — bélyegről bélyegre",
+    "subtitle": "Jelöld a bélyegzőhelyeket, és kövesd a statisztikáidat.",
+    "signIn": "Bejelentkezés Google-lel",
+    "authError": "A bejelentkezés sikertelen, próbáld újra."
+  },
+  "dashboard": {
+    "title": "Haladásom",
+    "signOut": "Kijelentkezés",
+    "stamps": "Bélyegzések",
+    "percent": "Teljesítve",
+    "km": "Kilométer",
+    "remaining": "Hátralévő km",
+    "map": "Az útvonal térképe",
+    "mapLegend": "Kék vonal — teljesített szakaszok (két szomszédos lepecsételt hely között), szürke szaggatott — a többi.",
+    "perMonth": "Bélyegzések havonta",
+    "checkpoints": "Bélyegzőhelyek",
+    "stamp": "Bélyegzés",
+    "unstamp": "Törlés",
+    "empty": "Még nincsenek bélyegzőhelyek. Futtasd a supabase/seed.sql fájlt.",
+    "showExtras": "Extra bélyegzők mutatása ({count})",
+    "extraStamps": "Extra bélyegzők",
+    "extraNote": "Nem hivatalos bélyegzők a nyomvonal mellett (várak, múzeumok, más túramozgalmak). A fő összesítésbe nem számítanak. Forrás: heyjoe.hu.",
+    "offTrail": "{m} m-re a nyomvonaltól",
+    "showOnMap": "Mutasd a térképen",
+    "showRestaurants": "Éttermek mutatása ({count})",
+    "restaurantDist": "{km} km-re a nyomvonaltól légvonalban",
+    "openRestaurantSite": "Megnyitás az etteremhet.hu-n",
+    "fullscreen": "Teljes képernyő",
+    "exitFullscreen": "Kilépés a teljes képernyőből",
+    "showWalked": "Teljesített szakaszok",
+    "showStamps": "Bélyegzők",
+    "stageTitle": "{n}. szakasz",
+    "expandAll": "Mind kinyit",
+    "collapseAll": "Mind összecsuk",
+    "stampStage": "Szakasz lepecsételése",
+    "unstampStage": "Szakasz törlése",
+    "stageHint": "A „Szakasz lepecsételése” a szakasz összes bélyegzését és a rajtpontját jelöli; a „Szakasz törlése” csak a szakasz saját bélyegzéseit törli.",
+    "routeFromHere": "Útvonal innen",
+    "routeToHere": "Útvonal idáig",
+    "markStamped": "Megjelölés teljesítettként",
+    "unmarkStamped": "Jelölés törlése",
+    "showInList": "Mutasd a listában",
+    "kmFromStart": "{km} km az Írott-kőtől",
+    "routeKm": "Távolság: {km} km",
+    "routeUp": "emelkedés {m} m",
+    "routeDown": "lejtés {m} m",
+    "routeTime": "idő ~{time}",
+    "routeTimeFerry": "idő ~{time} + komp",
+    "routePickTo": "Most válaszd ki a célbélyegzőt: „Útvonal idáig”.",
+    "routePickFrom": "Most válaszd ki a kiinduló bélyegzőt: „Útvonal innen”.",
+    "routeNoData": "Ezekhez a pontokhoz nincs adat.",
+    "routeClear": "Törlés",
+    "routeNote": "Az MTSZ táblázata alapján (szomszédos bélyegzőhelyek közötti szakaszok); az idő szünetek nélkül, haladási irányban.",
+    "routeFerryOnly": "komp (a táblázatban nincs idő)",
+    "actionFailed": "Nem sikerült menteni, próbáld újra.",
+    "kmValue": "{km} km",
+    "mapAttribution": "© az OpenStreetMap közreműködői · útvonal: MTSZ"
+  },
+  "error": {
+    "title": "Valami elromlott",
+    "retry": "Újra"
+  },
+  "notFound": {
+    "title": "Az oldal nem található",
+    "back": "Vissza a kezdőlapra"
+  }
+}

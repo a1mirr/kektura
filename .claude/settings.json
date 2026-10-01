@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop-check.mjs\"",
+            "timeout": 240,
+            "statusMessage": "Regression gate: typecheck, lint, tests"
+          }
+        ]
+      }
+    ]
+  }
+}
