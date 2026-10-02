@@ -14,16 +14,23 @@ author's context, and wants that to be part of how work is done here, not someth
 ## Behaviour
 
 - **AC-1**: `CLAUDE.md` (Workflow) states the rule: before a pull request is merged, an agent with no
-  context of the work reviews it; every valid finding is fixed and the rest answered in the pull request;
-  a pull request is not handed over as ready to merge before that. It names the agent (`fresh-reviewer`),
-  says what the author tells it (the spec number and the base branch, nothing else), and that a review of an
-  earlier state doesn't count after substantial fixes.
+  context of the work reviews the committed change; every valid finding is fixed and the rest answered in
+  the pull request, with the commit that was reviewed; a pull request is not handed over as ready to merge
+  before that. It names the agent (`fresh-reviewer`), says what the author tells it (the spec number, or
+  `none` for a small change without a spec, and the base branch, nothing else), that fixes which change
+  code, tests or behaviour get another fresh review (a review of an earlier state doesn't count) and
+  wording-only fixes don't, that documentation changes are reviewed too, and that Dependabot's pull
+  requests are not. `CLAUDE.md` lists the spec among "Where the rules live".
 - **AC-2**: `specs/README.md` has the review as the last step of the workflow, after the spec is closed.
 - **AC-3**: The `fresh-reviewer` agent is defined in `.claude/agents/fresh-reviewer.md`:
-  - it is read-only (no `Edit`, `Write` or `NotebookEdit` in its tools) and reviews the diff of the current
-    branch against the base it is given;
-  - it starts from `CLAUDE.md` and the spec it is given, and does not trust the spec's status or its
-    coverage table: it checks each AC against the code and the tests;
+  - its tools are exactly `Read`, `Grep`, `Glob` and `Bash`: no `Edit`, `Write` or `NotebookEdit`. `Bash`
+    could still write, so the brief forbids it;
+  - it reviews the diff of the current branch against the base it is given, plus anything not committed yet,
+    and starts its report with the commit it reviewed and whether the working tree was clean, so a review of
+    uncommitted work can't pass for a review of the final state;
+  - it starts from `CLAUDE.md` and the spec it is given (with `none`, from the specs that own the behaviour
+    the diff touches, saying whether the change needed a spec of its own), and does not trust the spec's
+    status or its coverage table: it checks each AC against the code and the tests;
   - it looks for: ACs not implemented or built twice, ACs without a test that really asserts them, behaviour
     that no AC describes, leftovers of what was renamed or moved (code, messages in all three languages,
     docs, specs, links), the gotchas listed in `CLAUDE.md`, regressions for signed-out visitors, other
@@ -32,9 +39,9 @@ author's context, and wants that to be part of how work is done here, not someth
   - it runs `npm run check` and reports the result;
   - it reports findings most severe first, each with `file:line`, what is wrong and a concrete failing
     scenario, then what it checked and found fine; "no findings" is a valid answer.
-- **AC-4**: `.github/pull_request_template.md` gives every pull request the checklist (spec first, checks and
-  E2E run, fresh-context review done) and a section to record the review's findings and what was done about
-  each.
+- **AC-4**: `.github/pull_request_template.md` gives every pull request the checklist (spec first, or a small
+  change that needs none; checks and E2E run; fresh-context review of the committed final state done) and a
+  section to record the reviewed commit, the review's findings and what was done about each.
 
 ## Out of scope
 
@@ -56,7 +63,12 @@ author's context, and wants that to be part of how work is done here, not someth
   `.claude/agents/fresh-reviewer.md`, spawn a general-purpose agent and give it the same brief (the body of
   that file); every later session has `fresh-reviewer`.
 - The agent reads and runs commands but never edits: the author applies the fixes, so the author's
-  context and the reviewer's never mix.
+  context and the reviewer's never mix. That is enforced for files by its tool list and, for `Bash`, only by
+  the brief.
+- A small change with no spec (CLAUDE.md allows that for trivial fixes) is reviewed too: the author passes
+  `none` and the reviewer works out which specs own the behaviour touched.
+- The author commits before asking for the review. The reviewer can see uncommitted files, but it says when
+  it did, and the pull request records the commit that was reviewed.
 
 ## Coverage
 

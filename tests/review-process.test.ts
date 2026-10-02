@@ -9,10 +9,18 @@ describe("spec 0022: fresh-context review", () => {
   it("AC-1: CLAUDE.md states the rule, names the agent and says what the author tells it", () => {
     const claude = read("CLAUDE.md");
     expect(claude).toContain("Fresh-context review before merge");
-    expect(claude).toContain("fresh-reviewer");
-    expect(claude).toMatch(/only the spec number and the base branch/);
+    expect(claude).toContain("`fresh-reviewer`");
+    expect(claude).toMatch(/only the spec number \(`none` for a small change that has no spec\) and the base branch/);
     expect(claude).toMatch(/before it is merged/);
-    expect(claude).toMatch(/again after substantial fixes/);
+    expect(claude).toMatch(/with the commit that was reviewed/);
+    expect(claude).toMatch(/Fixes that change code, tests or behaviour get another fresh review/);
+    expect(claude).toMatch(/wording-only fixes don't/);
+    expect(claude).toMatch(/documentation included/);
+    expect(claude).toMatch(/Dependabot's pull requests are not/);
+  });
+
+  it("AC-1: CLAUDE.md lists the spec among the places the rules live", () => {
+    expect(read("CLAUDE.md")).toMatch(/fresh-context review before merge: 0022/);
   });
 
   it("AC-2: the specs workflow ends with the review", () => {
@@ -21,6 +29,7 @@ describe("spec 0022: fresh-context review", () => {
     const lastStep = [...steps.matchAll(/^(\d+)\. \*\*(.+?)\*\*/gm)].at(-1);
     expect(lastStep?.[2]).toMatch(/review/i);
     expect(steps).toContain("fresh-reviewer");
+    expect(steps).toContain("`none`");
   });
 
   describe("AC-3: the fresh-reviewer agent", () => {
@@ -28,47 +37,64 @@ describe("spec 0022: fresh-context review", () => {
     const [, frontmatter = "", body = ""] = file.split(/^---\r?$/m);
     const field = (name: string) => new RegExp(`^${name}:\\s*(.+)$`, "m").exec(frontmatter)?.[1].trim();
 
-    it("is named after its file, says when to use it, and is read-only", () => {
+    it("is named after its file and says when to use it", () => {
       expect(field("name")).toBe("fresh-reviewer");
       expect(field("description")).toMatch(/before a pull request is merged/);
-      const tools = (field("tools") ?? "").split(/\s*,\s*/);
-      expect(tools.length).toBeGreaterThan(0);
-      for (const writer of ["Edit", "Write", "NotebookEdit"]) expect(tools, writer).not.toContain(writer);
     });
 
-    it("starts from CLAUDE.md and the spec, reads the diff against the base, runs the checks", () => {
+    it("has exactly the read tools: a missing `tools` line would hand it every tool", () => {
+      expect(field("tools")?.split(/\s*,\s*/).sort()).toEqual(["Bash", "Glob", "Grep", "Read"]);
+      expect(body).toMatch(/Write nothing/);
+    });
+
+    it("reviews the committed change and what is not committed, and says which commit and tree state", () => {
+      expect(body).toContain("git diff <base>...HEAD");
+      expect(body).toContain("git diff HEAD");
+      expect(body).toContain("git status --short");
+      expect(body).toContain("git rev-parse --short HEAD");
+      expect(body).toMatch(/a review only counts for the commit it names/);
+      expect(body).toMatch(/Start with the commit you reviewed/);
+    });
+
+    it("starts from CLAUDE.md and the spec (or the owning specs for `none`), and runs the checks", () => {
       expect(body).toContain("CLAUDE.md");
       expect(body).toMatch(/specs\/NNNN/);
-      expect(body).toContain("git diff <base>...HEAD");
+      expect(body).toMatch(/`none`/);
+      expect(body).toMatch(/should have had a spec/);
       expect(body).toContain("npm run check");
     });
 
     it("looks for what the spec asks for", () => {
       for (const topic of [
-        /not implemented/,
+        /Do not trust the spec's status or its coverage table/,
+        /not implemented as written, implemented twice/,
         /no test/,
         /no acceptance criterion describes/,
         /Leftovers/,
         /all three\s+languages/,
         /gotchas/,
-        /signed-out/,
+        /signed-out visitors, for each locale, on a 375 px wide screen and with JavaScript off/,
         /Security and privacy/,
       ]) {
         expect(body).toMatch(topic);
       }
     });
 
-    it("reports findings with file:line and a failing scenario, and allows 'No findings'", () => {
+    it("reports findings most severe first with file:line and a failing scenario, what was fine, and allows 'No findings'", () => {
+      expect(body).toMatch(/most severe first/);
       expect(body).toContain("`file:line`");
       expect(body).toMatch(/concrete scenario/);
+      expect(body).toMatch(/found fine/);
       expect(body).toContain("No findings");
     });
   });
 
-  it("AC-4: the pull request template has the checklist and a place for the findings", () => {
+  it("AC-4: the pull request template has the checklist, the reviewed commit and a place for the findings", () => {
     const template = read(".github/pull_request_template.md");
-    expect(template).toMatch(/^- \[ \] .*spec came first/m);
-    expect(template).toMatch(/^- \[ \] .*fresh-context agent.*fresh-reviewer/m);
+    expect(template).toMatch(/^- \[ \] .*spec came first.*needs no spec/m);
+    expect(template).toMatch(/^- \[ \] .*npm run check.*npm run e2e/m);
+    expect(template).toMatch(/^- \[ \] .*fresh-context agent.*fresh-reviewer.*committed final state/m);
     expect(template).toMatch(/^## Review findings/m);
+    expect(template).toMatch(/^Reviewed commit:/m);
   });
 });
