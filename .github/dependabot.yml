@@ -15,6 +15,10 @@ updates:
       - dependency-name: eslint
         update-types:
           - version-update:semver-major
+      # The types should match the Node we run (22 in production, 24 in CI), not run ahead of it.
+      - dependency-name: "@types/node"
+        update-types:
+          - version-update:semver-major
     groups:
       # Minor and patch updates arrive as one PR; majors stay separate (one PR each).
       npm-minor-patch:
