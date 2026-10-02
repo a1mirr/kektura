@@ -47,5 +47,12 @@ New map features; replacing MapLibre; changing the data files.
   Hooks and map event handlers read other changing values through `useLatest` refs.
 - The route-planner test (`e2e/map.spec.ts`) needs no test hook in production code: it uses the 📍 button to
   fly the map to a stamp, which centres it, then clicks the canvas centre to open the stamp's popup.
-- Not covered by E2E (canvas-only): the amber highlight and map fit (0003 AC-3), the hover tooltips, the walked
-  lines, and marking a stamp from its popup.
+- Not covered by E2E (canvas-only), so checked by hand with the checklist in spec 0003's coverage section:
+  - layer visibility actually changing on the map when a toggle flips (`useRememberedLayer`, `setLayoutProperty`;
+    E2E only proves the checkbox state persists);
+  - the swap to the detailed route at zoom 9 and its retry (0003 AC-9);
+  - position and zoom surviving a stamp change (0003 AC-16);
+  - marking / unmarking from the popup, including `unauthorized` -> `router.refresh()` (0003 AC-12);
+  - the 📍 of an extra stamp switching the extras layer on (0003 AC-13);
+  - restaurant hover and pinned popups (0003 AC-14);
+  - the amber highlight and map fit (0003 AC-3), the stamp hover tooltips and the walked lines.

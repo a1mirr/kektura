@@ -1,6 +1,13 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { readStored, store, STORAGE_KEY_DONE, STORAGE_KEY_EXTRAS } from "./map-storage";
+import {
+  readStored,
+  store,
+  STORAGE_KEY_DONE,
+  STORAGE_KEY_EXTRAS,
+  STORAGE_KEY_RESTAURANTS,
+  STORAGE_KEY_STAMPS,
+} from "./map-storage";
 
 afterEach(() => {
   localStorage.clear();
@@ -35,6 +42,16 @@ describe("spec 0011: map storage helpers (spec 0003 AC-10)", () => {
   });
 
   it("AC-4: the storage keys keep their old names, so existing choices survive the refactor", () => {
-    expect([STORAGE_KEY_EXTRAS, STORAGE_KEY_DONE]).toEqual(["kektura:showExtras", "kektura:showDone"]);
+    expect({
+      extras: STORAGE_KEY_EXTRAS,
+      restaurants: STORAGE_KEY_RESTAURANTS,
+      done: STORAGE_KEY_DONE,
+      stamps: STORAGE_KEY_STAMPS,
+    }).toEqual({
+      extras: "kektura:showExtras",
+      restaurants: "kektura:showRestaurants",
+      done: "kektura:showDone",
+      stamps: "kektura:showStamps",
+    });
   });
 });
