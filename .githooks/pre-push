@@ -1,0 +1,4 @@
+#!/bin/sh
+# Spec 0021: main only changes through pull requests. The decision is in guard.mjs (tested there).
+# Git passes the remote name and URL as arguments and the refs on stdin; exec keeps both.
+exec node "$(dirname "$0")/guard.mjs" "$@"
