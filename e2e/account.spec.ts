@@ -17,6 +17,8 @@ test.describe("spec 0014: the account page", () => {
   test("AC-7 (and 0025 AC-2): signed-out visitors are sent to the landing page", async ({ page }) => {
     await page.goto("/en/account");
     await expect(page).toHaveURL(/\/en$/);
+    await page.goto("/en/settings"); // the old address: redirected to /account, then to the landing page
+    await expect(page).toHaveURL(/\/en$/);
   });
 
   test("AC-7, AC-8, AC-9 (and 0025 AC-1, AC-2): the dashboard header leads to the account page; cancelling deletes nothing", async ({ page }) => {
@@ -114,7 +116,9 @@ test.describe("spec 0025: sign out and the account link", () => {
     await signInAsNewUser(page);
     await page.getByRole("link", { name: "Account", exact: true }).click();
     await expect(page).toHaveURL(/\/en\/account$/);
-    await page.getByRole("button", { name: "Sign out" }).click();
+    const header = page.locator("main > header"); // the button sits next to the heading
+    await expect(header.getByRole("heading", { level: 1 })).toHaveText("Account");
+    await header.getByRole("button", { name: "Sign out" }).click();
     await expect(page).toHaveURL(/\/en$/);
     await expect(page.getByRole("button", { name: "Sign in with Google" })).toBeVisible();
     for (const path of ["/en/dashboard", "/en/account"]) {
