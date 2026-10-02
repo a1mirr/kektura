@@ -46,13 +46,14 @@ async function asUser(action: StampAction, write: (session: Session) => Promise<
 
 // Stamps (or unstamps) places, e.g. one place or a whole stage. Alternative stamps at the same place
 // share a place_key, so stamping one stamps them all.
-export async function setPlacesStamped(placeKeys: string[], stamped: boolean): Promise<ActionResult> {
+export async function setPlacesStamped(placeKeys: string[], stamped: boolean, date?: string): Promise<ActionResult> {
   if (
     !Array.isArray(placeKeys) ||
     placeKeys.length === 0 ||
     placeKeys.length > MAX_PLACES ||
     placeKeys.some((k) => typeof k !== "string" || k.length > 64) ||
-    typeof stamped !== "boolean"
+    typeof stamped !== "boolean" ||
+    (date !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(date))
   ) {
     logStampActionInvalidInput("setPlacesStamped");
     return failed;
@@ -63,29 +64,40 @@ export async function setPlacesStamped(placeKeys: string[], stamped: boolean): P
     if (!rows?.length) return failed;
     const ids = rows.map((r) => r.id);
 
-    // ignoreDuplicates (ON CONFLICT DO NOTHING): re-stamping keeps the original stamped_on date.
+    // ignoreDuplicates (ON CONFLICT DO NOTHING): re-stamping without a date keeps the original stamped_on date.
+    // If a date is provided, we use onConflict to overwrite stamped_on.
     const { error: writeError } = stamped
       ? await supabase
           .from("user_stamps")
-          .upsert(ids.map((id) => ({ user_id: user.id, checkpoint_id: id })), { ignoreDuplicates: true })
+          .upsert(
+            ids.map((id) => ({ user_id: user.id, checkpoint_id: id, ...(date ? { stamped_on: date } : {}) })),
+            date ? { onConflict: "user_id, checkpoint_id" } : { ignoreDuplicates: true }
+          )
       : await supabase.from("user_stamps").delete().eq("user_id", user.id).in("checkpoint_id", ids);
     return writeError ? fail("write", writeError) : ok;
   });
 }
 
 // Extra (non-official) stamps are tracked separately from the official 161 places.
-export async function setExtraStamped(extraId: number, stamped: boolean): Promise<ActionResult> {
-  if (!Number.isInteger(extraId) || typeof stamped !== "boolean") {
+export async function setExtraStamped(extraId: number, stamped: boolean, date?: string): Promise<ActionResult> {
+  if (
+    !Number.isInteger(extraId) ||
+    typeof stamped !== "boolean" ||
+    (date !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(date))
+  ) {
     logStampActionInvalidInput("setExtraStamped");
     return failed;
   }
   return asUser("setExtraStamped", async ({ supabase, user, fail }) => {
-    // ignoreDuplicates (ON CONFLICT DO NOTHING): an already-stamped row must not need an UPDATE
-    // policy, which user_extra_stamps doesn't have.
+    // ignoreDuplicates (ON CONFLICT DO NOTHING): an already-stamped row must not need an UPDATE policy if no date is set.
+    // If a date is provided, we use onConflict to overwrite stamped_on, which uses the UPDATE policy in 0007_edit_dates.sql.
     const { error } = stamped
       ? await supabase
           .from("user_extra_stamps")
-          .upsert({ user_id: user.id, extra_id: extraId }, { ignoreDuplicates: true })
+          .upsert(
+            { user_id: user.id, extra_id: extraId, ...(date ? { stamped_on: date } : {}) },
+            date ? { onConflict: "user_id, extra_id" } : { ignoreDuplicates: true }
+          )
       : await supabase.from("user_extra_stamps").delete().eq("user_id", user.id).eq("extra_id", extraId);
     return error ? fail("write", error) : ok;
   });

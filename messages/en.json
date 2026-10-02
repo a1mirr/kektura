@@ -27,6 +27,7 @@
     "unstamp": "Remove",
     "empty": "No checkpoints loaded yet. Run supabase/seed.sql.",
     "showExtras": "Show extra stamps ({count})",
+    "goExtras": "go to extra stamps ({count})",
     "extraStamps": "Extra stamps",
     "extraNote": "Unofficial stamps near the trail (castles, museums, other hiking movements). Not counted in the main total. Source: heyjoe.hu.",
     "offTrail": "{m} m off the trail",

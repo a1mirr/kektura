@@ -27,6 +27,7 @@
     "unstamp": "Törlés",
     "empty": "Még nincsenek bélyegzőhelyek. Futtasd a supabase/seed.sql fájlt.",
     "showExtras": "Extra bélyegzők mutatása ({count})",
+    "goExtras": "ugrás az extra bélyegzőkhöz ({count})",
     "extraStamps": "Extra bélyegzők",
     "extraNote": "Nem hivatalos bélyegzők a nyomvonal mellett (várak, múzeumok, más túramozgalmak). A fő összesítésbe nem számítanak. Forrás: heyjoe.hu.",
     "offTrail": "{m} m-re a nyomvonaltól",

@@ -114,6 +114,24 @@ describe("spec 0002: setPlacesStamped", () => {
     expect(revalidatePath).toHaveBeenCalledWith("/[locale]/dashboard", "page");
   });
 
+  it("AC-3: explicit date updates stamped_on for existing rows", async () => {
+    const { calls } = useClient(fakeSupabase({ checkpoints: KOSZEG }));
+    expect(await setPlacesStamped(["OKTPH_03"], true, "2023-10-01")).toEqual({ ok: true });
+    expect(writes(calls)).toEqual([
+      {
+        table: "user_stamps",
+        op: "upsert",
+        args: [
+          [
+            { user_id: "user-1", checkpoint_id: 4, stamped_on: "2023-10-01" },
+            { user_id: "user-1", checkpoint_id: 5, stamped_on: "2023-10-01" },
+          ],
+          { onConflict: "user_id, checkpoint_id" },
+        ],
+      },
+    ]);
+  });
+
   it("AC-4: unstamping deletes only the user's rows for every variant", async () => {
     const { calls } = useClient(fakeSupabase({ checkpoints: KOSZEG }));
     expect(await setPlacesStamped(["OKTPH_03"], false)).toEqual({ ok: true });
@@ -164,6 +182,18 @@ describe("spec 0002: setExtraStamped", () => {
         table: "user_extra_stamps",
         op: "upsert",
         args: [{ user_id: "user-1", extra_id: 7 }, { ignoreDuplicates: true }],
+      },
+    ]);
+  });
+
+  it("AC-8: stamping with explicit date uses ON CONFLICT to update stamped_on", async () => {
+    const { calls } = useClient(fakeSupabase());
+    expect(await setExtraStamped(7, true, "2023-10-01")).toEqual({ ok: true });
+    expect(writes(calls)).toEqual([
+      {
+        table: "user_extra_stamps",
+        op: "upsert",
+        args: [{ user_id: "user-1", extra_id: 7, stamped_on: "2023-10-01" }, { onConflict: "user_id, extra_id" }],
       },
     ]);
   });

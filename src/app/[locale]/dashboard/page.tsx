@@ -13,6 +13,7 @@ import {
   stampedPlaceKeys,
   stampsPerMonth,
   walkedRanges,
+  findStageForKm,
 } from "@/lib/progress";
 import LocateButton from "@/components/LocateButton";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
@@ -48,9 +49,9 @@ export default async function Dashboard({
       supabase.from("checkpoints").select("*").order("seq"),
       supabase.from("user_stamps").select("checkpoint_id, stamped_on"),
       supabase.from("extra_stamps").select("*").order("km_from_start"),
-      supabase.from("user_extra_stamps").select("extra_id"),
+      supabase.from("user_extra_stamps").select("extra_id, stamped_on"),
     ]);
-  const extraDone = new Set((extraStamps ?? []).map((s) => s.extra_id));
+  const extraDone = new Map((extraStamps ?? []).map((s) => [s.extra_id, s.stamped_on]));
   const extraList = extraRows ?? [];
   const mapExtras = extraList.map((e) => ({
     id: e.id,
@@ -64,9 +65,14 @@ export default async function Dashboard({
   const placeList = buildPlaces(cps);
   const placeKm = new Map(placeList.map((p) => [p.key, p.km]));
   const stages = buildStages(placeList, stagesData.stages);
-  const stampedPlaces = stampedPlaceKeys(placeList, (stamps ?? []).map((s) => s.checkpoint_id));
+  const stampedPlaces = stampedPlaceKeys(placeList, stamps ?? []);
   const doneRanges = walkedRanges(placeList, stampedPlaces);
   const summary = progressSummary(placeList, doneRanges);
+
+  const extraListWithStage = extraList.map((e) => ({
+    ...e,
+    stage: findStageForKm(Number(e.km_from_start), stages, placeKm),
+  }));
 
   const chartData = stampsPerMonth(stamps ?? [], placeList).map(({ month, count }) => ({
     month: format.dateTime(new Date(`${month}-01T00:00:00Z`), { year: "numeric", month: "short", timeZone: "UTC" }),
@@ -140,6 +146,7 @@ export default async function Dashboard({
               const { stage: n, meta, places: list } = stage;
               const keys = stageStampKeys(stage);
               const done = list.filter((p) => stampedPlaces.has(p.key)).length;
+              const extrasCount = extraListWithStage.filter((e) => e.stage === n).length;
               return (
                 <StageSection
                   key={n}
@@ -150,11 +157,18 @@ export default async function Dashboard({
                   done={done}
                   total={list.length}
                   actions={
-                    <StageStampButton
-                      stampKeys={keys.stamp}
-                      unstampKeys={keys.unstamp}
-                      done={done === list.length}
-                    />
+                    <div className="flex items-center gap-3">
+                      {extrasCount > 0 && (
+                        <a href="#extra-stamps" className="text-xs text-blue-600 hover:underline">
+                          {t("goExtras", { count: extrasCount })}
+                        </a>
+                      )}
+                      <StageStampButton
+                        stampKeys={keys.stamp}
+                        unstampKeys={keys.unstamp}
+                        done={done === list.length}
+                      />
+                    </div>
                   }
                 >
                   {list.map((p) => (
@@ -184,7 +198,11 @@ export default async function Dashboard({
                           lat={Number(p.variants[0].lat)}
                           lng={Number(p.variants[0].lng)}
                         />
-                        <StampButton placeKey={p.key} stamped={stampedPlaces.has(p.key)} />
+                        <StampButton
+                          placeKey={p.key}
+                          stamped={stampedPlaces.has(p.key)}
+                          date={stampedPlaces.get(p.key)}
+                        />
                       </div>
                     </li>
                   ))}
@@ -195,23 +213,24 @@ export default async function Dashboard({
         )}
       </section>
 
-      {extraList.length > 0 && (
-        <section>
+      {extraListWithStage.length > 0 && (
+        <section id="extra-stamps" className="scroll-mt-8">
           <h2 className="mb-1 font-semibold">
             {t("extraStamps")}{" "}
             <span className="text-sm font-normal text-stone-500">
-              {extraDone.size} / {extraList.length}
+              {extraDone.size} / {extraListWithStage.length}
             </span>
           </h2>
           <p className="mb-2 text-sm text-stone-500">{t("extraNote")}</p>
           <ul className="divide-y rounded-lg bg-white shadow-sm">
-            {extraList.map((e) => (
+            {extraListWithStage.map((e) => (
               <li id={`extra-${e.id}`} key={e.id} className="flex scroll-mt-24 items-start justify-between gap-2 px-4 py-3">
                 <div className="min-w-0">
                   <div>
                     {e.name}
                     <span className="ml-2 text-sm text-stone-500">
                       {t("kmValue", { km: format.number(Number(e.km_from_start)) })}
+                      {e.stage !== null && ` · ${t("stageTitle", { n: e.stage })}`}
                       {e.off_trail_m > 100 && ` · ${t("offTrail", { m: format.number(e.off_trail_m) })}`}
                     </span>
                   </div>
@@ -219,7 +238,11 @@ export default async function Dashboard({
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <LocateButton kind="extra" keyId={String(e.id)} name={e.name} lat={e.lat} lng={e.lng} />
-                  <ExtraStampButton extraId={e.id} stamped={extraDone.has(e.id)} />
+                  <ExtraStampButton
+                    extraId={e.id}
+                    stamped={extraDone.has(e.id)}
+                    date={extraDone.get(e.id)}
+                  />
                 </div>
               </li>
             ))}

@@ -57,14 +57,22 @@ export function buildPlaces(checkpoints: Checkpoint[]): Place[] {
 }
 
 // A place is stamped when any of its variants is.
-export function stampedPlaceKeys(places: Place[], stampedCheckpointIds: Iterable<number>): Set<string> {
-  const ids = new Set(stampedCheckpointIds);
-  return new Set(places.filter((p) => p.variants.some((v) => ids.has(v.id))).map((p) => p.key));
+export function stampedPlaceKeys(places: Place[], stamps: StampRow[]): Map<string, string> {
+  const stampDates = new Map<number, string>(stamps.map((s) => [s.checkpoint_id, s.stamped_on]));
+  const result = new Map<string, string>();
+  for (const p of places) {
+    const dates = p.variants
+      .map((v) => stampDates.get(v.id))
+      .filter((d): d is string => d !== undefined)
+      .sort();
+    if (dates.length > 0) result.set(p.key, dates[0]);
+  }
+  return result;
 }
 
 // Stamps can be collected in any order. A stretch counts as walked only when BOTH of its neighbouring
 // places (in trail order) are stamped; touching stretches merge into one range.
-export function walkedRanges(places: Place[], stamped: Set<string>): KmRange[] {
+export function walkedRanges(places: Place[], stamped: { has: (key: string) => boolean }): KmRange[] {
   const ordered = [...places].sort((a, b) => a.km - b.km || a.seq - b.seq);
   const ranges: KmRange[] = [];
   for (let i = 0; i < ordered.length - 1; i++) {
@@ -135,4 +143,23 @@ export function buildStages(places: Place[], stagesMeta: StageMeta[]): Stage[] {
 export function stageStampKeys(stage: Stage): { stamp: string[]; unstamp: string[] } {
   const own = stage.places.map((p) => p.key);
   return { stamp: stage.startKey ? [stage.startKey, ...own] : own, unstamp: own };
+}
+
+// Maps a km_from_start value (e.g. from an extra stamp) to a stage number based on the stage's km bounds.
+// The bounds are [startKm, endKm) where startKm is the km of the stage's startKey (or first place),
+// and endKm is the km of its last place. For the final stage, endKm is inclusive.
+export function findStageForKm(km: number, stages: Stage[], placeKm: Map<string, number>): number | null {
+  for (let i = 0; i < stages.length; i++) {
+    const stage = stages[i];
+    if (stage.places.length === 0) continue;
+    
+    const startKm = stage.startKey !== null ? (placeKm.get(stage.startKey) ?? stage.places[0].km) : stage.places[0].km;
+    const endKm = stage.places.at(-1)!.km;
+    
+    const isLastStage = i === stages.length - 1;
+    if (km >= startKm && (isLastStage ? km <= endKm : km < endKm)) {
+      return stage.stage;
+    }
+  }
+  return null;
 }

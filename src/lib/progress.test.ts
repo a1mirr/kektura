@@ -7,6 +7,7 @@ import {
   stampedPlaceKeys,
   stampsPerMonth,
   walkedRanges,
+  findStageForKm,
   type Checkpoint,
   type StageMeta,
 } from "./progress";
@@ -66,8 +67,10 @@ describe("spec 0001: places", () => {
   it("AC-2: a place is stamped when any of its variants is", () => {
     const places = buildPlaces([cp("A", 0), cp("K", 5), cp("K", 6)]);
     const second = places[1].variants[1].id;
-    expect(stampedPlaceKeys(places, [second])).toEqual(new Set(["K"]));
-    expect(stampedPlaceKeys(places, [])).toEqual(new Set());
+    expect(stampedPlaceKeys(places, [{ checkpoint_id: second, stamped_on: "2023-10-01" }])).toEqual(
+      new Map([["K", "2023-10-01"]])
+    );
+    expect(stampedPlaceKeys(places, [])).toEqual(new Map());
   });
 });
 
@@ -166,5 +169,23 @@ describe("spec 0001: stages", () => {
     expect(stageStampKeys(s1)).toEqual({ stamp: ["A", "B"], unstamp: ["A", "B"] });
     expect(stageStampKeys(s2)).toEqual({ stamp: ["B", "C"], unstamp: ["C"] });
     expect(stageStampKeys(s3)).toEqual({ stamp: ["D", "E"], unstamp: ["D", "E"] });
+  });
+
+  it("spec 0013: findStageForKm maps an extra stamp to a stage based on km bounds", () => {
+    const [s1, s2, s3] = buildStages(places, meta);
+    const placeKm = new Map(places.map(p => [p.key, p.km]));
+    const stages = [s1, s2, s3];
+
+    // s1: [0, 10)
+    // s2: [10, 20) (starts at B's km=10)
+    // s3: [21, 30] (final stage, inclusive of end)
+    expect(findStageForKm(0, stages, placeKm)).toBe(1);
+    expect(findStageForKm(5, stages, placeKm)).toBe(1);
+    expect(findStageForKm(10, stages, placeKm)).toBe(2);
+    expect(findStageForKm(19.9, stages, placeKm)).toBe(2);
+    expect(findStageForKm(20, stages, placeKm)).toBeNull(); // s2 ends at 20, s3 starts at 21
+    expect(findStageForKm(21, stages, placeKm)).toBe(3);
+    expect(findStageForKm(30, stages, placeKm)).toBe(3); // inclusive
+    expect(findStageForKm(31, stages, placeKm)).toBeNull();
   });
 });
