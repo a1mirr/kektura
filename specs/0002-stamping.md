@@ -3,7 +3,7 @@
 Status: Done
 Owner code: `src/app/[locale]/dashboard/actions.ts`, `src/lib/action-result.ts`,
 `src/lib/use-stamp-action.ts`, `src/components/ActionButton.tsx` (+ `StampButton`, `StageStampButton`,
-`ExtraStampButton`), the stamp popup in `src/components/TrailMap.tsx`
+`ExtraStampButton`), the stamp popup in `src/components/trail-map/stampPopups.ts`
 
 ## Goal
 

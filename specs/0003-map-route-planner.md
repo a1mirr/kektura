@@ -1,7 +1,7 @@
 # 0003: Map lines and the route planner
 
 Status: Done
-Owner code: `src/lib/route-geometry.ts`, `src/lib/route-stats.ts`, `src/components/TrailMap.tsx`
+Owner code: `src/lib/route-geometry.ts`, `src/lib/route-stats.ts`, `src/components/TrailMap.tsx` (split into `src/components/trail-map/` and `src/lib/map-*.ts` by spec 0011)
 
 ## Goal
 
@@ -71,4 +71,16 @@ Routing off the trail.
 | AC-2 (toggle), AC-3 (fit) | manual: dashboard map |
 | AC-4 ... AC-8 | `src/lib/route-stats.test.ts` |
 | Table totals | `tests/trail-data.test.ts` (0004 AC-6) |
-| AC-9 ... AC-16 | manual (canvas interactions; spec 0011 adds E2E where the DOM allows) |
+| AC-10, AC-11, AC-13 | `e2e/map.spec.ts` (spec 0011) |
+| AC-4, AC-8, AC-12 (route from / to) | `e2e/map.spec.ts`: two stamps picked through their popups show the stretch's numbers |
+| AC-2 (layer visibility), AC-9, AC-12, AC-13 (extras), AC-14, AC-16 | manual, see the checklist below; AC-15 popup builders: `src/lib/map-popups.test.ts` |
+
+Manual checklist (dashboard, `npm run dev:test`, canvas interactions):
+
+- AC-10 visibility: untick "Stamps" and "Walked stretches" (the whole trail turns grey dashed), tick "Show extra stamps" and "Show restaurants"; dots and lines appear and disappear at once, without a reload.
+- AC-9: zoom in past level 9; the line gets visibly more detailed (the detailed file is requested once in the network tab); zoom out and it swaps back. Block that request and zoom again: the overview stays and the next zoom retries.
+- AC-16: pan and zoom, then mark a stamp from its row; the map's position and zoom do not change and the dot fills in.
+- AC-12: click a stamp, "Mark as walked" then "Remove mark" (official place and extra stamp); the popup closes and the dot, stats and list update. With an expired session (delete the auth cookie, then click) the page reloads to sign-in; with the network off the popup shows "Couldn't save" and the button works again.
+- AC-12: "Show in list" in a collapsed stage opens the stage, scrolls to the row and flashes it; in fullscreen it leaves fullscreen first.
+- AC-13: with extra stamps off, press 📍 on an extra stamp's row; the extra-stamps layer switches on and the map flies there (zoom >= 12).
+- AC-14: with restaurants on, hover one (name and distance) and click it (pinned popup with an "Open on etteremhet.hu" link that opens in a new tab).
