@@ -25,11 +25,11 @@ test.describe("spec 0018: changelog page", () => {
   test("AC-2: each change carries a translated kind label", async ({ page }) => {
     await page.goto("/en/changelog");
     const labels = { new: "New", improved: "Improved", fixed: "Fixed" };
-    const article = page.getByRole("article").first();
-    for (const kind of new Set(newest.changes.map((c) => c.kind))) {
-      await expect(article.getByText(labels[kind], { exact: true }).first()).toBeVisible();
+    // Every kind that any entry uses, so a wrong label still shows when the newest entry has only one kind.
+    for (const kind of new Set(CHANGELOG.flatMap((e) => e.changes.map((c) => c.kind)))) {
+      await expect(page.getByText(labels[kind], { exact: true }).first()).toBeVisible();
     }
-    await expect(article.getByText(newest.changes[0].text.en, { exact: true })).toBeVisible();
+    await expect(page.getByRole("article").first().getByText(newest.changes[0].text.en, { exact: true })).toBeVisible();
     // The oldest entry is the first version (AC-6).
     await expect(page.getByRole("article").last().getByText("Sign in with Google.")).toBeVisible();
   });
