@@ -99,18 +99,6 @@ export async function setSharing(friendId: string, isSharing: boolean): Promise<
   return { ok: true };
 }
 
-export async function setDisplayName(name: string): Promise<ActionResult> {
-  if (!(await isFriendsEnabled())) return { ok: false, reason: 'disabled' };
-  const supabase = await createClient();
-  const { data: userRes } = await supabase.auth.getUser();
-  const uid = userRes.user?.id;
-  if (!uid) return { ok: false, reason: 'unauthorized' };
-  if (!rateLimiter.allow(uid)) return { ok: false, reason: 'failed' };
-  const { error } = await supabase.from('profiles').update({ display_name: name.trim() }).eq('id', uid);
-  if (error) { logFriendsError('setDisplayName', error); return { ok: false, reason: 'failed' }; }
-  revalidatePath('/friends');
-  return { ok: true };
-}
 
 export async function regenerateInvite(): Promise<ActionResult> {
   if (!(await isFriendsEnabled())) return { ok: false, reason: 'disabled' };

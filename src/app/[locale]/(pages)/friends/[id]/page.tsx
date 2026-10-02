@@ -5,7 +5,7 @@ import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/serve
 import { getFriends, getFriendProgress } from '@/lib/friends';
 import { createClient } from '@/lib/supabase/server';
 import { isFriendsEnabled } from '../actions';
-import { buildStages, findStageForKm } from '@/lib/progress';
+import { buildStages } from '@/lib/progress';
 import stagesData from '../../../../../../scripts/data/okt-stages.json';
 import { Link } from '@/i18n/navigation';
 import StageControls from '@/components/StageControls';

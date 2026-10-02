@@ -45,11 +45,7 @@ describe("getFriends", () => {
     expect(charlie.displayName).toBe("Charlie");
     expect(charlie.status).toBe("pending");
     expect(charlie.isRequester).toBe(false);
-    expect(charlie.isSharing).toBe(false); // since u3 is requester, friend_is_sharing is true? Wait, getFriends code:
-    // const isRequester = f.user_id === uid;
-    // const isSharing = isRequester ? f.friend_is_sharing : f.user_is_sharing;
-    // For u3 (requester), uid is u1 (friend), so isRequester is false. 
-    // isSharing = user_is_sharing = false.
+    expect(charlie.isSharing).toBe(false); 
     expect(charlie.stamps).toEqual([]);
   });
 });

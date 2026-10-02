@@ -19,19 +19,16 @@ test("spec 0024: Approval Model flow", async ({ browser }) => {
   
   // They go to the invite URL
   await friendPage.goto(inviteUrl.replace("3000", "3002"));
-  // They should be redirected to login because they are signed out
-  // The UI should say something or maybe it redirects to /?return_to=... 
-  // Let's just sign them in first to be safe, or wait, the requirement says: 
-  // "incognito user clicks -> signs in -> clicks 'Send request'"
-  // We can just login directly as new user, then visit the link.
+  
+  // They should be redirected to login because they are signed out,
+  // but we can just sign them in first to simplify the test.
   await signInAsNewUser(friendPage);
   await friendPage.goto(inviteUrl.replace("3000", "3002"));
 
   // Friend clicks "Send request"
-  console.log("Current URL: " + friendPage.url());
-console.log("Page text: " + await friendPage.locator("body").innerText());
-await friendPage.getByRole("button", { name: /Send request/i }).click();
-  // It should redirect or show success. Let's assume it redirects to /friends
+  await friendPage.getByRole("button", { name: /Send request/i }).click();
+  
+  // It should redirect to /friends
   await expect(friendPage).toHaveURL(/\/en\/friends/);
 
   // Inviter sees request -> clicks "Approve"
@@ -57,9 +54,8 @@ test("spec 0024: invalid link and own link", async ({ page }) => {
   await page.goto("/en/friends");
   const inviteUrl = await page.locator("input[readonly]").inputValue();
   await page.goto(inviteUrl.replace("3000", "3002"));
-  // Assuming the UI prevents you from requesting yourself, or the server rejects it.
-  // The RPC returns 'own_token', let's just make sure the page doesn't crash.
-  await page.getByRole("button", { name: /Send request/i }).click();
-  await expect(page).toHaveURL(/error=own_token/);
+  
+  // UI should display that this is the user's own link
+  await expect(page.locator("text=This is your own invite link")).toBeVisible();
 });
 

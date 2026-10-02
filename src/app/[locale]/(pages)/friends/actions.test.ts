@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 process.env.NEXT_PUBLIC_FF_FRIENDS = "1";
 ﻿import { describe, expect, it, vi, beforeEach } from "vitest";
-import { sendRequest, approveRequest, ignoreRequest, removeFriend, setSharing, setDisplayName, regenerateInvite } from "./actions";
+import { sendRequest, approveRequest, ignoreRequest, removeFriend, setSharing, regenerateInvite } from "./actions";
 
 const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({ revalidatePath: (...args: any[]) => mockRevalidatePath(...args) }));
