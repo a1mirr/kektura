@@ -39,3 +39,24 @@ export function logStampActionError(action: StampAction, stage: StampStage, erro
 export function logStampActionInvalidInput(action: StampAction): void {
   console.warn(`${TAG} invalid input action=${action}`);
 }
+
+// Feedback form (spec 0017) and account deletion (spec 0014): same one-line format, their own tags.
+export function logFeedbackError(stage: "write" | "exception", error: unknown, userId?: string): void {
+  const { code, message } = describeError(error);
+  console.error(
+    `[feedback] stage=${stage} user=${userId ?? "anonymous"} code=${code ?? "-"} message=${quote(message)}`,
+  );
+}
+
+// Only a short reason such as http_401, timeout or network: the request URL holds the bot token and
+// the message text is the sender's, so neither is ever logged.
+export function logFeedbackNotifyFailure(reason: string): void {
+  console.warn(`[feedback] telegram notification failed reason=${/^[\w-]{1,32}$/.test(reason) ? reason : "unknown"}`);
+}
+
+export function logAccountDeletionError(stage: "rpc" | "exception", error: unknown, userId?: string): void {
+  const { code, message } = describeError(error);
+  console.error(
+    `[account-delete] stage=${stage} user=${userId ?? "unknown"} code=${code ?? "-"} message=${quote(message)}`,
+  );
+}

@@ -18,6 +18,7 @@
     "testdb:reset": "supabase db reset",
     "types:gen": "node scripts/db-types.mjs gen",
     "types:check": "node scripts/db-types.mjs check",
+    "telegram:check": "node scripts/telegram-check.mjs",
     "predev:test": "node scripts/copy-maplibre-worker.mjs",
     "dev:test": "node scripts/test-env.mjs next dev --port 3001",
     "prebuild:e2e": "node scripts/copy-maplibre-worker.mjs",

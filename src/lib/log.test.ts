@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { logStampActionError, logStampActionInvalidInput } from "./log";
+import {
+  logAccountDeletionError,
+  logFeedbackError,
+  logFeedbackNotifyFailure,
+  logStampActionError,
+  logStampActionInvalidInput,
+} from "./log";
 
 const errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
 const warnLog = vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -47,5 +53,29 @@ describe("spec 0008: log lines", () => {
     logStampActionInvalidInput("setExtraStamped");
     expect(lineOf(warnLog)).toBe("[stamp-action] invalid input action=setExtraStamped");
     expect(errorLog).not.toHaveBeenCalled();
+  });
+});
+
+describe("spec 0017: feedback and account-deletion log lines", () => {
+  it("AC-5: a feedback failure is one line with stage, user (or anonymous), code and message", () => {
+    logFeedbackError("write", { code: "42501", message: "denied", details: "secret-details" }, "u-1");
+    expect(lineOf(errorLog)).toBe('[feedback] stage=write user=u-1 code=42501 message="denied"');
+    logFeedbackError("exception", new Error("boom"));
+    expect(errorLog.mock.calls[1][0]).toBe('[feedback] stage=exception user=anonymous code=- message="boom"');
+  });
+
+  it("AC-5: a failed Telegram notification logs only a short reason", () => {
+    logFeedbackNotifyFailure("http_401");
+    expect(warnLog.mock.calls).toEqual([["[feedback] telegram notification failed reason=http_401"]]);
+  });
+
+  it("AC-5: a reason that could carry data (a URL with the bot token) is replaced", () => {
+    logFeedbackNotifyFailure("https://api.telegram.org/bot123:SECRET/sendMessage failed");
+    expect(warnLog.mock.calls).toEqual([["[feedback] telegram notification failed reason=unknown"]]);
+  });
+
+  it("spec 0014: an account deletion failure is one line with stage, user, code and message", () => {
+    logAccountDeletionError("rpc", { code: "P0001", message: "Not authenticated" }, "u-2");
+    expect(lineOf(errorLog)).toBe('[account-delete] stage=rpc user=u-2 code=P0001 message="Not authenticated"');
   });
 });

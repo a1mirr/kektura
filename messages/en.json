@@ -101,7 +101,7 @@
     "sourceEtteremhet": "Restaurants near the trail.",
     "independent": "Kéktúra tracker is an independent project and is not affiliated with MTSZ.",
     "dataTitle": "Your data",
-    "data1": "You sign in with Google; the app never sees your Google password. It stores your account (the email and name from your Google profile), the stamps you mark with their dates, and any messages you send through the feedback form.",
+    "data1": "You sign in with Google; the app never sees your Google password. It stores your account (the email and name from your Google profile), the stamps you mark with their dates, and the messages you send through the feedback form, which are delivered to the developer together with your email if you are signed in.",
     "data2": "Cookies keep you signed in. Your browser also remembers display choices, such as which stages are open and which map layers are on.",
     "data3": "You can delete your account and all your stamps at any time under <settings>Account settings</settings>. Feedback messages you have already sent are kept, but are no longer linked to you.",
     "contactTitle": "Questions or ideas?",
@@ -121,7 +121,13 @@
     "submit": "Submit feedback",
     "placeholder": "Your message...",
     "success": "Thanks for your feedback!",
-    "error": "Failed to submit feedback."
+    "error": "Failed to submit feedback.",
+    "label": "Your message",
+    "counter": "{count} of {max} characters",
+    "note": "If you are signed in, your email is sent along with your message so we can reply.",
+    "sending": "Sending…",
+    "tooLong": "The message is too long (2,000 characters at most).",
+    "rateLimited": "Too many messages in a short time. Please try again later."
   },
   "settings": {
     "title": "Account settings",

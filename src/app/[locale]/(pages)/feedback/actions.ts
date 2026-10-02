@@ -1,20 +1,72 @@
 "use server";
 
+import { headers } from "next/headers";
+import { hasLocale } from "next-intl";
+import { routing } from "@/i18n/routing";
+import { formatFeedbackNotification, validateFeedback } from "@/lib/feedback";
+import { logFeedbackError, logFeedbackNotifyFailure } from "@/lib/log";
+import { createRateLimiter } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
+import { sendTelegramMessage, telegramConfig } from "@/lib/telegram";
 
-export async function submitFeedback(message: string): Promise<{ ok: boolean }> {
-  if (!message || message.trim().length === 0) {
-    return { ok: false };
+// See specs/0017-feedback.md. The form is public (it is in the footer), so everything that reaches
+// this action is untrusted.
+
+export type FeedbackResult =
+  | { ok: true }
+  | { ok: false; reason: "invalid" | "empty" | "too_long" | "rate_limited" | "failed" };
+
+const ok: FeedbackResult = { ok: true };
+
+// Per address and overall (AC-7). In memory: one server process, forgotten on restart.
+const perIp = createRateLimiter({ limit: 5, windowMs: 10 * 60_000 });
+const overall = createRateLimiter({ limit: 100, windowMs: 60 * 60_000 });
+
+// Caddy puts the client address first in x-forwarded-for; without a proxy everyone shares a bucket.
+const clientIp = (h: Headers) => h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "unknown";
+
+// `input` is `{ message, locale, website }`. `website` is the honeypot: hidden from people, so a
+// filled one is a bot, which gets a success answer and nothing else.
+export async function submitFeedback(input: unknown): Promise<FeedbackResult> {
+  try {
+    if (typeof input !== "object" || input === null) return { ok: false, reason: "invalid" };
+    const { message: raw, locale, website } = input as Record<string, unknown>;
+    if (typeof website === "string" && website.trim() !== "") return ok;
+
+    const checked = validateFeedback(raw);
+    if (!checked.ok) return { ok: false, reason: checked.reason };
+
+    if (!perIp.allow(clientIp(await headers())) || !overall.allow("all")) {
+      return { ok: false, reason: "rate_limited" };
+    }
+
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    // RLS only lets the row carry the caller's own user id (or none at all).
+    const { error } = await supabase.from("user_feedback").insert({ user_id: user?.id ?? null, message: checked.message });
+    if (error) {
+      logFeedbackError("write", error, user?.id);
+      return { ok: false, reason: "failed" };
+    }
+
+    // The row is saved: from here on nothing may fail the submission.
+    const config = telegramConfig();
+    if (config) {
+      const sent = await sendTelegramMessage(
+        formatFeedbackNotification({
+          message: checked.message,
+          locale: hasLocale(routing.locales, locale) ? locale : "?",
+          senderEmail: user ? (user.email ?? `user ${user.id}`) : null,
+        }),
+        config,
+      );
+      if (!sent.ok) logFeedbackNotifyFailure(sent.reason);
+    }
+    return ok;
+  } catch (error) {
+    logFeedbackError("exception", error);
+    return { ok: false, reason: "failed" };
   }
-  
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  const userId = data?.user?.id;
-
-  const { error } = await supabase.from("user_feedback").insert({
-    user_id: userId || null,
-    message: message.trim(),
-  });
-
-  return { ok: !error };
 }

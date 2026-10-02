@@ -31,7 +31,8 @@ be true of the app today.
 - **AC-5**: "Your data" says what is stored and what deleting does, matching spec 0014 and migration
   `0008_pages_settings.sql`:
   - Google handles the sign-in; the app stores the account (email and name from the Google profile) and
-    the stamps the user marks, with their dates, and the messages sent through the feedback form;
+    the stamps the user marks, with their dates, and the messages sent through the feedback form, which
+    are delivered to the developer together with the email when signed in (spec 0017);
   - cookies keep the user signed in, and the browser remembers display choices (which stages are open,
     which map layers are on);
   - "Account settings" deletes the account and all stamps; feedback messages already sent are kept but
