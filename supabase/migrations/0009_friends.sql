@@ -70,7 +70,7 @@ begin
   if v_existing_status = 'pending' then return 'already_pending'; end if;
   
   insert into public.friendships (user_id, friend_id, status)
-  values (v_inviter_id, v_uid, 'pending');
+  values (v_uid, v_inviter_id, 'pending');
   return 'ok';
 end;
 $$;

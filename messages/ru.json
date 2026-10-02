@@ -65,7 +65,8 @@
     "kmValue": "{km} км",
     "mapAttribution": "© участники OpenStreetMap · маршрут: MTSZ",
     "account": "Аккаунт",
-    "stampDate": "Дата печати"
+    "stampDate": "Дата печати",
+    "friends": "Друзья"
   },
   "error": {
     "title": "Что-то пошло не так",
@@ -164,6 +165,26 @@
     "deleteFailed": "Не удалось удалить аккаунт. Попробуйте ещё раз."
   },
   "friends": {
-    "unknown_user": "Неизвестно"
+    "title": "Друзья",
+    "inviteTitle": "Ваша ссылка для приглашения",
+    "regenerate": "Сгенерировать новую",
+    "pendingTitle": "Ожидающие запросы",
+    "approve": "Одобрить",
+    "ignore": "Игнорировать",
+    "acceptedTitle": "Друзья",
+    "noFriends": "У вас пока нет друзей.",
+    "remove": "Удалить",
+    "stampsCount": "печатей",
+    "startSharing": "Начать делиться",
+    "stopSharing": "Перестать делиться",
+    "isSharing": "Прогресс виден",
+    "notSharing": "Прогресс скрыт",
+    "invalidLink": "Недействительная ссылка",
+    "invalidLinkDesc": "Эта ссылка недействительна или была отозвана.",
+    "signInToConnect": "Войдите, чтобы добавиться в друзья к {name}.",
+    "ownLink": "Это ваша собственная ссылка.",
+    "connectWith": "Добавиться в друзья к {name}?",
+    "sendRequest": "Отправить запрос",
+    "unknown_user": "Неизвестный"
   }
 }

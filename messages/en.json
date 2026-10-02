@@ -65,7 +65,8 @@
     "kmValue": "{km} km",
     "mapAttribution": "© OpenStreetMap contributors · route: MTSZ",
     "account": "Account",
-    "stampDate": "Date of the stamp"
+    "stampDate": "Date of the stamp",
+    "friends": "Friends"
   },
   "error": {
     "title": "Something went wrong",
@@ -164,6 +165,26 @@
     "deleteFailed": "Couldn't delete the account. Please try again."
   },
   "friends": {
+    "title": "Friends",
+    "inviteTitle": "Your invite link",
+    "regenerate": "Regenerate",
+    "pendingTitle": "Pending requests",
+    "approve": "Approve",
+    "ignore": "Ignore",
+    "acceptedTitle": "Friends",
+    "noFriends": "You haven't added any friends yet.",
+    "remove": "Remove",
+    "stampsCount": "stamps",
+    "startSharing": "Start sharing",
+    "stopSharing": "Stop sharing",
+    "isSharing": "Sharing progress",
+    "notSharing": "Not sharing progress",
+    "invalidLink": "Invalid link",
+    "invalidLinkDesc": "This invite link is not valid or has been revoked.",
+    "signInToConnect": "Sign in to connect with {name}.",
+    "ownLink": "This is your own invite link.",
+    "connectWith": "Connect with {name}?",
+    "sendRequest": "Send request",
     "unknown_user": "Unknown"
   }
 }

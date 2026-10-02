@@ -65,7 +65,8 @@
     "kmValue": "{km} km",
     "mapAttribution": "© az OpenStreetMap közreműködői · útvonal: MTSZ",
     "account": "Fiók",
-    "stampDate": "A bélyegzés dátuma"
+    "stampDate": "A bélyegzés dátuma",
+    "friends": "Barátok"
   },
   "error": {
     "title": "Valami elromlott",
@@ -164,6 +165,26 @@
     "deleteFailed": "Nem sikerült törölni a fiókot. Próbáld újra."
   },
   "friends": {
+    "title": "Barátok",
+    "inviteTitle": "A te meghívó linked",
+    "regenerate": "Újragenerálás",
+    "pendingTitle": "Függőben lévő kérések",
+    "approve": "Elfogadás",
+    "ignore": "Mellőzés",
+    "acceptedTitle": "Barátok",
+    "noFriends": "Még nem adtál hozzá barátokat.",
+    "remove": "Eltávolítás",
+    "stampsCount": "bélyegző",
+    "startSharing": "Megosztás indítása",
+    "stopSharing": "Megosztás leállítása",
+    "isSharing": "Haladás megosztása",
+    "notSharing": "Haladás nincs megosztva",
+    "invalidLink": "Érvénytelen link",
+    "invalidLinkDesc": "Ez a meghívó link érvénytelen vagy visszavonták.",
+    "signInToConnect": "Jelentkezz be, hogy kapcsolódj {name} felhasználóval.",
+    "ownLink": "Ez a saját meghívó linked.",
+    "connectWith": "Kapcsolódás {name} felhasználóval?",
+    "sendRequest": "Kérés küldése",
     "unknown_user": "Ismeretlen"
   }
 }

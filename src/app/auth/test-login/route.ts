@@ -14,6 +14,7 @@ export async function POST(request: Request) {
   const email = String(form.get("email") ?? "").trim().toLowerCase();
   const requested = form.get("locale");
   const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
+  const next = form.get("next")?.toString() || "/dashboard";
   const to = (path: string) => NextResponse.redirect(`${requestOrigin(request)}/${locale}${path}`, 303);
   if (!isTestEmail(email)) return to("?error=auth");
 
@@ -21,5 +22,5 @@ export async function POST(request: Request) {
   const credentials = { email, password: TEST_PASSWORD };
   let { error } = await supabase.auth.signInWithPassword(credentials);
   if (error) ({ error } = await supabase.auth.signUp(credentials));
-  return to(error ? "?error=auth" : "/dashboard");
+  return to(error ? "?error=auth" : (next.startsWith("/") ? next : "/" + next));
 }
