@@ -27,6 +27,10 @@ branch (default `main`). Nothing else.
    (it needs Docker); read the E2E specs instead and say whether they would catch a regression.
 5. Write nothing: no file changes, installs, commits or pushes. Run only read-only commands (`git`, `grep`,
    `npm run check`). Your tool list has no `Edit` or `Write`, but `Bash` could write, so this rule is on you.
+   Ignored build artefacts that `npm run check` rewrites (`tsconfig.tsbuildinfo`) don't count.
+6. Just before you report, run `git status --short` and `git rev-parse --short HEAD` again. If either
+   differs from step 3, someone changed the tree while you were reviewing: say so, name what changed, and
+   say that your review covers the commit you started from.
 
 ## What to look for
 

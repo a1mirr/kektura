@@ -16,6 +16,7 @@ describe("spec 0022: fresh-context review", () => {
     expect(claude).toMatch(/with the commit that was reviewed/);
     expect(claude).toMatch(/a review of an earlier state doesn't count/);
     expect(claude).toMatch(/Never hand a pull request over as ready to merge without it/);
+    expect(claude).toMatch(/leave the working tree alone while the review runs/);
     expect(claude).toMatch(/Fixes that change code, tests or behaviour get another fresh review/);
     expect(claude).toMatch(/wording-only fixes don't/);
     expect(claude).toMatch(/documentation included/);
@@ -57,6 +58,19 @@ describe("spec 0022: fresh-context review", () => {
       expect(body).toContain("git rev-parse --short HEAD");
       expect(body).toMatch(/a review only counts for the commit it names/);
       expect(body).toMatch(/Start with the commit you reviewed/);
+    });
+
+    it("checks the tree again just before reporting, and tolerates ignored build artefacts", () => {
+      expect(body).toMatch(/Just before you report, run `git status --short` and `git rev-parse --short HEAD` again/);
+      expect(body).toMatch(/someone changed the tree while you were reviewing/);
+      expect(body).toContain("tsconfig.tsbuildinfo");
+    });
+
+    it("checks spec hygiene and reads (does not run) the E2E specs", () => {
+      expect(body).toMatch(/Spec hygiene/);
+      expect(body).toMatch(/marked `Removed`|instead of marked `Removed`/);
+      expect(body).toMatch(/Do not run `npm run e2e`/);
+      expect(body).toMatch(/read the E2E specs instead/);
     });
 
     it("starts from CLAUDE.md and the spec (or the owning specs for `none`), and runs the checks", () => {

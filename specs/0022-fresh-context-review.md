@@ -37,7 +37,12 @@ author's context, and wants that to be part of how work is done here, not someth
     docs, specs, links), the gotchas listed in `CLAUDE.md`, regressions for signed-out visitors, other
     locales, small screens and the no-JS paths, and security and privacy (authorization, secrets in logs,
     redirects);
-  - it runs `npm run check` and reports the result;
+  - it also checks spec hygiene (ACs renumbered or deleted instead of marked `Removed`, the owning spec of
+    changed behaviour not updated, the index in `specs/README.md`, status and coverage not true), and reads
+    the E2E specs instead of running them (they need Docker), saying whether they would catch a regression;
+  - it runs `npm run check` and reports the result, ignoring the ignored build artefacts that rewrites
+    (`tsconfig.tsbuildinfo`); just before reporting it checks the tree and the commit again and says if
+    either changed while it worked;
   - it reports findings most severe first, each with `file:line`, what is wrong and a concrete failing
     scenario, then what it checked and found fine; "no findings" is a valid answer.
 - **AC-4**: `.github/pull_request_template.md` gives every pull request the checklist (spec first, or a small
@@ -79,6 +84,10 @@ author's context, and wants that to be part of how work is done here, not someth
   `none` and the reviewer works out which specs own the behaviour touched.
 - The author commits before asking for the review. The reviewer can see uncommitted files, but it says when
   it did, and the pull request records the commit that was reviewed.
+- The author leaves the tree alone while the review runs. This happened once while this spec was reviewed:
+  a second Claude session sharing the checkout wrote files into it. The reviewer noticed (its final check)
+  and reviewed the commit it started from; a session that shares a checkout should use its own
+  `git worktree`, and the author should stage only their own paths (never `git add -A` in a shared tree).
 
 ## Coverage
 
