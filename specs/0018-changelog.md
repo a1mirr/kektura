@@ -38,7 +38,8 @@ Release numbers; a feed (RSS); showing "what's new" inside the app; generating e
 ## Notes
 
 - To add an entry, put it first in `CHANGELOG` with all three languages and run `npm test`; the tests say
-  what is missing. Keep entries short; group several small changes under one title.
+  what is missing. If the newest entry has today's date, add the change to it instead (AC-7). Keep
+  entries short; group several small changes under one title.
 - The dates of the first three entries were reconstructed from migration and file timestamps; the first
   version went live earlier than any date in the git history, so they are approximate.
 - Dates are plain `YYYY-MM-DD` strings shown in UTC, so they can't shift a day with the visitor's time
