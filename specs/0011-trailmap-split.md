@@ -1,7 +1,7 @@
 # 0011: Split TrailMap into focused pieces, with an E2E safety net
 
-Status: Accepted
-Owner code: `src/components/TrailMap.tsx` and new modules next to it / in `src/lib`
+Status: Done
+Owner code: `src/components/TrailMap.tsx`, `src/components/trail-map/` and `src/lib/map-*.ts`
 
 ## Goal
 
@@ -36,6 +36,16 @@ New map features; replacing MapLibre; changing the data files.
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-2 | `e2e/map.spec.ts` + existing E2E |
-| AC-3 | review (file sizes) |
-| AC-4 | unit tests next to the extracted modules |
+| AC-1, AC-2 | `e2e/map.spec.ts` (written and green against the unrefactored component first, in its own commit) + existing E2E |
+| AC-3 | review (file sizes). `TrailMap.tsx` is 117 lines, a composition of `src/components/trail-map/`: `useLayerToggles` (55), `useFullscreen` (44), `useRoutePlanner` (86), `useRestaurants` (34), `useMapData` (45), `useMapInstance` (96) with `addTrailLayers` (32), `watchDetailRoute` (34), `stampPopups` (115), `restaurantPopups` (49), `listenForFocus` (28), plus `RoutePanel` (57), `LayerToggles` (74), `types` (54), `useLatest` (11). The largest file is 118 lines (`src/lib/map-layers.ts`). |
+| AC-4 | `src/lib/map-storage.test.ts`, `map-data.test.ts`, `map-layers.test.ts`, `map-popups.test.ts`, `map-reveal.test.ts` |
+
+## Notes
+
+- The map is not React state: `TrailMap` keeps one mutable handle (`map`, `ready`, `route`) in a ref and the
+  hooks update the map in place, which is what keeps position and zoom when a stamp changes (0003 AC-16).
+  Hooks and map event handlers read other changing values through `useLatest` refs.
+- The route-planner test (`e2e/map.spec.ts`) needs no test hook in production code: it uses the 📍 button to
+  fly the map to a stamp, which centres it, then clicks the canvas centre to open the stamp's popup.
+- Not covered by E2E (canvas-only): the amber highlight and map fit (0003 AC-3), the hover tooltips, the walked
+  lines, and marking a stamp from its popup.

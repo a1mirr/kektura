@@ -1,7 +1,7 @@
 # 0003: Map lines and the route planner
 
 Status: Done
-Owner code: `src/lib/route-geometry.ts`, `src/lib/route-stats.ts`, `src/components/TrailMap.tsx`
+Owner code: `src/lib/route-geometry.ts`, `src/lib/route-stats.ts`, `src/components/TrailMap.tsx` (split into `src/components/trail-map/` and `src/lib/map-*.ts` by spec 0011)
 
 ## Goal
 
@@ -71,4 +71,6 @@ Routing off the trail.
 | AC-2 (toggle), AC-3 (fit) | manual: dashboard map |
 | AC-4 ... AC-8 | `src/lib/route-stats.test.ts` |
 | Table totals | `tests/trail-data.test.ts` (0004 AC-6) |
-| AC-9 ... AC-16 | manual (canvas interactions; spec 0011 adds E2E where the DOM allows) |
+| AC-10, AC-11, AC-13 | `e2e/map.spec.ts` (spec 0011) |
+| AC-4, AC-8, AC-12 (route from / to) | `e2e/map.spec.ts`: two stamps picked through their popups show the stretch's numbers |
+| AC-9, AC-12, AC-14 ... AC-16 | manual (canvas interactions); AC-15 popup builders: `src/lib/map-popups.test.ts` |
