@@ -187,6 +187,13 @@
     "connectWith": "Добавиться в друзья к {name}?",
     "sendRequest": "Отправить запрос",
     "unknown_user": "Неизвестный",
-    "invalidToken": "Эта ссылка недействительна"
+    "invalidToken": "Эта ссылка недействительна",
+    "inviteFrom": "Приглашение от {name}",
+    "stagesCount": "этапов",
+    "error_invalid_token": "Эта ссылка недействительна.",
+    "error_own_token": "Вы не можете пригласить сами себя.",
+    "error_already_friends": "Вы уже друзья.",
+    "error_already_pending": "Вы уже отправили запрос.",
+    "error_failed": "Что-то пошло не так, попробуйте еще раз."
   }
 }

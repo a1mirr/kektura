@@ -1,6 +1,6 @@
 # Specs
 
-Every task (feature, behaviour change, non-trivial bug fix) gets a spec here **before** code. The
+Every task (feature, behaviour change, non-trivial bug fix) gets a spec here **before** code. Specs are always written in English. The
 spec is the contract; tests prove it; the Stop hook keeps it proven.
 
 ## Workflow
@@ -74,4 +74,6 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0015](0015-about-page.md) | About page | Done |
 | [0021](0021-pull-requests-only.md) | main only changes through pull requests (local pre-push guard) | Done |
 | [0022](0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Done |
+| [0023](0023-feature-flags.md) | Feature flags | Draft |
+| [0024](0024-friends-sharing.md) | Sharing progress with friends | Accepted |
 | [0025](0025-account-page.md) | Account page: sign out moves in, "Settings" becomes "Account" | Done |

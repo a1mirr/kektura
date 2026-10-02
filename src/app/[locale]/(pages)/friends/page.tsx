@@ -5,11 +5,15 @@ import { createClient } from '@/lib/supabase/server';
 import { isFriendsEnabled, regenerateInvite, approveRequest, ignoreRequest, removeFriend, setSharing } from './actions';
 import { Link } from '@/i18n/navigation';
 
-export default async function FriendsPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+import { headers } from 'next/headers';
+
+export default async function FriendsPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ error?: string }> }) {
   if (!(await isFriendsEnabled())) notFound();
   
   const { error } = await searchParams;
+  const { locale } = await params;
   const t = await getTranslations('friends');
+  const tDash = await getTranslations('dashboard');
   const supabase = await createClient();
   const [friends, { data: userRes }] = await Promise.all([
     getFriends(supabase),
@@ -18,8 +22,13 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
   const uid = userRes.user?.id;
   if (!uid) return null;
   
+  const headersList = await headers();
+  const host = headersList.get('host');
+  const proto = headersList.get('x-forwarded-proto') || 'http';
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || `${proto}://${host}`;
+  
   const { data: profile } = await supabase.from('profiles').select('invite_token').eq('id', uid).single();
-  const inviteLink = profile ? `${process.env.SITE_URL || 'http://localhost:3000'}/en/friends/invite/${profile.invite_token}` : '';
+  const inviteLink = profile ? `${origin}/${locale}/friends/invite/${profile.invite_token}` : '';
 
   const pending = friends.filter(f => f.status === 'pending' && !f.isRequester);
   const accepted = friends.filter(f => f.status === 'accepted');
@@ -29,10 +38,13 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
     return { ...f, progress: p };
   }));
 
+  const errorKey = `error_${error}`;
+  const errorMsg = error && t.has(errorKey as any) ? t(errorKey as any) : error;
+
   return (
     <div className='max-w-xl mx-auto p-4 space-y-8'>
       <h1 className='text-2xl font-bold'>{t('title')}</h1>
-      {error && <div className="bg-red-50 text-red-700 p-4 rounded-lg">{error}</div>}
+      {error && <div className="bg-red-50 text-red-700 p-4 rounded-lg">{errorMsg}</div>}
       
       <section className='space-y-4'>
         <h2 className='text-xl font-semibold'>{t('inviteTitle')}</h2>
@@ -90,7 +102,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                     t('notSharing')
                   ) : (
                     <>
-                      {f.stamps?.length || 0} {t('stampsCount')} &middot; {f.progress?.summary.doneKm} km &middot; {f.progress?.completedStages} stages
+                      {f.progress?.stampedKeys.size || 0} {t('stampsCount')} &middot; {tDash('kmValue', { km: f.progress?.summary.doneKm ?? 0 })} &middot; {f.progress?.completedStages} {t('stagesCount')}
                     </>
                   )}
                 </div>

@@ -107,7 +107,9 @@ export async function regenerateInvite(): Promise<ActionResult> {
   const uid = userRes.user?.id;
   if (!uid) return { ok: false, reason: 'unauthorized' };
   if (!rateLimiter.allow(uid)) return { ok: false, reason: 'failed' };
-  const newToken = crypto.randomUUID();
+  const newToken = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
   const { error } = await supabase.from('profiles').update({ invite_token: newToken }).eq('id', uid);
   if (error) { logFriendsError('regenerateInvite', error); return { ok: false, reason: 'failed' }; }
   revalidatePath('/friends');

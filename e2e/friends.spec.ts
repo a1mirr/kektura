@@ -47,7 +47,7 @@ test("spec 0024: invalid link and own link", async ({ page }) => {
   await signInAsNewUser(page);
   
   // Invalid token
-  await page.goto("/en/friends/invite/00000000-0000-0000-0000-000000000000");
+  await page.goto("/en/friends/invite/00000000000000000000000000000000");
   await expect(page.locator("text=This link is not valid")).toBeVisible();
 
   // Own token

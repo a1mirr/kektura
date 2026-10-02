@@ -187,6 +187,13 @@
     "connectWith": "Kapcsolódás {name} felhasználóval?",
     "sendRequest": "Kérés küldése",
     "unknown_user": "Ismeretlen",
-    "invalidToken": "Ez a link nem érvényes"
+    "invalidToken": "Ez a link nem érvényes",
+    "inviteFrom": "Meghívó tőle: {name}",
+    "stagesCount": "szakasz",
+    "error_invalid_token": "Ez a meghívó érvénytelen.",
+    "error_own_token": "Nem hívhatod meg magad.",
+    "error_already_friends": "Már barátok vagytok.",
+    "error_already_pending": "Már küldtél kérést.",
+    "error_failed": "Hiba történt, próbáld újra."
   }
 }

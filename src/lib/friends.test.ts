@@ -26,7 +26,7 @@ describe("getFriends", () => {
       [{ id: "u2", display_name: "Bob" }, { id: "u3", display_name: "Charlie" }],
       [
         { user_id: "u1", friend_id: "u2", status: "accepted", friend_is_sharing: true, user_is_sharing: true },
-        { user_id: "u3", friend_id: "u1", status: "pending", friend_is_sharing: true, user_is_sharing: false }
+        { user_id: "u3", friend_id: "u1", status: "pending", friend_is_sharing: false, user_is_sharing: true }
       ],
       [{ friend_id: "u2", checkpoint_id: 10 }]
     );
@@ -45,7 +45,8 @@ describe("getFriends", () => {
     expect(charlie.displayName).toBe("Charlie");
     expect(charlie.status).toBe("pending");
     expect(charlie.isRequester).toBe(false);
-    expect(charlie.isSharing).toBe(false); 
+    expect(charlie.isSharing).toBe(false);
+    expect(charlie.friendIsSharing).toBe(true);
     expect(charlie.stamps).toEqual([]);
   });
 });

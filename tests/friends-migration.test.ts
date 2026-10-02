@@ -31,7 +31,7 @@ describe('spec 0024: friends migration RLS', () => {
     ];
     for (const rpc of rpcs) {
       const { error } = await client.rpc(rpc.name as any, rpc.args);
-      expect(error).toBeDefined();
+      expect(error).not.toBeNull();
     }
   });
 });

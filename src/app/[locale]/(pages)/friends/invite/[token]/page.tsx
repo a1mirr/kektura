@@ -25,7 +25,7 @@ export default async function InvitePage({
   if (!user) {
     return (
       <div className="max-w-md mx-auto mt-16 p-6 text-center border rounded-xl space-y-6">
-        <h1 className="text-2xl font-bold">{t("inviteTitle", { name: inviterName })}</h1>
+        <h1 className="text-2xl font-bold">{t("inviteFrom", { name: inviterName })}</h1>
         <div className="flex flex-col items-center gap-4">
           <SignInButton next={'/friends/invite/' + token} />
           {testLoginEnabled() && <TestLoginForm locale={locale} next={'/friends/invite/' + token} />}
@@ -44,7 +44,7 @@ export default async function InvitePage({
 
   return (
     <div className="max-w-md mx-auto mt-16 p-6 text-center border rounded-xl space-y-6">
-      <h1 className="text-2xl font-bold">{t("inviteTitle", { name: inviterName })}</h1>
+      <h1 className="text-2xl font-bold">{t("inviteFrom", { name: inviterName })}</h1>
       <form action={async () => {
         "use server";
         const res = await sendRequest(token);

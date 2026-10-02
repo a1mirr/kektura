@@ -1,7 +1,7 @@
 create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text not null check(length(trim(display_name)) between 1 and 40 and display_name !~ '[[:cntrl:]]'),
-  invite_token text not null unique default gen_random_uuid()::text check (invite_token ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
+  invite_token text not null unique default encode(gen_random_bytes(16), 'hex') check (invite_token ~ '^[0-9a-f]{32}$')
 );
 
 alter table public.profiles enable row level security;
@@ -12,7 +12,7 @@ create function public.handle_new_user() returns trigger
 language plpgsql security definer set search_path = '' as $$
 begin
   insert into public.profiles (id, display_name)
-  values (new.id, coalesce(new.raw_user_meta_data->>'full_name', 'Hiker ' || substr(new.id::text, 1, 6)));
+  values (new.id, substr(trim(regexp_replace(coalesce(new.raw_user_meta_data->>'full_name', 'Hiker ' || substr(new.id::text, 1, 6)), '[[:cntrl:]]', '', 'g')), 1, 40));
   return new;
 end;
 $$;
@@ -20,6 +20,12 @@ $$;
 create trigger on_auth_user_created
 after insert on auth.users
 for each row execute procedure public.handle_new_user();
+
+-- Backfill existing users
+insert into public.profiles (id, display_name)
+select id, substr(trim(regexp_replace(coalesce(raw_user_meta_data->>'full_name', 'Hiker ' || substr(id::text, 1, 6)), '[[:cntrl:]]', '', 'g')), 1, 40)
+from auth.users
+on conflict (id) do nothing;
 
 create table public.friendships (
   id uuid primary key default gen_random_uuid(),
@@ -157,5 +163,5 @@ begin
   return query select id, p.display_name from public.profiles p where invite_token = token;
 end;
 $$;
-revoke execute on function public.get_inviter_info(text) from public, anon;
-grant execute on function public.get_inviter_info(text) to authenticated;
+-- anon and authenticated can execute this to resolve the invite link
+grant execute on function public.get_inviter_info(text) to authenticated, anon;

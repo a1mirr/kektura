@@ -187,6 +187,13 @@
     "connectWith": "Connect with {name}?",
     "sendRequest": "Send request",
     "unknown_user": "Unknown",
-    "invalidToken": "This link is not valid"
+    "invalidToken": "This link is not valid",
+    "inviteFrom": "Invite from {name}",
+    "stagesCount": "stages",
+    "error_invalid_token": "This invite link is invalid.",
+    "error_own_token": "You cannot invite yourself.",
+    "error_already_friends": "You are already friends.",
+    "error_already_pending": "You already sent a request.",
+    "error_failed": "Something went wrong, please try again."
   }
 }
