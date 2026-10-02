@@ -22,6 +22,7 @@ Stack: Next.js 16 (App Router, TS, Tailwind 4), next-intl (`ru` default, `en`, `
 - Map and route planner: `src/components/TrailMap.tsx`, `src/lib/route-*.ts`, spec 0003
 - Trail data, sources and regeneration (`scripts/build-data.mjs`; never hand-edit its outputs): spec 0004
 - Auth, routing, translations: spec 0005; test server, dummy login, E2E: spec 0006
+- Footer pages, feedback, account settings: spec 0014; the About page (its text must stay true: no "open source"/"PWA" until they are): spec 0015
 
 ## Gotchas
 - `next.config.ts` wires next-intl by hand: `createNextIntlPlugin` loads native `@swc/core`, which fails on this Windows machine. Its `distDir` comes from `NEXT_DIST_DIR` (`.next-test` / `.next-e2e` for the test servers).

@@ -15,7 +15,8 @@ function flatten(messages: Messages, prefix = ""): Map<string, string> {
   );
 }
 
-const placeholders = (s: string) => [...s.matchAll(/\{(\w+)/g)].map((m) => m[1]).sort();
+// ICU arguments ({km}) and rich-text tags (<settings>...</settings>) must survive translation.
+const placeholders = (s: string) => [...s.matchAll(/\{(\w+)|<(\w+)>/g)].map((m) => m[1] ?? `<${m[2]}>`).sort();
 
 const reference = flatten(en);
 const locales = { ru: flatten(ru), hu: flatten(hu) };
@@ -33,5 +34,23 @@ describe("spec 0005: translations", () => {
 
   it.each(Object.entries({ en: reference, ...locales }))("AC-5: %s has no empty strings", (_, messages) => {
     for (const [key, text] of messages) expect(text.trim(), key).not.toBe("");
+  });
+});
+
+describe("spec 0015: about page text", () => {
+  // The repository is private and the app has no manifest or service worker, so neither claim is
+  // true. Whoever makes one true edits spec 0015 AC-6 and this test.
+  const claims = /open[- ]source|progressive|\bPWA\b|открыт[а-яё]* исходн|nyílt forrás/i; // (\w doesn't match Cyrillic)
+
+  it.each(Object.entries({ en: reference, ...locales }))("AC-6: %s makes no open-source or PWA claim", (_, messages) => {
+    for (const [key, text] of messages) {
+      if (key.startsWith("about.")) expect(text, key).not.toMatch(claims);
+    }
+  });
+
+  it.each(Object.entries(locales))("AC-7: %s has every about.* key of English", (_, messages) => {
+    const keys = (m: Map<string, string>) => [...m.keys()].filter((k) => k.startsWith("about.")).sort();
+    expect(keys(messages)).toEqual(keys(reference));
+    expect(keys(reference).length).toBeGreaterThan(10);
   });
 });

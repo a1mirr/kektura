@@ -8,6 +8,7 @@ import overview from "../public/data/okt-route.json";
 import detail from "../public/data/okt-route-detail.json";
 import stagesJson from "../scripts/data/okt-stages.json";
 import type { Hop } from "@/lib/route-stats";
+import { TRAIL_FACTS } from "@/lib/trail-facts";
 
 const hops = hopsJson as Hop[];
 const read = (path: string) => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -31,6 +32,12 @@ describe("spec 0004: stamping places (seed.sql)", () => {
     expect(seedPlaces.size).toBe(stagePlaceCount);
     const names = new Set(seedRows.map((r) => r.name));
     for (const st of stagesJson.stages) for (const name of st.places) expect(names).toContain(name);
+  });
+
+  it("spec 0015 AC-2: the about page's trail facts match the seed and the MTSZ table", () => {
+    expect(TRAIL_FACTS.places).toBe(seedPlaces.size);
+    expect(TRAIL_FACTS.stages).toBe(new Set(seedRows.map((r) => r.stage)).size);
+    expect(TRAIL_FACTS.km).toBe(round1(stagesJson.stages.reduce((s, st) => s + st.km, 0)));
   });
 
   it("AC-3: variants of a place share its stage and number; <stage>.<n> labels are unique", () => {

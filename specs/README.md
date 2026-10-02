@@ -59,3 +59,6 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0010](0010-typed-translations.md) | Typed translation keys | Done |
 | [0011](0011-trailmap-split.md) | Split TrailMap, map E2E safety net | Accepted |
 | [0012](0012-backups.md) | Weekly backup of production user data | Done |
+| [0013](0013-extra-stamps-stages.md) | Extra stamps linked to stages | Accepted |
+| [0014](0014-pages-and-settings.md) | Footer pages, feedback, account settings | Accepted |
+| [0015](0015-about-page.md) | About page | Done |

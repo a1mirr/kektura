@@ -13,7 +13,7 @@ Add informational pages (About, Changelog, Useful Links, Feedback) with footer n
 - **AC-1**: All pages include a footer with links to About, Changelog, Useful Links, and Feedback form.
 
 ### Informational Pages
-- **AC-2**: `/about` renders information about the Kéktúra tracker app.
+- **AC-2**: `/about` renders information about the Kéktúra tracker app (detailed in spec 0015).
 - **AC-3**: `/changelog` renders recent updates.
 - **AC-4**: `/links` renders useful links related to the trail.
 
