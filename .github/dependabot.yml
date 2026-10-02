@@ -5,6 +5,16 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # Not yet usable (spec 0007 notes): typescript-eslint doesn't run on TypeScript 7 and
+      # eslint-plugin-react (inside eslint-config-next) doesn't run on ESLint 10. Remove these
+      # two entries once both have released support.
+      - dependency-name: typescript
+        update-types:
+          - version-update:semver-major
+      - dependency-name: eslint
+        update-types:
+          - version-update:semver-major
     groups:
       # Minor and patch updates arrive as one PR; majors stay separate (one PR each).
       npm-minor-patch:
