@@ -1,6 +1,6 @@
 # 0013: Extra stamps in stages
 
-Status: Accepted
+Status: Done
 Owner code: `src/app/[locale]/dashboard/page.tsx`, `src/lib/progress.ts`
 
 ## Goal
@@ -28,4 +28,4 @@ Modifying the official 161 checkpoints count, or moving extra stamps into the ma
 | AC | Test |
 | --- | --- |
 | AC-1, AC-4 | `src/lib/progress.test.ts` |
-| AC-2, AC-3 | manual: view the dashboard, check stage lists and extra stamps list |
+| AC-2, AC-3 | `e2e/extra-stamps-stages.spec.ts` (every extra stamp names a stage, in order along the trail; each stage's "go to extra stamps (N)" counts exactly its extra stamps and jumps to them; the counts add up) |

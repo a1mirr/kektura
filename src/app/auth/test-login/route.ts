@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { hasLocale } from "next-intl";
 import { routing } from "@/i18n/routing";
+import { requestOrigin } from "@/lib/origin";
 import { createClient } from "@/lib/supabase/server";
 import { isTestEmail, TEST_PASSWORD, testLoginEnabled } from "@/lib/test-login";
 
@@ -13,7 +14,7 @@ export async function POST(request: Request) {
   const email = String(form.get("email") ?? "").trim().toLowerCase();
   const requested = form.get("locale");
   const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
-  const to = (path: string) => NextResponse.redirect(new URL(`/${locale}${path}`, request.url), 303);
+  const to = (path: string) => NextResponse.redirect(`${requestOrigin(request)}/${locale}${path}`, 303);
   if (!isTestEmail(email)) return to("?error=auth");
 
   const supabase = await createClient();

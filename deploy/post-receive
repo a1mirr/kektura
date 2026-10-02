@@ -1,0 +1,41 @@
+#!/bin/bash
+# Production deploy hook (spec 0020). Git runs it on the server after every push to the bare repository
+# ~/kektura.git; the copy that runs lives in ~/kektura.git/hooks/post-receive (copy this file there after
+# changing it, and `chmod +x` it: see deploy/README.md).
+#
+# It stops at the first failing step: a failed install or build must never reload the running app.
+
+export NVM_DIR="$HOME/.nvm"
+# nvm's own scripts aren't written for `set -eu`, so load it first.
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+set -euo pipefail
+
+TARGET="/home/a1mirr/kektura_app"
+GIT_DIR="/home/a1mirr/kektura.git"
+
+# Only a push to main is deployed; other branches are just stored.
+deploy=false
+while read -r _old _new ref; do
+  if [ "$ref" = "refs/heads/main" ]; then deploy=true; fi
+done
+if [ "$deploy" != true ]; then
+  echo "Nothing to deploy: only pushes to main are deployed."
+  exit 0
+fi
+
+mkdir -p "$TARGET"
+git --work-tree="$TARGET" --git-dir="$GIT_DIR" checkout -f main
+
+cd "$TARGET"
+echo "Installing dependencies..."
+npm ci || npm install
+
+echo "Building Next.js app..."
+npm run build
+
+echo "Restarting PM2..."
+# HOSTNAME is the server's public address (see deploy/README.md, "Notes").
+HOSTNAME=188.166.117.212 pm2 reload kektura --update-env || HOSTNAME=188.166.117.212 pm2 start npm --name "kektura" -- start
+
+echo "Deployed $(git --git-dir="$GIT_DIR" rev-parse --short main)."

@@ -22,13 +22,18 @@ Stack: Next.js 16 (App Router, TS, Tailwind 4), next-intl (`ru` default, `en`, `
 - Map and route planner: `src/components/TrailMap.tsx`, `src/lib/route-*.ts`, spec 0003
 - Trail data, sources and regeneration (`scripts/build-data.mjs`; never hand-edit its outputs): spec 0004
 - Auth, routing, translations: spec 0005; test server, dummy login, E2E: spec 0006
-- Footer pages, feedback, account settings: spec 0014; the About page (its text must stay true: no "open source"/"PWA" until they are): spec 0015
+- Footer pages and account settings (delete account): spec 0014; About page (its text must stay true: no "open source"/"PWA" until they are): 0015; changelog (`src/content/changelog.ts`): 0018; useful links (`src/content/links.ts`): 0019
+- Stamp dates (`src/lib/stamp-date.ts`, `StampDateInput`): spec 0016; feedback form + Telegram notifications: 0017; request origin behind the proxy and the `deploy/` files: 0020
 
 ## Gotchas
 - `next.config.ts` wires next-intl by hand: `createNextIntlPlugin` loads native `@swc/core`, which fails on this Windows machine. Its `distDir` comes from `NEXT_DIST_DIR` (`.next-test` / `.next-e2e` for the test servers).
 - `src/proxy.ts` matcher is a TS string: the extension escape must stay `\\.` (a single `\.` makes it match only `/`; `src/proxy.test.ts` guards this).
 - Landing page and dashboard both check the session with `getUser()`; mixing in `getClaims()` can loop on a revoked but unexpired token.
-- Stamp actions never throw (they return `ActionResult`; a thrown error reaches the client as an opaque message) and write with `ignoreDuplicates` (`user_extra_stamps` has no UPDATE policy).
+- Stamp, delete-account and feedback actions never throw (they return a result; a thrown error reaches the client as an opaque message). Stamping writes with `ignoreDuplicates`; its optional `date` only dates rows that are *created*. Editing a date is a separate update-only action (`setStampDate`); never save a date on every `change` event (Chrome fires one per keystroke): see `StampDateInput`.
+- Build redirect URLs in route handlers with `requestOrigin(request)` (`src/lib/origin.ts`), never from `request.url` (it says `localhost` behind Caddy) or raw forwarded headers.
+- Feedback (`src/app/[locale]/(pages)/feedback/`): public, so validated, honeypotted and rate limited; the Telegram token is in the request URL, so never log URLs, fetch error objects or message text. `npm run telegram:check` verifies the setup.
+- Node's `fetch` keeps sockets open and crashes a process at exit on Windows (libuv assertion): scripts throw instead of `process.exit()`, and E2E helpers use Playwright's `request`, not `fetch`.
+- Full-height pages (landing, error) use `flex-1`, not `min-h-screen`: the footer must stay on the first screen.
 - Sign-out and the dummy login are plain form POSTs to route handlers under `src/app/auth/` (work before hydration). The dummy login needs BOTH `TEST_LOGIN=1` and a localhost Supabase URL: keep both guards.
 - Every user-visible string goes into all three `messages/*.json` (`tests/messages.test.ts` checks parity). Message keys and `Locale` are typed (`src/i18n/global.ts`): a page that reads `params.locale` must narrow it with `hasLocale(routing.locales, locale)` / `notFound()` first.
 - Failed stamp actions log one `[stamp-action]` line through `src/lib/log.ts` (spec 0008): the place to hook in error monitoring; never log emails, input or Supabase `details`/`hint`.
@@ -39,9 +44,6 @@ Stack: Next.js 16 (App Router, TS, Tailwind 4), next-intl (`ru` default, `en`, `
 - Node comes from winget: in a fresh shell refresh PATH if `npm` isn't found.
 
 ## Server & Deployment
-- Live server: DigitalOcean droplet `188.166.117.212`, Ubuntu 22.04 LTS, 1GB RAM, 1 CPU.
-- Domain: `kektura-tracker.com`.
-- Deployment: Push to `production` git remote (`git push production main`). A `post-receive` hook in `~/kektura.git/hooks/` checks out the code to `~/kektura_app`, installs dependencies, builds, and reloads PM2.
-- Process Manager: PM2 (`pm2 reload kektura` or `pm2 logs kektura`). 
-- Environment: Node.js v22 via nvm. 2GB Swap space added to prevent OOM during builds. `HOSTNAME=188.166.117.212` is injected into Next.js by PM2 to prevent Next.js from aggressively overriding `request.url` with `localhost` internally during auth callbacks.
-- Web Server: Caddy proxying port 80/443 to Next.js on port 3000. Xray VPN (previously port 443) was disabled. Cloudflare manages DNS (Proxy should be OFF/Gray Cloud for Caddy to fetch Let's Encrypt certificates, or use Full (Strict) if turned ON).
+Production is a DigitalOcean droplet (`188.166.117.212`, 1 GB RAM + swap) running PM2 behind Caddy at `kektura-tracker.com`, database and sign-in on Supabase cloud. Everything about it (setup, environment variables, deploying, rolling back, logs) is in `deploy/README.md` (spec 0020); `deploy/post-receive` is the git hook (a copy lives on the server).
+- Deploy: `git push production main`, only after the database migrations are applied to production (the hook never touches the database). Never push to `production` unless the user asks.
+- The hook stops at the first failing step. Server-only secrets (`TELEGRAM_*`, `SITE_URL`) live in `~/kektura_app/.env.local` on the server; `TEST_LOGIN` must never be set there.

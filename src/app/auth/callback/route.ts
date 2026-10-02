@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { hasLocale } from "next-intl";
 import { routing } from "@/i18n/routing";
+import { requestOrigin } from "@/lib/origin";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
-  const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
-  const protocol = request.headers.get("x-forwarded-proto") || "http";
-  const origin = `${protocol}://${host}`;
+  // Behind the proxy request.url says localhost: redirect to the address the user is on (spec 0020).
+  const origin = requestOrigin(request);
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   // The locale comes from the query string: only ever put a known one into the redirect path.

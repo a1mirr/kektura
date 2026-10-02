@@ -1,0 +1,9 @@
+# The production proxy (spec 0020): Caddy terminates HTTPS and forwards to the app on port 3000. It gets
+# and renews the Let's Encrypt certificate by itself. Install: sudo cp Caddyfile /etc/caddy/Caddyfile
+# && sudo systemctl reload caddy.
+#
+# Needs DNS records for both names pointing at the server. On Cloudflare the proxy must be OFF (grey
+# cloud) so Let's Encrypt can reach the server, or the SSL mode must be "Full (strict)".
+kektura-tracker.com, www.kektura-tracker.com {
+	reverse_proxy 127.0.0.1:3000
+}
