@@ -19,7 +19,6 @@ test.describe("spec 0014: footer", () => {
   test("AC-1: the footer is also on the dashboard, in the page's language", async ({ page }) => {
     await signInAsNewUser(page);
     await expect(page.getByRole("contentinfo").getByRole("link", { name: "Feedback" })).toBeVisible();
-    await page.goto("/ru");
     await page.goto("/ru/about");
     await expect(page.getByRole("contentinfo").getByRole("link")).toHaveText([
       "О приложении",
@@ -34,5 +33,13 @@ test.describe("spec 0014: footer", () => {
       "Hasznos linkek",
       "Visszajelzés",
     ]);
+  });
+
+  test("AC-1: on a phone the landing page and its footer fit one screen, without scrolling", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/en");
+    await expect(page.getByRole("contentinfo")).toBeInViewport({ ratio: 1 });
+    const extra = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
+    expect(extra).toBeLessThanOrEqual(0);
   });
 });

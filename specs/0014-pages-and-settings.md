@@ -15,7 +15,9 @@ settings page for signed-in users whose one option, for now, is deleting the acc
 
 - **AC-1**: Every page has a footer with links to About, Changelog, Useful links and Feedback, in the
   page's language. The footer links only to pages anyone can open; the settings page is reached from
-  the dashboard header (AC-7), because a footer link would lead signed-out visitors nowhere.
+  the dashboard header (AC-7), because a footer link would lead signed-out visitors nowhere. Full-height
+  pages (landing, error) fill the space above the footer instead of a whole screen, so on a phone the
+  landing page and its footer fit one screen without scrolling.
 
 ### Informational pages
 
@@ -65,7 +67,7 @@ Other settings (language, email, export of the data); a "type your email to conf
 
 | AC | Test |
 | --- | --- |
-| AC-1 | `e2e/footer.spec.ts` (four links on a public page and on the dashboard, in ru/en/hu, none for settings) |
+| AC-1 | `e2e/footer.spec.ts` (four links on a public page and on the dashboard, in ru/en/hu, none for settings; landing page and footer fit one phone screen) |
 | AC-2 | spec 0015 |
 | AC-3, AC-4 | specs 0018, 0019 |
 | AC-5, AC-6 | spec 0017 |

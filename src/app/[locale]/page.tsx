@@ -32,7 +32,7 @@ export default async function Home({
   const t = await getTranslations("home");
 
   return (
-    <main className="relative mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-6 px-6 text-center">
+    <main className="relative mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-6 px-6 py-8 text-center">
       <div className="absolute right-4 top-4">
         <LocaleSwitcher />
       </div>

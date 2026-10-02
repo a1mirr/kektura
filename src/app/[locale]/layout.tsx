@@ -38,7 +38,8 @@ export default async function LocaleLayout({
       <body className="flex min-h-screen flex-col bg-stone-50 text-stone-900">
         {testLoginEnabled() && <TestBanner />}
         <NextIntlClientProvider>
-          <div className="flex-grow">{children}</div>
+          {/* A column that takes the space above the footer: full-height pages (landing, error) fill it with flex-1 instead of min-h-screen, which would push the footer below the fold. */}
+          <div className="flex flex-grow flex-col">{children}</div>
           <Footer />
         </NextIntlClientProvider>
       </body>

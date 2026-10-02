@@ -62,4 +62,6 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0013](0013-extra-stamps-stages.md) | Extra stamps linked to stages | Accepted |
 | [0014](0014-pages-and-settings.md) | Footer pages, account settings, account deletion | Done |
 | [0017](0017-feedback.md) | Feedback form with Telegram notifications | Done |
+| [0018](0018-changelog.md) | Changelog page | Done |
+| [0019](0019-useful-links.md) | Useful links page | Done |
 | [0015](0015-about-page.md) | About page | Done |

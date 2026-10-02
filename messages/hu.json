@@ -109,11 +109,34 @@
   },
   "changelog": {
     "title": "Változások",
-    "empty": "Nincsenek frissítések."
+    "intro": "Mi változott a követőben, a legújabb elöl.",
+    "kind": {
+      "new": "Új",
+      "improved": "Fejlesztés",
+      "fixed": "Javítás"
+    }
   },
   "links": {
     "title": "Hasznos linkek",
-    "official": "Hivatalos Kéktúra oldal"
+    "intro": "Hol olvashatsz többet a nyomvonalról, és mi segít a túra megtervezésében. Minden link új lapon nyílik, és idegen weboldalakra vezet.",
+    "groups": {
+      "trail": "A nyomvonal",
+      "planning": "Túratervezés",
+      "community": "Közösség és adatok"
+    },
+    "items": {
+      "kekturaHu": "Az Országos Kéktúra hivatalos weboldala.",
+      "kekturaStages": "A szakaszok, a bélyegzőhelyek és a teljes nyomvonal GPX-fájljaival.",
+      "stageTable": "Az MTSZ szakaszleírása: hossz, szintemelkedés, lejtés és menetidő a bélyegzőhelyek között (PDF).",
+      "mtsz": "A Magyar Természetjáró Szövetség (MTSZ), a hivatalos nyomvonaladatok kiadója.",
+      "wikipedia": "A nyomvonal a Wikipédián, angolul: történet és útvonal.",
+      "menetrendek": "Helyközi vonat- és buszmenetrend-kereső a nyomvonalhoz és vissza.",
+      "hungaromet": "A HungaroMet, az országos meteorológiai szolgálat: előrejelzések és figyelmeztetések.",
+      "turistautak": "Magyarországi túratérképek és túraútvonalak.",
+      "osm": "A követő térképének alapjául szolgáló térképadatok.",
+      "heyjoe": "Túranyilvántartó; az extra bélyegzők listájának forrása.",
+      "etteremhet": "Étteremkereső; a térképen látható éttermek forrása."
+    }
   },
   "feedback": {
     "title": "Visszajelzés",

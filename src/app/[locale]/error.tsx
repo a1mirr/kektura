@@ -6,7 +6,7 @@ export default function ErrorPage({ retry }: { retry: () => void }) {
   const t = useTranslations("error");
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 text-center">
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-4 px-6 py-8 text-center">
       <h1 className="text-2xl font-bold">{t("title")}</h1>
       <button
         type="button"

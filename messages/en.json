@@ -109,11 +109,34 @@
   },
   "changelog": {
     "title": "Changelog",
-    "empty": "No recent updates."
+    "intro": "What changed in the tracker, newest first.",
+    "kind": {
+      "new": "New",
+      "improved": "Improved",
+      "fixed": "Fixed"
+    }
   },
   "links": {
     "title": "Useful links",
-    "official": "Official Kéktúra website"
+    "intro": "Where to read more about the trail, and what helps to plan a hike. All links open in a new tab and lead to websites that aren't ours.",
+    "groups": {
+      "trail": "The trail",
+      "planning": "Planning a hike",
+      "community": "Community and data"
+    },
+    "items": {
+      "kekturaHu": "The official website of the Országos Kéktúra.",
+      "kekturaStages": "The stages, with GPX files of the stamping points and of the full route.",
+      "stageTable": "The MTSZ stage table: length, ascent, descent and walking time between stamping places (PDF).",
+      "mtsz": "The Hungarian Hiking Association (MTSZ), publisher of the official trail data.",
+      "wikipedia": "The trail on Wikipedia, in English: history and route.",
+      "menetrendek": "Timetable search for intercity trains and buses, to get to and from the trail.",
+      "hungaromet": "HungaroMet, the national weather service: forecasts and warnings.",
+      "turistautak": "Hungarian hiking maps and trails.",
+      "osm": "The map data behind the tracker's map.",
+      "heyjoe": "A hike registry; the source of the extra stamps list.",
+      "etteremhet": "A restaurant guide; the source of the restaurants on the map."
+    }
   },
   "feedback": {
     "title": "Feedback",
