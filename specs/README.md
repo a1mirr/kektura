@@ -15,6 +15,11 @@ spec is the contract; tests prove it; the Stop hook keeps it proven.
    `manual` in the spec's coverage table, with how to check it.
 4. **Implement** until `npm run check` (typecheck + lint + tests) is green.
 5. **Close the spec**: status `Done`, coverage table filled in.
+6. **Review with a fresh agent** before the pull request is merged ([0022](0022-fresh-context-review.md)):
+   spawn the `fresh-reviewer` agent with only the spec number (`none` for a small change with no spec) and
+   the base branch. It has none of your context and reads the spec and the diff like a stranger would. Fix
+   its valid findings, answer the rest in the pull request, and review again after fixes that change code,
+   tests or behaviour.
 
 Changing existing behaviour means editing the spec that owns it (add/change/remove ACs) in the same
 change as the code and tests. Never delete an AC number: mark it `Removed` so old references stay
@@ -68,3 +73,4 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0020](0020-origin-and-deploy.md) | Request origin behind the proxy; deploy files | Done |
 | [0015](0015-about-page.md) | About page | Done |
 | [0021](0021-pull-requests-only.md) | main only changes through pull requests (local pre-push guard) | Done |
+| [0022](0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Done |

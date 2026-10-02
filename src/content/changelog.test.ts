@@ -47,8 +47,8 @@ describe("spec 0018: changelog data", () => {
     }
   });
 
-  it("AC-6: the history so far is three entries, from the first version on", () => {
-    expect(CHANGELOG.map((e) => e.date)).toEqual(["2026-10-02", "2026-10-01", "2026-09-29"]);
+  it("AC-6: the three oldest entries are the history up to 2026-10-02, from the first version on (newer ones go on top)", () => {
+    expect(CHANGELOG.map((e) => e.date).slice(-3)).toEqual(["2026-10-02", "2026-10-01", "2026-09-29"]);
     expect(CHANGELOG.at(-1)!.title.en).toBe("First version");
   });
 });
