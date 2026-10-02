@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
-import { redirect } from "@/i18n/navigation";
+import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -100,6 +100,9 @@ export default async function Dashboard({
         <h1 className="text-2xl font-bold text-blue-700">{t("title")}</h1>
         <div className="flex items-center gap-4">
           <LocaleSwitcher />
+          <Link href="/settings" className="text-sm text-stone-600 hover:underline">
+            {t("settings")}
+          </Link>
           <SignOutButton />
         </div>
       </header>

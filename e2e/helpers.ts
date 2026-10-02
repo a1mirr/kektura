@@ -1,14 +1,19 @@
 import { randomUUID } from "node:crypto";
 import { expect, type Page } from "@playwright/test";
 
-// Signs in through the dummy login as a brand-new user (spec 0006 AC-3, AC-6), so every test starts
-// from an empty dashboard and tests can run in parallel.
-export async function signInAsNewUser(page: Page) {
-  const email = `e2e-${randomUUID()}@kektura.test`;
+// Signs in through the dummy login with this email; the account is created on first use (spec 0006 AC-3).
+export async function signInWithEmail(page: Page, email: string) {
   await page.goto("/en");
   await page.getByLabel(/^Test login/).fill(email);
   await page.getByRole("button", { name: "Sign in as test user" }).click();
   await expect(page).toHaveURL(/\/en\/dashboard$/);
+}
+
+// Signs in as a brand-new user (spec 0006 AC-3, AC-6), so every test starts from an empty dashboard
+// and tests can run in parallel.
+export async function signInAsNewUser(page: Page) {
+  const email = `e2e-${randomUUID()}@kektura.test`;
+  await signInWithEmail(page, email);
   return email;
 }
 

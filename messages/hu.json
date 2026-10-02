@@ -64,7 +64,8 @@
     "routeFerryOnly": "komp (a táblázatban nincs idő)",
     "actionFailed": "Nem sikerült menteni, próbáld újra.",
     "kmValue": "{km} km",
-    "mapAttribution": "© az OpenStreetMap közreműködői · útvonal: MTSZ"
+    "mapAttribution": "© az OpenStreetMap közreműködői · útvonal: MTSZ",
+    "settings": "Beállítások"
   },
   "error": {
     "title": "Valami elromlott",
@@ -78,8 +79,7 @@
     "about": "Névjegy",
     "changelog": "Változások",
     "usefulLinks": "Hasznos linkek",
-    "feedback": "Visszajelzés",
-    "settings": "Fiók beállítások"
+    "feedback": "Visszajelzés"
   },
   "about": {
     "title": "A Kéktúra követőről",
@@ -135,6 +135,8 @@
     "dangerZoneDesc": "Fiókod és minden hozzá tartozó adat végleges törlése.",
     "deleteAccount": "Fiók törlése",
     "deleteConfirm": "Biztos vagy benne? Ezt nem lehet visszavonni.",
-    "deleteButton": "Igen, véglegesen törlöm a fiókom"
+    "deleteButton": "Igen, véglegesen törlöm a fiókom",
+    "cancel": "Mégse",
+    "deleteFailed": "Nem sikerült törölni a fiókot. Próbáld újra."
   }
 }

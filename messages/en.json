@@ -64,7 +64,8 @@
     "routeFerryOnly": "ferry (no time in the table)",
     "actionFailed": "Couldn't save, try again.",
     "kmValue": "{km} km",
-    "mapAttribution": "© OpenStreetMap contributors · route: MTSZ"
+    "mapAttribution": "© OpenStreetMap contributors · route: MTSZ",
+    "settings": "Settings"
   },
   "error": {
     "title": "Something went wrong",
@@ -78,8 +79,7 @@
     "about": "About",
     "changelog": "Changelog",
     "usefulLinks": "Useful links",
-    "feedback": "Feedback",
-    "settings": "Account settings"
+    "feedback": "Feedback"
   },
   "about": {
     "title": "About Kéktúra tracker",
@@ -135,6 +135,8 @@
     "dangerZoneDesc": "Permanently delete your account and all associated stamping data.",
     "deleteAccount": "Delete account",
     "deleteConfirm": "Are you sure? This cannot be undone.",
-    "deleteButton": "Yes, permanently delete my account"
+    "deleteButton": "Yes, permanently delete my account",
+    "cancel": "Cancel",
+    "deleteFailed": "Couldn't delete the account. Please try again."
   }
 }

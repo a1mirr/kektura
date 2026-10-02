@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
@@ -8,15 +9,21 @@ import { buildPlaces, stampsPerMonth } from "@/lib/progress";
 import StampsChart from "@/components/StampsChart";
 import DeleteAccountButton from "./DeleteAccountButton";
 
-export default async function SettingsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+// See specs/0014-pages-and-settings.md (AC-7 to AC-13).
+
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setRequestLocale(locale as any);
+  const t = await getTranslations({ locale, namespace: "settings" });
+  return { title: t("title") };
+}
+
+export default async function SettingsPage({ params }: Props) {
+  const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
+  setRequestLocale(locale);
   const t = await getTranslations("settings");
   const dashboardT = await getTranslations("dashboard");
   const format = await getFormatter();
@@ -32,9 +39,7 @@ export default async function SettingsPage({
     supabase.from("user_stamps").select("checkpoint_id, stamped_on"),
   ]);
 
-  const cps = checkpoints ?? [];
-  const placeList = buildPlaces(cps);
-
+  const placeList = buildPlaces(checkpoints ?? []);
   const chartData = stampsPerMonth(stamps ?? [], placeList).map(({ month, count }) => ({
     month: format.dateTime(new Date(`${month}-01T00:00:00Z`), { year: "numeric", month: "short", timeZone: "UTC" }),
     count,

@@ -3,24 +3,34 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
+import type { ActionResult } from "@/lib/action-result";
 import { deleteAccountAction } from "./actions";
 
+// Two steps (AC-9): the button asks, the confirmation deletes. See specs/0014-pages-and-settings.md.
 export default function DeleteAccountButton() {
   const t = useTranslations("settings");
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [failed, setFailed] = useState(false);
 
-  const handleDelete = async () => {
-    setLoading(true);
-    const res = await deleteAccountAction();
-    if (res.ok) {
-      router.push("/");
-    } else {
-      setLoading(false);
-      alert("Failed to delete account.");
+  async function handleDelete() {
+    setDeleting(true);
+    setFailed(false);
+    let result: ActionResult;
+    try {
+      result = await deleteAccountAction();
+    } catch {
+      result = { ok: false, reason: "failed" }; // network error
     }
-  };
+    if (result.ok) {
+      router.replace("/"); // stays disabled while the page changes
+      return;
+    }
+    setDeleting(false);
+    if (result.reason === "unauthorized") router.refresh(); // session expired: the page redirects
+    else setFailed(true);
+  }
 
   if (!confirming) {
     return (
@@ -35,12 +45,12 @@ export default function DeleteAccountButton() {
   }
 
   return (
-    <div className="flex flex-col gap-2 rounded border border-red-200 bg-red-50 p-4">
+    <div role="group" aria-label={t("deleteAccount")} className="flex flex-col gap-2 rounded border border-red-200 bg-red-50 p-4">
       <p className="text-sm font-semibold text-red-800">{t("deleteConfirm")}</p>
-      <div className="flex items-center gap-3 mt-2">
+      <div className="mt-2 flex items-center gap-3">
         <button
           type="button"
-          disabled={loading}
+          disabled={deleting}
           onClick={handleDelete}
           className="rounded bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
         >
@@ -48,13 +58,21 @@ export default function DeleteAccountButton() {
         </button>
         <button
           type="button"
-          disabled={loading}
-          onClick={() => setConfirming(false)}
+          disabled={deleting}
+          onClick={() => {
+            setConfirming(false);
+            setFailed(false);
+          }}
           className="text-sm text-stone-600 hover:underline disabled:opacity-50"
         >
-          Cancel
+          {t("cancel")}
         </button>
       </div>
+      {failed && (
+        <p role="alert" className="text-sm text-red-700">
+          {t("deleteFailed")}
+        </p>
+      )}
     </div>
   );
 }
