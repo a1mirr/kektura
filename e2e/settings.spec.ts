@@ -21,6 +21,10 @@ test.describe("spec 0014: account settings", () => {
 
   test("AC-7, AC-8, AC-9: the dashboard header leads to the settings; cancelling deletes nothing", async ({ page }) => {
     const email = await signInAsNewUser(page);
+    // AC-8: the chart is on the settings page, not here (the dashboard renders in one piece, so once its
+    // Settings link is there, a missing chart really is missing).
+    await expect(page.getByRole("link", { name: "Settings" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Stamps per month" })).toHaveCount(0);
     await page.getByRole("link", { name: "Settings" }).click();
     await expect(page).toHaveURL(/\/en\/settings$/);
     await expect(page).toHaveTitle("Account settings");

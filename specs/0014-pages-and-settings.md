@@ -64,9 +64,8 @@ Other settings (language, email, export of the data); a "type your email to conf
   environment, which is the bigger risk.
 - After the deletion the user's session no longer exists at the Auth server, so `signOut()` gets a
   401/403 back; supabase-js ignores that and still clears the session cookies.
-- **Open question for the owner**: AC-8 (the per-month chart on the settings page instead of the
-  dashboard) came with the first version of this page. It is kept as is; if the chart should be back on
-  the dashboard, change AC-8 and move one component.
+- **Decided by the owner (2026-10-02)**: the per-month chart stays on the settings page (AC-8), not on the
+  dashboard. To move it, change AC-8, the E2E test below and one component.
 
 ## Coverage
 
@@ -77,7 +76,7 @@ Other settings (language, email, export of the data); a "type your email to conf
 | AC-3, AC-4 | specs 0018, 0019 |
 | AC-5, AC-6 | spec 0017 |
 | AC-7 | `e2e/settings.spec.ts` (redirect when signed out, header link) |
-| AC-8 | manual: `/settings` shows the chart (no test yet) |
+| AC-8 | `e2e/settings.spec.ts` (`/settings` shows the chart heading, the dashboard doesn't) |
 | AC-9, AC-10 | `e2e/settings.spec.ts` (cancel; delete: account, stamps and extra stamps gone, feedback kept and unlinked, signed out, signing in again gives an empty account), `src/app/[locale]/settings/DeleteAccountButton.test.tsx` |
 | AC-11 | `DeleteAccountButton.test.tsx`, `e2e/settings.spec.ts` (server action answering 500) |
 | AC-12 | `e2e/feedback.spec.ts` (anonymous caller refused); migration 0008 |
