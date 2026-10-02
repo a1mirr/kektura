@@ -31,7 +31,7 @@ on GitHub, for everybody who works in a clone of this repository, Claude Code in
 - GitHub-side enforcement (a branch protection rule or ruleset). The owner chose not to turn it on here;
   on a private repository it also needs a paid GitHub plan. This hook protects only clones that installed it.
 - `git push --no-verify` skips every git hook. That stays available as the owner's escape hatch.
-- Opening the pull request: `gh` is not installed here. `git push -u origin <topic>` prints GitHub's link
+- Opening the pull request: `gh` is installed (see `CLAUDE.md`), and `git push -u origin <topic>` also prints GitHub's link
   for it.
 
 ## Notes
