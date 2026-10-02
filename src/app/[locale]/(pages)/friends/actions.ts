@@ -1,9 +1,10 @@
-﻿'use server';
+'use server';
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { logFriendsError } from '@/lib/log';
 import type { ActionResult } from '@/lib/action-result';
+import { createRateLimiter } from '@/lib/rate-limit';
 
 type SendRequestResult = 
   | { ok: true } 
@@ -13,9 +14,16 @@ export async function isFriendsEnabled() {
   return process.env.NEXT_PUBLIC_FF_FRIENDS === '1';
 }
 
+
+const rateLimiter = createRateLimiter({ limit: 30, windowMs: 60 * 60_000 });
+
 export async function sendRequest(token: string): Promise<SendRequestResult> {
-  if (!(await isFriendsEnabled())) return { ok: false, reason: 'disabled' };
   const supabase = await createClient();
+  const { data: userRes } = await supabase.auth.getUser();
+  const uid = userRes.user?.id;
+  if (!uid) return { ok: false, reason: "unauthorized" };
+  if (!rateLimiter.allow(uid)) return { ok: false, reason: "failed" };
+  if (!(await isFriendsEnabled())) return { ok: false, reason: 'disabled' };
   const { data, error } = await supabase.rpc('send_request', { token });
   
   if (error) {
@@ -34,6 +42,9 @@ export async function sendRequest(token: string): Promise<SendRequestResult> {
 export async function approveRequest(requesterId: string): Promise<ActionResult> {
   if (!(await isFriendsEnabled())) return { ok: false, reason: 'disabled' };
   const supabase = await createClient();
+  const { data: userRes } = await supabase.auth.getUser();
+  const uid = userRes.user?.id;
+  if (uid && !rateLimiter.allow(uid)) return { ok: false, reason: "failed" };
   const { error } = await supabase.rpc('approve_request', { requester_id: requesterId });
   
   if (error) {
@@ -48,6 +59,9 @@ export async function approveRequest(requesterId: string): Promise<ActionResult>
 export async function ignoreRequest(requesterId: string): Promise<ActionResult> {
   if (!(await isFriendsEnabled())) return { ok: false, reason: 'disabled' };
   const supabase = await createClient();
+  const { data: userRes } = await supabase.auth.getUser();
+  const uid = userRes.user?.id;
+  if (uid && !rateLimiter.allow(uid)) return { ok: false, reason: "failed" };
   const { error } = await supabase.rpc('ignore_request', { requester_id: requesterId });
   
   if (error) {
@@ -91,6 +105,7 @@ export async function setDisplayName(name: string): Promise<ActionResult> {
   const { data: userRes } = await supabase.auth.getUser();
   const uid = userRes.user?.id;
   if (!uid) return { ok: false, reason: 'unauthorized' };
+  if (!rateLimiter.allow(uid)) return { ok: false, reason: 'failed' };
   const { error } = await supabase.from('profiles').update({ display_name: name.trim() }).eq('id', uid);
   if (error) { logFriendsError('setDisplayName', error); return { ok: false, reason: 'failed' }; }
   revalidatePath('/friends');
@@ -103,9 +118,13 @@ export async function regenerateInvite(): Promise<ActionResult> {
   const { data: userRes } = await supabase.auth.getUser();
   const uid = userRes.user?.id;
   if (!uid) return { ok: false, reason: 'unauthorized' };
+  if (!rateLimiter.allow(uid)) return { ok: false, reason: 'failed' };
   const newToken = crypto.randomUUID();
   const { error } = await supabase.from('profiles').update({ invite_token: newToken }).eq('id', uid);
   if (error) { logFriendsError('regenerateInvite', error); return { ok: false, reason: 'failed' }; }
   revalidatePath('/friends');
   return { ok: true };
 }
+
+
+
