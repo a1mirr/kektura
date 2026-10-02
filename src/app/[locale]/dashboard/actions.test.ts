@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("next/cache", () => ({ refresh: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { setExtraStampDate, setExtraStamped, setPlacesStamped, setStampDate } from "./actions";
 
@@ -118,7 +118,7 @@ describe("spec 0002: setPlacesStamped", () => {
         ],
       },
     ]);
-    expect(revalidatePath).toHaveBeenCalledWith("/[locale]/dashboard", "page");
+    expect(refresh).toHaveBeenCalledOnce();
   });
 
   it("spec 0016 AC-1: a date is the stamp date of NEW rows only: it still never overwrites an existing stamp", async () => {
@@ -161,7 +161,7 @@ describe("spec 0002: setPlacesStamped", () => {
     expect(await setPlacesStamped(["OKTPH_03"], true)).toEqual({ ok: false, reason: "failed" });
     useClient(fakeSupabase({ checkpoints: KOSZEG, readError: { message: "boom" } }));
     expect(await setPlacesStamped(["OKTPH_03"], true)).toEqual({ ok: false, reason: "failed" });
-    expect(revalidatePath).not.toHaveBeenCalled();
+    expect(refresh).not.toHaveBeenCalled();
   });
 
   it("AC-7: never throws, even when the client itself does", async () => {
@@ -341,7 +341,7 @@ describe("spec 0008: logging of failed stamp actions", () => {
     const result = await setPlacesStamped(["OKTPH_03"], true);
     expect(result).toEqual(FAILED);
     expect(Object.keys(result).sort()).toEqual(["ok", "reason"]);
-    expect(revalidatePath).not.toHaveBeenCalled();
+    expect(refresh).not.toHaveBeenCalled();
   });
 });
 
@@ -395,14 +395,14 @@ describe("spec 0016: setStampDate", () => {
       { table: "user_stamps", op: "select", args: ["checkpoint_id"] },
     ]);
     expect(calls.some((c) => c.op === "upsert" || c.op === "delete")).toBe(false);
-    expect(revalidatePath).toHaveBeenCalledWith("/[locale]/dashboard", "page");
+    expect(refresh).toHaveBeenCalledOnce();
   });
 
   it("AC-4: when the place isn't stamped (no row updated) it fails: it never creates a stamp", async () => {
     const { calls } = useClient(fakeSupabase({ checkpoints: KOSZEG, updatedRows: [] }));
     expect(await setStampDate(["OKTPH_03"], DAY)).toEqual({ ok: false, reason: "failed" });
     expect(calls.some((c) => c.op === "upsert")).toBe(false);
-    expect(revalidatePath).not.toHaveBeenCalled();
+    expect(refresh).not.toHaveBeenCalled();
     expect(errorLog).not.toHaveBeenCalled(); // a user error, not a failure of ours
   });
 
@@ -433,7 +433,7 @@ describe("spec 0016: setStampDate", () => {
     useClient(fakeSupabase({ checkpoints: KOSZEG, writeError: { code: "42501", message: "denied", details: "secret" } }));
     expect(await setStampDate(["OKTPH_03"], DAY)).toEqual({ ok: false, reason: "failed" });
     expect(errorLog.mock.calls).toEqual([['[stamp-action] action=setStampDate stage=write user=user-1 code=42501 message="denied"']]);
-    expect(revalidatePath).not.toHaveBeenCalled();
+    expect(refresh).not.toHaveBeenCalled();
   });
 
   it("AC-4: never throws", async () => {
@@ -452,7 +452,7 @@ describe("spec 0016: setExtraStampDate", () => {
       { table: "user_extra_stamps", op: "eq", args: ["extra_id", 7] },
       { table: "user_extra_stamps", op: "select", args: ["extra_id"] },
     ]);
-    expect(revalidatePath).toHaveBeenCalledWith("/[locale]/dashboard", "page");
+    expect(refresh).toHaveBeenCalledOnce();
   });
 
   it("AC-4: when the extra stamp isn't collected (no row updated) it fails without creating one", async () => {

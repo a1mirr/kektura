@@ -22,10 +22,10 @@ own rows) and with clear feedback when something goes wrong.
 - **AC-2**: Without a signed-in user the result is `unauthorized` and nothing is written.
 - **AC-3**: Stamping a place writes one `user_stamps` row per variant of every given place, for the
   signed-in user, with ON CONFLICT DO NOTHING (re-stamping keeps the original `stamped_on`). An optional
-  `date` is the `stamped_on` of rows that are *created* (spec 0016 AC-1, AC-3). The dashboard is revalidated.
+  `date` is the `stamped_on` of rows that are *created* (spec 0016 AC-1, AC-3). The dashboard is refreshed (`refresh()`, not `revalidatePath`: see spec 0009).
 - **AC-4**: Unstamping deletes only the signed-in user's rows for every variant of the given places.
 - **AC-5**: Place keys that match no checkpoint fail without writing.
-- **AC-6**: A database error (read or write) gives `failed` and nothing is revalidated.
+- **AC-6**: A database error (read or write) gives `failed` and nothing is refreshed.
 - **AC-7**: The actions never throw, even when creating the client or reading the session throws
   (a thrown error would reach the client as an opaque message).
 - **AC-8**: Extra stamps follow the same rules as official places (ON CONFLICT DO NOTHING; an optional `date` for new rows) and are unstamped by deleting only the user's row. They never count towards the 161 places. Their dates are edited by `setExtraStampDate`, which needs the UPDATE policy of migration 0007 (spec 0016 AC-4).

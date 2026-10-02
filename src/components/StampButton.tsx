@@ -24,9 +24,12 @@ export default function StampButton({
   return (
     <div className="flex items-center gap-2">
       {stamped && date && <StampDateInput value={date} max={maxDate} onSave={(d) => setStampDate([placeKey], d)} />}
-      <ActionButton action={() => setPlacesStamped([placeKey], !stamped, stamped ? undefined : newStampDate())} done={stamped}>
-        {stamped ? t("unstamp") : t("stamp")}
-      </ActionButton>
+      <ActionButton
+        action={() => setPlacesStamped([placeKey], !stamped, stamped ? undefined : newStampDate())}
+        done={stamped}
+        doneLabel={t("unstamp")}
+        todoLabel={t("stamp")}
+      />
     </div>
   );
 }

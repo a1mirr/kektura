@@ -84,6 +84,14 @@ export const CHANGELOG: ChangelogEntry[] = [
         },
       },
       {
+        kind: "improved",
+        text: {
+          en: "Stamp buttons react instantly, even on a slow connection.",
+          ru: "Кнопки печатей реагируют мгновенно, даже при медленном соединении.",
+          hu: "A bélyegzés gombok azonnal reagálnak, lassú kapcsolaton is.",
+        },
+      },
+      {
         kind: "fixed",
         text: {
           en: "Signing out works even before the page has finished loading.",

@@ -18,12 +18,10 @@ afterEach(() => {
 function renderButton(action: () => Promise<ActionResult>) {
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <ActionButton action={action} done={false}>
-        Add stamp
-      </ActionButton>
+      <ActionButton action={action} done={false} todoLabel="Add stamp" doneLabel="Remove" />
     </NextIntlClientProvider>,
   );
-  return screen.getByRole("button", { name: "Add stamp" });
+  return screen.getByRole("button");
 }
 
 async function click(button: HTMLElement) {
@@ -32,7 +30,36 @@ async function click(button: HTMLElement) {
   });
 }
 
-describe("spec 0002: stamp buttons", () => {
+describe("spec 0002 + 0009: stamp buttons", () => {
+  it("0009 AC-3: the button shows the new state at once, while the action runs", async () => {
+    let finish!: (r: ActionResult) => void;
+    const button = renderButton(() => new Promise((resolve) => (finish = resolve)));
+    expect(button.textContent).toBe("Add stamp");
+    const classesBefore = button.className;
+    await click(button);
+    expect(button.textContent).toBe("Remove"); // flipped before the server answered
+    expect(button.className).not.toBe(classesBefore);
+    expect(button).toHaveProperty("disabled", true);
+    await act(async () => finish({ ok: true }));
+  });
+
+  it("0009 AC-3: a failed action flips the button back and shows the error", async () => {
+    let finish!: (r: ActionResult) => void;
+    const button = renderButton(() => new Promise((resolve) => (finish = resolve)));
+    await click(button);
+    expect(button.textContent).toBe("Remove");
+    await act(async () => finish({ ok: false, reason: "failed" }));
+    expect(button.textContent).toBe("Add stamp");
+    expect(screen.getByRole("alert").textContent).toBe(messages.dashboard.actionFailed);
+  });
+
+  it("0009 AC-3: an expired session flips the button back and refreshes the page", async () => {
+    const button = renderButton(async () => ({ ok: false, reason: "unauthorized" }));
+    await click(button);
+    expect(button.textContent).toBe("Add stamp");
+    expect(refresh).toHaveBeenCalledOnce();
+  });
+
   it("AC-9: the button is disabled while the action runs", async () => {
     let finish!: (r: ActionResult) => void;
     const button = renderButton(() => new Promise((resolve) => (finish = resolve)));
