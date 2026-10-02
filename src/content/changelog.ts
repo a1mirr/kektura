@@ -38,9 +38,9 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "new",
         text: {
-          en: "Account settings, where you can delete your account and all your stamps.",
-          ru: "Настройки аккаунта: там можно удалить аккаунт и все свои печати.",
-          hu: "Fiókbeállítások, ahol törölheted a fiókodat és az összes bélyegzésedet.",
+          en: "An Account page, where you can delete your account and all your stamps.",
+          ru: "Страница «Аккаунт»: там можно удалить аккаунт и все свои печати.",
+          hu: "Fiók oldal, ahol törölheted a fiókodat és az összes bélyegzésedet.",
         },
       },
       {
@@ -70,9 +70,17 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "improved",
         text: {
-          en: "The stamps-per-month chart moved to Account settings.",
-          ru: "График «Печати по месяцам» перенесён в настройки аккаунта.",
-          hu: "A „Bélyegzések havonta” diagram átkerült a fiókbeállításokba.",
+          en: "The stamps-per-month chart moved to the Account page.",
+          ru: "График «Печати по месяцам» перенесён на страницу «Аккаунт».",
+          hu: "A „Bélyegzések havonta” diagram átkerült a Fiók oldalra.",
+        },
+      },
+      {
+        kind: "improved",
+        text: {
+          en: "“Sign out” is now on the Account page, and the “Settings” link is called “Account”.",
+          ru: "Кнопка «Выйти» теперь на странице «Аккаунт», а ссылка «Настройки» называется «Аккаунт».",
+          hu: "A „Kijelentkezés” mostantól a Fiók oldalon található, a „Beállítások” hivatkozás pedig „Fiók” néven szerepel.",
         },
       },
       {

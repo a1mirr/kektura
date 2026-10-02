@@ -100,8 +100,8 @@ export default async function AboutPage({ params }: Props) {
           <p>{t("data2")}</p>
           <p>
             {t.rich("data3", {
-              settings: (chunks) => (
-                <Link href="/settings" className={link}>
+              account: (chunks) => (
+                <Link href="/account" className={link}>
                   {chunks}
                 </Link>
               ),

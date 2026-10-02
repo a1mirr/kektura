@@ -15,7 +15,7 @@ function flatten(messages: Messages, prefix = ""): Map<string, string> {
   );
 }
 
-// ICU arguments ({km}) and rich-text tags (<settings>...</settings>) must survive translation.
+// ICU arguments ({km}) and rich-text tags (<account>...</account>) must survive translation.
 const placeholders = (s: string) => [...s.matchAll(/\{(\w+)|<(\w+)>/g)].map((m) => m[1] ?? `<${m[2]}>`).sort();
 
 const reference = flatten(en);
@@ -52,5 +52,21 @@ describe("spec 0015: about page text", () => {
     const keys = (m: Map<string, string>) => [...m.keys()].filter((k) => k.startsWith("about.")).sort();
     expect(keys(messages)).toEqual(keys(reference));
     expect(keys(reference).length).toBeGreaterThan(10);
+  });
+});
+
+describe("spec 0025: the account page has one name in every language", () => {
+  const expected = { en: "Account", ru: "Аккаунт", hu: "Fiók" };
+
+  it.each(Object.entries(expected))("AC-5: %s: the header link, the page title and the About page's link text say %s", (locale, name) => {
+    const messages = { en, ru, hu }[locale as keyof typeof expected];
+    expect(messages.dashboard.account).toBe(name);
+    expect(messages.account.title).toBe(name);
+    expect(messages.about.data3).toContain(`<account>${name}</account>`);
+  });
+
+  it.each(Object.entries(expected))("AC-5: %s: nothing is still called settings", (locale) => {
+    const messages = flatten({ en, ru, hu }[locale as keyof typeof expected]);
+    expect([...messages.keys()].filter((key) => /(^|\.)settings(\.|$)|signOut/.test(key) && key !== "account.signOut")).toEqual([]);
   });
 });

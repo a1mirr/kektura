@@ -14,7 +14,6 @@
   },
   "dashboard": {
     "title": "My progress",
-    "signOut": "Sign out",
     "stamps": "Stamps",
     "percent": "Completed",
     "km": "Kilometres",
@@ -65,7 +64,7 @@
     "actionFailed": "Couldn't save, try again.",
     "kmValue": "{km} km",
     "mapAttribution": "© OpenStreetMap contributors · route: MTSZ",
-    "settings": "Settings",
+    "account": "Account",
     "stampDate": "Date of the stamp"
   },
   "error": {
@@ -104,7 +103,7 @@
     "dataTitle": "Your data",
     "data1": "You sign in with Google; the app never sees your Google password. It stores your account (the email and name from your Google profile), the stamps you mark with their dates, and the messages you send through the feedback form, which are delivered to the developer together with your email if you are signed in.",
     "data2": "Cookies keep you signed in. Your browser also remembers display choices, such as which stages are open and which map layers are on.",
-    "data3": "You can delete your account and all your stamps at any time under <settings>Account settings</settings>. Feedback messages you have already sent are kept, but are no longer linked to you.",
+    "data3": "You can delete your account and all your stamps at any time on the <account>Account</account> page. Feedback messages you have already sent are kept, but are no longer linked to you.",
     "contactTitle": "Questions or ideas?",
     "contactText": "Found a bug or have an idea for the tracker? Send it through the <feedback>feedback form</feedback>."
   },
@@ -153,8 +152,9 @@
     "tooLong": "The message is too long (2,000 characters at most).",
     "rateLimited": "Too many messages in a short time. Please try again later."
   },
-  "settings": {
-    "title": "Account settings",
+  "account": {
+    "title": "Account",
+    "signOut": "Sign out",
     "dangerZone": "Danger Zone",
     "dangerZoneDesc": "Permanently delete your account and all associated stamping data.",
     "deleteAccount": "Delete account",

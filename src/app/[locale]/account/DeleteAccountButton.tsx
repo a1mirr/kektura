@@ -8,7 +8,7 @@ import { deleteAccountAction } from "./actions";
 
 // Two steps (AC-9): the button asks, the confirmation deletes. See specs/0014-pages-and-settings.md.
 export default function DeleteAccountButton() {
-  const t = useTranslations("settings");
+  const t = useTranslations("account");
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);

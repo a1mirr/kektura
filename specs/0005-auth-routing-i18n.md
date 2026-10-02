@@ -22,7 +22,7 @@ complete in all three languages.
   shows the sign-in error on failure.
 - **AC-5**: All three message files have exactly the same keys, the same ICU placeholders per key,
   and no empty strings.
-- **AC-6**: "Sign out" is a plain form POST to `/auth/sign-out`: it works before the page has
+- **AC-6**: "Sign out" (a button on the account page, spec 0025) is a plain form POST to `/auth/sign-out`: it works before the page has
   hydrated, revokes the session at Supabase from the server, clears the session cookies and returns
   to the landing page in the current locale.
 

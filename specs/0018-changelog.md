@@ -21,7 +21,7 @@ commit messages are not it). Adding an entry must be a small, safe edit that tes
   the future; each has at least one change.
 - **AC-5**: The text describes what users see, and only what is true of the app as shipped.
 - **AC-6**: The history up to 2026-10-02 is three entries, the oldest ones: the first version (2026-09-29),
-  stages and the route planner (2026-10-01), and pages, feedback, settings and stamp dates (2026-10-02).
+  stages and the route planner (2026-10-01), and pages, feedback, the account page and stamp dates (2026-10-02).
   Later changes follow AC-7 (a new entry on top, or an addition to the newest entry when the dates are the
   same); how many entries there are is not pinned by any test.
 - **AC-7**: A change that users can see (new, improved or fixed behaviour, a rename, a new page) adds or

@@ -19,7 +19,7 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-const s = messages.settings;
+const s = messages.account;
 const renderButton = () =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
