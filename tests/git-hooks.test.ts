@@ -108,4 +108,19 @@ describe("spec 0021: pull requests only", () => {
     expect(claude).toMatch(/pull request/i);
     expect(claude).toContain("npm run hooks:install");
   });
+
+  it("AC-6: CLAUDE.md says how pull requests are opened and merged with gh, and when merging is allowed", () => {
+    const claude = read("CLAUDE.md");
+    expect(claude).toContain("gh pr create --base main --head <topic> --body-file <file>");
+    expect(claude).toContain("gh pr checks <n> --watch");
+    expect(claude).toContain("gh pr merge <n> --merge --match-head-commit <sha>");
+    expect(claude).toMatch(/only when the user asked for it or the task said so, CI is green and the fresh-context review is done/);
+    expect(claude).toContain("never `--admin`");
+    expect(claude).toContain("Don't delete branches or deploy unless asked");
+    expect(claude).toContain(String.raw`%LOCALAPPDATA%\Programs\gh\bin`);
+    expect(claude).not.toContain("There is no `gh` here");
+    // No control characters other than line breaks and tabs (an earlier edit turned `\b` into a backspace).
+    const control = [...claude].filter((ch) => ch.charCodeAt(0) < 32 && !["\n", "\r", "\t"].includes(ch));
+    expect(control).toEqual([]);
+  });
 });
