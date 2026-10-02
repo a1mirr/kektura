@@ -73,5 +73,40 @@
   "notFound": {
     "title": "Az oldal nem található",
     "back": "Vissza a kezdőlapra"
+  },
+  "footer": {
+    "about": "Névjegy",
+    "changelog": "Változások",
+    "usefulLinks": "Hasznos linkek",
+    "feedback": "Visszajelzés",
+    "settings": "Fiók beállítások"
+  },
+  "about": {
+    "title": "A Kéktúra követőről",
+    "description": "Egy nyílt forráskódú webes alkalmazás az Országos Kéktúra teljesítésének követésére."
+  },
+  "changelog": {
+    "title": "Változások",
+    "empty": "Nincsenek frissítések."
+  },
+  "links": {
+    "title": "Hasznos linkek",
+    "official": "Hivatalos Kéktúra oldal"
+  },
+  "feedback": {
+    "title": "Visszajelzés",
+    "description": "Van egy ötleted, vagy hibát találtál? Írd meg nekünk!",
+    "submit": "Küldés",
+    "placeholder": "Üzenet...",
+    "success": "Köszönjük a visszajelzést!",
+    "error": "Nem sikerült elküldeni."
+  },
+  "settings": {
+    "title": "Fiók beállítások",
+    "dangerZone": "Veszélyes zóna",
+    "dangerZoneDesc": "Fiókod és minden hozzá tartozó adat végleges törlése.",
+    "deleteAccount": "Fiók törlése",
+    "deleteConfirm": "Biztos vagy benne? Ezt nem lehet visszavonni.",
+    "deleteButton": "Igen, véglegesen törlöm a fiókom"
   }
 }

@@ -73,5 +73,40 @@
   "notFound": {
     "title": "Page not found",
     "back": "Back to the start"
+  },
+  "footer": {
+    "about": "About",
+    "changelog": "Changelog",
+    "usefulLinks": "Useful links",
+    "feedback": "Feedback",
+    "settings": "Account settings"
+  },
+  "about": {
+    "title": "About Kéktúra tracker",
+    "description": "An open-source progressive web app to track your hike along the National Blue Trail (Országos Kéktúra)."
+  },
+  "changelog": {
+    "title": "Changelog",
+    "empty": "No recent updates."
+  },
+  "links": {
+    "title": "Useful links",
+    "official": "Official Kéktúra website"
+  },
+  "feedback": {
+    "title": "Feedback",
+    "description": "Have an idea or found a bug? Let us know!",
+    "submit": "Submit feedback",
+    "placeholder": "Your message...",
+    "success": "Thanks for your feedback!",
+    "error": "Failed to submit feedback."
+  },
+  "settings": {
+    "title": "Account settings",
+    "dangerZone": "Danger Zone",
+    "dangerZoneDesc": "Permanently delete your account and all associated stamping data.",
+    "deleteAccount": "Delete account",
+    "deleteConfirm": "Are you sure? This cannot be undone.",
+    "deleteButton": "Yes, permanently delete my account"
   }
 }

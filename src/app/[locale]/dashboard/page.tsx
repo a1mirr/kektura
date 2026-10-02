@@ -11,7 +11,6 @@ import {
   progressSummary,
   stageStampKeys,
   stampedPlaceKeys,
-  stampsPerMonth,
   walkedRanges,
   findStageForKm,
 } from "@/lib/progress";
@@ -23,7 +22,6 @@ import StageControls from "@/components/StageControls";
 import StageSection from "@/components/StageSection";
 import StageStampButton from "@/components/StageStampButton";
 import StampButton from "@/components/StampButton";
-import StampsChart from "@/components/StampsChart";
 import TrailMapLoader from "@/components/TrailMapLoader";
 import stagesData from "../../../../scripts/data/okt-stages.json";
 
@@ -74,10 +72,6 @@ export default async function Dashboard({
     stage: findStageForKm(Number(e.km_from_start), stages, placeKm),
   }));
 
-  const chartData = stampsPerMonth(stamps ?? [], placeList).map(({ month, count }) => ({
-    month: format.dateTime(new Date(`${month}-01T00:00:00Z`), { year: "numeric", month: "short", timeZone: "UTC" }),
-    count,
-  }));
 
   const mapPoints = cps
     .filter((c) => c.lat != null && c.lng != null)
@@ -127,11 +121,6 @@ export default async function Dashboard({
         </section>
       )}
 
-      <section className="rounded-lg bg-white p-4 shadow-sm">
-        <h2 className="mb-2 font-semibold">{t("perMonth")}</h2>
-        <StampsChart data={chartData} seriesName={t("stamps")} />
-      </section>
-
       <section>
         <h2 className="mb-2 font-semibold">{t("checkpoints")}</h2>
         {placeList.length === 0 ? (
@@ -146,7 +135,7 @@ export default async function Dashboard({
               const { stage: n, meta, places: list } = stage;
               const keys = stageStampKeys(stage);
               const done = list.filter((p) => stampedPlaces.has(p.key)).length;
-              const extrasCount = extraListWithStage.filter((e) => e.stage === n).length;
+              const stageExtras = extraListWithStage.filter((e) => e.stage === n);
               return (
                 <StageSection
                   key={n}
@@ -158,9 +147,9 @@ export default async function Dashboard({
                   total={list.length}
                   actions={
                     <div className="flex items-center gap-3">
-                      {extrasCount > 0 && (
-                        <a href="#extra-stamps" className="text-xs text-blue-600 hover:underline">
-                          {t("goExtras", { count: extrasCount })}
+                      {stageExtras.length > 0 && (
+                        <a href={`#extra-${stageExtras[0].id}`} className="text-xs text-blue-600 hover:underline">
+                          {t("goExtras", { count: stageExtras.length })}
                         </a>
                       )}
                       <StageStampButton

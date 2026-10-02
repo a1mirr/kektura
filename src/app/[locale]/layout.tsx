@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { testLoginEnabled } from "@/lib/test-login";
 import TestBanner from "@/components/TestBanner";
+import Footer from "@/components/Footer";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -34,9 +35,12 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
-      <body className="min-h-screen bg-stone-50 text-stone-900">
+      <body className="flex min-h-screen flex-col bg-stone-50 text-stone-900">
         {testLoginEnabled() && <TestBanner />}
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <div className="flex-grow">{children}</div>
+          <Footer />
+        </NextIntlClientProvider>
       </body>
     </html>
   );
