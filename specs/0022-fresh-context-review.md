@@ -40,8 +40,9 @@ author's context, and wants that to be part of how work is done here, not someth
   - it reports findings most severe first, each with `file:line`, what is wrong and a concrete failing
     scenario, then what it checked and found fine; "no findings" is a valid answer.
 - **AC-4**: `.github/pull_request_template.md` gives every pull request the checklist (spec first, or a small
-  change that needs none; checks and E2E run; fresh-context review of the committed final state done) and a
-  section to record the reviewed commit, the review's findings and what was done about each.
+  change that needs none; checks and E2E run; fresh-context review done at the commit named in the pull
+  request, with only wording fixes after it) and a section to record the reviewed commit, the review's
+  findings and what was done about each.
 
 ## Out of scope
 
@@ -63,8 +64,15 @@ author's context, and wants that to be part of how work is done here, not someth
   `.claude/agents/fresh-reviewer.md`, spawn a general-purpose agent and give it the same brief (the body of
   that file); every later session has `fresh-reviewer`.
 - The agent reads and runs commands but never edits: the author applies the fixes, so the author's
-  context and the reviewer's never mix. That is enforced for files by its tool list and, for `Bash`, only by
-  the brief.
+  context and the reviewer's never mix. For the real `fresh-reviewer` agent that is enforced for files by
+  its tool list and, for `Bash`, only by the brief. The fallback (a general-purpose agent, see above) has
+  every tool, so there only the brief's "write nothing" holds: check `git status` after it ran.
+- "Wording-only" is the author's call, and so is whether a fix needs another review. The pull request shows
+  the reviewed commit next to the head, so the owner can see what came after it.
+- The Stop hook doesn't watch `CLAUDE.md`, `.claude/` or `.github/`, so editing only those files doesn't run
+  `tests/review-process.test.ts` at the end of a turn. `npm run check` and CI run it (CI on every pull
+  request). Adding the three paths to `WATCHED` in `.claude/hooks/stop-check.mjs` would close the gap; that
+  hook is the owner's, so it is left as it is.
 - A small change with no spec (CLAUDE.md allows that for trivial fixes) is reviewed too: the author passes
   `none` and the reviewer works out which specs own the behaviour touched.
 - The author commits before asking for the review. The reviewer can see uncommitted files, but it says when

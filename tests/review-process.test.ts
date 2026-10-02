@@ -12,7 +12,10 @@ describe("spec 0022: fresh-context review", () => {
     expect(claude).toContain("`fresh-reviewer`");
     expect(claude).toMatch(/only the spec number \(`none` for a small change that has no spec\) and the base branch/);
     expect(claude).toMatch(/before it is merged/);
+    expect(claude).toMatch(/Fix every valid finding and answer the rest in the pull request description/);
     expect(claude).toMatch(/with the commit that was reviewed/);
+    expect(claude).toMatch(/a review of an earlier state doesn't count/);
+    expect(claude).toMatch(/Never hand a pull request over as ready to merge without it/);
     expect(claude).toMatch(/Fixes that change code, tests or behaviour get another fresh review/);
     expect(claude).toMatch(/wording-only fixes don't/);
     expect(claude).toMatch(/documentation included/);
@@ -93,7 +96,7 @@ describe("spec 0022: fresh-context review", () => {
     const template = read(".github/pull_request_template.md");
     expect(template).toMatch(/^- \[ \] .*spec came first.*needs no spec/m);
     expect(template).toMatch(/^- \[ \] .*npm run check.*npm run e2e/m);
-    expect(template).toMatch(/^- \[ \] .*fresh-context agent.*fresh-reviewer.*committed final state/m);
+    expect(template).toMatch(/^- \[ \] .*fresh-context agent.*fresh-reviewer.*at the commit named below.*later commits only fix wording/m);
     expect(template).toMatch(/^## Review findings/m);
     expect(template).toMatch(/^Reviewed commit:/m);
   });
