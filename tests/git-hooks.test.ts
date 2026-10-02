@@ -114,7 +114,7 @@ describe("spec 0021: pull requests only", () => {
     expect(claude).toContain('gh pr create --base main --head <topic> --title "<title>" --body-file <file>');
     expect(claude).toContain("gh pr checks <n> --watch");
     expect(claude).toContain("gh pr merge <n> --merge --match-head-commit <full-sha>");
-    expect(claude).toMatch(/only when the user asked for it or the task said so, CI is green and the fresh-context review is done/);
+    expect(claude).toMatch(/only when the user asked for it in chat, CI is green and the fresh-context review is done/);
     expect(claude).toContain("never `--admin`");
     expect(claude).toContain("Don't delete branches or deploy unless asked");
     expect(claude).toContain(String.raw`%LOCALAPPDATA%\Programs\gh\bin`);
