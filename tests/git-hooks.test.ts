@@ -111,9 +111,9 @@ describe("spec 0021: pull requests only", () => {
 
   it("AC-6: CLAUDE.md says how pull requests are opened and merged with gh, and when merging is allowed", () => {
     const claude = read("CLAUDE.md");
-    expect(claude).toContain("gh pr create --base main --head <topic> --body-file <file>");
+    expect(claude).toContain('gh pr create --base main --head <topic> --title "<title>" --body-file <file>');
     expect(claude).toContain("gh pr checks <n> --watch");
-    expect(claude).toContain("gh pr merge <n> --merge --match-head-commit <sha>");
+    expect(claude).toContain("gh pr merge <n> --merge --match-head-commit <full-sha>");
     expect(claude).toMatch(/only when the user asked for it or the task said so, CI is green and the fresh-context review is done/);
     expect(claude).toContain("never `--admin`");
     expect(claude).toContain("Don't delete branches or deploy unless asked");

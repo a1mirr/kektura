@@ -25,12 +25,13 @@ on GitHub, for everybody who works in a clone of this repository, Claude Code in
   repository and switch off its own `post-receive` hook.
 - **AC-5**: `CLAUDE.md` states the rule and the install step, so a new clone (or a new Claude Code session)
   knows both.
-- **AC-6**: `CLAUDE.md` says how a pull request is opened and merged with `gh` (installed per user, signed in
-  as the owner): `gh pr create --base main --head <topic> --body-file <file>`, `gh pr checks <n> --watch`,
-  `gh pr merge <n> --merge --match-head-commit <sha>`. Merging happens only when the user asked for it or the
-  task said so, CI is green and the fresh-context review (spec 0022) is done; never `--admin`; branches are not
-  deleted and nothing is deployed unless asked. The text also gives the install path, without control characters
-  (an earlier edit turned its backslashes into a backspace).
+- **AC-6**: `CLAUDE.md` says how a pull request is opened and merged with `gh`:
+  `gh pr create --base main --head <topic> --title "<title>" --body-file <file>` (title and body are always
+  given: a shell without a terminal can't answer gh's prompts), `gh pr checks <n> --watch`,
+  `gh pr merge <n> --merge --match-head-commit <full-sha>` (the full sha of the reviewed head). Merging happens
+  only when the user asked for it or the task said so, CI is green and the fresh-context review (spec 0022) is
+  done; never `--admin`; branches are not deleted and nothing is deployed unless asked. It also gives where `gh`
+  is installed (per user, on the user's PATH).
 
 ## Out of scope
 
@@ -58,4 +59,4 @@ on GitHub, for everybody who works in a clone of this repository, Claude Code in
 | AC-1, AC-2, AC-3 | `tests/git-hooks.test.ts` (`checkPush` for the three URL forms, every spelling of a push to `main`, topic branches, tags, the deploy remote, a look-alike host; the guard run as a process: exit codes and message) |
 | AC-4 | `tests/git-hooks.test.ts` (hook script calls the guard, `hooks:install` sets `core.hooksPath`, no `prepare`/`postinstall`/`preinstall` script); by hand: with the hook installed, `git push origin HEAD:main --dry-run` is refused |
 | AC-5 | `tests/git-hooks.test.ts` (CLAUDE.md mentions the rule and `hooks:install`) |
-| AC-6 | `tests/git-hooks.test.ts` (CLAUDE.md names the three commands, the conditions for merging, the install path, and has no control characters) |
+| AC-6 | `tests/git-hooks.test.ts` (CLAUDE.md names the three commands with the options that make them work without a terminal, the conditions for merging and the install path, and has no control characters) |

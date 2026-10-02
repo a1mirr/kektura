@@ -72,6 +72,6 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0019](0019-useful-links.md) | Useful links page | Done |
 | [0020](0020-origin-and-deploy.md) | Request origin behind the proxy; deploy files | Done |
 | [0015](0015-about-page.md) | About page | Done |
-| [0021](0021-pull-requests-only.md) | main only changes through pull requests (local pre-push guard) | Done |
+| [0021](0021-pull-requests-only.md) | main only changes through pull requests (local pre-push guard; opening and merging them with gh) | Done |
 | [0022](0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Done |
 | [0025](0025-account-page.md) | Account page: sign out moves in, "Settings" becomes "Account" | Done |
