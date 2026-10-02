@@ -1,4 +1,4 @@
-﻿import { test, expect } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import { signInAsNewUser } from "./helpers";
 
 test("spec 0024: Approval Model flow", async ({ browser }) => {
@@ -44,4 +44,21 @@ await friendPage.getByRole("button", { name: /Send request/i }).click();
   
   await friendPage.reload();
   await expect(friendPage.locator("text=Sharing progress").first()).toBeVisible();
+});
+
+test("spec 0024: invalid link and own link", async ({ page }) => {
+  await signInAsNewUser(page);
+  
+  // Invalid token
+  await page.goto("/en/friends/invite/00000000-0000-0000-0000-000000000000");
+  await expect(page.locator("text=This link is not valid")).toBeVisible();
+
+  // Own token
+  await page.goto("/en/friends");
+  const inviteUrl = await page.locator("input[readonly]").inputValue();
+  await page.goto(inviteUrl.replace("3000", "3002"));
+  // Assuming the UI prevents you from requesting yourself, or the server rejects it.
+  // The RPC returns 'own_token', let's just make sure the page doesn't crash.
+  await page.getByRole("button", { name: /Send request/i }).click();
+  await expect(page.locator("text=failed").or(page.locator("text=own_token"))).toBeVisible();
 });

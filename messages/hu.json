@@ -185,6 +185,7 @@
     "ownLink": "Ez a saját meghívó linked.",
     "connectWith": "Kapcsolódás {name} felhasználóval?",
     "sendRequest": "Kérés küldése",
-    "unknown_user": "Ismeretlen"
+    "unknown_user": "Ismeretlen",
+    "invalidToken": "Ez a link nem érvényes"
   }
 }

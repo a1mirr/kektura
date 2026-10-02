@@ -185,6 +185,7 @@
     "ownLink": "This is your own invite link.",
     "connectWith": "Connect with {name}?",
     "sendRequest": "Send request",
-    "unknown_user": "Unknown"
+    "unknown_user": "Unknown",
+    "invalidToken": "This link is not valid"
   }
 }

@@ -1,7 +1,7 @@
 create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text not null check(length(trim(display_name)) between 1 and 40),
-  invite_token text not null unique default gen_random_uuid()::text
+  invite_token text not null unique default gen_random_uuid()::text check (invite_token ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
 );
 
 alter table public.profiles enable row level security;
@@ -150,3 +150,15 @@ grant execute on function public.set_sharing(uuid, boolean) to authenticated;
 
 
 
+
+create function public.get_inviter_name(token text) returns text
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_name text;
+begin
+  select display_name into v_name from public.profiles where invite_token = token;
+  return v_name;
+end;
+$$;
+revoke execute on function public.get_inviter_name(text) from public, anon;
+grant execute on function public.get_inviter_name(text) to authenticated;
