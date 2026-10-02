@@ -46,11 +46,11 @@ test.describe("spec 0015: about page", () => {
     await expect(page.getByText("not affiliated with MTSZ")).toBeVisible();
   });
 
-  test("AC-5: 'Your data' links to the account settings and the feedback form", async ({ page }) => {
+  test("AC-5: 'Your data' links to the account page and the feedback form", async ({ page }) => {
     await page.goto("/en/about");
-    await expect(page.getByRole("region", { name: "Your data" }).getByRole("link", { name: "Account settings" })).toHaveAttribute(
+    await expect(page.getByRole("region", { name: "Your data" }).getByRole("link", { name: "Account", exact: true })).toHaveAttribute(
       "href",
-      "/en/settings",
+      "/en/account",
     );
     await page.getByRole("link", { name: "feedback form" }).click();
     await expect(page).toHaveURL(/\/en\/feedback$/);

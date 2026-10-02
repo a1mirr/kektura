@@ -17,7 +17,6 @@ import {
 import { maxStampDate } from "@/lib/stamp-date";
 import LocateButton from "@/components/LocateButton";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
-import SignOutButton from "@/components/SignOutButton";
 import ExtraStampButton from "@/components/ExtraStampButton";
 import StageControls from "@/components/StageControls";
 import StageSection from "@/components/StageSection";
@@ -102,10 +101,9 @@ export default async function Dashboard({
         <h1 className="text-2xl font-bold text-blue-700">{t("title")}</h1>
         <div className="flex items-center gap-4">
           <LocaleSwitcher />
-          <Link href="/settings" className="text-sm text-stone-600 hover:underline">
-            {t("settings")}
+          <Link href="/account" className="text-sm text-stone-600 hover:underline">
+            {t("account")}
           </Link>
-          <SignOutButton />
         </div>
       </header>
 

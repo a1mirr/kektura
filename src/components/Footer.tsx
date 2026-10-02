@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
-// Links to the pages anyone can open (spec 0014 AC-1). The account settings are reached from the
+// Links to the pages anyone can open (spec 0014 AC-1). The account page is reached from the
 // dashboard header instead: a footer link would lead signed-out visitors nowhere.
 const LINKS = [
   { href: "/about", label: "about" },

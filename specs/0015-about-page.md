@@ -35,9 +35,9 @@ be true of the app today.
     are delivered to the developer together with the email when signed in (spec 0017);
   - cookies keep the user signed in, and the browser remembers display choices (which stages are open,
     which map layers are on);
-  - "Account settings" deletes the account and all stamps; feedback messages already sent are kept but
+  - the "Account" page deletes the account and all stamps; feedback messages already sent are kept but
     no longer linked to the user;
-  - links to `/settings` and `/feedback`.
+  - links to `/account` and `/feedback`.
 - **AC-6**: The page makes no claim that isn't true today. In particular it doesn't call the app open
   source (the repository is private) or a progressive web app (no manifest or service worker). Whoever
   makes either true edits this AC and its test.

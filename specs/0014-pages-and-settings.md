@@ -1,20 +1,21 @@
-# 0014: Footer pages and account settings
+# 0014: Footer pages and the account page
 
 Status: Done
-Owner code: `src/components/Footer.tsx`, `src/app/[locale]/(pages)/*`, `src/app/[locale]/settings/*`,
+Owner code: `src/components/Footer.tsx`, `src/app/[locale]/(pages)/*`, `src/app/[locale]/account/*`,
 `supabase/migrations/0008_pages_settings.sql`
 
 ## Goal
 
 Footer navigation to the informational pages (About, Changelog, Useful links, Feedback), and an account
-settings page for signed-in users whose one option, for now, is deleting the account.
+page for signed-in users (called "settings" until spec 0025) whose one option, for now, is deleting the
+account.
 
 ## Behaviour
 
 ### Footer navigation
 
 - **AC-1**: Every page has a footer with links to About, Changelog, Useful links and Feedback, in the
-  page's language. The footer links only to pages anyone can open; the settings page is reached from
+  page's language. The footer links only to pages anyone can open; the account page is reached from
   the dashboard header (AC-7), because a footer link would lead signed-out visitors nowhere. Full-height
   pages (landing, error) fill the space above the footer instead of a whole screen, so on a phone the
   landing page and its footer fit one screen without scrolling.
@@ -31,11 +32,11 @@ settings page for signed-in users whose one option, for now, is deleting the acc
 - **AC-5**: `/feedback` has a form to send a message to the developer (spec 0017).
 - **AC-6**: A submitted message is stored in `user_feedback` and delivered to the developer (spec 0017).
 
-### Settings page
+### Account page
 
-- **AC-7**: `/settings` is for signed-in users; a signed-out visitor is sent to the landing page. The
-  dashboard header has a "Settings" link next to "Sign out".
-- **AC-8**: The "Stamps per month" chart (spec 0001 AC-5) is shown on `/settings`, not on the dashboard.
+- **AC-7**: `/account` is for signed-in users; a signed-out visitor is sent to the landing page. The
+  dashboard header has an "Account" link (spec 0025 AC-1; before it was "Settings" next to "Sign out").
+- **AC-8**: The "Stamps per month" chart (spec 0001 AC-5) is shown on `/account`, not on the dashboard.
 - **AC-9**: "Delete account" asks for confirmation first ("Are you sure? This cannot be undone." with a
   confirm button and a cancel link). Confirming permanently deletes the account with all its stamps and
   extra stamps, signs the user out and returns to the landing page. Cancelling changes nothing.
@@ -64,20 +65,20 @@ Other settings (language, email, export of the data); a "type your email to conf
   environment, which is the bigger risk.
 - After the deletion the user's session no longer exists at the Auth server, so `signOut()` gets a
   401/403 back; supabase-js ignores that and still clears the session cookies.
-- **Decided by the owner (2026-10-02)**: the per-month chart stays on the settings page (AC-8), not on the
+- **Decided by the owner (2026-10-02)**: the per-month chart stays on the account page (AC-8), not on the
   dashboard. To move it, change AC-8, the E2E test below and one component.
 
 ## Coverage
 
 | AC | Test |
 | --- | --- |
-| AC-1 | `e2e/footer.spec.ts` (four links on a public page and on the dashboard, in ru/en/hu, none for settings; landing page and footer fit one phone screen) |
+| AC-1 | `e2e/footer.spec.ts` (four links on a public page and on the dashboard, in ru/en/hu, none for the account page; landing page and footer fit one phone screen) |
 | AC-2 | spec 0015 |
 | AC-3, AC-4 | specs 0018, 0019 |
 | AC-5, AC-6 | spec 0017 |
-| AC-7 | `e2e/settings.spec.ts` (redirect when signed out, header link) |
-| AC-8 | `e2e/settings.spec.ts` (`/settings` shows the chart heading, the dashboard doesn't) |
-| AC-9, AC-10 | `e2e/settings.spec.ts` (cancel; delete: account, stamps and extra stamps gone, feedback kept and unlinked, signed out, signing in again gives an empty account), `src/app/[locale]/settings/DeleteAccountButton.test.tsx` |
-| AC-11 | `DeleteAccountButton.test.tsx`, `e2e/settings.spec.ts` (server action answering 500) |
+| AC-7 | `e2e/account.spec.ts` (redirect when signed out, header link), spec 0025 |
+| AC-8 | `e2e/account.spec.ts` (`/account` shows the chart heading, the dashboard doesn't) |
+| AC-9, AC-10 | `e2e/account.spec.ts` (cancel; delete: account, stamps and extra stamps gone, feedback kept and unlinked, signed out, signing in again gives an empty account), `src/app/[locale]/account/DeleteAccountButton.test.tsx` |
+| AC-11 | `DeleteAccountButton.test.tsx`, `e2e/account.spec.ts` (server action answering 500) |
 | AC-12 | `e2e/feedback.spec.ts` (anonymous caller refused); migration 0008 |
-| AC-13 | `src/app/[locale]/settings/actions.test.ts`, `src/lib/log.test.ts` |
+| AC-13 | `src/app/[locale]/account/actions.test.ts`, `src/lib/log.test.ts` |

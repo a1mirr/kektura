@@ -23,6 +23,7 @@ test.describe("spec 0006 + 0005: signing in and out on the test server", () => {
 
   test("0005 AC-6, AC-3: signing out returns to the landing page, after which the dashboard redirects there", async ({ page }) => {
     await signInAsNewUser(page);
+    await page.getByRole("link", { name: "Account", exact: true }).click(); // spec 0025: sign out lives there
     await page.getByRole("button", { name: "Sign out" }).click();
     await expect(page).toHaveURL(/\/en$/);
     await page.goto("/en/dashboard");

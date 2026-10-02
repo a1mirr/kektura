@@ -15,7 +15,7 @@ function flatten(messages: Messages, prefix = ""): Map<string, string> {
   );
 }
 
-// ICU arguments ({km}) and rich-text tags (<settings>...</settings>) must survive translation.
+// ICU arguments ({km}) and rich-text tags (<account>...</account>) must survive translation.
 const placeholders = (s: string) => [...s.matchAll(/\{(\w+)|<(\w+)>/g)].map((m) => m[1] ?? `<${m[2]}>`).sort();
 
 const reference = flatten(en);

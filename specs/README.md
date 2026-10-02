@@ -65,7 +65,7 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0011](0011-trailmap-split.md) | Split TrailMap, map E2E safety net | Accepted |
 | [0012](0012-backups.md) | Weekly backup of production user data | Done |
 | [0013](0013-extra-stamps-stages.md) | Extra stamps linked to stages | Done |
-| [0014](0014-pages-and-settings.md) | Footer pages, account settings, account deletion | Done |
+| [0014](0014-pages-and-settings.md) | Footer pages, account page, account deletion | Done |
 | [0016](0016-stamp-dates.md) | Stamp dates: validation, own time zone, safe editing | Done |
 | [0017](0017-feedback.md) | Feedback form with Telegram notifications | Done |
 | [0018](0018-changelog.md) | Changelog page | Done |
@@ -74,3 +74,4 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0015](0015-about-page.md) | About page | Done |
 | [0021](0021-pull-requests-only.md) | main only changes through pull requests (local pre-push guard) | Done |
 | [0022](0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Done |
+| [0025](0025-account-page.md) | Account page: sign out moves in, "Settings" becomes "Account" | Done |

@@ -52,3 +52,30 @@ describe("spec 0018: changelog data", () => {
     expect(CHANGELOG.at(-1)!.title.en).toBe("First version");
   });
 });
+
+describe("spec 0025: the account page in the changelog", () => {
+  const entry = CHANGELOG.find((e) => e.date === "2026-10-02")!;
+
+  it("AC-6: the 2026-10-02 entry says Sign out moved to the Account page and Settings is now Account, in every language", () => {
+    const words: Record<string, string[]> = {
+      en: ["Sign out", "Account", "Settings"],
+      ru: ["Выйти", "Аккаунт", "Настройки"],
+      hu: ["Kijelentkezés", "Fiók", "Beállítások"],
+    };
+    for (const locale of routing.locales) {
+      const said = entry.changes.some((c) => words[locale].every((w) => c.text[locale].includes(w)));
+      expect(said, locale).toBe(true);
+    }
+  });
+
+  it("AC-6: it also says the page exists and the chart moved there, and nothing calls the page 'Account settings' any more", () => {
+    const en = entry.changes.map((c) => c.text.en);
+    expect(en.some((t) => /An Account page/.test(t))).toBe(true);
+    expect(en.some((t) => /chart moved to the Account page/.test(t))).toBe(true);
+    for (const { where, text } of texts()) {
+      for (const locale of routing.locales) {
+        expect(text[locale], `${where} (${locale})`).not.toMatch(/Account settings|Настройки аккаунта|fiókbeállítás/i);
+      }
+    }
+  });
+});

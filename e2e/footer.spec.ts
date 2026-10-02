@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { signInAsNewUser } from "./helpers";
 
 test.describe("spec 0014: footer", () => {
-  test("AC-1: a public page has links to the four pages, and none to the account settings", async ({ page }) => {
+  test("AC-1: a public page has links to the four pages, and none to the account page", async ({ page }) => {
     await page.goto("/en");
     const footer = page.getByRole("contentinfo");
     const links = footer.getByRole("link");
@@ -13,7 +13,7 @@ test.describe("spec 0014: footer", () => {
       "/en/links",
       "/en/feedback",
     ]);
-    await expect(footer.getByText(/settings/i)).toHaveCount(0);
+    await expect(footer.getByText(/account|settings/i)).toHaveCount(0);
   });
 
   test("AC-1: the footer is also on the dashboard, in the page's language", async ({ page }) => {

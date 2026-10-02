@@ -13,22 +13,22 @@ async function openDeleteConfirmation(page: Page) {
 
 const count = (sql: string) => Number(psql(sql));
 
-test.describe("spec 0014: account settings", () => {
+test.describe("spec 0014: the account page", () => {
   test("AC-7: signed-out visitors are sent to the landing page", async ({ page }) => {
-    await page.goto("/en/settings");
+    await page.goto("/en/account");
     await expect(page).toHaveURL(/\/en$/);
   });
 
-  test("AC-7, AC-8, AC-9: the dashboard header leads to the settings; cancelling deletes nothing", async ({ page }) => {
+  test("AC-7, AC-8, AC-9: the dashboard header leads to the account page; cancelling deletes nothing", async ({ page }) => {
     const email = await signInAsNewUser(page);
-    // AC-8: the chart is on the settings page, not here (the dashboard renders in one piece, so once its
-    // Settings link is there, a missing chart really is missing).
-    await expect(page.getByRole("link", { name: "Settings" })).toBeVisible();
+    // AC-8: the chart is on the account page, not here (the dashboard renders in one piece, so once its
+    // Account link is there, a missing chart really is missing).
+    await expect(page.getByRole("link", { name: "Account", exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Stamps per month" })).toHaveCount(0);
-    await page.getByRole("link", { name: "Settings" }).click();
-    await expect(page).toHaveURL(/\/en\/settings$/);
-    await expect(page).toHaveTitle("Account settings");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Account settings");
+    await page.getByRole("link", { name: "Account", exact: true }).click();
+    await expect(page).toHaveURL(/\/en\/account$/);
+    await expect(page).toHaveTitle("Account");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Account");
     await expect(page.getByRole("heading", { name: "Stamps per month" })).toBeVisible();
 
     await openDeleteConfirmation(page);
@@ -53,7 +53,7 @@ test.describe("spec 0014: account settings", () => {
     psql(`insert into public.user_feedback (user_id, message) values ('${userId}', 'to keep ${marker}')`);
     expect(count(`select count(*) from public.user_stamps where user_id = '${userId}'`)).toBe(1);
 
-    await page.goto("/en/settings");
+    await page.goto("/en/account");
     await openDeleteConfirmation(page);
     await page.getByRole("button", { name: "Yes, permanently delete my account" }).click();
     await expect(page).toHaveURL(/\/en$/);
@@ -75,9 +75,9 @@ test.describe("spec 0014: account settings", () => {
 
   test("AC-11: when the server fails, the page says so and nothing is deleted", async ({ page }) => {
     const email = await signInAsNewUser(page);
-    await page.goto("/en/settings");
+    await page.goto("/en/account");
     // Make the server action fail like a dropped connection or a server error.
-    await page.route("**/en/settings", (route) =>
+    await page.route("**/en/account", (route) =>
       route.request().headers()["next-action"] ? route.fulfill({ status: 500, body: "boom" }) : route.continue(),
     );
     await openDeleteConfirmation(page);
@@ -85,8 +85,67 @@ test.describe("spec 0014: account settings", () => {
 
     // (Next's hidden route announcer also has role="alert", so match the text.)
     await expect(page.getByText("Couldn't delete the account. Please try again.")).toBeVisible();
-    await expect(page).toHaveURL(/\/en\/settings$/);
+    await expect(page).toHaveURL(/\/en\/account$/);
     await expect(page.getByRole("button", { name: "Yes, permanently delete my account" })).toBeEnabled();
     expect(count(`select count(*) from auth.users where email = '${email}'`)).toBe(1);
+  });
+});
+
+test.describe("spec 0025: sign out and the account link", () => {
+  test("AC-1: the dashboard header has one Account link and no Settings link or Sign out control", async ({ page }) => {
+    await signInAsNewUser(page);
+    const header = page.locator("main > header");
+    await expect(header.getByRole("link", { name: "Account", exact: true })).toHaveAttribute("href", "/en/account");
+    await expect(page.getByRole("link", { name: "Settings" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Sign out" })).toHaveCount(0);
+  });
+
+  test("AC-2: /settings no longer exists", async ({ page }) => {
+    await signInAsNewUser(page);
+    const response = await page.goto("/en/settings");
+    expect(response?.status()).toBe(404);
+  });
+
+  test("AC-3: signing out from the account page ends the session for the dashboard and the account page", async ({ page }) => {
+    await signInAsNewUser(page);
+    await page.getByRole("link", { name: "Account", exact: true }).click();
+    await expect(page).toHaveURL(/\/en\/account$/);
+    await page.getByRole("button", { name: "Sign out" }).click();
+    await expect(page).toHaveURL(/\/en$/);
+    await expect(page.getByRole("button", { name: "Sign in with Google" })).toBeVisible();
+    for (const path of ["/en/dashboard", "/en/account"]) {
+      await page.goto(path);
+      await expect(page).toHaveURL(/\/en$/);
+    }
+  });
+
+  test("AC-4: the Sign out button works with JavaScript off", async ({ page, browser, baseURL }) => {
+    await signInAsNewUser(page);
+    const context = await browser.newContext({ baseURL, javaScriptEnabled: false, storageState: await page.context().storageState() });
+    try {
+      const plain = await context.newPage();
+      await plain.goto("/en/account");
+      await plain.getByRole("button", { name: "Sign out" }).click();
+      await expect(plain).toHaveURL(/\/en$/);
+      await plain.goto("/en/account");
+      await expect(plain).toHaveURL(/\/en$/);
+    } finally {
+      await context.close();
+    }
+  });
+
+  test("AC-5: the link, the page and the button are translated", async ({ page }) => {
+    await signInAsNewUser(page);
+    for (const [locale, account, signOut] of [
+      ["ru", "Аккаунт", "Выйти"],
+      ["hu", "Fiók", "Kijelentkezés"],
+    ]) {
+      await page.goto(`/${locale}/dashboard`);
+      await page.getByRole("link", { name: account, exact: true }).click();
+      await expect(page).toHaveURL(new RegExp(`/${locale}/account$`));
+      await expect(page).toHaveTitle(account);
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText(account);
+      await expect(page.getByRole("button", { name: signOut })).toBeVisible();
+    }
   });
 });
