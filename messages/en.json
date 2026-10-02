@@ -65,7 +65,8 @@
     "actionFailed": "Couldn't save, try again.",
     "kmValue": "{km} km",
     "mapAttribution": "© OpenStreetMap contributors · route: MTSZ",
-    "settings": "Settings"
+    "settings": "Settings",
+    "stampDate": "Date of the stamp"
   },
   "error": {
     "title": "Something went wrong",

@@ -1,51 +1,30 @@
 "use client";
 
-import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { setPlacesStamped } from "@/app/[locale]/dashboard/actions";
+import { setPlacesStamped, setStampDate } from "@/app/[locale]/dashboard/actions";
+import { newStampDate } from "@/lib/stamp-date";
 import ActionButton from "./ActionButton";
-import { useStampAction } from "@/lib/use-stamp-action";
+import StampDateInput from "./StampDateInput";
 
+// Stamp / unstamp one place, and edit the date of a stamp (specs 0002, 0016). A new stamp gets the
+// user's own day.
 export default function StampButton({
   placeKey,
   stamped,
   date,
+  maxDate,
 }: {
   placeKey: string;
   stamped: boolean;
-  date?: string;
+  date?: string; // the stamp's date, when stamped
+  maxDate: string; // the latest date the server accepts
 }) {
   const t = useTranslations("dashboard");
-  const { pending, failed, run } = useStampAction();
-  const [prevDate, setPrevDate] = useState(date);
-  const [localDate, setLocalDate] = useState(date ?? "");
-
-  if (date !== prevDate) {
-    setPrevDate(date);
-    setLocalDate(date ?? "");
-  }
 
   return (
     <div className="flex items-center gap-2">
-      {failed && (
-        <span role="alert" className="text-xs text-red-600">
-          {t("actionFailed")}
-        </span>
-      )}
-      {stamped && (
-        <input
-          type="date"
-          value={localDate}
-          disabled={pending}
-          onChange={(e) => {
-            const val = e.target.value;
-            setLocalDate(val);
-            run(() => setPlacesStamped([placeKey], true, val));
-          }}
-          className="rounded border border-stone-300 px-2 py-0.5 text-sm disabled:opacity-50"
-        />
-      )}
-      <ActionButton action={() => setPlacesStamped([placeKey], !stamped)} done={stamped}>
+      {stamped && date && <StampDateInput value={date} max={maxDate} onSave={(d) => setStampDate([placeKey], d)} />}
+      <ActionButton action={() => setPlacesStamped([placeKey], !stamped, stamped ? undefined : newStampDate())} done={stamped}>
         {stamped ? t("unstamp") : t("stamp")}
       </ActionButton>
     </div>

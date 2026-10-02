@@ -5,7 +5,7 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { setExtraStamped, setPlacesStamped } from "./actions";
+import { setExtraStampDate, setExtraStamped, setPlacesStamped, setStampDate } from "./actions";
 
 type Call = { table: string; op: string; args: unknown[] };
 
@@ -16,15 +16,22 @@ function fakeSupabase({
   checkpoints = [] as { id: number; place_key: string }[],
   readError = null as unknown,
   writeError = null as unknown,
+  updatedRows = [{ ok: 1 }] as unknown[], // what `update(...).select()` returns: the rows that were changed
 } = {}) {
   const calls: Call[] = [];
   const from = (table: string) => {
     let result: { data?: unknown; error: unknown } = { error: null };
+    let updating = false;
     const record = (op: string, args: unknown[]) => calls.push({ table, op, args });
     const q = {
       select(...args: unknown[]) {
         record("select", args);
-        result = { data: checkpoints, error: readError };
+        result = updating ? { data: updatedRows, error: writeError } : { data: checkpoints, error: readError };
+        return q;
+      },
+      update(...args: unknown[]) {
+        record("update", args);
+        updating = true;
         return q;
       },
       in(column: string, values: unknown[]) {
@@ -62,7 +69,7 @@ function useClient(fake: ReturnType<typeof fakeSupabase>) {
   return fake;
 }
 
-const writes = (calls: Call[]) => calls.filter((c) => c.op === "upsert" || c.op === "delete");
+const writes = (calls: Call[]) => calls.filter((c) => c.op === "upsert" || c.op === "delete" || c.op === "update");
 
 // The actions log failures (spec 0008). Spying keeps the output quiet and lets the 0008 tests read it.
 const errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -114,19 +121,19 @@ describe("spec 0002: setPlacesStamped", () => {
     expect(revalidatePath).toHaveBeenCalledWith("/[locale]/dashboard", "page");
   });
 
-  it("AC-3: explicit date updates stamped_on for existing rows", async () => {
+  it("spec 0016 AC-1: a date is the stamp date of NEW rows only: it still never overwrites an existing stamp", async () => {
     const { calls } = useClient(fakeSupabase({ checkpoints: KOSZEG }));
-    expect(await setPlacesStamped(["OKTPH_03"], true, "2023-10-01")).toEqual({ ok: true });
+    expect(await setPlacesStamped(["OKTPH_03"], true, "2026-10-02")).toEqual({ ok: true });
     expect(writes(calls)).toEqual([
       {
         table: "user_stamps",
         op: "upsert",
         args: [
           [
-            { user_id: "user-1", checkpoint_id: 4, stamped_on: "2023-10-01" },
-            { user_id: "user-1", checkpoint_id: 5, stamped_on: "2023-10-01" },
+            { user_id: "user-1", checkpoint_id: 4, stamped_on: "2026-10-02" },
+            { user_id: "user-1", checkpoint_id: 5, stamped_on: "2026-10-02" },
           ],
-          { onConflict: "user_id, checkpoint_id" },
+          { ignoreDuplicates: true },
         ],
       },
     ]);
@@ -186,14 +193,14 @@ describe("spec 0002: setExtraStamped", () => {
     ]);
   });
 
-  it("AC-8: stamping with explicit date uses ON CONFLICT to update stamped_on", async () => {
+  it("spec 0016 AC-1: a date is the stamp date of a NEW extra stamp only (ON CONFLICT DO NOTHING)", async () => {
     const { calls } = useClient(fakeSupabase());
-    expect(await setExtraStamped(7, true, "2023-10-01")).toEqual({ ok: true });
+    expect(await setExtraStamped(7, true, "2026-10-02")).toEqual({ ok: true });
     expect(writes(calls)).toEqual([
       {
         table: "user_extra_stamps",
         op: "upsert",
-        args: [{ user_id: "user-1", extra_id: 7, stamped_on: "2023-10-01" }, { onConflict: "user_id, extra_id" }],
+        args: [{ user_id: "user-1", extra_id: 7, stamped_on: "2026-10-02" }, { ignoreDuplicates: true }],
       },
     ]);
   });
@@ -335,5 +342,137 @@ describe("spec 0008: logging of failed stamp actions", () => {
     expect(result).toEqual(FAILED);
     expect(Object.keys(result).sort()).toEqual(["ok", "reason"]);
     expect(revalidatePath).not.toHaveBeenCalled();
+  });
+});
+
+// A day inside the valid range whatever "today" is (the range runs from 1938 to tomorrow in UTC).
+const DAY = "2026-09-15";
+
+describe("spec 0016: dates of new stamps", () => {
+  it("AC-3: a malformed date is invalid input: refused with a warning and no database access", async () => {
+    for (const bad of ["2026-02-30", "2026-9-5", "", "tomorrow", " 2026-10-02"]) {
+      expect(await setPlacesStamped(["OKTPH_03"], true, bad), bad).toEqual({ ok: false, reason: "failed" });
+      expect(await setExtraStamped(7, true, bad), bad).toEqual({ ok: false, reason: "failed" });
+    }
+    expect(createClient).not.toHaveBeenCalled();
+    expect(warnLog).toHaveBeenCalledTimes(10);
+  });
+
+  it("AC-3: a real date outside the valid range is ignored: the stamp is still made, with the default date", async () => {
+    const { calls } = useClient(fakeSupabase({ checkpoints: KOSZEG }));
+    for (const outOfRange of ["2999-01-01", "0002-10-02", "1900-01-01"]) {
+      expect(await setPlacesStamped(["OKTPH_03"], true, outOfRange)).toEqual({ ok: true });
+    }
+    const rows = writes(calls).map((c) => (c.args[0] as Record<string, unknown>[]).map((r) => "stamped_on" in r));
+    expect(rows).toEqual([[false, false], [false, false], [false, false]]);
+    expect(warnLog).not.toHaveBeenCalled();
+  });
+
+  it("AC-3: an out-of-range date doesn't stop an extra stamp either", async () => {
+    const { calls } = useClient(fakeSupabase());
+    expect(await setExtraStamped(7, true, "2999-01-01")).toEqual({ ok: true });
+    expect(writes(calls)[0].args[0]).toEqual({ user_id: "user-1", extra_id: 7 });
+  });
+
+  it("AC-1: without a date nothing is added to the rows (the database default applies)", async () => {
+    const { calls } = useClient(fakeSupabase({ checkpoints: KOSZEG }));
+    await setPlacesStamped(["OKTPH_03"], true);
+    expect(writes(calls)[0].args[0]).toEqual([
+      { user_id: "user-1", checkpoint_id: 4 },
+      { user_id: "user-1", checkpoint_id: 5 },
+    ]);
+  });
+});
+
+describe("spec 0016: setStampDate", () => {
+  it("AC-4: updates stamped_on of every variant of the place, for the user, and nothing else", async () => {
+    const { calls } = useClient(fakeSupabase({ checkpoints: [...KOSZEG, { id: 9, place_key: "OKTPH_07" }] }));
+    expect(await setStampDate(["OKTPH_03"], DAY)).toEqual({ ok: true });
+    expect(calls.filter((c) => c.table === "user_stamps")).toEqual([
+      { table: "user_stamps", op: "update", args: [{ stamped_on: DAY }] },
+      { table: "user_stamps", op: "eq", args: ["user_id", "user-1"] },
+      { table: "user_stamps", op: "in", args: ["checkpoint_id", [4, 5]] },
+      { table: "user_stamps", op: "select", args: ["checkpoint_id"] },
+    ]);
+    expect(calls.some((c) => c.op === "upsert" || c.op === "delete")).toBe(false);
+    expect(revalidatePath).toHaveBeenCalledWith("/[locale]/dashboard", "page");
+  });
+
+  it("AC-4: when the place isn't stamped (no row updated) it fails: it never creates a stamp", async () => {
+    const { calls } = useClient(fakeSupabase({ checkpoints: KOSZEG, updatedRows: [] }));
+    expect(await setStampDate(["OKTPH_03"], DAY)).toEqual({ ok: false, reason: "failed" });
+    expect(calls.some((c) => c.op === "upsert")).toBe(false);
+    expect(revalidatePath).not.toHaveBeenCalled();
+    expect(errorLog).not.toHaveBeenCalled(); // a user error, not a failure of ours
+  });
+
+  it("AC-4: an unknown place fails without writing", async () => {
+    const { calls } = useClient(fakeSupabase({ checkpoints: KOSZEG }));
+    expect(await setStampDate(["NOPE"], DAY)).toEqual({ ok: false, reason: "failed" });
+    expect(writes(calls)).toEqual([]);
+  });
+
+  it("AC-4: an invalid or out-of-range date is refused without database access, with a warning", async () => {
+    for (const bad of ["2026-02-30", "2999-01-01", "0002-10-02", "1937-12-31", "", "x"]) {
+      expect(await setStampDate(["OKTPH_03"], bad), bad).toEqual({ ok: false, reason: "failed" });
+    }
+    expect(await setStampDate([], DAY)).toEqual({ ok: false, reason: "failed" });
+    expect(await setStampDate("OKTPH_03" as unknown as string[], DAY)).toEqual({ ok: false, reason: "failed" });
+    expect(createClient).not.toHaveBeenCalled();
+    expect(warnLog.mock.calls.every((c) => c[0] === "[stamp-action] invalid input action=setStampDate")).toBe(true);
+    expect(warnLog).toHaveBeenCalledTimes(8);
+  });
+
+  it("AC-4: without a session it is `unauthorized` and writes nothing", async () => {
+    const { calls } = useClient(fakeSupabase({ user: null, checkpoints: KOSZEG }));
+    expect(await setStampDate(["OKTPH_03"], DAY)).toEqual({ ok: false, reason: "unauthorized" });
+    expect(writes(calls)).toEqual([]);
+  });
+
+  it("AC-4: a database error is `failed` and logged like the other stamp actions", async () => {
+    useClient(fakeSupabase({ checkpoints: KOSZEG, writeError: { code: "42501", message: "denied", details: "secret" } }));
+    expect(await setStampDate(["OKTPH_03"], DAY)).toEqual({ ok: false, reason: "failed" });
+    expect(errorLog.mock.calls).toEqual([['[stamp-action] action=setStampDate stage=write user=user-1 code=42501 message="denied"']]);
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("AC-4: never throws", async () => {
+    vi.mocked(createClient).mockRejectedValue(new Error("cookies() unavailable"));
+    await expect(setStampDate(["OKTPH_03"], DAY)).resolves.toEqual({ ok: false, reason: "failed" });
+  });
+});
+
+describe("spec 0016: setExtraStampDate", () => {
+  it("AC-4: updates only the user's own extra stamp", async () => {
+    const { calls } = useClient(fakeSupabase());
+    expect(await setExtraStampDate(7, DAY)).toEqual({ ok: true });
+    expect(calls).toEqual([
+      { table: "user_extra_stamps", op: "update", args: [{ stamped_on: DAY }] },
+      { table: "user_extra_stamps", op: "eq", args: ["user_id", "user-1"] },
+      { table: "user_extra_stamps", op: "eq", args: ["extra_id", 7] },
+      { table: "user_extra_stamps", op: "select", args: ["extra_id"] },
+    ]);
+    expect(revalidatePath).toHaveBeenCalledWith("/[locale]/dashboard", "page");
+  });
+
+  it("AC-4: when the extra stamp isn't collected (no row updated) it fails without creating one", async () => {
+    const { calls } = useClient(fakeSupabase({ updatedRows: [] }));
+    expect(await setExtraStampDate(7, DAY)).toEqual({ ok: false, reason: "failed" });
+    expect(calls.some((c) => c.op === "upsert")).toBe(false);
+  });
+
+  it("AC-4: refuses a non-integer id and an invalid date without database access", async () => {
+    expect(await setExtraStampDate(1.5, DAY)).toEqual({ ok: false, reason: "failed" });
+    expect(await setExtraStampDate(7, "2026-02-30")).toEqual({ ok: false, reason: "failed" });
+    expect(await setExtraStampDate(7, "2999-01-01")).toEqual({ ok: false, reason: "failed" });
+    expect(createClient).not.toHaveBeenCalled();
+  });
+
+  it("AC-4: without a session it is `unauthorized`; errors are `failed` and logged", async () => {
+    useClient(fakeSupabase({ user: null }));
+    expect(await setExtraStampDate(7, DAY)).toEqual({ ok: false, reason: "unauthorized" });
+    useClient(fakeSupabase({ writeError: { code: "42501", message: "denied" } }));
+    expect(await setExtraStampDate(7, DAY)).toEqual({ ok: false, reason: "failed" });
+    expect(errorLog.mock.calls).toEqual([['[stamp-action] action=setExtraStampDate stage=write user=user-1 code=42501 message="denied"']]);
   });
 });

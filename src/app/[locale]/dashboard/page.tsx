@@ -14,6 +14,7 @@ import {
   walkedRanges,
   findStageForKm,
 } from "@/lib/progress";
+import { maxStampDate } from "@/lib/stamp-date";
 import LocateButton from "@/components/LocateButton";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import SignOutButton from "@/components/SignOutButton";
@@ -35,6 +36,7 @@ export default async function Dashboard({
   setRequestLocale(locale);
   const t = await getTranslations("dashboard");
   const format = await getFormatter();
+  const maxDate = maxStampDate(); // the latest stamp date the server accepts: the date fields' `max`
 
   const supabase = await createClient();
   const {
@@ -194,6 +196,7 @@ export default async function Dashboard({
                           placeKey={p.key}
                           stamped={stampedPlaces.has(p.key)}
                           date={stampedPlaces.get(p.key)}
+                          maxDate={maxDate}
                         />
                       </div>
                     </li>
@@ -234,6 +237,7 @@ export default async function Dashboard({
                     extraId={e.id}
                     stamped={extraDone.has(e.id)}
                     date={extraDone.get(e.id)}
+                    maxDate={maxDate}
                   />
                 </div>
               </li>

@@ -1,51 +1,33 @@
 "use client";
 
-import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { setExtraStamped } from "@/app/[locale]/dashboard/actions";
+import { setExtraStampDate, setExtraStamped } from "@/app/[locale]/dashboard/actions";
+import { newStampDate } from "@/lib/stamp-date";
 import ActionButton from "./ActionButton";
-import { useStampAction } from "@/lib/use-stamp-action";
+import StampDateInput from "./StampDateInput";
 
+// Same as StampButton, for the extra (non-official) stamps.
 export default function ExtraStampButton({
   extraId,
   stamped,
   date,
+  maxDate,
 }: {
   extraId: number;
   stamped: boolean;
-  date?: string;
+  date?: string; // the stamp's date, when stamped
+  maxDate: string; // the latest date the server accepts
 }) {
   const t = useTranslations("dashboard");
-  const { pending, failed, run } = useStampAction();
-  const [prevDate, setPrevDate] = useState(date);
-  const [localDate, setLocalDate] = useState(date ?? "");
-
-  if (date !== prevDate) {
-    setPrevDate(date);
-    setLocalDate(date ?? "");
-  }
 
   return (
     <div className="flex items-center gap-2">
-      {failed && (
-        <span role="alert" className="text-xs text-red-600">
-          {t("actionFailed")}
-        </span>
-      )}
-      {stamped && (
-        <input
-          type="date"
-          value={localDate}
-          disabled={pending}
-          onChange={(e) => {
-            const val = e.target.value;
-            setLocalDate(val);
-            run(() => setExtraStamped(extraId, true, val));
-          }}
-          className="rounded border border-stone-300 px-2 py-0.5 text-sm disabled:opacity-50"
-        />
-      )}
-      <ActionButton action={() => setExtraStamped(extraId, !stamped)} done={stamped} accent="amber">
+      {stamped && date && <StampDateInput value={date} max={maxDate} onSave={(d) => setExtraStampDate(extraId, d)} />}
+      <ActionButton
+        action={() => setExtraStamped(extraId, !stamped, stamped ? undefined : newStampDate())}
+        done={stamped}
+        accent="amber"
+      >
         {stamped ? t("unstamp") : t("stamp")}
       </ActionButton>
     </div>

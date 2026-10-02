@@ -65,7 +65,8 @@
     "actionFailed": "Nem sikerült menteni, próbáld újra.",
     "kmValue": "{km} km",
     "mapAttribution": "© az OpenStreetMap közreműködői · útvonal: MTSZ",
-    "settings": "Beállítások"
+    "settings": "Beállítások",
+    "stampDate": "A bélyegzés dátuma"
   },
   "error": {
     "title": "Valami elromlott",

@@ -13,6 +13,7 @@ import { emptyLines, segmentLines, sliceRoute, splitRoute, type Route } from "@/
 import { fmtTime, hopOrder, routeStats, type Hop } from "@/lib/route-stats";
 import { setStageOpen } from "@/lib/stage-events";
 import { setExtraStamped, setPlacesStamped } from "@/app/[locale]/dashboard/actions";
+import { newStampDate } from "@/lib/stamp-date";
 
 export type MapPoint = {
   placeKey: string;
@@ -628,14 +629,16 @@ export default function TrailMap({
               },
               {
                 label: stamped ? tr("unmarkStamped") : tr("markStamped"),
-                run: (button, showError) => done(button, showError, setPlacesStamped([key], !stamped)),
+                run: (button, showError) =>
+                  done(button, showError, setPlacesStamped([key], !stamped, stamped ? undefined : newStampDate())),
               },
             );
           } else {
             const stamped = latest.current.extras.find((x) => String(x.id) === key)?.stamped ?? false;
             actions.push({
               label: stamped ? tr("unmarkStamped") : tr("markStamped"),
-              run: (button, showError) => done(button, showError, setExtraStamped(Number(key), !stamped)),
+              run: (button, showError) =>
+                done(button, showError, setExtraStamped(Number(key), !stamped, stamped ? undefined : newStampDate())),
             });
           }
           actions.push({

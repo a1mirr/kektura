@@ -65,7 +65,8 @@
     "actionFailed": "Не удалось сохранить, попробуйте ещё раз.",
     "kmValue": "{km} км",
     "mapAttribution": "© участники OpenStreetMap · маршрут: MTSZ",
-    "settings": "Настройки"
+    "settings": "Настройки",
+    "stampDate": "Дата печати"
   },
   "error": {
     "title": "Что-то пошло не так",
