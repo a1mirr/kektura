@@ -92,12 +92,31 @@ describe("spec 0022: fresh-context review", () => {
     });
   });
 
+  it("AC-3 (spec 0018 AC-7): the reviewer checks that what users can see is in the changelog", () => {
+    const body = read(".claude/agents/fresh-reviewer.md");
+    expect(body).toMatch(/A change users can see \(texts, names, pages, behaviour\) with no entry in `src\/content\/changelog\.ts`/);
+    expect(body).toContain("spec 0018 AC-7");
+  });
+
   it("AC-4: the pull request template has the checklist, the reviewed commit and a place for the findings", () => {
     const template = read(".github/pull_request_template.md");
     expect(template).toMatch(/^- \[ \] .*spec came first.*needs no spec/m);
     expect(template).toMatch(/^- \[ \] .*npm run check.*npm run e2e/m);
+    expect(template).toMatch(/^- \[ \] .*users can see is in the changelog.*src\/content\/changelog\.ts/m);
     expect(template).toMatch(/^- \[ \] .*fresh-context agent.*fresh-reviewer.*at the commit named below.*later commits only fix wording/m);
     expect(template).toMatch(/^## Review findings/m);
     expect(template).toMatch(/^Reviewed commit:/m);
+  });
+});
+
+// Spec 0018 AC-7: what users can see always reaches the changelog page. Whether an entry exists for a given
+// change can't be computed, so the rule is written where authors and reviewers look; the review checks it.
+describe("spec 0018: the changelog rule", () => {
+  it("AC-7: CLAUDE.md asks for an entry, in three languages, in the same pull request", () => {
+    const claude = read("CLAUDE.md");
+    expect(claude).toMatch(/\*\*Changelog\*\* \(spec 0018 AC-7\)/);
+    expect(claude).toMatch(/adds or extends an entry in `src\/content\/changelog\.ts` in the same pull request, in all three languages/);
+    expect(claude).toMatch(/process, test and refactor changes add none/);
+    expect(claude).toMatch(/joins that entry/);
   });
 });

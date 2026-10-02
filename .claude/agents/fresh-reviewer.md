@@ -38,6 +38,8 @@ Do not trust the spec's status or its coverage table: verify them.
   (assertions too weak, mocks standing in for the thing under test). `manual` rows must say how to check.
 - Spec hygiene: acceptance criteria renumbered or deleted instead of marked `Removed`; the owning spec of
   changed behaviour not updated; the index in `specs/README.md` out of date; status and coverage not true.
+- A change users can see (texts, names, pages, behaviour) with no entry in `src/content/changelog.ts` in all
+  three languages (spec 0018 AC-7), or an entry that says something untrue about the app as shipped.
 - Leftovers of anything renamed, moved or removed: code, routes and links, message keys and texts in all three
   languages (`messages/ru.json`, `en.json`, `hu.json`), the About page and the changelog, `README.md`,
   `CLAUDE.md`, other specs, test names.

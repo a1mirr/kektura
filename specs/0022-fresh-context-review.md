@@ -32,7 +32,8 @@ author's context, and wants that to be part of how work is done here, not someth
     the diff touches, saying whether the change needed a spec of its own), and does not trust the spec's
     status or its coverage table: it checks each AC against the code and the tests;
   - it looks for: ACs not implemented or built twice, ACs without a test that really asserts them, behaviour
-    that no AC describes, leftovers of what was renamed or moved (code, messages in all three languages,
+    that no AC describes, changes users can see that are missing from the changelog or described untruly
+    there (spec 0018 AC-7), leftovers of what was renamed or moved (code, messages in all three languages,
     docs, specs, links), the gotchas listed in `CLAUDE.md`, regressions for signed-out visitors, other
     locales, small screens and the no-JS paths, and security and privacy (authorization, secrets in logs,
     redirects);
@@ -40,7 +41,8 @@ author's context, and wants that to be part of how work is done here, not someth
   - it reports findings most severe first, each with `file:line`, what is wrong and a concrete failing
     scenario, then what it checked and found fine; "no findings" is a valid answer.
 - **AC-4**: `.github/pull_request_template.md` gives every pull request the checklist (spec first, or a small
-  change that needs none; checks and E2E run; fresh-context review done at the commit named in the pull
+  change that needs none; checks and E2E run; everything users can see is in the changelog; fresh-context
+  review done at the commit named in the pull
   request, with only wording fixes after it) and a section to record the reviewed commit, the review's
   findings and what was done about each.
 
