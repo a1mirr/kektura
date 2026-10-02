@@ -5,14 +5,17 @@ import { useRouter } from "@/i18n/navigation";
 import type { ActionResult } from "@/lib/action-result";
 
 // Runs a stamp server action: `pending` while it runs, `failed` if it didn't go through. An expired
-// session refreshes the page instead, which redirects to the sign-in screen.
+// session refreshes the page instead, which redirects to the sign-in screen. `optimistic` runs at the
+// start of the transition, so a `useOptimistic` setter called there flips the UI at once and reverts by
+// itself when the transition ends (spec 0009 AC-3).
 export function useStampAction() {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [failed, setFailed] = useState(false);
 
-  const run = (action: () => Promise<ActionResult>) =>
+  const run = (action: () => Promise<ActionResult>, optimistic?: () => void) =>
     start(async () => {
+      optimistic?.();
       setFailed(false);
       let result: ActionResult;
       try {
