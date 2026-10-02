@@ -116,7 +116,7 @@ describe("spec 0018: the changelog rule", () => {
     const claude = read("CLAUDE.md");
     expect(claude).toMatch(/\*\*Changelog\*\* \(spec 0018 AC-7\)/);
     expect(claude).toMatch(/adds or extends an entry in `src\/content\/changelog\.ts` in the same pull request, in all three languages/);
-    expect(claude).toMatch(/process, test and refactor changes add none/);
+    expect(claude).toMatch(/process, test, refactor and deploy-file changes add none/);
     expect(claude).toMatch(/joins that entry/);
   });
 });
