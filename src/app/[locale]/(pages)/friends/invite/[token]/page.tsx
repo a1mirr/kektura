@@ -18,8 +18,9 @@ export default async function InvitePage({
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  const { data: inviterName } = await supabase.rpc('get_inviter_name', { token });
-  if (!inviterName) return <div className="max-w-md mx-auto mt-16 p-6 text-center border rounded-xl space-y-6"><h1 className="text-2xl font-bold">{t("invalidToken")}</h1></div>;
+  const { data: inviterInfo } = await supabase.rpc('get_inviter_info', { token });
+  if (!inviterInfo || inviterInfo.length === 0) return <div className="max-w-md mx-auto mt-16 p-6 text-center border rounded-xl space-y-6"><h1 className="text-2xl font-bold">{t("invalidToken")}</h1></div>;
+  const { inviter_id: inviterId, display_name: inviterName } = inviterInfo[0];
 
   if (!user) {
     return (
@@ -29,6 +30,14 @@ export default async function InvitePage({
           <SignInButton next={'/friends/invite/' + token} />
           {testLoginEnabled() && <TestLoginForm locale={locale} next={'/friends/invite/' + token} />}
         </div>
+      </div>
+    );
+  }
+
+  if (user.id === inviterId) {
+    return (
+      <div className="max-w-md mx-auto mt-16 p-6 text-center border rounded-xl space-y-6">
+        <h1 className="text-2xl font-bold">{t("ownLink")}</h1>
       </div>
     );
   }

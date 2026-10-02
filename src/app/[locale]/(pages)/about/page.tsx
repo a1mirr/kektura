@@ -107,6 +107,7 @@ export default async function AboutPage({ params }: Props) {
               ),
             })}
           </p>
+          <p>{t("data4")}</p>
         </div>
       </section>
 

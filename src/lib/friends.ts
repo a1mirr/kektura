@@ -1,12 +1,14 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 import { getReferenceData } from "./dashboard-data";
-import { buildPlaces, stampedPlaceKeys, walkedRanges, progressSummary } from "./progress";
+import { buildPlaces, stampedPlaceKeys, walkedRanges, progressSummary, buildStages } from "./progress";
+import stagesData from "../../scripts/data/okt-stages.json";
 
 export type Friend = {
   id: string;
   displayName: string | null;
   isSharing: boolean;
+  friendIsSharing: boolean;
   status: 'pending' | 'accepted';
   isRequester: boolean;
   stamps?: { checkpoint_id: number }[];
@@ -39,12 +41,14 @@ export async function getFriends(supabase: SupabaseClient<Database>): Promise<Fr
   for (const f of friendships) {
     const isRequester = f.user_id === uid;
     const friendId = isRequester ? f.friend_id : f.user_id;
-    const isSharing = isRequester ? f.friend_is_sharing : f.user_is_sharing;
+    const isSharing = isRequester ? f.user_is_sharing : f.friend_is_sharing;
+    const friendIsSharing = isRequester ? f.friend_is_sharing : f.user_is_sharing;
     
     result.push({
       id: friendId,
       displayName: profileMap.get(friendId) ?? null,
       isSharing,
+      friendIsSharing,
       status: f.status as 'pending' | 'accepted',
       isRequester,
       stamps: stampsMap.get(friendId) ?? [],
@@ -59,6 +63,10 @@ export async function getFriendProgress(friend: Friend) {
   const stampedKeys = stampedPlaceKeys(places, (friend.stamps ?? []).map(s => ({ checkpoint_id: s.checkpoint_id, stamped_on: '2000-01-01' })));
   const ranges = walkedRanges(places, stampedKeys);
   const summary = progressSummary(places, ranges);
-  return { summary, places, stampedKeys };
+  
+  const stages = buildStages(places, stagesData.stages);
+  const completedStages = stages.filter(s => s.places.every(p => stampedKeys.has(p.key))).length;
+  
+  return { summary, places, stampedKeys, completedStages };
 }
 

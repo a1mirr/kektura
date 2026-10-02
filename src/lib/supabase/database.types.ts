@@ -128,8 +128,10 @@ isOneToOne: false
               "checkpoint_id": number,"friend_id": string
             }[]
                            },
-"get_inviter_name":
-{ Args: { "token": string }; Returns: string
+"get_inviter_info":
+{ Args: { "token": string }; Returns: {
+              "inviter_id": string,"display_name": string
+            }[]
                            },
 "ignore_request":
 { Args: { "requester_id": string }; Returns: undefined

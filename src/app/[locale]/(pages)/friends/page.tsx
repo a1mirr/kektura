@@ -1,12 +1,14 @@
-﻿import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { getFriends } from '@/lib/friends';
+import { getFriends, getFriendProgress } from '@/lib/friends';
 import { createClient } from '@/lib/supabase/server';
 import { isFriendsEnabled, regenerateInvite, approveRequest, ignoreRequest, removeFriend, setSharing } from './actions';
+import { Link } from '@/i18n/navigation';
 
-export default async function FriendsPage() {
+export default async function FriendsPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   if (!(await isFriendsEnabled())) notFound();
   
+  const { error } = await searchParams;
   const t = await getTranslations('friends');
   const supabase = await createClient();
   const [friends, { data: userRes }] = await Promise.all([
@@ -21,10 +23,16 @@ export default async function FriendsPage() {
 
   const pending = friends.filter(f => f.status === 'pending' && !f.isRequester);
   const accepted = friends.filter(f => f.status === 'accepted');
+  const acceptedProgress = await Promise.all(accepted.map(async f => {
+    if (!f.friendIsSharing) return { ...f, progress: null };
+    const p = await getFriendProgress(f);
+    return { ...f, progress: p };
+  }));
 
   return (
     <div className='max-w-xl mx-auto p-4 space-y-8'>
       <h1 className='text-2xl font-bold'>{t('title')}</h1>
+      {error && <div className="bg-red-50 text-red-700 p-4 rounded-lg">{error}</div>}
       
       <section className='space-y-4'>
         <h2 className='text-xl font-semibold'>{t('inviteTitle')}</h2>
@@ -59,20 +67,32 @@ export default async function FriendsPage() {
 
       <section className='space-y-4'>
         <h2 className='text-xl font-semibold'>{t('acceptedTitle')}</h2>
-        {accepted.length === 0 ? (
+        {acceptedProgress.length === 0 ? (
           <p className='text-stone-500'>{t('noFriends')}</p>
         ) : (
           <ul className='space-y-4'>
-            {accepted.map(f => (
+            {acceptedProgress.map(f => (
               <li key={f.id} className='border p-4 rounded space-y-2'>
                 <div className='flex justify-between items-center'>
-                  <span className='font-bold'>{f.displayName}</span>
+                  {f.friendIsSharing ? (
+                    <Link href={`/friends/${f.id}`} className="font-bold text-blue-600 hover:underline">
+                      {f.displayName}
+                    </Link>
+                  ) : (
+                    <span className='font-bold'>{f.displayName}</span>
+                  )}
                   <form action={async () => { "use server"; await removeFriend(f.id); }}>
                     <button className='text-red-600 text-sm'>{t('remove')}</button>
                   </form>
                 </div>
                 <div className='text-sm text-stone-600'>
-                  {f.stamps?.length || 0} {t('stampsCount')}
+                  {!f.friendIsSharing ? (
+                    t('notSharing')
+                  ) : (
+                    <>
+                      {f.stamps?.length || 0} {t('stampsCount')} &middot; {f.progress?.summary.doneKm} km &middot; {f.progress?.completedStages} stages
+                    </>
+                  )}
                 </div>
                 <form action={async () => {
                   'use server';

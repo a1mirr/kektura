@@ -106,7 +106,8 @@
     "data2": "Cookies keep you signed in. Your browser also remembers display choices, such as which stages are open and which map layers are on.",
     "data3": "You can delete your account and all your stamps at any time on the <account>Account</account> page. Feedback messages you have already sent are kept, but are no longer linked to you.",
     "contactTitle": "Questions or ideas?",
-    "contactText": "Found a bug or have an idea for the tracker? Send it through the <feedback>feedback form</feedback>."
+    "contactText": "Found a bug or have an idea for the tracker? Send it through the <feedback>feedback form</feedback>.",
+    "data4": "If you connect with friends, they can see your display name and your stage-by-stage progress (official stamps, kilometres, stages). They cannot see your stamp dates, notes, or extra stamps. You can stop sharing your progress with a friend at any time on the Friends page."
   },
   "changelog": {
     "title": "Changelog",
