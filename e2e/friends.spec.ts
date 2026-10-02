@@ -60,5 +60,6 @@ test("spec 0024: invalid link and own link", async ({ page }) => {
   // Assuming the UI prevents you from requesting yourself, or the server rejects it.
   // The RPC returns 'own_token', let's just make sure the page doesn't crash.
   await page.getByRole("button", { name: /Send request/i }).click();
-  await expect(page.locator("text=failed").or(page.locator("text=own_token"))).toBeVisible();
+  await expect(page).toHaveURL(/error=own_token/);
 });
+
