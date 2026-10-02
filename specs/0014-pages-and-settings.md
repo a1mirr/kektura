@@ -57,6 +57,11 @@ Other settings (language, email, export of the data); a "type your email to conf
 
 - Deleting needs a database function with elevated rights (`security definer`), because a user can't
   delete their own row in `auth.users` through the API. The stamps follow through `on delete cascade`.
+- Supabase's advisor flags `delete_user_account()` as a WARN ("signed-in users can execute a SECURITY
+  DEFINER function"). That is intended: a signed-in user must be able to call it, and it only ever deletes
+  `auth.uid()`'s own row; anonymous callers can't run it (tested). The alternative, deleting through the
+  Auth admin API, would put the `service_role` key (full access to everything) into the app server's
+  environment, which is the bigger risk.
 - After the deletion the user's session no longer exists at the Auth server, so `signOut()` gets a
   401/403 back; supabase-js ignores that and still clears the session cookies.
 - **Open question for the owner**: AC-8 (the per-month chart on the settings page instead of the
