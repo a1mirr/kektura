@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
   turbopack: {
     resolveAlias: { "next-intl/config": requestConfig },
   },
+  // Spec 0025 AC-2: the account page used to live at /settings. Temporary (307), so the address stays free
+  // for real settings later.
+  async redirects() {
+    return [{ source: "/:locale(ru|en|hu)/settings", destination: "/:locale/account", permanent: false }];
+  },
   webpack(config) {
     config.resolve.alias["next-intl/config"] = path.resolve(
       __dirname,

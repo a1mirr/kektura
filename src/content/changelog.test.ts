@@ -68,10 +68,17 @@ describe("spec 0025: the account page in the changelog", () => {
     }
   });
 
-  it("AC-6: it also says the page exists and the chart moved there, and nothing calls the page 'Account settings' any more", () => {
-    const en = entry.changes.map((c) => c.text.en);
-    expect(en.some((t) => /An Account page/.test(t))).toBe(true);
-    expect(en.some((t) => /chart moved to the Account page/.test(t))).toBe(true);
+  it("AC-6: it also says, in every language, that the page exists and that the chart moved there, and nothing calls the page 'Account settings' any more", () => {
+    const claims: Record<string, RegExp[]> = {
+      en: [/An Account page/, /chart moved to the Account page/],
+      ru: [/Страница «Аккаунт»/, /График.*на страницу «Аккаунт»/],
+      hu: [/Fiók oldal, ahol/, /diagram átkerült a Fiók oldalra/],
+    };
+    for (const locale of routing.locales) {
+      for (const claim of claims[locale]) {
+        expect(entry.changes.some((c) => claim.test(c.text[locale])), `${locale}: ${claim}`).toBe(true);
+      }
+    }
     for (const { where, text } of texts()) {
       for (const locale of routing.locales) {
         expect(text[locale], `${where} (${locale})`).not.toMatch(/Account settings|Настройки аккаунта|fiókbeállítás/i);
