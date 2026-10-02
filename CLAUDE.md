@@ -36,3 +36,11 @@ Stack: Next.js 16 (App Router, TS, Tailwind 4), next-intl (`ru` default, `en`, `
 - E2E: never against `next dev` (each stamp re-renders the whole dashboard, 15-20 s under parallel tests). Each test signs in as a fresh user (`signInAsNewUser`); wait for hydration (`expandAllStages`) before clicking client-side buttons.
 - Docker Desktop here can't delete its own Unix-socket files (Windows error 1920) and then crashes on start ("initializing Inference manager … dockerInference"). Workaround: quit Docker, rename `%LOCALAPPDATA%\Docker\run` (and `%LOCALAPPDATA%\docker-secrets-engine` if the error names it) aside, start again.
 - Node comes from winget: in a fresh shell refresh PATH if `npm` isn't found.
+
+## Server & Deployment
+- Live server: DigitalOcean droplet `188.166.117.212`, Ubuntu 22.04 LTS, 1GB RAM, 1 CPU.
+- Domain: `kektura-tracker.com`.
+- Deployment: Push to `production` git remote (`git push production main`). A `post-receive` hook in `~/kektura.git/hooks/` checks out the code to `~/kektura_app`, installs dependencies, builds, and reloads PM2.
+- Process Manager: PM2 (`pm2 reload kektura` or `pm2 logs kektura`). 
+- Environment: Node.js v22 via nvm. 2GB Swap space added to prevent OOM during builds. `HOSTNAME=188.166.117.212` is injected into Next.js by PM2 to prevent Next.js from aggressively overriding `request.url` with `localhost` internally during auth callbacks.
+- Web Server: Caddy proxying port 80/443 to Next.js on port 3000. Xray VPN (previously port 443) was disabled. Cloudflare manages DNS (Proxy should be OFF/Gray Cloud for Caddy to fetch Let's Encrypt certificates, or use Full (Strict) if turned ON).

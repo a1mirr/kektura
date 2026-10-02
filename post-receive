@@ -16,4 +16,4 @@ echo "Building Next.js app..."
 npm run build
 
 echo "Restarting PM2..."
-pm2 reload kektura || pm2 start npm --name "kektura" -- start
+HOSTNAME=188.166.117.212 pm2 reload kektura --update-env || HOSTNAME=188.166.117.212 pm2 start npm --name "kektura" -- start

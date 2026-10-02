@@ -11,5 +11,9 @@ export async function POST(request: Request) {
   const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
   const supabase = await createClient();
   await supabase.auth.signOut();
-  return NextResponse.redirect(new URL(`/${locale}`, request.url), 303);
+  
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
+  const protocol = request.headers.get("x-forwarded-proto") || "http";
+  const origin = `${protocol}://${host}`;
+  return NextResponse.redirect(`${origin}/${locale}`, 303);
 }
