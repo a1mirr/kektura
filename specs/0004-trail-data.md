@@ -47,6 +47,9 @@ and, with the third argument, `supabase/seed_extra.sql`. Never edit those by han
 1. Run `npm test` (this spec's checks).
 2. Run `npm run testdb:reset` and `npm run e2e`.
 3. Apply the seeds to production.
+4. Expire the dashboard's cached reference data (spec 0009): delete `.next/cache/fetch-cache` on the
+   server and restart PM2 (`deploy/README.md`, "After the seeds change"). Until then the old places are
+   served for up to 24 hours.
 
 **Places and variants.** 220 checkpoint rows form 161 places, the official count.
 - Alternative stamps at one place (`_1`/`_2`/`_3`) share a `place_key`, and stamping one stamps them

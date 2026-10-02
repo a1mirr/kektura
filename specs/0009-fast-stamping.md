@@ -17,7 +17,9 @@ feel instant and the re-render cheaper.
 - **AC-1**: The reference data (`checkpoints`, `extra_stamps`; RLS lets everyone read them) is read
   through a cookie-less Supabase client and cached on the server across requests and users, with a
   revalidation time of at most one day and a cache tag that can expire it on demand. Per request, the
-  dashboard only queries the signed-in user's own `user_stamps` and `user_extra_stamps`.
+  dashboard only queries the signed-in user's own `user_stamps` and `user_extra_stamps`. A failed
+  reference read is not cached, and the dashboard shows the localized error boundary (`error.tsx`)
+  rather than an empty list.
 - **AC-2**: The user's stamps are never cached across users: they keep going through the
   cookie-based client under RLS.
 - **AC-3**: Clicking a stamp button flips its label and style to the new state immediately (optimistic)
@@ -52,11 +54,12 @@ Offline stamping and a queue of pending stamps (a possible later feature); optim
   re-renders the page in the action's response without expiring any cache. Behaviour of 0002 is unchanged.
 - **Expiring the cache by hand.** The cache is also kept on disk (`.next/cache/fetch-cache`) and survives
   restarts and rebuilds. After changing seeds in production, either wait at most a day or delete that folder
-  and restart the app; nothing calls `revalidateTag(REFERENCE_DATA_TAG, "max")` yet.
+  and restart the app (`deploy/README.md`, "After the seeds change"); nothing calls `revalidateTag(REFERENCE_DATA_TAG, "max")` yet.
 - **Optimistic button.** `ActionButton` keeps `useOptimistic(done)` and flips it inside the transition that
   runs the action; React reverts it when the transition ends, so a failure needs no extra code and a success
   shows the server's answer. It takes `doneLabel`/`todoLabel` instead of children so it can show either one.
-  The date field of a new stamp still appears only once the server has answered (AC-4).
+  The date field of a new stamp still appears only once the server has answered (a consequence of AC-3:
+  the date is server data, not part of the optimistic state).
 
 ## Measurements
 
@@ -80,6 +83,6 @@ network, which was not measured (no production access in this task).
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-2 | `src/lib/dashboard-data.test.ts` (mocked clients: reference data via the cookie-less client under a tag and a one-day revalidation, never cached when the read fails; stamps via the cookie client) |
+| AC-1, AC-2 | `src/lib/dashboard-data.test.ts` (mocked clients: reference data via the cookie-less client under a tag and a one-day revalidation, never cached when the read fails; stamps via the cookie client). That the cache really serves later requests rests on these mocked-options unit tests plus the manual measurement above: to re-check, follow the Measurements procedure (build, `next start`, clear `.next-e2e/cache/fetch-cache`, stamp repeatedly, count reference reads, e.g. with a temporary log in `fetchReferenceData`; expect one) |
 | AC-3 | `src/components/ActionButton.test.tsx` (label and style flip while pending, revert on `failed` with the error, revert and refresh on `unauthorized`) |
 | AC-4, AC-5 | `e2e/stamping.spec.ts` and the other dashboard E2E specs (stats, counters and map come from the server's answer); `src/app/[locale]/dashboard/actions.test.ts` (the actions call `refresh()`) |

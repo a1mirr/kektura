@@ -55,6 +55,17 @@ Server-only values (`SITE_URL`, `TELEGRAM_*`) take effect with `pm2 restart kekt
 
 If the hook changed, copy the new `deploy/post-receive` to `~/kektura.git/hooks/` on the server.
 
+## After the seeds change
+
+The dashboard caches the checkpoints and extra stamps on the server for up to 24 hours (spec 0009), on
+disk as well as in memory, so the cache survives deploys and restarts. After applying changed seeds to
+production (spec 0004), delete the cache folder and restart, otherwise old places are served for up to a day:
+
+```
+rm -rf ~/kektura_app/.next/cache/fetch-cache
+pm2 restart kektura
+```
+
 ## When something is wrong
 
 - Logs: `pm2 logs kektura` (stamp and feedback failures are `[stamp-action]`, `[feedback]`,
