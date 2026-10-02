@@ -47,6 +47,8 @@ on a phone, and "Account" says what is behind the link.
   function keep their names.
 - Specs 0014 (AC-7 to AC-13), 0005 (AC-6), 0015 (AC-5) and 0018 (AC-6) are edited in place to use the new
   name and address. Spec 0014's file name stays so that existing links keep working.
+- Spec numbers 0023 and 0024 belong to specs drafted in parallel (feature flags, sharing), which are not on any
+  branch yet; this one took the next free number after them.
 - `/settings` is about a day old (spec 0014, added on 2026-10-02 and already pushed to `production`) and was linked from the dashboard
   header and the public About page, which is why it redirects. The redirect is in `next.config.ts`, so it
   runs before the proxy and needs no session. It is temporary so that the address stays free for real settings.
@@ -58,7 +60,7 @@ on a phone, and "Account" says what is behind the link.
 | AC | Test |
 | --- | --- |
 | AC-1, AC-2 | `e2e/account.spec.ts` (header link and no sign-out control; signed-out redirect; title and heading; `/settings` redirects to `/account` in each language) |
-| AC-3 | `e2e/account.spec.ts` (sign out from the account page in each language, then dashboard and account redirect), `e2e/auth.spec.ts` |
+| AC-3 | `e2e/account.spec.ts` (the button sits next to the heading; sign out from the account page in each language, then dashboard and account redirect), `e2e/auth.spec.ts` |
 | AC-4 | `e2e/account.spec.ts` (with JavaScript disabled) |
-| AC-5 | `e2e/account.spec.ts` (`ru` and `hu`), `e2e/about.spec.ts` (link), `tests/messages.test.ts` (parity) |
+| AC-5 | `tests/messages.test.ts` (the header link, the page title and the About page's link text use the same name in each language, and no key is still called settings), `e2e/account.spec.ts` (`ru` and `hu`), `e2e/about.spec.ts` (link) |
 | AC-6 | `src/content/changelog.test.ts` (the 2026-10-02 entry says all three things in every language) |
