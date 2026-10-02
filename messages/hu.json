@@ -162,5 +162,8 @@
     "deleteButton": "Igen, véglegesen törlöm a fiókom",
     "cancel": "Mégse",
     "deleteFailed": "Nem sikerült törölni a fiókot. Próbáld újra."
+  },
+  "friends": {
+    "unknown_user": "Ismeretlen"
   }
 }

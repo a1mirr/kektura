@@ -34,6 +34,32 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"friendships": {
+                  Row: {
+                    "created_at": string,"friend_id": string,"friend_is_sharing": boolean,"id": string,"status": string,"updated_at": string,"user_id": string,"user_is_sharing": boolean
+                  }
+                  Insert: {
+                    "created_at"?: string,"friend_id": string,"friend_is_sharing"?: boolean,"id"?: string,"status": string,"updated_at"?: string,"user_id": string,"user_is_sharing"?: boolean
+                  }
+                  Update: {
+                    "created_at"?: string,"friend_id"?: string,"friend_is_sharing"?: boolean,"id"?: string,"status"?: string,"updated_at"?: string,"user_id"?: string,"user_is_sharing"?: boolean
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"profiles": {
+                  Row: {
+                    "display_name": string,"id": string,"invite_token": string
+                  }
+                  Insert: {
+                    "display_name": string,"id": string,"invite_token"?: string
+                  }
+                  Update: {
+                    "display_name"?: string,"id"?: string,"invite_token"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"user_extra_stamps": {
                   Row: {
                     "extra_id": number,"stamped_on": string,"user_id": string
@@ -91,8 +117,28 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "delete_user_account":
+            "approve_request":
+{ Args: { "requester_id": string }; Returns: undefined
+                           },
+"delete_user_account":
 { Args: Record<PropertyKey, never>; Returns: undefined
+                           },
+"get_friend_stamps":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "checkpoint_id": number,"friend_id": string
+            }[]
+                           },
+"ignore_request":
+{ Args: { "requester_id": string }; Returns: undefined
+                           },
+"remove_friend":
+{ Args: { "other_id": string }; Returns: undefined
+                           },
+"send_request":
+{ Args: { "token": string }; Returns: string
+                           },
+"set_sharing":
+{ Args: { "other_id": string,"sharing": boolean }; Returns: undefined
                            }
           }
           Enums: {
