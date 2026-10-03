@@ -7,6 +7,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const read = (file: string) => fs.readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
+const hasBash = spawnSync("bash", ["-c", "true"]).status === 0;
 const workflow = read(".github/workflows/deploy.yml");
 const lines = workflow.split("\n");
 
@@ -35,7 +36,7 @@ describe("spec 0026: the deploy workflow", () => {
     it("the job runs only for a successful push to main of this very repository (or by hand)", () => {
       const condition = workflow.slice(workflow.indexOf("    if: >-"), workflow.indexOf("    runs-on:"));
       for (const part of [
-        "github.event_name == 'workflow_dispatch'",
+        "github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'", // by hand: from main only
         "github.event.workflow_run.conclusion == 'success'",
         "github.event.workflow_run.event == 'push'",
         "github.event.workflow_run.head_branch == 'main'",
@@ -55,8 +56,15 @@ describe("spec 0026: the deploy workflow", () => {
     });
   });
 
-  it("AC-2: one deploy at a time, a waiting one is not cancelled by being queued behind a running one", () => {
-    expect(workflow).toMatch(/^concurrency:\s*\n {2}group: deploy\s*\n {2}cancel-in-progress: false/m);
+  describe("AC-2: one deploy at a time", () => {
+    it("the deploy job has the concurrency group, and nothing is cancelled for it", () => {
+      expect(workflow).toMatch(/^ {4}concurrency:\s*\n {6}group: deploy\s*\n {6}cancel-in-progress: false/m);
+    });
+
+    it("the group is on the job, not the workflow: a run whose job is skipped must not take a waiting deploy's place", () => {
+      expect(workflow).not.toMatch(/^concurrency:/m);
+      expect(workflow.indexOf("    concurrency:")).toBeGreaterThan(workflow.indexOf("\njobs:"));
+    });
   });
 
   describe("AC-3: a manual run with a dry run that changes nothing", () => {
@@ -71,6 +79,17 @@ describe("spec 0026: the deploy workflow", () => {
       for (const name of ["Push the code to production", "Check that the site answers"]) {
         expect(step(name), name).toContain("env.DRY_RUN != 'true'");
       }
+    });
+
+    it("a run by hand that changes something needs a passed CI run on that commit, as a merge does", () => {
+      const ci = step("Check that CI passed on this commit");
+      expect(ci).toContain("id: ci");
+      expect(ci).toContain("github.event_name == 'workflow_dispatch'");
+      expect(ci).toContain("env.DRY_RUN != 'true'");
+      expect(ci).toContain('gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --commit "$TARGET_SHA"');
+      expect(ci).toContain('select(.conclusion == "success")');
+      expect(ci).toContain("exit 1");
+      expect(workflow.indexOf("- name: Check that CI passed on this commit")).toBeLessThan(workflow.indexOf("- name: Reach production and decide what to deploy"));
     });
 
     it("only migrates and pushes when the plan says deploy (a baseline may also run the migration step, to be recorded)", () => {
@@ -94,12 +113,45 @@ describe("spec 0026: the deploy workflow", () => {
       const push = step("Push the code to production");
       expect(push).toContain('git push production "$TARGET_SHA:refs/heads/main"');
       expect(workflow).not.toMatch(/--force|--force-with-lease|git push [^\n]* -f\b|git push [^\n]*\+/);
-      expect(workflow.match(/git push/g)).toHaveLength(1);
+      const code = lines.filter((line) => !line.trim().startsWith("#")).join("\n"); // comments may talk about `git push`
+      expect(code.match(/git push/g)).toHaveLength(1);
+    });
+
+    it("counts the push only when the server's hook reports it deployed this commit (git push exits 0 when the hook fails)", () => {
+      const push = step("Push the code to production");
+      expect(push).toContain('2>&1 | tee "$RUNNER_TEMP/push.log"');
+      expect(push).toMatch(/if ! grep -Eq "remote: Deployed \$\{TARGET_SHA:0:7\}\[0-9a-f\]\*\\\." "\$RUNNER_TEMP\/push\.log"; then/);
+      expect(push).toMatch(/exit 1\n\s+fi\n\s+echo "### Deployed"/); // the summary says "Deployed" only after the check
+      // ... and the hook prints exactly that line when it is done
+      expect(read("deploy/post-receive")).toContain('echo "Deployed $(git --git-dir="$GIT_DIR" rev-parse --short main)."');
+    });
+
+    describe.skipIf(!hasBash)("the check, run for real on hook output", () => {
+      const grepLine = () => /grep -Eq "remote: Deployed[^\n]*push\.log"/.exec(step("Push the code to production"))![0];
+      const run = (log: string, sha: string) => {
+        const dir = fs.mkdtempSync(path.join(os.tmpdir(), "push-"));
+        fs.writeFileSync(path.join(dir, "push.log"), log);
+        return spawnSync("bash", ["-c", grepLine()], { env: { ...process.env, TARGET_SHA: sha, RUNNER_TEMP: dir.replace(/\\/g, "/") } }).status;
+      };
+      const SHA = "0123456abcdef0123456789abcdef01234567890";
+
+      it("passes when the hook says it deployed this commit (abbreviation of any length)", () => {
+        expect(run("remote: Building Next.js app...\nremote: Deployed 0123456.\nTo host:~/kektura.git\n", SHA)).toBe(0);
+        expect(run("remote: Deployed 0123456abc.\n", SHA)).toBe(0);
+      });
+
+      it("fails when the hook stopped before saying so (a failed install or build), or deployed another commit", () => {
+        expect(run("remote: Installing dependencies...\nremote: npm ERR! ...\nTo host:~/kektura.git\n   a..b  x -> main\n", SHA)).toBe(1);
+        expect(run("remote: Deployed 9999999.\n", SHA)).toBe(1);
+        expect(run("Everything up-to-date\n", SHA)).toBe(1);
+      });
     });
 
     it("authenticates with the deploy key, a pinned host key and no prompt", () => {
       const setup = step("Set up the deploy key");
       expect(setup).toContain("StrictHostKeyChecking=yes");
+      expect(setup).toContain("| tr -d '\\r' > ~/.ssh/deploy_key"); // a key pasted from Windows may carry carriage returns
+      expect(setup).toContain("| tr -d '\\r' > ~/.ssh/known_hosts");
       expect(setup).toContain("IdentitiesOnly=yes");
       expect(setup).toContain('git remote add production "$DEPLOY_REMOTE"');
       expect(workflow).toContain("DEPLOY_REMOTE: a1mirr@188.166.117.212:~/kektura.git");
@@ -114,17 +166,19 @@ describe("spec 0026: the deploy workflow", () => {
       expect(failure).toContain("GITHUB_STEP_SUMMARY");
       expect(failure).toMatch(/Nothing was rolled back by itself/);
       expect(failure).toMatch(/revert the pull request on main and merge the revert/);
-      for (const id of ["plan", "migrate", "push", "smoke"]) expect(failure).toContain(`steps.${id}.outcome`);
+      for (const id of ["ci", "plan", "migrate", "push", "smoke"]) expect(failure).toContain(`steps.${id}.outcome`);
+      expect(failure).toMatch(/rebuild on the server by hand/); // a push whose build failed can't be re-run
     });
 
     it("names the steps the failure message refers to", () => {
-      for (const id of ["plan", "migrate", "push", "smoke"]) expect(workflow).toContain(`id: ${id}`);
+      for (const id of ["ci", "plan", "migrate", "push", "smoke"]) expect(workflow).toContain(`id: ${id}`);
     });
   });
 
   describe("AC-10: secrets are only referenced in a step's env, never printed; contents are read-only", () => {
-    it("has read-only permissions for the repository contents and nothing else", () => {
-      expect(workflow).toMatch(/^permissions:\n {2}contents: read\n\n/m);
+    it("has read-only permissions only: the contents, and the list of CI runs", () => {
+      expect(workflow).toMatch(/^permissions:\n {2}contents: read\n {2}actions: read[^\n]*\n\n/m);
+      expect(workflow).not.toMatch(/: write\b/);
     });
 
     it("references every secret only in an `env` mapping line", () => {
@@ -164,9 +218,10 @@ describe("spec 0026: the deploy workflow", () => {
     expect(claude).toContain("The merge itself deploys (spec 0026, `.github/workflows/deploy.yml`)");
     expect(claude).toContain("only for a rollback or when the workflow is broken");
     expect(claude).toMatch(/never push to `production` unless the user asks/);
+    expect(claude).toContain("insert into public.applied_migrations (file_name) values ('0031_x.sql')"); // the fallback records what it applied
     expect(claude).not.toContain("Nothing deploys by itself");
     const readme = read("deploy/README.md");
-    for (const part of ["## Automatic deploys", "### One-time setup", "## Deploying by hand (the fallback)", "DEPLOY_SSH_KEY", "DEPLOY_KNOWN_HOSTS", "SUPABASE_DB_URL", "TELEGRAM_BOT_TOKEN", "deploy-gate", 'restrict,command="/home/a1mirr/bin/deploy-gate"', "dry_run", "baseline", "0024_friends.sql"]) {
+    for (const part of ["## Automatic deploys", "### One-time setup", "## Deploying by hand (the fallback)", "DEPLOY_SSH_KEY", "DEPLOY_KNOWN_HOSTS", "SUPABASE_DB_URL", "TELEGRAM_BOT_TOKEN", "deploy-gate", 'restrict,command="/home/a1mirr/bin/deploy-gate"', "dry_run", "baseline", "0024_friends.sql", "insert into public.applied_migrations (file_name) values ('0031_x.sql')", "post-receive", "The server did not report a deploy"]) {
       expect(readme, part).toContain(part);
     }
   });

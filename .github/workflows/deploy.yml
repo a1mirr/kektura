@@ -28,17 +28,20 @@ on:
 
 permissions:
   contents: read
-
-# One deploy at a time. A merge that arrives while one runs waits; GitHub keeps only the newest waiting run.
-concurrency:
-  group: deploy
-  cancel-in-progress: false
+  actions: read # only to see whether CI passed on a commit that is deployed by hand
 
 jobs:
   deploy:
     name: Migrate, deploy, check
+    # One deploy at a time (AC-2). A merge that arrives while one runs waits; GitHub keeps only the newest waiting
+    # run. It is the job that has the group, not the workflow: a run whose job is skipped (CI failed, say) must not
+    # take the waiting place of a deploy that is still to come.
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
+    # Started by hand only from main: another branch must never reach the secrets or production (AC-1, AC-3).
     if: >-
-      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
       (github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.event == 'push' &&
        github.event.workflow_run.head_branch == 'main' &&
@@ -77,11 +80,27 @@ jobs:
         run: |
           set -euo pipefail
           install -m 700 -d ~/.ssh
-          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          # A secret pasted from Windows can carry carriage returns, which OpenSSH rejects.
+          printf '%s\n' "$DEPLOY_SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" | tr -d '\r' > ~/.ssh/known_hosts
           git remote add production "$DEPLOY_REMOTE"
           echo "GIT_SSH_COMMAND=ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts" >> "$GITHUB_ENV"
+
+      # A merge is deployed only after CI passed (the trigger sees to that); a run started by hand needs the same.
+      - name: Check that CI passed on this commit
+        id: ci
+        if: env.CONFIGURED == 'true' && github.event_name == 'workflow_dispatch' && env.DRY_RUN != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          passed=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --commit "$TARGET_SHA" --json conclusion --jq '[.[] | select(.conclusion == "success")] | length')
+          if [ "$passed" -lt 1 ]; then
+            echo "::error title=CI has not passed on this commit::Wait for CI on ${TARGET_SHA:0:7} to finish and pass, or fix it. A run started by hand deploys only a commit whose CI passed."
+            exit 1
+          fi
+          echo "CI passed on ${TARGET_SHA:0:7}."
 
       - name: Reach production and decide what to deploy
         id: plan
@@ -107,7 +126,13 @@ jobs:
         run: |
           set -euo pipefail
           # A fast-forward only, never forced: the server's hook builds and reloads (spec 0020).
-          git push production "$TARGET_SHA:refs/heads/main"
+          git push production "$TARGET_SHA:refs/heads/main" 2>&1 | tee "$RUNNER_TEMP/push.log"
+          # `git push` exits 0 even when the server's post-receive hook fails (githooks(5): the hook "does not
+          # affect the outcome"), so the push only counts when the hook's last line says it deployed this commit.
+          if ! grep -Eq "remote: Deployed ${TARGET_SHA:0:7}[0-9a-f]*\." "$RUNNER_TEMP/push.log"; then
+            echo "::error title=The server did not report a deploy::The push went through but the hook did not print 'Deployed ${TARGET_SHA:0:7}': the build on the server probably failed. See the log above."
+            exit 1
+          fi
           echo "### Deployed" >> "$GITHUB_STEP_SUMMARY"
           echo "- Pushed ${TARGET_SHA:0:7} to production; the server built it and reloaded." >> "$GITHUB_STEP_SUMMARY"
 
@@ -123,6 +148,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          CI_OUTCOME: ${{ steps.ci.outcome }}
           PLAN_OUTCOME: ${{ steps.plan.outcome }}
           MIGRATE_OUTCOME: ${{ steps.migrate.outcome }}
           PUSH_OUTCOME: ${{ steps.push.outcome }}
@@ -133,5 +159,6 @@ jobs:
             echo "- Nothing was rolled back by itself."
             echo "- Migrations that were applied stay applied (each ran in its own transaction); one that failed left nothing behind."
             echo "- Roll back the code: revert the pull request on main and merge the revert; in an emergency, see deploy/README.md ('When something is wrong')."
+            echo "- If the push went through but the build on the server failed, production's main already points at this commit, so a re-run skips it: merge a fix, or rebuild on the server by hand (deploy/README.md, 'When something is wrong')."
           } >> "$GITHUB_STEP_SUMMARY"
           node scripts/notify-telegram.mjs

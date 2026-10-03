@@ -36,6 +36,9 @@ spec, then the code):
 - **Failure messages**: the Telegram bot of spec 0017, through the repository secrets `TELEGRAM_BOT_TOKEN` and
   `TELEGRAM_CHAT_ID` when they are set; otherwise only GitHub's own failure e-mail.
 
+Also on 2026-10-03: the owner gave the author a standing permission to merge the author's own pull requests once CI
+is green and the fresh review is done (`CLAUDE.md`, spec 0021 AC-6). With no approval gate, such a merge is a deploy.
+
 Secrets (repository secrets, used by `deploy.yml` only): `DEPLOY_SSH_KEY` (private key), `DEPLOY_KNOWN_HOSTS`
 (the droplet's host key line, from `ssh-keyscan`), `SUPABASE_DB_URL` (exists), `TELEGRAM_BOT_TOKEN` and
 `TELEGRAM_CHAT_ID` (optional).
@@ -49,10 +52,13 @@ Secrets (repository secrets, used by `deploy.yml` only): `DEPLOY_SSH_KEY` (priva
   of the CI workflow and checks that it succeeded, was a push and was on `main`. Pull requests, other branches
   and forks never reach the deploy job or its secrets. A failed or still running CI never deploys.
 - **AC-2**: Only one deploy runs at a time. A merge that arrives while one is running waits for it and then
-  deploys the newest `main` (the older one is skipped, not run in parallel).
-- **AC-3**: A deploy can also be started by hand from the Actions tab (`workflow_dispatch`) for the current
-  `main`, with an option `dry_run` (on by default) that lists the migrations that would be applied and the
-  commit that would be deployed, and changes nothing.
+  deploys the newest `main` (the older one is skipped, not run in parallel). The deploy job has the concurrency
+  group, not the workflow, so a run whose job is skipped (CI failed on `main`, say) never takes the place of a
+  deploy that is waiting.
+- **AC-3**: A deploy can also be started by hand from the Actions tab (`workflow_dispatch`), only from `main`
+  (another branch never reaches the secrets), for the current `main`, with an option `dry_run` (on by default)
+  that lists the migrations that would be applied and the commit that would be deployed, and changes nothing.
+  A run that does change something needs a passed CI run on that commit, like a merge does (AC-1).
 
 ### Migrations
 
@@ -78,7 +84,9 @@ Secrets (repository secrets, used by `deploy.yml` only): `DEPLOY_SSH_KEY` (priva
 
 - **AC-7**: The code is deployed by pushing `main` to the existing `production` remote, so the server still
   builds it itself with `deploy/post-receive` (spec 0020: install, build, then reload; a failed build never
-  reloads). The push is a fast-forward, never forced. The workflow authenticates with a key whose forced
+  reloads). The push is a fast-forward, never forced, and it counts only when the server's hook reports
+  `Deployed <sha>`: `git push` exits 0 even when the hook fails, so the workflow reads the hook's last line and
+  fails without it. The workflow authenticates with a key whose forced
   command (`deploy/ssh-gate.sh`) lets it reach only that repository (push and list refs).
 - **AC-8**: After the reload the workflow requests `/en` and `/ru` on the public address and expects 200, and
   expects an unknown route to answer 404 (a sanity check of the running build, not a test suite; a route behind
@@ -101,8 +109,8 @@ Secrets (repository secrets, used by `deploy.yml` only): `DEPLOY_SSH_KEY` (priva
   Nothing rolls back by itself: the summary says how (revert the pull request and merge it, spec 0020's
   README), and what state the database is in.
 - **AC-10**: The secrets (the production database connection, the deploy key, the Telegram bot) are repository
-  secrets used by this workflow only, never printed, and the workflow's permissions are read-only for the
-  repository contents.
+  secrets used by this workflow only, never printed, and the workflow's permissions are read-only (the repository
+  contents, and the list of CI runs to see whether CI passed on a commit deployed by hand).
 - **AC-11**: The manual procedure stays documented in `deploy/README.md` as the fallback, and `CLAUDE.md` is
   updated: a merge deploys, so "never push to `production` unless asked" becomes "the workflow deploys; a
   manual push is only for a rollback or when the workflow is broken".
@@ -134,6 +142,11 @@ turning feature flags on (a flag is switched by hand on the server, spec 0023 an
 - Migration file names are the record of what is applied, so a file must never be renamed after it was
   merged (the one rename done before the first deploy of `0024_friends.sql` was possible only because nothing
   had been applied yet).
+- "What production runs" is where its `main` points. After a push whose build failed on the server that is the
+  commit that failed, so re-running the workflow skips it: merge a fix, or rebuild on the server by hand (the
+  hook, `deploy/README.md`). The workflow fails in that case (AC-7); it does not retry by itself.
+- A manual deploy (the fallback: migrations through the MCP, then a push by hand) must record each
+  applied file in `public.applied_migrations`, or the next automatic run applies it again (`deploy/README.md`).
 - The first run needs the baseline (AC-13): production has every file in `supabase/migrations/` today, so the
   baseline is the newest file name, `0024_friends.sql`. The setup steps are in `deploy/README.md`.
 - The deploy workflow is started by the end of CI (`workflow_run`), not by the push itself, because that is
@@ -145,10 +158,10 @@ turning feature flags on (a flag is switched by hand on the server, spec 0023 an
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-2, AC-3, AC-10 | `tests/deploy-workflow.test.ts` (the trigger and its conditions, the concurrency group, the `dry_run` input, read-only permissions, secrets only in `env`, none echoed) |
+| AC-1, AC-2, AC-3, AC-10 | `tests/deploy-workflow.test.ts` (the trigger and its conditions, a manual run only from `main` and only for a commit CI passed, the concurrency group on the job, the `dry_run` input, read-only permissions, secrets only in `env`, none echoed) |
 | AC-4, AC-6, AC-13 | `tests/migrate-production.test.ts` (order, recorded in the same transaction, skipped when recorded, a file that sorts before the latest applied one, stop at the first failure, the baseline rules, the password redacted) |
-| AC-5 | manual: reviewed with every migration (the fresh reviewer checks it, spec 0022) |
-| AC-7 | `tests/deploy.test.ts` (the hook, spec 0020), `tests/deploy-workflow.test.ts` (pushes only to `production`, never forced; the gate script allows only that repository: run for real on Linux) |
+| AC-5 | `tests/review-process.test.ts` (the reviewer's brief, spec 0022 and `CLAUDE.md` ask for it); manual: reviewed with every migration |
+| AC-7 | `tests/deploy.test.ts` (the hook, spec 0020), `tests/deploy-workflow.test.ts` (pushes only to `production`, never forced; fails unless the hook's `Deployed <sha>` line comes back, and the hook prints exactly that; the gate script allows only that repository: run for real on Linux) |
 | AC-8 | `tests/smoke-test.test.ts` (the checks and the retry, against a local server) |
 | AC-9 | `tests/deploy-workflow.test.ts` (failure notification step, job summary), `tests/notify-telegram.test.ts` (the message, no token in the output, against a fake API); manual: break a step on purpose once on a throwaway commit |
 | AC-11 | `tests/deploy-workflow.test.ts` (`CLAUDE.md` and `deploy/README.md` describe the workflow and the fallback) |

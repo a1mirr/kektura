@@ -43,6 +43,10 @@ Do not trust the spec's status or its coverage table: verify them.
   (assertions too weak, mocks standing in for the thing under test). `manual` rows must say how to check.
 - Spec hygiene: acceptance criteria renumbered or deleted instead of marked `Removed`; the owning spec of
   changed behaviour not updated; the index in `specs/README.md` out of date; status and coverage not true.
+- A migration in the diff that the code running in production could not live with while it is applied (a drop
+  or rename of something the running code uses takes two merges, the second after the first has deployed: spec
+  0026 AC-5), one that is not named `NNNN_slug.sql` after the spec that owns it, or a schema change without
+  regenerated types (`npm run types:gen`). A merge deploys by itself, so nobody else will look at this.
 - A change users can see (texts, names, pages, behaviour) with no entry in `src/content/changelog.ts` in all
   three languages (spec 0018 AC-7), or an entry that says something untrue about the app as shipped.
 - Leftovers of anything renamed, moved or removed: code, routes and links, message keys and texts in all three

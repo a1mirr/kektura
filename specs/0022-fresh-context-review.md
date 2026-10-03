@@ -39,6 +39,9 @@ author's context, and wants that to be part of how work is done here, not someth
     docs, specs, links), the gotchas listed in `CLAUDE.md`, regressions for signed-out visitors, other
     locales, small screens and the no-JS paths, and security and privacy (authorization, secrets in logs,
     redirects);
+  - it checks every migration in the diff against spec 0026 AC-5 (could the code that is running live with it while
+    it is applied; two merges for a drop or a rename), the migration's name and the regenerated types, because a merge
+    deploys by itself;
   - it also checks spec hygiene (ACs renumbered or deleted instead of marked `Removed`, the owning spec of
     changed behaviour not updated, the index in `specs/README.md`, status and coverage not true), and reads
     the E2E specs instead of running them (they need Docker), saying whether they would catch a regression;

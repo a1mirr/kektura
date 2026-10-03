@@ -95,7 +95,10 @@ Only for a rollback or when the workflow is broken. The workflow does the same t
 
 1. **Apply the database migrations first.** The hook never touches the database: code that needs a table
    or policy that production doesn't have yet fails at runtime (this has happened: the feedback and
-   account-deletion code was ready before migration 0008 was applied). Order: migration, then push.
+   account-deletion code was ready before migration 0008 was applied). Order: migration, then push. **Record each
+   file you applied** by hand in the workflow's table, or the next automatic run applies it a second time and
+   fails: `insert into public.applied_migrations (file_name) values ('0031_x.sql');` (the file name as in
+   `supabase/migrations/`).
 2. `git push production main`. Only pushes to `main` deploy; other branches are just stored.
 3. The hook checks out `main`, runs `npm ci`, `npm run build`, then `pm2 reload kektura`. It stops at the
    first failing step, so a failed install or build never reloads the app. The build takes minutes on this
@@ -122,6 +125,9 @@ pm2 restart kektura
   emergency `git push --force production <good-sha>:main` redeploys an older commit; the force only
   concerns this deploy remote, not GitHub. After such a rollback the next merge deploys `main` again, the bad
   commit included, so merge the revert first.
+- The server's build failed but the push went through (the workflow fails with "The server did not report a deploy"):
+  production's `main` already points at that commit, so re-running the workflow skips it. Merge a fix, or rebuild
+  without a new commit by running the hook by hand on the server: `echo "0 0 refs/heads/main" | ~/kektura.git/hooks/post-receive`.
 - A failed build has already replaced part of `.next`: the running app can misbehave until the next good
   build, even though the hook stopped before reloading.
 

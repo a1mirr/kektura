@@ -46,6 +46,7 @@ describe("spec 0026 AC-9: the failure message", () => {
   });
 
   it.each([
+    [{ ci: "failure" }, "checking that CI passed"],
     [{ plan: "failure" }, "reaching production"],
     [{ plan: "success", migrate: "success", push: "failure" }, "pushing the code to production"],
     [{ plan: "success", migrate: "success", push: "success", smoke: "failure" }, "the smoke test"],
@@ -94,6 +95,7 @@ describe("spec 0026 AC-9: the failure message", () => {
       TELEGRAM_API_BASE: base,
       DEPLOY_SHA: SHA,
       RUN_URL: RUN,
+      CI_OUTCOME: "skipped",
       PLAN_OUTCOME: "success",
       MIGRATE_OUTCOME: "success",
       PUSH_OUTCOME: "success",

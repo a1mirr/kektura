@@ -66,6 +66,16 @@ describe("spec 0022: fresh-context review", () => {
       expect(body).toContain("tsconfig.tsbuildinfo");
     });
 
+    it("checks every migration against the running code, its name and the regenerated types (a merge deploys by itself)", () => {
+      expect(body).toMatch(/A migration in the diff that the code running in production could not live with while it is applied/);
+      expect(body).toMatch(/takes two merges, the second after the first has deployed: spec\s+0026 AC-5/);
+      expect(body).toMatch(/not named `NNNN_slug\.sql` after the spec that owns it/);
+      expect(body).toMatch(/regenerated types \(`npm run types:gen`\)/);
+      expect(body).toMatch(/A merge deploys by itself, so nobody else will look at this/);
+      expect(read("specs/0022-fresh-context-review.md")).toMatch(/checks every migration in the diff against spec 0026 AC-5/);
+      expect(read("CLAUDE.md")).toMatch(/a migration in the diff that the code running in production could not live with while it is applied/);
+    });
+
     it("checks spec hygiene and reads (does not run) the E2E specs", () => {
       expect(body).toMatch(/Spec hygiene/);
       expect(body).toMatch(/marked `Removed`|instead of marked `Removed`/);

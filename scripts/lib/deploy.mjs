@@ -63,7 +63,7 @@ export function redact(text, connectionString) {
   return out;
 }
 
-const STEPS = { plan: "reaching production", migrate: "applying migrations", push: "pushing the code to production", smoke: "the smoke test" };
+const STEPS = { ci: "checking that CI passed", plan: "reaching production", migrate: "applying migrations", push: "pushing the code to production", smoke: "the smoke test" };
 
 /**
  * The Telegram message for a failed run (AC-9): the commit, the failed step, a link. `outcomes` maps step id to its outcome.
