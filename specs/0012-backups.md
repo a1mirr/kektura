@@ -50,7 +50,10 @@ npx supabase db dump --db-url "$SUPABASE_DB_URL" --data-only --schema auth,publi
 The CLI emits plain `INSERT` statements, preceded by `SET session_replication_role = replica`
 (triggers and FK checks off while loading) and followed by `RESET ALL`, plus `setval` calls for the
 sequences. If Supabase adds an `auth` table that holds data, the "Check the dump" step fails and
-names it: add it to the exclude list. The job's secret handling: the secret is only passed through
+names it: add it to the exclude list. `public.applied_migrations` (the deploy workflow's record of applied
+migrations, spec 0026) is there from the start: it is not user data. The tables that spec 0024 and 0008 added
+(`profiles`, `friendships`, `user_feedback`) are not on either list yet, so the first scheduled run will name them and
+fail until the owner decides which of them belong in the backup. The job's secret handling: the secret is only passed through
 `env:` (GitHub masks it in logs) and never echoed; there is no `set -x`.
 
 **Restore** (verified on the local stack, see the drill below). Restore into a database that has the

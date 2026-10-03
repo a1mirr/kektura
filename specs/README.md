@@ -77,7 +77,7 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0023](0023-feature-flags.md) | Feature flags | Draft |
 | [0024](0024-friends-sharing.md) | Sharing progress with friends | Done |
 | [0025](0025-account-page.md) | Account page: sign out moves in, "Settings" becomes "Account" | Done |
-| [0026](0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Draft |
+| [0026](0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Accepted |
 | [0027](0027-feature-flags-via-telegram.md) | Switching feature flags from the Telegram bot | Draft |
 | [0028](0028-landing-screenshots.md) | Screenshots on the landing page | Draft |
 | [0029](0029-site-logo-link.md) | A logo that leads home, on every page | Draft |

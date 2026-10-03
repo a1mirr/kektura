@@ -1,0 +1,199 @@
+# Spec 0026. After a merge to main whose CI passed: apply the missing migrations to production, push the code to
+# the server (its post-receive hook builds and reloads it), then check that the site answers. Merges that change
+# only documentation, specs, tests or repository tooling are skipped (AC-12).
+#
+# Needs the repository secrets DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS and SUPABASE_DB_URL (setup: deploy/README.md);
+# TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are optional (a failure message). Without the first three the run ends
+# with a notice, so this file can be merged before they exist. Secrets are only ever referenced in a step's `env`,
+# never printed: no `set -x`, no echo of them.
+name: Deploy
+
+on:
+  # Started by the end of CI, because that is the only way to start after both CI jobs passed on this very commit.
+  # Such a run has the secrets of the default branch, so it only ever deploys a commit of main (AC-1).
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Only list what would be applied and deployed; change nothing"
+        type: boolean
+        default: true
+      baseline:
+        description: "First run only: record this migration file, and every file before it, as already applied (spec 0026 AC-13)"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+  actions: read # only to see whether CI passed on a commit that is deployed by hand
+
+jobs:
+  deploy:
+    name: Migrate, deploy, check
+    # One deploy at a time (AC-2). A merge that arrives while one runs waits; GitHub keeps only the newest waiting
+    # run, and every run deploys the newest commit of main whose CI passed (the "Pick" step), so it does not matter
+    # which run survives. It is the job that has the group, not the workflow: a run whose job is skipped (CI failed,
+    # say) must not take the waiting place of a deploy that is still to come, and a dry run, which changes nothing,
+    # has a group of its own for the same reason.
+    concurrency:
+      group: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'deploy-dry-run' || 'deploy' }}
+      cancel-in-progress: false
+    # Started by hand only from main: another branch must never reach the secrets or production (AC-1, AC-3).
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # A step's `if` can't read secrets, so only whether they are set goes into a variable.
+      CONFIGURED: ${{ secrets.DEPLOY_SSH_KEY != '' && secrets.DEPLOY_KNOWN_HOSTS != '' && secrets.SUPABASE_DB_URL != '' }}
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+      BASELINE: ${{ inputs.baseline }}
+      DEPLOY_REMOTE: a1mirr@188.166.117.212:~/kektura.git
+      SITE_URL: https://kektura-tracker.com
+    steps:
+      - name: Notice when the secrets are missing
+        if: env.CONFIGURED != 'true'
+        run: echo "::notice title=Deploy skipped::Add the repository secrets DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS and SUPABASE_DB_URL (deploy/README.md, 'Automatic deploys')."
+
+      # No `ref`: for both triggers this is the tip of main, with all its history.
+      - uses: actions/checkout@v7
+        if: env.CONFIGURED == 'true'
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        if: env.CONFIGURED == 'true'
+        with:
+          node-version: 24
+
+      # What to deploy: the newest commit of main whose CI passed. After a merge that is the newest CI run on main
+      # that succeeded, not the run that happened to start this workflow: CI runs can finish out of merge order, and
+      # a waiting run may have replaced a newer one. By hand it is the tip of main (checked for CI below).
+      - name: Pick the commit to deploy
+        id: pick
+        if: env.CONFIGURED == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = "workflow_run" ]; then
+            sha=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --branch main --event push --status success --limit 1 --json headSha --jq '.[0].headSha // empty')
+          else
+            sha="$GITHUB_SHA"
+          fi
+          if [ -z "$sha" ]; then
+            echo "::error title=No commit to deploy::No CI run on main has passed."
+            exit 1
+          fi
+          # It has to be part of main's history, which is what is checked out.
+          git merge-base --is-ancestor "$sha" HEAD
+          # Work from exactly that commit: the migrations that are applied, the scripts that run and the code that is
+          # pushed all have to be the same, not the tip of main when that is newer (its CI may not have passed).
+          git checkout --detach "$sha"
+          echo "TARGET_SHA=$sha" >> "$GITHUB_ENV"
+          echo "Deploying ${sha:0:7}, the newest commit of main whose CI passed."
+
+      - name: Set up the deploy key
+        if: env.CONFIGURED == 'true'
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          # A secret pasted from Windows can carry carriage returns, which OpenSSH rejects.
+          printf '%s\n' "$DEPLOY_SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" | tr -d '\r' > ~/.ssh/known_hosts
+          git remote add production "$DEPLOY_REMOTE"
+          echo "GIT_SSH_COMMAND=ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts" >> "$GITHUB_ENV"
+
+      # A merge is deployed only after CI passed (the trigger sees to that); a run started by hand needs the same.
+      - name: Check that CI passed on this commit
+        id: ci
+        if: env.CONFIGURED == 'true' && github.event_name == 'workflow_dispatch' && env.DRY_RUN != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          passed=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --commit "$TARGET_SHA" --json conclusion --jq '[.[] | select(.conclusion == "success")] | length')
+          if [ "$passed" -lt 1 ]; then
+            echo "::error title=CI has not passed on this commit::Wait for CI on ${TARGET_SHA:0:7} to finish and pass, or fix it. A run started by hand deploys only a commit whose CI passed."
+            exit 1
+          fi
+          echo "CI passed on ${TARGET_SHA:0:7}."
+
+      - name: Reach production and decide what to deploy
+        id: plan
+        if: env.CONFIGURED == 'true'
+        run: node scripts/deploy-plan.mjs "$TARGET_SHA" production
+
+      - name: Apply the missing migrations
+        id: migrate
+        # Also with a baseline (the first manual run, AC-13): that has to be recorded even when nothing else is deployed.
+        if: env.CONFIGURED == 'true' && (steps.plan.outputs.deploy == 'true' || env.BASELINE != '')
+        # A migration that waits on a lock would otherwise hold the job until its own timeout, which cancels the job
+        # (and `failure()` does not catch a cancelled job): this way it fails the step and reaches the message.
+        timeout-minutes: 10
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          args=()
+          if [ "$DRY_RUN" = "true" ]; then args+=(--dry-run); fi
+          if [ -n "$BASELINE" ]; then args+=(--baseline "$BASELINE"); fi
+          node scripts/migrate-production.mjs "${args[@]}"
+
+      - name: Push the code to production
+        id: push
+        if: env.CONFIGURED == 'true' && steps.plan.outputs.deploy == 'true' && env.DRY_RUN != 'true'
+        # The ssh connection stays open while the server builds. A step that times out fails, so the failure step
+        # below still runs; a job that times out is cancelled, and `failure()` does not catch that.
+        timeout-minutes: 20
+        run: |
+          set -euo pipefail
+          # A fast-forward only, never forced: the server's hook builds and reloads (spec 0020).
+          git push production "$TARGET_SHA:refs/heads/main" 2>&1 | tee "$RUNNER_TEMP/push.log"
+          # `git push` exits 0 even when the server's post-receive hook fails (githooks(5): the hook "does not
+          # affect the outcome"), so the push only counts when the hook's last line says it deployed this commit.
+          if ! grep -Eq "remote: Deployed ${TARGET_SHA:0:7}[0-9a-f]*\." "$RUNNER_TEMP/push.log"; then
+            echo "::error title=The server did not report a deploy::The push went through but the hook did not print 'Deployed ${TARGET_SHA:0:7}': the build on the server probably failed. See the log above."
+            exit 1
+          fi
+          echo "### Deployed" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Pushed ${TARGET_SHA:0:7} to production; the server built it and reloaded." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check that the site answers
+        id: smoke
+        if: env.CONFIGURED == 'true' && steps.plan.outputs.deploy == 'true' && env.DRY_RUN != 'true'
+        run: node scripts/smoke-test.mjs "$SITE_URL" 120
+
+      - name: Tell the developer, and say how to roll back
+        if: failure()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DEPLOY_SHA: ${{ env.TARGET_SHA || github.event.workflow_run.head_sha || github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PICK_OUTCOME: ${{ steps.pick.outcome }}
+          CI_OUTCOME: ${{ steps.ci.outcome }}
+          PLAN_OUTCOME: ${{ steps.plan.outcome }}
+          MIGRATE_OUTCOME: ${{ steps.migrate.outcome }}
+          PUSH_OUTCOME: ${{ steps.push.outcome }}
+          SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+        run: |
+          {
+            echo "### The deploy failed"
+            echo "- Nothing was rolled back by itself."
+            echo "- Migrations that were applied stay applied (each ran in its own transaction); one that failed left nothing behind."
+            echo "- Roll back the code: revert the pull request on main and merge the revert; in an emergency, see deploy/README.md ('When something is wrong')."
+            echo "- If the push went through but the build on the server failed, production's main already points at this commit, so a re-run skips it: merge a fix, or rebuild on the server by hand (deploy/README.md, 'When something is wrong')."
+          } >> "$GITHUB_STEP_SUMMARY"
+          node scripts/notify-telegram.mjs
