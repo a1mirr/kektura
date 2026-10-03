@@ -59,7 +59,8 @@ check's name changes.
 `main` has no branch protection (the repository is private on the free plan, where GitHub offers neither protection
 rules nor rulesets: the settings API answers 403 "Upgrade to GitHub Pro or make this repository public"), so no check
 is required by name today and CI gates merges only by the convention in `CLAUDE.md` step 7. The aggregating job of
-AC-2 is therefore for readability and for the day protection is switched on, not a requirement of it.
+AC-2 is therefore for readability and for the day protection is switched on, not a requirement of it. Spec 0021 owns the pull request rules and says why protection
+is off; if that changes, this note goes stale.
 
 ## Coverage
 
