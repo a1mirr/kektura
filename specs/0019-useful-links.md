@@ -45,4 +45,4 @@ sites being up); per-language link lists.
 | --- | --- |
 | AC-3 (https, unique), AC-4 | `src/content/links.test.ts`, `tests/messages.test.ts` |
 | AC-1, AC-2, AC-3 (new tab, rel) | `e2e/links.spec.ts` |
-| AC-5 | checked by hand on 2026-10-03 (status of every link; page titles checked when the link was added) |
+| AC-5 | manual (the links are external sites): every link answers 200 and its page says what the description says. Last checked: 2026-10-03 (status of every link; page titles when the link was added). |

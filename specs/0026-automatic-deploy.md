@@ -1,8 +1,6 @@
 # 0026: Automatic migrations and deploy after a merge
 
-Status: Accepted
-(It becomes Done after the first deploy that a merge starts by itself and that succeeds. The deploy key, the secrets
-and the baseline are in place since 2026-10-03: see the Notes.)
+Status: Done
 Owner code: `.github/workflows/deploy.yml`, `scripts/migrate-production.mjs`, `scripts/smoke-test.mjs`,
 `scripts/notify-telegram.mjs`, `scripts/deploy-plan.mjs`, `scripts/lib/deploy.mjs`, `deploy/ssh-gate.sh`, `deploy/README.md`
 
@@ -92,9 +90,11 @@ Secrets (repository secrets, used by `deploy.yml` only): `DEPLOY_SSH_KEY` (priva
   `Deployed <sha>`: `git push` exits 0 even when the hook fails, so the workflow reads the hook's last line and
   fails without it. The workflow authenticates with a key whose forced
   command (`deploy/ssh-gate.sh`) lets it reach only that repository (push and list refs).
-- **AC-8**: After the reload the workflow requests `/en` and `/ru` on the public address and expects 200, and
-  expects an unknown route to answer 404 (a sanity check of the running build, not a test suite; a route behind
-  a feature flag would fail every deploy once the flag is switched on). It retries for up to two minutes,
+- **AC-8**: After the reload the workflow requests `/en` and `/ru` on the public address and expects 200, expects
+  an unknown route to answer 404, and POSTs to `/auth/test-login`, expecting 404 too: the test server's dummy login
+  signs anybody in and must never be reachable on the public address (spec 0006 AC-4). It is a sanity check of the
+  running build, not a test suite; a route behind a feature flag would fail every deploy once the flag is
+  switched on. It retries for up to two minutes,
   because the reload takes a moment.
 
 ### What is deployed
@@ -141,11 +141,10 @@ seeds (spec 0004) and clearing the dashboard cache afterwards, which stay manual
   workflow knows reaches the build.
 - Migration file names are the record of what is applied, so a file must never be renamed after it was
   merged.
-- **State**: the deploy key is installed on the droplet behind `deploy/ssh-gate.sh`, the secrets
-  `DEPLOY_SSH_KEY` and `DEPLOY_KNOWN_HOSTS` are set (`SUPABASE_DB_URL` already was), and a first real run started by
-  hand (`dry_run` off, `baseline` `0024_friends.sql`) recorded the 9 files as applied, pushed `c09dedb`, saw the
-  server build and report `Deployed`, and passed the smoke test. What is still to be seen is a run started by a merge
-  by itself; the spec becomes Done after that.
+- **Setup**: the deploy key is installed on the droplet behind `deploy/ssh-gate.sh`, and the secrets `DEPLOY_SSH_KEY`,
+  `DEPLOY_KNOWN_HOSTS` and `SUPABASE_DB_URL` are set. The first run started by hand (`dry_run` off, `baseline`
+  `0024_friends.sql`) recorded the 9 files then in the repository as applied; since then runs started by a merge have
+  deployed by themselves (the first: run 37158189942).
 - "What production runs" is where its `main` points. After a push whose build failed on the server that is the
   commit that failed, so re-running the workflow skips it: merge a fix, or rebuild on the server by hand (the
   hook, `deploy/README.md`). The workflow fails in that case (AC-7); it does not retry by itself.
@@ -165,12 +164,13 @@ seeds (spec 0004) and clearing the dashboard cache afterwards, which stay manual
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-2, AC-3, AC-10 | `tests/deploy-workflow.test.ts` (the trigger and its conditions, the commit picked (the newest whose CI passed), a manual run only from `main` and only for a commit CI passed, the concurrency group on the job and a separate one for dry runs, a timeout on the push step, the `dry_run` input, read-only permissions, secrets only in `env`, none echoed) |
+| AC-1, AC-2, AC-3, AC-10 | `tests/deploy-workflow.test.ts` (the trigger and its conditions, the commit picked (the newest whose CI passed), a run started from the Actions tab only from `main` and only for a commit CI passed, the concurrency group on the job and a separate one for dry runs, a timeout on the push step, the `dry_run` input, read-only permissions, secrets only in `env`, none echoed) |
 | AC-4, AC-6, AC-13 | `tests/migrate-production.test.ts` (order, recorded in the same transaction, skipped when recorded, a file that sorts before the latest applied one, stop at the first failure, the baseline rules, the password redacted) |
-| AC-4, AC-13 (against a real database) | manual, once: the real `migrate()` against the local test database through `docker exec psql` (2026-10-03): refused without a baseline, a baseline recorded without running its files, a failing file rolled back with nothing recorded and the later file not tried, the record table with row level security and no grants for the API roles, a second run applying nothing, a baseline on a table with records refused; repeat after any change to the SQL in `scripts/migrate-production.mjs` |
-| AC-5 | `tests/review-process.test.ts` (the reviewer's brief, spec 0022 and `CLAUDE.md` ask for it); manual: reviewed with every migration |
+| AC-4, AC-13 (against a real database) | manual (it runs the script against a database through `docker exec psql`): the real `migrate()` against the local test database: refused without a baseline, a baseline recorded without running its files, a failing file rolled back with nothing recorded and the later file not tried, the record table with row level security and no grants for the API roles, a second run applying nothing, a baseline on a table with records refused. Repeat after any change to the SQL in `scripts/migrate-production.mjs`. Last checked: 2026-10-03. |
+| AC-5 | `tests/review-process.test.ts` (the reviewer's brief, spec 0022 and `CLAUDE.md` ask for it); manual (judgement): the reviewer checks every migration against it. Last checked: every pull request. |
 | AC-7 | `tests/deploy.test.ts` (the hook, spec 0020), `tests/deploy-workflow.test.ts` (pushes only to `production`, never forced; fails unless the hook's `Deployed <sha>` line comes back, and the hook prints exactly that; the gate script allows only that repository: run for real on Linux) |
-| AC-8 | `tests/smoke-test.test.ts` (the checks and the retry, against a local server); manual, once: run against the E2E build of this app (2026-10-03: `/en` 200, `/ru` 200, an unknown page 404) |
-| AC-9 | `tests/deploy-workflow.test.ts` (failure notification step, job summary), `tests/notify-telegram.test.ts` (the message, no token in the output, against a fake API); manual: break a step on purpose once on a throwaway commit |
+| AC-8 | `tests/smoke-test.test.ts` (the checks, including that the dummy login answers 404, and the retry, against a local server); the first deploy a merge started by itself (run 37158189942, 2026-10-03) passed the first three checks against production |
+| AC-8 (the dummy login on production) | manual (it needs a real deploy): the "Check that the site answers" step of the first deploy after this check was added says the smoke test passed. Last checked: never recorded. |
+| AC-9 | `tests/deploy-workflow.test.ts` (failure notification step, job summary), `tests/notify-telegram.test.ts` (the message, no token in the output, against a fake API); manual (it needs a real failing run): break a step on purpose once on a throwaway commit and see the Telegram message. Last checked: never recorded. |
 | AC-11 | `tests/deploy-workflow.test.ts` (`CLAUDE.md` and `deploy/README.md` describe the workflow and the fallback) |
 | AC-12 | `tests/deploy-plan.test.ts` (which paths deploy, older and already deployed commits) |

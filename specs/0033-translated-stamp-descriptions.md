@@ -46,4 +46,4 @@ user-submitted translations.
 | --- | --- |
 | AC-1, AC-2 | `src/lib/stamp-description.test.ts`, `e2e/stamping.spec.ts` (ru/en/hu) |
 | AC-3, AC-4 | `tests/stamp-descriptions.test.ts` |
-| AC-5 | manual: `node scripts/build-data.mjs` leaves `src/content/stamp-descriptions.json` untouched (the script doesn't read or write it) |
+| AC-5 | `tests/stamp-descriptions.test.ts` (the seed generator and the seed do not mention the translations file) |

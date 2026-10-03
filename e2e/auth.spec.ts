@@ -44,4 +44,28 @@ test.describe("spec 0006 + 0005: signing in and out on the test server", () => {
     await page.goto("/en/dashboard");
     await expect(page).toHaveURL(/\/en$/);
   });
+
+  test("0005 AC-4, 0020 AC-3: the callback sends a failed exchange back to the landing page of a known locale, on the address the user is on", async ({
+    page,
+    baseURL,
+  }) => {
+    const go = async (query: string) => {
+      const response = await page.request.get(`/auth/callback?${query}`, { maxRedirects: 0 });
+      expect(response.status()).toBe(307);
+      return response.headers()["location"];
+    };
+    expect(await go("code=not-a-real-code&locale=en")).toBe(`${baseURL}/en?error=auth`);
+    expect(await go("code=not-a-real-code&locale=hu")).toBe(`${baseURL}/hu?error=auth`);
+    expect(await go("code=not-a-real-code&locale=xx")).toBe(`${baseURL}/ru?error=auth`); // unknown: the default locale
+    expect(await go("code=not-a-real-code&locale=../evil.example")).toBe(`${baseURL}/ru?error=auth`);
+    expect(await go("locale=en")).toBe(`${baseURL}/en?error=auth`); // no code at all
+    // an `x-forwarded-host` the proxy would set is honoured, a malformed one is not (spec 0020 AC-1, AC-2)
+    const forwarded = await page.request.get("/auth/callback?code=x&locale=en", {
+      maxRedirects: 0,
+      headers: { "x-forwarded-host": "example.test", "x-forwarded-proto": "https" },
+    });
+    expect(forwarded.headers()["location"]).toBe("https://example.test/en?error=auth");
+    const evil = await page.request.get("/auth/callback?code=x&locale=en", { maxRedirects: 0, headers: { "x-forwarded-host": "evil.com/path" } });
+    expect(evil.headers()["location"]).toBe(`${baseURL}/en?error=auth`);
+  });
 });

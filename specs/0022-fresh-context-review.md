@@ -43,6 +43,9 @@ author's context, and wants that to be part of how work is done here, not someth
     docs, specs, links), the gotchas listed in `CLAUDE.md`, regressions for signed-out visitors, other
     locales, small screens and the no-JS paths, and security and privacy (authorization, secrets in logs,
     redirects);
+  - it re-checks the `manual` coverage rows of the areas the change touches (spec 0034 AC-11): a row without a
+    reason, a way to check it or a `Last checked` is a finding, so is one a test could replace, and it does the
+    check itself where it can;
   - it checks every migration in the diff against spec 0026 AC-5 (could the code that is running live with it while
     it is applied; two merges for a drop or a rename), the migration's name and the regenerated types, because a merge
     deploys by itself;
@@ -103,4 +106,4 @@ author's context, and wants that to be part of how work is done here, not someth
 | AC | Test |
 | --- | --- |
 | AC-1, AC-2, AC-3, AC-4 | `tests/review-process.test.ts` (the rule is in `CLAUDE.md` and `specs/README.md`; the agent file exists, is read-only and names what it checks; the pull request template has the checklist and the findings section) |
-| AC-3 (quality of the reviews) | manual: the owner reads the findings in each pull request |
+| AC-3 (quality of the reviews) | manual (judgement): the owner reads the findings in each pull request. Last checked: every pull request. |

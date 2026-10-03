@@ -207,3 +207,34 @@ describe("spec 0034: specs and the repository agree", () => {
     expect(missing).toEqual([]);
   });
 });
+
+describe("spec 0034: manual checks", () => {
+  const coverageRows = (text: string) =>
+    (text.split(/^## Coverage\s*$/m)[1] ?? "")
+      .split("\n")
+      .filter((line) => line.startsWith("|") && !/^\|\s*(AC\s*\||-{3})/.test(line));
+
+  it("AC-11: every coverage row of a Done or Accepted spec that says manual gives a reason and a Last checked (also when it says by hand or review)", () => {
+    const incomplete: string[] = [];
+    let manualRows = 0;
+    for (const name of specFiles) {
+      const text = read(specsDir, name);
+      if (!/^Status: (Done|Accepted)\s*$/m.test(text)) continue;
+      for (const row of coverageRows(text).filter((line) => /\bmanual\b|\bby hand\b|checked in review|\breview of\b/i.test(line))) {
+        manualRows += 1;
+        const cell = row.slice(0, 60);
+        if (!/\bmanual \([^)]+\)/.test(row)) incomplete.push(`${name}: no "manual (reason)": ${cell}`);
+        if (!/Last checked: (\d{4}-\d{2}-\d{2}|never|every pull request)/.test(row)) incomplete.push(`${name}: no "Last checked": ${cell}`);
+      }
+    }
+    expect(manualRows, "the rule has rows to look at").toBeGreaterThan(5);
+    expect(incomplete).toEqual([]);
+  });
+
+  it("AC-11: the rule is written where authors and the reviewer look", () => {
+    expect(readRoot("CLAUDE.md")).toMatch(/gets a `manual` coverage row with its reason, how to check it and when it was last checked/);
+    expect(readRoot("CLAUDE.md")).toMatch(/the `manual` coverage rows of the touched areas/);
+    expect(read(specsDir, "README.md")).toMatch(/`manual \(why it can't be automated\): how to check it\. Last checked: <date>`/);
+    expect(readRoot(".claude/agents/fresh-reviewer.md")).toMatch(/A `manual` coverage row of a touched area \(spec 0034 AC-11\)/);
+  });
+});

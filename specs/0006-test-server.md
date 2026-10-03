@@ -68,9 +68,10 @@ an explicit allowance for that project's URL). Tests of the map canvas (WebGL cl
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-2 | manual: `npm run testdb:start`, `npm run dev:test`, open http://localhost:3001 (exercised by every E2E run) |
+| AC-1 | `tests/database-rules.test.ts` (the migrations and both seeds leave 220 checkpoints, 161 places and 72 extra stamps); CI's `e2e` job starts the stack with `supabase start` and every E2E run uses it |
+| AC-2 | manual (it starts a dev server): `npm run testdb:start`, `npm run dev:test`, open http://localhost:3001. Last checked: never recorded. |
 | AC-3 | `e2e/auth.spec.ts` |
-| AC-4 | `src/lib/test-login.test.ts`; manual: the production landing page has no dummy login |
+| AC-4 | `src/lib/test-login.test.ts`; `tests/smoke-test.test.ts` and the deploy workflow's smoke test (spec 0026 AC-8): after every deploy a POST to `/auth/test-login` on the public address must answer 404 |
 | AC-5 | `e2e/auth.spec.ts` |
 | AC-6 | `playwright.config.ts`, `e2e/helpers.ts` |
 | AC-8 | `e2e/auth.spec.ts` ("AC-8: the helper's sign-in leaves the session cookies…", which fails if no session reaches the browser); every other E2E test signs in through the helper. Not asserted: that the landing page isn't loaded, and the "refused" error message (both read from `e2e/helpers.ts`) |

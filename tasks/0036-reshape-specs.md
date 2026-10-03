@@ -51,6 +51,8 @@ Folded and moved (the old file is now a task, its ACs are mapped in its "Spec ch
 - 0014 absorbed 0025 (AC-14 to AC-18); the tests of the changelog entry about it now cite 0018 AC-7
 - Stay as they are: 0004 and 0033 (two areas, trail data and the translations), 0020 and 0026 (origin helper and deploy files, and the automatic deploy), and the drafts 0023, 0027, 0028, 0029, 0031 (0027 folds into 0023 and 0031 into 0007 when they are built)
 
+The manual coverage rows were audited in task 0039 (tests where a test could do it; a reason and a date for the rest); spec 0026 is Done.
+
 Goals and Notes that told a story were rewritten to describe the area: 0007, 0008, 0015, 0017, 0018, 0019, 0020, 0026.
 
 Checked against the repository, with scripts (now partly permanent: `tests/specs.test.ts`, spec 0034 AC-9):
@@ -61,7 +63,7 @@ Checked against the repository, with scripts (now partly permanent: `tests/specs
 
 Findings: the committed seeds predate the cleanup that 0004 AC-9 describes (task 0037); 0015 carried a note about `as any` that is no longer true (removed); the deploy workflow's "pick the commit" step has no retry and failed once on a GitHub API 504 (merge of #28, a docs-only change, so nothing was lost).
 
-Still to do: read these specs line by line against the code, not only through their tests: 0008, 0012, 0015 to 0019, 0021, 0022, 0024, 0033, and the ACs of 0001, 0003, 0004 and 0005 that are `manual`.
+Still to do: read these specs line by line against the code, not only through their tests: 0008, 0015 to 0019, 0021, 0022, 0024, 0033 (0012 was re-checked in task 0039: the backup would have failed on its first run).
 
 ## Spec changes
 
