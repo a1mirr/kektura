@@ -21,7 +21,7 @@ export default function ExtraStampButton({
   const t = useTranslations("dashboard");
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center justify-end gap-2">
       {stamped && date && <StampDateInput value={date} max={maxDate} onSave={(d) => setExtraStampDate(extraId, d)} />}
       <ActionButton
         action={() => setExtraStamped(extraId, !stamped, stamped ? undefined : newStampDate())}

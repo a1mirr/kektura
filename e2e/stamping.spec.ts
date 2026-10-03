@@ -68,4 +68,36 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
       await expect(page.locator("#extra-stamps li").first()).toContainText(extraText);
     }
   });
+
+  test("0001 AC-11: the dashboard never scrolls sideways at 375 px: collapsed, expanded and with stamped rows, in every language", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await signInAsNewUser(page);
+    const locales = ["en", "hu", "ru"];
+    const widths = () =>
+      page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, viewport: window.innerWidth }));
+    const expectFits = async (label: string, stagesOpen: boolean) => {
+      for (const locale of locales) {
+        await page.goto(`/${locale}/dashboard`);
+        await expect(page.locator("#extra-stamps li").first()).toBeVisible();
+        // Stages open after mount, from what the browser remembers: measure only once they are in the wanted state.
+        await expect(page.locator("#stage-1 [aria-expanded]")).toHaveAttribute("aria-expanded", String(stagesOpen));
+        const { scroll, viewport } = await widths();
+        expect(scroll, `${locale}, ${label}`).toBeLessThanOrEqual(viewport);
+      }
+    };
+
+    await expectFits("every stage collapsed", false);
+
+    // A date field next to the buttons is the widest a row gets: stamp a place and an extra stamp.
+    await page.goto("/en/dashboard");
+    await expandAllStages(page);
+    await place(page, "OKTPH_01_DDKPH_01").getByRole("button", { name: "Add stamp" }).click();
+    await page.locator("#extra-stamps li").first().getByRole("button", { name: "Add stamp" }).click();
+    await expect(place(page, "OKTPH_01_DDKPH_01").locator("input[type=date]")).toBeVisible();
+    await expect(page.locator("#extra-stamps li").first().locator("input[type=date]")).toBeVisible();
+
+    await expectFits("stamped rows, every stage expanded", true); // the open stages are remembered across languages
+  });
 });

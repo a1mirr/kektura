@@ -151,7 +151,7 @@ export default async function Dashboard({
                   done={done}
                   total={list.length}
                   actions={
-                    <div className="flex items-center gap-3">
+                    <div className="ml-auto flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
                       {stageExtras.length > 0 && (
                         <a href={`#extra-${stageExtras[0].id}`} className="text-xs text-blue-600 hover:underline">
                           {t("goExtras", { count: stageExtras.length })}
@@ -170,9 +170,9 @@ export default async function Dashboard({
                       id={`place-${p.key}`}
                       data-stage={p.stage}
                       key={p.key}
-                      className="flex scroll-mt-24 items-start justify-between gap-2 px-4 py-3"
+                      className="flex scroll-mt-24 flex-wrap items-start justify-between gap-x-2 gap-y-1 px-4 py-3"
                     >
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1 basis-40">
                         <div>
                           <span className="mr-2 inline-block min-w-10 text-stone-400 tabular-nums">{p.label}</span>
                           {p.name}
@@ -180,7 +180,7 @@ export default async function Dashboard({
                         </div>
                         <StampDescriptions descriptions={p.variants.map((v) => localizedDescription(v.code, v.description, locale))} />
                       </div>
-                      <div className="flex shrink-0 items-center gap-1">
+                      <div className="ml-auto flex flex-wrap items-center justify-end gap-1">
                         <LocateButton
                           kind="place"
                           keyId={p.key}
@@ -215,8 +215,8 @@ export default async function Dashboard({
           <p className="mb-2 text-sm text-stone-500">{t("extraNote")}</p>
           <ul className="divide-y rounded-lg bg-white shadow-sm">
             {extraListWithStage.map((e) => (
-              <li id={`extra-${e.id}`} key={e.id} className="flex scroll-mt-24 items-start justify-between gap-2 px-4 py-3">
-                <div className="min-w-0">
+              <li id={`extra-${e.id}`} key={e.id} className="flex scroll-mt-24 flex-wrap items-start justify-between gap-x-2 gap-y-1 px-4 py-3">
+                <div className="min-w-0 flex-1 basis-40">
                   <div>
                     {e.name}
                     <span className="ml-2 text-sm text-stone-500">
@@ -227,7 +227,7 @@ export default async function Dashboard({
                   </div>
                   <StampDescriptions descriptions={[localizedDescription(e.code, e.description, locale)]} />
                 </div>
-                <div className="flex shrink-0 items-center gap-1">
+                <div className="ml-auto flex flex-wrap items-center justify-end gap-1">
                   <LocateButton kind="extra" keyId={String(e.id)} name={e.name} lat={e.lat} lng={e.lng} />
                   <ExtraStampButton
                     extraId={e.id}
