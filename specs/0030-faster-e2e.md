@@ -24,7 +24,7 @@ stays covered, and nothing is skipped.
 - **AC-3**: The `e2e` job of `.github/workflows/ci.yml` restores two caches before it needs them: Playwright's
   browser download (`~/.cache/ms-playwright`, keyed by the locked `@playwright/test` version) and Next's
   incremental build cache (`.next-e2e/cache`, keyed by `package-lock.json` and the source files, with a
-  fallback to the newest cache of the lockfile). The Next cache folder also holds the server's cached reference data (spec 0009), which would hide a changed seed
+  fallback to the newest cache of the lockfile). The Next cache folder also holds the server's cached reference data (spec 0002 AC-15), which would hide a changed seed
   or migration, so the job deletes `.next-e2e/cache/fetch-cache` after restoring. A cache miss only makes the job
   slower, never fails it.
 - **AC-4**: The job reports the slowest tests, so the next round of speed-ups starts from numbers: Playwright's

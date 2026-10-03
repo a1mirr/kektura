@@ -44,7 +44,7 @@ Line formats (one `console.error` / `console.warn` call, one string argument eac
 - Not logged, on purpose: a missing session, a successful action, and place keys that match no
   checkpoint (0002 AC-5): that is a bare `failed` without a database error, and AC-3 limits warnings
   to rejected input (0002 AC-1).
-- `refresh()` (formerly `revalidatePath`, see spec 0009) throwing after a successful write counts as an `exception` (the client already
+- `refresh()` (not `revalidatePath`: spec 0002, notes) throwing after a successful write counts as an `exception` (the client already
   got `failed` for it before this spec).
 
 ## Coverage

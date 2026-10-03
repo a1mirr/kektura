@@ -13,7 +13,7 @@ migrations that carry spec numbers don't all move at once.
 ## Done when
 
 - [ ] Every spec was read against the code, and each AC that the code does not satisfy was fixed in the code or marked `Removed` or corrected in the spec
-- [ ] Each area has one spec; a spec absorbed into another keeps its file as a short pointer (`Status: Done`, "moved to 00NN AC-n to AC-m"), so old references still resolve, and its tests cite the new spec
+- [ ] Each area has one spec; a spec absorbed into another moves to `tasks/` (`git mv`: number and history stay), its "Spec changes" section maps old ACs to new ones, and its tests and code comments cite the new spec
 - [ ] Task-shaped specs became tasks (history only), their lasting rules moved into the area spec
 - [ ] Goals and Notes of the remaining specs describe the area, not a change
 - [ ] The indexes in `specs/README.md` and `tasks/README.md` are true
@@ -39,13 +39,21 @@ A first guess from the Goal lines; decide per area while reading the code.
 
 Task-only (no lasting behaviour): 0009 and 0011 mostly, 0010, 0025, 0030, 0031.
 
+## Progress
+
+A few related areas per pull request; each step audits the area's ACs against the code and the tests (a script lists ACs that no
+test cites), then folds, moves and re-cites.
+
+- [x] Stamping: 0002 absorbed 0009 (AC-13 to AC-16); 0016 absorbed 0032 (AC-5, AC-6, AC-9 to AC-11) and gained AC-12 for behaviour that was tested but not stated (the field follows the server's date)
+
 ## Spec changes
 
-Recorded per step.
+Recorded per step (see Progress).
 
 ## Notes
 
-- Never renumber or delete an AC: a moved AC is marked `Removed` in the old spec with a pointer, and added as a new
-  AC in the new one. Tests are re-cited in the same change.
+- Never renumber or delete an AC of a spec that stays: a dropped one is marked `Removed`. ACs that move into another
+  spec are added there as new ACs, and the old spec's file moves to `tasks/` with a map from old AC to new AC. Tests
+  and code comments are re-cited in the same change.
 - Migrations keep the numbers they have.
 - `git grep "spec 00NN"` finds what cites a spec before it is moved.

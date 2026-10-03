@@ -33,10 +33,10 @@ function fakeClient(tables: Record<string, { data?: unknown[]; error?: unknown }
 const checkpoints = [{ id: 1, name: "Írott-kő" }];
 const extras = [{ id: 7, name: "Extra" }];
 
-describe("spec 0009: dashboard data", () => {
+describe("spec 0002: dashboard data", () => {
   beforeEach(() => vi.mocked(createPublicClient).mockReset());
 
-  it("AC-1: checkpoints and extra stamps are read through the cookie-less client, never the user's", async () => {
+  it("AC-15: checkpoints and extra stamps are read through the cookie-less client, never the user's", async () => {
     const pub = fakeClient({ checkpoints: { data: checkpoints }, extra_stamps: { data: extras } });
     vi.mocked(createPublicClient).mockReturnValue(pub.client);
     const user = fakeClient({ user_stamps: { data: [] }, user_extra_stamps: { data: [] } });
@@ -50,7 +50,7 @@ describe("spec 0009: dashboard data", () => {
     expect(user.read).not.toContain("extra_stamps");
   });
 
-  it("AC-1: the reference data is cached for at most one day under a tag that can expire it", () => {
+  it("AC-15: the reference data is cached for at most one day under a tag that can expire it", () => {
     const entry = cacheOptions.calls.find((c) => c.options.tags?.includes(REFERENCE_DATA_TAG));
     expect(entry).toBeDefined();
     expect(entry!.options.revalidate).toBe(REFERENCE_DATA_REVALIDATE_SECONDS);
@@ -58,13 +58,13 @@ describe("spec 0009: dashboard data", () => {
     expect(cacheOptions.calls).toHaveLength(1); // the only cached read is the reference data
   });
 
-  it("AC-1: a failed reference read throws, so an empty result is never cached", async () => {
+  it("AC-15: a failed reference read throws, so an empty result is never cached", async () => {
     const pub = fakeClient({ checkpoints: { error: { message: "boom" } }, extra_stamps: { data: extras } });
     vi.mocked(createPublicClient).mockReturnValue(pub.client);
     await expect(loadDashboardData(fakeClient({}).client)).rejects.toThrow();
   });
 
-  it("AC-2: the user's stamps are read per request through the cookie-based client", async () => {
+  it("AC-16: the user's stamps are read per request through the cookie-based client", async () => {
     const pub = fakeClient({ checkpoints: { data: checkpoints }, extra_stamps: { data: extras } });
     vi.mocked(createPublicClient).mockReturnValue(pub.client);
     const stamps = [{ checkpoint_id: 1, stamped_on: "2026-05-01" }];
