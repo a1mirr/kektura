@@ -25,7 +25,9 @@ author's context, and wants that to be part of how work is done here, not someth
 - **AC-3**: The `fresh-reviewer` agent is defined in `.claude/agents/fresh-reviewer.md`:
   - its tools are exactly `Read`, `Grep`, `Glob` and `Bash`: no `Edit`, `Write` or `NotebookEdit`. `Bash`
     could still write, so the brief forbids it;
-  - it reviews the diff of the current branch against the base it is given, plus anything not committed yet,
+  - it reviews the diff of the current branch against the base it is given (by default `origin/main`, which it
+    fetches first: a local `main` can be stale; fetching is the one write it makes, to remote-tracking refs), plus
+    anything not committed yet,
     and starts its report with the commit it reviewed and whether the working tree was clean, so a review of
     uncommitted work can't pass for a review of the final state;
   - it starts from `CLAUDE.md` and the spec it is given (with `none`, from the specs that own the behaviour

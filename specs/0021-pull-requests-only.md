@@ -35,7 +35,8 @@ on GitHub, for everybody who works in a clone of this repository, Claude Code in
   user asked for it in chat, CI is green and the fresh-context review (spec 0022) is
   done; never `--admin`. After the merge the pull request's branch is deleted, remote and local, once it is
   verified (after a `git fetch`) to be contained in `main`, and never with `-D`; only branches of pull requests
-  that were merged are deleted, and a branch another session has checked out is left to it. Nothing is deployed unless asked. It also gives where `gh` is installed (per user, on the user's
+  that were merged are deleted; the remote branch always goes, but a local branch another session has checked out
+  is left to that session (and the user is told). Nothing is deployed unless asked. It also gives where `gh` is installed (per user, on the user's
   PATH).
 
 ## Out of scope
@@ -61,7 +62,8 @@ on GitHub, for everybody who works in a clone of this repository, Claude Code in
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-2, AC-3 | `tests/git-hooks.test.ts` (`checkPush` for the three URL forms, every spelling of a push to `main`, topic branches, tags, the deploy remote, a look-alike host; the guard run as a process: exit codes and message) |
+| AC-1, AC-2, AC-3 | `tests/git-hooks.test.ts` (`checkPush` for the three URL forms, every spelling of a push to `main`, topic branches, deleting a topic branch, tags, the deploy remote, a look-alike host; the guard run as a process: exit codes and message) |
 | AC-4 | `tests/git-hooks.test.ts` (hook script calls the guard, `hooks:install` sets `core.hooksPath`, no `prepare`/`postinstall`/`preinstall` script); by hand: with the hook installed, `git push origin HEAD:main --dry-run` is refused |
 | AC-5 | `tests/git-hooks.test.ts` (CLAUDE.md mentions the rule and `hooks:install`) |
 | AC-6 | `tests/git-hooks.test.ts` (CLAUDE.md names the three commands with the options that make them work without a terminal, the conditions for merging, the deletion of the merged branch and its check, and the install path, and has no control characters) |
+| AC-6 (the deletion recipe works) | manual, after any change to the recipe: on a throwaway branch, push it, merge it, then run the recipe from a detached `origin/main` and confirm that `git branch -d` succeeds and that a branch with a commit added after the merge is refused |

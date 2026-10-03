@@ -17,7 +17,8 @@ branch (default `origin/main`, after `git fetch origin`). Nothing else.
 2. Read the spec you were given in full, and any spec it points to as the owner of changed behaviour. With
    `none`: find the specs that own the behaviour the diff touches (`git grep` for its routes, components and
    message keys in `specs/`) and read those; then say whether the change should have had a spec of its own.
-3. Pin down what you are reviewing: `git status --short` and `git rev-parse --short HEAD`. Then read the
+3. If your base is a remote-tracking branch (`origin/main`), run `git fetch origin` first: it only updates remote-tracking
+   refs, and a local `main` can be stale. Pin down what you are reviewing: `git status --short` and `git rev-parse --short HEAD`. Then read the
    change: `git log <base>..HEAD --stat`, `git diff <base>...HEAD`, and `git diff HEAD` plus the untracked
    files from `git status` for anything not committed yet. If the tree is dirty, or the committed diff is
    empty, say so at the top of your report: a review only counts for the commit it names. Open changed files
