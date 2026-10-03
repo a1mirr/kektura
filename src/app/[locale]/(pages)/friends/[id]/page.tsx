@@ -44,8 +44,8 @@ export default async function FriendPage({
 
   return (
     <main className="mx-auto max-w-3xl space-y-8 px-6 py-8">
-      <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-blue-700">{friend.displayName}</h1>
+      <header className="flex items-center justify-between gap-4">
+        <h1 className="min-w-0 text-2xl font-bold text-blue-700 [overflow-wrap:anywhere]">{friend.displayName}</h1>
         <Link href="/friends" className="text-sm text-stone-600 hover:underline">
           {t("friends")}
         </Link>
@@ -63,8 +63,7 @@ export default async function FriendPage({
       <section>
         <h2 className="mb-2 font-semibold">{t("checkpoints")}</h2>
         <div className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm text-stone-500">{t("stageHint")}</p>
+          <div className="flex justify-end">
             <StageControls />
           </div>
           {stages.map((stage) => {

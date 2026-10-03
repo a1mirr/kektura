@@ -78,7 +78,9 @@ sharing at any moment. Ships behind the feature flag `friends` (spec 0023).
   `get_inviter_info` answers only signed-in callers and returns no user id. The `friendships` table has an
   index on `friend_id` to support querying requests.
 - **AC-13**: Regenerating an invite, sending a request, and approving/ignoring are rate limited per user (30
-  per hour, one shared budget). There is no limit on the number of friends.
+  per hour, one shared budget) in the app's actions. The database functions behind them are not limited
+  beyond the rules of the data itself (one friendship per pair, one invite token per user), so a client that
+  bypasses the app can repeat a call but not gain anything by it. There is no limit on the number of friends.
 - **AC-14**: The actions (regenerate invite, send request, approve, ignore, remove, set sharing, set display name)
   never throw: they return an `ActionResult` (`unauthorized` when signed out, `failed` for anything else,
   including a network error) and log a failure as one `[friends]` line without tokens, names or user ids

@@ -62,6 +62,9 @@ export default async function FriendsPage({
 
   return (
     <div className="mx-auto max-w-xl space-y-8 p-4">
+      <Link href="/dashboard" className="text-sm text-stone-600 hover:underline">
+        {t("back")}
+      </Link>
       <h1 className="text-2xl font-bold">{t("title")}</h1>
       {errorKey && <div className="rounded-lg bg-red-50 p-4 text-red-700">{t(`error_${errorKey}`)}</div>}
       {sent === "1" && <div className="rounded-lg bg-green-50 p-4 text-green-800">{t("requestSent")}</div>}

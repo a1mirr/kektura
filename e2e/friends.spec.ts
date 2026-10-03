@@ -54,8 +54,7 @@ test.describe("spec 0024: friends", () => {
 
     // AC-4: the request is only visible to the inviter, and shares nothing yet.
     await expect(bobPage.getByText("You haven't added any friends yet.")).toBeVisible();
-    await bobPage.goto(`/en/friends/${anaId}`);
-    await expect(bobPage.getByRole("heading", { name: "Ana" })).toHaveCount(0); // 404: not a friend yet
+    expect((await bobPage.request.get(`/en/friends/${anaId}`)).status()).toBe(404); // not a friend yet
     await anaPage.goto("/en/friends");
     await expect(anaPage.getByRole("heading", { name: "Pending requests" })).toBeVisible();
 
@@ -155,8 +154,8 @@ test.describe("spec 0024: friends", () => {
     await expect(other.getByText("You are already friends.")).toBeVisible();
   });
 
-  test("AC-7: the Friends page fits a phone screen, also with the longest names", async ({ browser }) => {
-    const { anaPage, bobPage, anaId, bobId } = await requestedFriendship(browser);
+  test("AC-7: the friends pages fit a phone screen, also with the longest names", async ({ browser }) => {
+    const { anaPage, bobPage, anaId, bobId, inviteUrl } = await requestedFriendship(browser);
     const overflow = (page: Page) =>
       page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     psql(`update public.profiles set display_name = repeat('W', 40) where id in ('${anaId}', '${bobId}')`);
@@ -174,7 +173,19 @@ test.describe("spec 0024: friends", () => {
       await anaPage.goto(`/${locale}/friends`);
       expect(await overflow(anaPage), `${locale} friend`).toBeLessThanOrEqual(0);
     }
-    await bobPage.close();
+    // A friend's page and the invite page show the (long) name in their headings.
+    await anaPage.goto(`/en/friends/${bobId}`);
+    await expect(anaPage.getByRole("heading", { name: "W".repeat(40) })).toBeVisible();
+    // The stage list is the dashboard's, and Ana left every stage open there: close them to measure the heading.
+    await expect(async () => {
+      await anaPage.getByRole("button", { name: "Collapse all" }).click();
+      await expect(anaPage.locator("#stage-1 [aria-expanded]")).toHaveAttribute("aria-expanded", "false", { timeout: 1_000 });
+    }).toPass();
+    expect(await overflow(anaPage), "friend page").toBeLessThanOrEqual(0);
+    await bobPage.setViewportSize({ width: 375, height: 812 });
+    await bobPage.goto(inviteUrl.replace("/en/", "/ru/"));
+    await expect(bobPage.getByRole("heading", { name: new RegExp("W{40}") })).toBeVisible();
+    expect(await overflow(bobPage), "invite page").toBeLessThanOrEqual(0);
   });
 
   test("AC-14: an action that fails says so on the page instead of doing nothing", async ({ page }) => {

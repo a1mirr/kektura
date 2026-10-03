@@ -195,6 +195,7 @@
     "error_unauthorized": "Előbb jelentkezz be.",
     "friendNotSharing": "Nem oszt meg veled",
     "error_incoming_pending": "Ez a személy már kérte, hogy kapcsolódjatok: fogadd el a kérést lent.",
-    "requestSent": "Kérés elküldve. Itt fog megjelenni, ha elfogadja."
+    "requestSent": "Kérés elküldve. Itt fog megjelenni, ha elfogadja.",
+    "back": "← Vissza a követőhöz"
   }
 }

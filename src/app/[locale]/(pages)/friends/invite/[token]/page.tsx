@@ -62,7 +62,7 @@ export default async function InvitePage({
 
   return (
     <div className={card}>
-      <h1 className="text-2xl font-bold">{t("inviteFrom", { name: inviterName })}</h1>
+      <h1 className="text-2xl font-bold [overflow-wrap:anywhere]">{t("inviteFrom", { name: inviterName })}</h1>
       <form
         action={async () => {
           "use server";

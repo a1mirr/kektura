@@ -195,6 +195,7 @@
     "error_unauthorized": "Please sign in first.",
     "friendNotSharing": "Not sharing with you",
     "error_incoming_pending": "This person already asked to connect with you: approve the request below.",
-    "requestSent": "Request sent. You will see them here once they approve it."
+    "requestSent": "Request sent. You will see them here once they approve it.",
+    "back": "← Back to the tracker"
   }
 }
