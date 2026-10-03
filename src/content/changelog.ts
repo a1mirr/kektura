@@ -15,8 +15,8 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-10-03",
     title: {
       en: "Stamp descriptions in your language, and yyyy-mm-dd dates",
-      ru: "Описания печатей на вашем языке и даты гггг-мм-дд",
-      hu: "Bélyegzőleírások a te nyelveden és éééé-hh-nn dátumok",
+      ru: "Описания печатей на вашем языке и даты yyyy-mm-dd",
+      hu: "Bélyegzőleírások a te nyelveden és yyyy-mm-dd dátumok",
     },
     changes: [
       {
@@ -39,8 +39,8 @@ export const CHANGELOG: ChangelogEntry[] = [
         kind: "improved",
         text: {
           en: "The date of a stamp is typed and shown as yyyy-mm-dd, the same in every browser, with a calendar button next to it.",
-          ru: "Дата печати вводится и показывается в формате гггг-мм-дд, одинаково во всех браузерах; рядом есть кнопка календаря.",
-          hu: "A bélyegzés dátumát éééé-hh-nn formában írod és látod, minden böngészőben egyformán, mellette naptár gombbal.",
+          ru: "Дата печати вводится и показывается в формате yyyy-mm-dd (год-месяц-день), одинаково во всех браузерах; рядом есть кнопка календаря.",
+          hu: "A bélyegzés dátumát yyyy-mm-dd (év-hónap-nap) formában írod és látod, minden böngészőben egyformán, mellette naptár gombbal.",
         },
       },
     ],

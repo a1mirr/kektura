@@ -9,9 +9,10 @@ import { isValidStampDate, MIN_STAMP_DATE } from "@/lib/stamp-date";
 // The date field of a stamp (spec 0016 AC-5 to AC-7, spec 0031): a yyyy-mm-dd text field, so the date reads
 // the same in every browser, plus a button that opens the browser's calendar.
 //
-// It must not save on every change: while the year is typed, every prefix (0002, 0020, 0202, 2026) is a
-// valid date, and a disabled field would lose focus mid-typing. So a valid, changed value is saved after
-// a pause or when the field is left; anything else is never sent and is restored on leaving.
+// It must not save on every change: typing one date over another passes through other complete dates
+// (2026-09-02 on the way to 2026-09-26), and a disabled field would lose focus mid-typing. So a valid,
+// changed value is saved after a pause or when the field is left; anything else is never sent and is
+// restored on leaving. (A day picked in the calendar is one complete date and is saved at once.)
 
 const SAVE_DELAY_MS = 700;
 
@@ -83,8 +84,12 @@ export default function StampDateInput({
   function openCalendar() {
     const input = picker.current;
     if (!input) return;
-    if (typeof input.showPicker === "function") input.showPicker();
-    else input.click();
+    try {
+      if (typeof input.showPicker === "function") input.showPicker();
+      else input.click();
+    } catch {
+      input.click(); // showPicker() throws when the browser refuses (no user gesture, a sandboxed frame)
+    }
   }
 
   function handlePick(date: string) {
@@ -109,7 +114,6 @@ export default function StampDateInput({
       )}
       <input
         type="text"
-        inputMode="numeric"
         autoComplete="off"
         placeholder="yyyy-mm-dd"
         maxLength={10}
