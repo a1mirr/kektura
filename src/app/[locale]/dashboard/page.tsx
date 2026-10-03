@@ -26,6 +26,7 @@ import StageStampButton from "@/components/StageStampButton";
 import StampButton from "@/components/StampButton";
 import StampDescriptions from "@/components/StampDescriptions";
 import TrailMapLoader from "@/components/TrailMapLoader";
+import { localizedDescription } from "@/lib/stamp-description";
 import stagesData from "../../../../scripts/data/okt-stages.json";
 
 export default async function Dashboard({
@@ -177,7 +178,7 @@ export default async function Dashboard({
                           {p.name}
                           <span className="ml-2 text-sm text-stone-500">{t("kmValue", { km: format.number(p.km) })}</span>
                         </div>
-                        <StampDescriptions descriptions={p.variants.map((v) => v.description)} />
+                        <StampDescriptions descriptions={p.variants.map((v) => localizedDescription(v.code, v.description, locale))} />
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
                         <LocateButton
@@ -224,7 +225,7 @@ export default async function Dashboard({
                       {e.off_trail_m > 100 && ` · ${t("offTrail", { m: format.number(e.off_trail_m) })}`}
                     </span>
                   </div>
-                  <StampDescriptions descriptions={[e.description]} />
+                  <StampDescriptions descriptions={[localizedDescription(e.code, e.description, locale)]} />
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <LocateButton kind="extra" keyId={String(e.id)} name={e.name} lat={e.lat} lng={e.lng} />

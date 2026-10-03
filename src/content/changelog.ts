@@ -14,9 +14,9 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     date: "2026-10-03",
     title: {
-      en: "Full stamp descriptions and yyyy-mm-dd dates",
-      ru: "Описания печатей целиком и даты yyyy-mm-dd",
-      hu: "Teljes bélyegzőleírások és yyyy-mm-dd dátumok",
+      en: "Stamp descriptions in your language, and yyyy-mm-dd dates",
+      ru: "Описания печатей на вашем языке и даты yyyy-mm-dd",
+      hu: "Bélyegzőleírások a te nyelveden és yyyy-mm-dd dátumok",
     },
     changes: [
       {
@@ -25,6 +25,14 @@ export const CHANGELOG: ChangelogEntry[] = [
           en: "Where to find a stamp is now shown in full: long descriptions wrap onto more lines instead of being cut off with “…”.",
           ru: "Описание, где искать печать, теперь показывается целиком: длинный текст переносится на следующие строки, а не обрезается многоточием.",
           hu: "A bélyegző helyének leírása mostantól teljes egészében látszik: a hosszú szöveg új sorba tör, és nem vágja le a „…”.",
+        },
+      },
+      {
+        kind: "new",
+        text: {
+          en: "Where to find each stamp is now also written in English and Russian (in Hungarian it stays as published). The translations were not proofread: tell us about mistakes through the feedback form.",
+          ru: "Описание, где искать каждую печать, теперь есть и на русском, и на английском (на венгерском остаётся как опубликовано). Переводы не вычитывались: об ошибках можно сообщить через форму обратной связи.",
+          hu: "Mostantól minden bélyegző helyének leírása angolul és oroszul is olvasható (magyarul úgy marad, ahogy megjelent). A fordításokat nem lektorálták: a hibákat a visszajelzési űrlapon jelezheted.",
         },
       },
       {
