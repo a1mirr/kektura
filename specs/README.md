@@ -72,7 +72,7 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0019](0019-useful-links.md) | Useful links page | Done |
 | [0020](0020-origin-and-deploy.md) | Request origin behind the proxy; deploy files | Done |
 | [0015](0015-about-page.md) | About page | Done |
-| [0021](0021-pull-requests-only.md) | main only changes through pull requests (local pre-push guard) | Done |
+| [0021](0021-pull-requests-only.md) | main only changes through pull requests (local pre-push guard; opening, merging and cleaning up after them with gh) | Done |
 | [0022](0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Done |
 | [0023](0023-feature-flags.md) | Feature flags | Draft |
 | [0024](0024-friends-sharing.md) | Sharing progress with friends | Done |
@@ -81,4 +81,6 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0027](0027-feature-flags-via-telegram.md) | Switching feature flags from the Telegram bot | Draft |
 | [0028](0028-landing-screenshots.md) | Screenshots on the landing page | Draft |
 | [0029](0029-site-logo-link.md) | A logo that leads home, on every page | Draft |
-| [0031](0031-iso-date-input.md) | Stamp dates typed and shown as yyyy-mm-dd, with a calendar button | Done |
+| [0030](0030-faster-e2e.md) | Faster end-to-end tests: API sign-in, CI caches, timing report | Done |
+| [0031](0031-e2e-sharding.md) | Sharded end-to-end tests: two parallel CI jobs | Draft |
+| [0032](0032-iso-date-input.md) | Stamp dates typed and shown as yyyy-mm-dd, with a calendar button | Done |

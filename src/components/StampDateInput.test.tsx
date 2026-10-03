@@ -193,7 +193,7 @@ describe("spec 0016: the date field", () => {
   });
 });
 
-describe("spec 0031: the yyyy-mm-dd text field and the calendar button", () => {
+describe("spec 0032: the yyyy-mm-dd text field and the calendar button", () => {
   it("AC-1: an accessible yyyy-mm-dd text field showing the saved date", () => {
     const { input } = setup(ok());
     expect(input.type).toBe("text");

@@ -33,7 +33,7 @@ async function stampFirstPlaces(page: Page) {
 }
 
 test.describe("spec 0016: stamp dates", () => {
-  test("0016 AC-1, AC-5 + 0031 AC-1, AC-3: a new stamp shows today's date as yyyy-mm-dd in a labelled field; the calendar has a valid range", async ({ page }) => {
+  test("0016 AC-1, AC-5 + 0032 AC-1, AC-3: a new stamp shows today's date as yyyy-mm-dd in a labelled field; the calendar has a valid range", async ({ page }) => {
     const email = await signInAsNewUser(page);
     await stampFirstPlaces(page);
     const field = dateField(place(page, "OKTPH_02"));
@@ -87,7 +87,7 @@ test.describe("spec 0016: stamp dates", () => {
     await field.blur();
     await expect(field).toHaveValue("2025-06-01");
     for (const other of ["15/09/2025", "2025-9-5", "09/15/2025"]) {
-      await field.fill(other); // 0031 AC-2: only yyyy-mm-dd
+      await field.fill(other); // 0032 AC-2: only yyyy-mm-dd
       await field.blur();
       await expect(field).toHaveValue("2025-06-01");
     }
@@ -96,7 +96,7 @@ test.describe("spec 0016: stamp dates", () => {
     expect(storedDate(email, "OKTPH_02")).toBe("2025-06-01");
   });
 
-  test("0031 AC-3: a day picked in the calendar fills the field and is saved at once", async ({ page }) => {
+  test("0032 AC-3: a day picked in the calendar fills the field and is saved at once", async ({ page }) => {
     const email = await signInAsNewUser(page);
     await stampFirstPlaces(page);
     const row = place(page, "OKTPH_02");
