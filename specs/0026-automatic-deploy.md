@@ -1,8 +1,8 @@
 # 0026: Automatic migrations and deploy after a merge
 
 Status: Accepted
-(It becomes Done after the first successful automatic deploy: that needs the secrets and the baseline run of
-`deploy/README.md`, which only the owner can do.)
+(It becomes Done after the first deploy that a merge starts by itself and that succeeds. The deploy key, the secrets
+and the baseline are in place since 2026-10-03: see the Notes.)
 Owner code: `.github/workflows/deploy.yml`, `scripts/migrate-production.mjs`, `scripts/smoke-test.mjs`,
 `scripts/notify-telegram.mjs`, `scripts/deploy-plan.mjs`, `scripts/lib/deploy.mjs`, `deploy/ssh-gate.sh`, `deploy/README.md`
 
