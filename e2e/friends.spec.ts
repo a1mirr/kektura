@@ -188,7 +188,7 @@ test.describe("spec 0024: friends", () => {
     expect(await overflow(bobPage), "invite page").toBeLessThanOrEqual(0);
   });
 
-  test("0001 AC-10 + 0032 AC-1: a friend's page shows the stamp descriptions in full at 375 px, in the page's language", async ({ browser }) => {
+  test("0001 AC-10 + 0033 AC-1: a friend's page shows the stamp descriptions in full at 375 px, in the page's language", async ({ browser }) => {
     const { anaPage, bobId } = await requestedFriendship(browser);
     await approve(anaPage);
     await anaPage.setViewportSize({ width: 375, height: 812 });

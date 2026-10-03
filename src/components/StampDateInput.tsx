@@ -6,7 +6,7 @@ import { useRouter } from "@/i18n/navigation";
 import type { ActionResult } from "@/lib/action-result";
 import { isValidStampDate, MIN_STAMP_DATE } from "@/lib/stamp-date";
 
-// The date field of a stamp (spec 0016 AC-5 to AC-7, spec 0031): a yyyy-mm-dd text field, so the date reads
+// The date field of a stamp (spec 0016 AC-5 to AC-7, spec 0032): a yyyy-mm-dd text field, so the date reads
 // the same in every browser, plus a button that opens the browser's calendar.
 //
 // It must not save on every change: typing one date over another passes through other complete dates
@@ -79,7 +79,7 @@ export default function StampDateInput({
     return () => clearTimeout(timer);
   }, [draft, saved, status, save]);
 
-  // The calendar button (spec 0031 AC-3): the native picker lives in a hidden date input; a pick is one
+  // The calendar button (spec 0032 AC-3): the native picker lives in a hidden date input; a pick is one
   // complete date, so it is saved at once instead of after the pause.
   function openCalendar() {
     const input = picker.current;

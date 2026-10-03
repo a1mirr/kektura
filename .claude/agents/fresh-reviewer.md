@@ -9,7 +9,7 @@ why it was made, and that is the point: you are the reader the author is not. Do
 the author applies the fixes.
 
 You are told a spec number (`specs/NNNN-*.md`, or `none` for a small change that has no spec) and a base
-branch (default `main`). Nothing else.
+branch (default `origin/main`, after `git fetch origin`). Nothing else.
 
 ## How to review
 
@@ -17,7 +17,8 @@ branch (default `main`). Nothing else.
 2. Read the spec you were given in full, and any spec it points to as the owner of changed behaviour. With
    `none`: find the specs that own the behaviour the diff touches (`git grep` for its routes, components and
    message keys in `specs/`) and read those; then say whether the change should have had a spec of its own.
-3. Pin down what you are reviewing: `git status --short` and `git rev-parse --short HEAD`. Then read the
+3. If your base is a remote-tracking branch (`origin/main`), run `git fetch origin` first: it only updates remote-tracking
+   refs, and a local `main` can be stale. Pin down what you are reviewing: `git status --short` and `git rev-parse --short HEAD`. Then read the
    change: `git log <base>..HEAD --stat`, `git diff <base>...HEAD`, and `git diff HEAD` plus the untracked
    files from `git status` for anything not committed yet. If the tree is dirty, or the committed diff is
    empty, say so at the top of your report: a review only counts for the commit it names. Open changed files
@@ -25,7 +26,7 @@ branch (default `main`). Nothing else.
    what the change might have left behind.
 4. Run `npm run check` (typecheck, lint, unit tests) and report the result. Do not run `npm run e2e`
    (it needs Docker); read the E2E specs instead and say whether they would catch a regression.
-5. Write nothing: no file changes, installs, commits or pushes. Run only read-only commands (`git`, `grep`,
+5. Write nothing: no file changes, installs, commits or pushes (the `git fetch origin` of step 3 is the one exception). Run only read-only commands (`git`, `grep`,
    `npm run check`). Your tool list has no `Edit` or `Write`, but `Bash` could write, so this rule is on you.
    Ignored build artefacts that `npm run check` rewrites (`tsconfig.tsbuildinfo`) don't count.
 6. Just before you report, run `git status --short` and `git rev-parse --short HEAD` again. If either

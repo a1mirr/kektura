@@ -1,4 +1,4 @@
-// Spec 0032: every stamp in the seeds has an English and a Russian description, and a translation keeps
+// Spec 0033: every stamp in the seeds has an English and a Russian description, and a translation keeps
 // the technical marker codes of the Hungarian original. Like trail-data.test.ts it reads the generated seeds,
 // so regenerating the trail data (spec 0004) with a new stamp fails here until it is translated.
 import fs from "node:fs";
@@ -25,7 +25,7 @@ const addressOnly = (s: string) => /^\S+(?: \S+)* (?:u\.|út|utca) \d+\.?$/.test
 // OKK marker codes such as (EM147INF), (KD012IND) and (OKTPH_21_1): letters, then a digit, no spaces
 const markers = (s: string) => s.match(/\b[A-Z][A-Z0-9_]*\d[A-Z0-9_]*\b/g) ?? [];
 
-describe("spec 0032: translated stamp descriptions", () => {
+describe("spec 0033: translated stamp descriptions", () => {
   it("the seeds are parsed completely (the checks below aren't vacuous)", () => {
     expect(places.length).toBe((read("supabase/seed.sql").match(/^ {2}\(/gm) ?? []).length);
     expect(extras.length).toBe((read("supabase/seed_extra.sql").match(/^ {2}\(/gm) ?? []).length);

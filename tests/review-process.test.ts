@@ -73,6 +73,12 @@ describe("spec 0022: fresh-context review", () => {
       expect(body).toMatch(/read the E2E specs instead/);
     });
 
+    it("reviews against origin/main by default, fetched first, and does not trust a stale local main", () => {
+      expect(body).toMatch(/branch \(default `origin\/main`, after `git fetch origin`\)/);
+      expect(body).toMatch(/run `git fetch origin` first/);
+      expect(read("CLAUDE.md")).toMatch(/the base branch \(`origin\/main`, after `git fetch origin`: a local `main` can be stale\)/);
+    });
+
     it("starts from CLAUDE.md and the spec (or the owning specs for `none`), and runs the checks", () => {
       expect(body).toContain("CLAUDE.md");
       expect(body).toMatch(/specs\/NNNN/);

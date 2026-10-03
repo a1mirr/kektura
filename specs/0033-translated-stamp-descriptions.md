@@ -1,4 +1,4 @@
-# 0032: Translated stamp descriptions
+# 0033: Translated stamp descriptions
 
 Status: Done
 Owner code: `src/content/stamp-descriptions.json`, `src/lib/stamp-description.ts`,

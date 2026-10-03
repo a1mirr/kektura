@@ -1,4 +1,4 @@
-// Translated stamp descriptions (spec 0032): MTSZ and heyjoe.hu publish where to find each stamp only in
+// Translated stamp descriptions (spec 0033): MTSZ and heyjoe.hu publish where to find each stamp only in
 // Hungarian; `src/content/stamp-descriptions.json` holds our `ru` and `en` versions, keyed by stamp code.
 import type { Locale } from "next-intl";
 import translations from "@/content/stamp-descriptions.json";

@@ -3,7 +3,7 @@ import { localizedDescription } from "./stamp-description";
 
 const table = { A: { en: "On the post.", ru: "На столбе." }, B: { en: "Only English." } };
 
-describe("spec 0032: localizedDescription", () => {
+describe("spec 0033: localizedDescription", () => {
   it("AC-1: ru and en use the translation, hu the Hungarian original", () => {
     expect(localizedDescription("A", "Az oszlopon.", "en", table)).toBe("On the post.");
     expect(localizedDescription("A", "Az oszlopon.", "ru", table)).toBe("На столбе.");

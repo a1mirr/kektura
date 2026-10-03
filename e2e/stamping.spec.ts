@@ -54,7 +54,7 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
     expect(clipped).toEqual([]);
   });
 
-  test("0032 AC-1: stamp descriptions follow the page language, the Hungarian original stays in hu", async ({ page }) => {
+  test("0033 AC-1: stamp descriptions follow the page language, the Hungarian original stays in hu", async ({ page }) => {
     await signInAsNewUser(page);
     const expected = {
       // a place (Piliscsaba) and the first extra stamp (Velem, 3.8 km)

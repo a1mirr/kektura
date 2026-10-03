@@ -1,4 +1,4 @@
-# 0031: Stamp dates as yyyy-mm-dd
+# 0032: Stamp dates as yyyy-mm-dd
 
 Status: Done
 Owner code: `src/components/StampDateInput.tsx`, `messages/*.json` (`dashboard.openCalendar`)

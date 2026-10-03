@@ -43,9 +43,34 @@ jobs:
       # The database rules of spec 0024 (they skip themselves without a local Supabase, so only here do they run).
       - name: Database rule tests
         run: npx vitest run tests/friends-migration.test.ts
+      # Spec 0030 AC-3: the browser download and Next's incremental build cache survive between runs. A miss
+      # only costs time.
+      - name: Playwright version
+        id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - uses: actions/cache@v4
+        with:
+          path: .next-e2e/cache
+          key: next-e2e-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**', 'messages/**', 'public/**', 'next.config.ts', 'tsconfig.json') }}
+          restore-keys: next-e2e-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+      # The folder also holds the server's cached reference data (checkpoints, extra stamps, `unstable_cache` for a day,
+      # spec 0009): a restored copy would hide a changed seed or migration, so only the build cache is kept.
+      - name: Drop the restored reference-data cache
+        run: rm -rf .next-e2e/cache/fetch-cache
       - run: npx playwright install --with-deps chromium
       # Builds the test server through scripts/test-env.mjs (reads `supabase status`) and runs it.
+      # The JSON report feeds the slowest-tests table below (spec 0030 AC-4).
       - run: npm run e2e
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: e2e-report.json
+      - name: Slowest E2E tests
+        if: always()
+        run: |
+          if [ -f e2e-report.json ]; then node scripts/slowest-tests.mjs e2e-report.json 10 >> "$GITHUB_STEP_SUMMARY"; fi
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v7
