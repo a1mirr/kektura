@@ -1,15 +1,15 @@
-# NNNN: Title
+# NNNN: Area name
 
 Status: Draft | Accepted | Done
 Owner code: `path/to/module.ts`, `path/to/Component.tsx`
 
 ## Goal
 
-Why this exists, for whom, in two or three sentences.
+What this area is for and for whom, in two or three sentences. Describe the area as it is, not a change to it: the work belongs in a task (`tasks/`).
 
 ## Behaviour
 
-Numbered acceptance criteria. Each one observable and testable; group them under subheadings if
+Numbered acceptance criteria, true now. Each one observable and testable; group them under subheadings if
 there are many.
 
 - **AC-1**: Given ..., when ..., then ...
@@ -17,7 +17,7 @@ there are many.
 
 ## Out of scope
 
-What this task deliberately does not do.
+What this area deliberately does not do.
 
 ## Open questions
 

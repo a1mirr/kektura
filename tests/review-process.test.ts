@@ -10,7 +10,9 @@ describe("spec 0022: fresh-context review", () => {
     const claude = read("CLAUDE.md");
     expect(claude).toContain("Fresh-context review before merge");
     expect(claude).toContain("`fresh-reviewer`");
-    expect(claude).toMatch(/only the spec number \(`none` for a small change that has no spec\) and the base branch/);
+    expect(claude).toMatch(
+      /only the task number \(the spec number for a change that is only a spec, `none` for a small change that has neither\) and the base branch/,
+    );
     expect(claude).toMatch(/before it is merged/);
     expect(claude).toMatch(/Fix every valid finding and answer the rest in the pull request description/);
     expect(claude).toMatch(/with the commit that was reviewed/);
@@ -27,13 +29,14 @@ describe("spec 0022: fresh-context review", () => {
     expect(read("CLAUDE.md")).toMatch(/fresh-context review before merge: 0022/);
   });
 
-  it("AC-2: the specs workflow ends with the review", () => {
+  it("AC-2: the specs workflow ends with the review, after the specs are made true", () => {
     const readme = read("specs/README.md");
     const steps = readme.slice(readme.indexOf("## Workflow"), readme.indexOf("## Where tests live"));
     const lastStep = [...steps.matchAll(/^(\d+)\. \*\*(.+?)\*\*/gm)].at(-1);
     expect(lastStep?.[2]).toMatch(/review/i);
     expect(steps).toContain("fresh-reviewer");
     expect(steps).toContain("`none`");
+    expect(steps).toContain("only the task number");
   });
 
   describe("AC-3: the fresh-reviewer agent", () => {
@@ -69,7 +72,7 @@ describe("spec 0022: fresh-context review", () => {
     it("checks every migration against the running code, its name and the regenerated types (a merge deploys by itself)", () => {
       expect(body).toMatch(/A migration in the diff that the code running in production could not live with while it is applied/);
       expect(body).toMatch(/takes two merges, the second after the first has deployed: spec\s+0026 AC-5/);
-      expect(body).toMatch(/not named `NNNN_slug\.sql` after the spec that owns it/);
+      expect(body).toMatch(/not named `NNNN_slug\.sql` after the task that adds it/);
       expect(body).toMatch(/regenerated types \(`npm run types:gen`\)/);
       expect(body).toMatch(/A merge deploys by itself, so nobody else will look at this/);
       expect(read("specs/0022-fresh-context-review.md")).toMatch(/checks every migration in the diff against spec 0026 AC-5/);
@@ -125,6 +128,7 @@ describe("spec 0022: fresh-context review", () => {
   it("AC-4: the pull request template has the checklist, the reviewed commit and a place for the findings", () => {
     const template = read(".github/pull_request_template.md");
     expect(template).toMatch(/^- \[ \] .*spec came first.*needs no spec/m);
+    expect(template).toMatch(/^- \[ \] .*specs this change touches mirror the code as built.*Spec changes/m);
     expect(template).toMatch(/^- \[ \] .*npm run check.*npm run e2e/m);
     expect(template).toMatch(/^- \[ \] .*fresh-context agent.*fresh-reviewer.*at the commit named below.*later commits only fix wording/m);
     expect(template).toMatch(/^## Review findings/m);

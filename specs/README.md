@@ -1,29 +1,42 @@
 # Specs
 
-Every task (feature, behaviour change, non-trivial bug fix) gets a spec here **before** code. Specs are always written in English. The
-spec is the contract; tests prove it; the Stop hook keeps it proven.
+A spec is the contract of one **area**, a part of the product or of how the project is run, written as it behaves
+**now**: numbered acceptance criteria, each one observable and testable. The tests prove it, the Stop hook keeps it
+proven, and after every change the spec is edited until it mirrors the code again.
+Specs are always written in English.
+
+The work that changes an area is a **task** ([`tasks/`](../tasks/README.md)): why, which specs it touches, what is
+done when. A task is history and never says how the product behaves; a spec never tells the story of a change.
+Both folders share one number sequence (next number = the highest in `specs/` and `tasks/` plus one). Details:
+[0034](0034-specs-and-tasks.md). A quick test for where a sentence belongs: will it still be true in a year if
+nobody touches it? Yes: spec. No: task.
 
 ## Workflow
 
-1. **Write the spec.** Copy [`_template.md`](_template.md) to `specs/NNNN-short-slug.md` (next free
-   number), status `Draft`. Fill in the goal, the behaviour as numbered acceptance criteria
-   (`AC-1`, `AC-2`, ...), what is out of scope and open questions. Each AC is one observable,
-   testable statement: "given X, when Y, then Z".
+1. **Write or edit the spec.** A new area: copy [`_template.md`](_template.md) to `specs/NNNN-short-slug.md`,
+   status `Draft`. A change to an existing area: edit the spec that owns it (add, change or remove ACs). Fill in
+   the goal, the behaviour as numbered acceptance criteria (`AC-1`, `AC-2`, ...), what is out of scope and open
+   questions. Each AC is one observable, testable statement: "given X, when Y, then Z". Then open the task
+   (`tasks/NNNN-slug.md`) that lists the spec; a refactor or a CI change is only a task, a trivial fix needs
+   neither.
 2. **Agree on it.** Resolve the open questions and set status `Accepted` before implementing.
 3. **Write the tests from the ACs.** `describe("spec NNNN: <area>")`, and every test title starts
    with the AC it covers (`it("AC-3: ...")`). An AC that can't be automated yet is listed as
    `manual` in the spec's coverage table, with how to check it.
 4. **Implement** until `npm run check` (typecheck + lint + tests) is green.
-5. **Close the spec**: status `Done`, coverage table filled in.
+5. **Make the spec true.** Reread every spec the task touches against the code as built and edit it to mirror
+   reality: an AC for behaviour that exists and no AC states, `Removed` for an AC that was dropped, status `Done`,
+   the coverage table, the index below. Where code and spec disagree, decide which is right and fix that one.
+   Write what changed in the task's "Spec changes" section and set the task `Done`.
 6. **Review with a fresh agent** before the pull request is merged ([0022](0022-fresh-context-review.md)):
-   spawn the `fresh-reviewer` agent with only the spec number (`none` for a small change with no spec) and
-   the base branch. It has none of your context and reads the spec and the diff like a stranger would. Fix
-   its valid findings, answer the rest in the pull request, and review again after fixes that change code,
-   tests or behaviour.
+   spawn the `fresh-reviewer` agent with only the task number (the spec number for a change that is only a spec,
+   `none` for a small change with neither) and the base branch. It has none of your context and reads the specs
+   and the diff like a stranger would, in both directions. Fix its valid findings, answer the rest in the pull
+   request, and review again after fixes that change code, tests or behaviour.
 
-Changing existing behaviour means editing the spec that owns it (add/change/remove ACs) in the same
-change as the code and tests. Never delete an AC number: mark it `Removed` so old references stay
-meaningful. `git grep "AC-3" -- '*0001*' 'src' 'tests'` finds a criterion's spec and tests.
+Never delete an AC number: mark it `Removed` so old references stay meaningful. `git grep "AC-3" -- '*0001*'
+'src' 'tests'` finds a criterion's spec and tests. A spec found to disagree with the code at any other time is a
+defect: correct it at once when that is small, otherwise open a task.
 
 ## Where tests live
 
@@ -44,8 +57,8 @@ dummy user each (`signInAsNewUser` in `e2e/helpers.ts`), so they never depend on
 `.claude/settings.json` runs [`.claude/hooks/stop-check.mjs`](../.claude/hooks/stop-check.mjs) whenever
 Claude Code is about to finish a turn with changed source files: typecheck, lint and tests in
 parallel. A failure is sent back to Claude to fix (up to 3 attempts, then you get a message). If app
-code changed but no spec and no test did, it asks once for the spec/test update or a one-line reason
-why none is needed. Run the same checks yourself with `npm run check`. E2E tests need Docker, so the
+code changed but no spec did, it asks once whether behaviour changed (then the spec and its tests are
+updated) or not (then say so in one line). Run the same checks yourself with `npm run check`. E2E tests need Docker, so the
 hook doesn't run them: run `npm run e2e` before committing changes to user flows.
 
 ## Index
@@ -85,3 +98,4 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0031](0031-e2e-sharding.md) | Sharded end-to-end tests: two parallel CI jobs | Draft |
 | [0032](0032-iso-date-input.md) | Stamp dates typed and shown as yyyy-mm-dd, with a calendar button | Done |
 | [0033](0033-translated-stamp-descriptions.md) | Stamp descriptions translated into ru and en | Done |
+| [0034](0034-specs-and-tasks.md) | Specs and tasks: how work is written down | Done |
