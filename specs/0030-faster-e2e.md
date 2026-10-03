@@ -1,7 +1,8 @@
 # 0030: Faster end-to-end tests
 
 Status: Done
-Owner code: `e2e/helpers.ts`, `e2e/auth.spec.ts`, `.github/workflows/ci.yml`
+Owner code: `e2e/helpers.ts`, `e2e/auth.spec.ts`, `.github/workflows/ci.yml`, `scripts/slowest-tests.mjs`,
+`playwright.config.ts`
 
 ## Goal
 
@@ -17,13 +18,15 @@ stays covered, and nothing is skipped.
   sets end up in the browser context, so the dashboard is rendered once, as a signed-in page. If the route does
   not answer with a redirect to the dashboard (the account was refused), the helper fails with a clear message
   instead of a timeout.
-- **AC-2**: One E2E test still signs in through the real dummy form (landing page, email field, "Sign in as test
+- **AC-2**: At least one E2E test still signs in through the real dummy form (landing page, email field, "Sign in as test
   user" button) and ends on the dashboard, so the form and its hydration-free POST stay covered
   (`signInThroughForm` in `e2e/helpers.ts`, used by `e2e/auth.spec.ts`).
 - **AC-3**: The `e2e` job of `.github/workflows/ci.yml` restores two caches before it needs them: Playwright's
   browser download (`~/.cache/ms-playwright`, keyed by the locked `@playwright/test` version) and Next's
   incremental build cache (`.next-e2e/cache`, keyed by `package-lock.json` and the source files, with a
-  fallback to the newest cache of the lockfile). A cache miss only makes the job slower, never fails it.
+  fallback to the newest cache of the lockfile). The Next cache folder also holds the server's cached reference data (spec 0009), which would hide a changed seed
+  or migration, so the job deletes `.next-e2e/cache/fetch-cache` after restoring. A cache miss only makes the job
+  slower, never fails it.
 - **AC-4**: The job reports the slowest tests, so the next round of speed-ups starts from numbers: Playwright's
   `list` reporter is joined by `json` in CI (`PLAYWRIGHT_JSON_OUTPUT_NAME`), and a final step prints the ten
   slowest tests to the job summary. It runs even when the suite failed.

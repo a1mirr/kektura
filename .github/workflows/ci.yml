@@ -57,6 +57,10 @@ jobs:
           path: .next-e2e/cache
           key: next-e2e-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**', 'messages/**', 'public/**', 'next.config.ts', 'tsconfig.json') }}
           restore-keys: next-e2e-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+      # The folder also holds the server's cached reference data (checkpoints, extra stamps, `unstable_cache` for a day,
+      # spec 0009): a restored copy would hide a changed seed or migration, so only the build cache is kept.
+      - name: Drop the restored reference-data cache
+        run: rm -rf .next-e2e/cache/fetch-cache
       - run: npx playwright install --with-deps chromium
       # Builds the test server through scripts/test-env.mjs (reads `supabase status`) and runs it.
       # The JSON report feeds the slowest-tests table below (spec 0030 AC-4).

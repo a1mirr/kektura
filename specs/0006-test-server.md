@@ -34,7 +34,7 @@ Google account and without touching real data. Production keeps Google sign-in o
 - **AC-6**: `npm run e2e` runs the Playwright suite against a production build of the test server
   (`build:e2e` + `start:e2e`, port 3002, its own build folder, so a manual `dev:test` on :3001 is
   never reused by mistake). Every test signs in as a fresh user, so tests are independent and run
-  in parallel. How they sign in (a direct POST to the login route; one test uses the form) is spec 0030 AC-1, AC-2.
+  in parallel. How they sign in (a direct POST to the login route; at least one test uses the form) is spec 0030 AC-1, AC-2.
 - **AC-7**: The test server never sends feedback to the real Telegram bot. `scripts/test-env.mjs` blanks
   `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` for every server it starts (`dev:test`, `build:e2e`,
   `start:e2e`, CI), even when `.env.local` holds the real bot, so feedback submitted by a manual test
