@@ -60,4 +60,4 @@ Elevation-based stats; walked time; stamps outside the official 161 (see extra s
 | AC-3, AC-4, AC-7 on the real dashboard | `e2e/stamping.spec.ts` |
 | AC-5 (localized labels) | manual: switch locale on the dashboard, check month labels and tooltip |
 | AC-8, AC-9 | `src/components/StageSection.test.tsx` |
-| AC-10 | `src/components/StampDescriptions.test.tsx` (every description rendered, no truncation classes), `e2e/stamping.spec.ts` (nothing clipped or sticking out of its row at 375 px) |
+| AC-10 | `src/components/StampDescriptions.test.tsx` (every description rendered, no truncation classes), `e2e/stamping.spec.ts` (dashboard) and `e2e/friends.spec.ts` (a friend's page): nothing clipped or sticking out of its row at 375 px |

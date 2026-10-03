@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expandAllStages, signInAsNewUser, stat } from "./helpers";
+import { expandAllStages, measureDescriptions, signInAsNewUser, stat } from "./helpers";
 
 const place = (page: import("@playwright/test").Page, key: string) => page.locator(`#place-${key}`);
 
@@ -49,22 +49,8 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
     await signInAsNewUser(page);
     await expandAllStages(page);
 
-    const rows = await page.locator("li[id^=place-], #extra-stamps li").evaluateAll((lis) =>
-      lis.flatMap((li) =>
-        [...li.querySelectorAll<HTMLElement>("div.text-xs")].map((d) => {
-          const s = getComputedStyle(d);
-          return {
-            id: li.id,
-            clipped:
-              s.textOverflow === "ellipsis" ||
-              s.whiteSpace === "nowrap" ||
-              d.scrollWidth > d.clientWidth ||
-              d.getBoundingClientRect().right > li.getBoundingClientRect().right,
-          };
-        }),
-      ),
-    );
-    expect(rows.length).toBeGreaterThan(200); // 161 places (220 stamps) + 72 extra stamps
-    expect(rows.filter((r) => r.clipped).map((r) => r.id)).toEqual([]);
+    const { measured, clipped } = await measureDescriptions(page);
+    expect(measured).toBeGreaterThan(200); // 161 places (220 stamps) + 72 extra stamps
+    expect(clipped).toEqual([]);
   });
 });

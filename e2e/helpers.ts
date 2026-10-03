@@ -28,3 +28,22 @@ export async function expandAllStages(page: Page) {
     await expect(page.locator("#stage-1 [aria-expanded]")).toHaveAttribute("aria-expanded", "true", { timeout: 1_000 });
   }).toPass();
 }
+
+// Spec 0001 AC-10: the ids of the place and extra-stamp rows whose description is cut off, nowrap or sticks
+// out of its row, plus how many descriptions were measured (so a changed selector can't pass vacuously).
+export function measureDescriptions(page: Page) {
+  return page.locator("li[id^=place-], #extra-stamps li").evaluateAll((lis) => {
+    const rows = lis.flatMap((li) =>
+      [...li.querySelectorAll<HTMLElement>("div.text-xs")].map((d) => {
+        const s = getComputedStyle(d);
+        const clipped =
+          s.textOverflow === "ellipsis" ||
+          s.whiteSpace === "nowrap" ||
+          d.scrollWidth > d.clientWidth ||
+          d.getBoundingClientRect().right > li.getBoundingClientRect().right;
+        return { id: li.id, clipped };
+      }),
+    );
+    return { measured: rows.length, clipped: rows.filter((r) => r.clipped).map((r) => r.id) };
+  });
+}

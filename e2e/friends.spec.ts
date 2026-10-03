@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
-import { expandAllStages, signInAsNewUser, stat } from "./helpers";
+import { expandAllStages, measureDescriptions, signInAsNewUser, stat } from "./helpers";
 import { psql } from "./local-db";
 
 // Two people with their own browser contexts. Ana stamps two neighbouring places (8.1 km) and sets her name;
@@ -186,6 +186,17 @@ test.describe("spec 0024: friends", () => {
     await bobPage.goto(inviteUrl.replace("/en/", "/ru/"));
     await expect(bobPage.getByRole("heading", { name: new RegExp("W{40}") })).toBeVisible();
     expect(await overflow(bobPage), "invite page").toBeLessThanOrEqual(0);
+  });
+
+  test("0001 AC-10: a friend's page shows the stamp descriptions in full at 375 px", async ({ browser }) => {
+    const { anaPage, bobId } = await requestedFriendship(browser);
+    await approve(anaPage);
+    await anaPage.setViewportSize({ width: 375, height: 812 });
+    await anaPage.goto(`/en/friends/${bobId}`);
+    await expandAllStages(anaPage);
+    const { measured, clipped } = await measureDescriptions(anaPage);
+    expect(measured).toBeGreaterThan(200); // every stamp of the 161 places, stamped or not
+    expect(clipped).toEqual([]);
   });
 
   test("AC-14: an action that fails says so on the page instead of doing nothing", async ({ page }) => {
