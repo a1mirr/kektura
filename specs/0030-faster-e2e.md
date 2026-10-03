@@ -28,10 +28,10 @@ stays covered, and nothing is skipped.
   `list` reporter is joined by `json` in CI (`PLAYWRIGHT_JSON_OUTPUT_NAME`), and a final step prints the ten
   slowest tests to the job summary. It runs even when the suite failed.
 
-- **AC-5**: In CI the suite runs on 3 workers (`workers` in `playwright.config.ts`), not the single worker
-  Playwright picks on a 2-core runner. Locally the default stays. The suite must stay green on it, with the same
-  one retry as before, and the job's test phase must be measurably shorter than the 143 s of the single-worker
-  run (`main`, run 56).
+- **AC-5**: *Removed.* It ran the CI suite on 3 workers. Measured on the 2-core runner (run 37129709176): the
+  test phase took 162 s against 143 s on the single worker Playwright picks there, and single tests got 2-4 times
+  slower, because Next, Postgres and Chromium already use both cores. More workers do not help on this runner;
+  faster is only possible with less work per test, more cores (a larger runner) or splitting across jobs.
 
 ## Out of scope
 
@@ -57,4 +57,4 @@ else is sent" (`e2e/stamp-dates.spec.ts`). Caching the Supabase Docker images.
 | AC-2 | `e2e/auth.spec.ts` ("0006 AC-3, AC-5 + 0030 AC-2") |
 | AC-3 | manual: the `e2e` job log of a second run on the same lockfile shows "Cache restored" for both caches |
 | AC-4 | `tests/slowest-tests.test.ts` (the table); manual: the job summary of a CI run shows it |
-| AC-5 | manual: the `Running N tests using 3 workers` line and the test time in the `e2e` job log |
+| AC-5 | Removed |

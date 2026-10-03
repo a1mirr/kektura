@@ -9,9 +9,6 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  // A GitHub runner has 2 cores and Playwright's default (half of them) ran the whole suite on 1 worker; the tests
-  // mostly wait on the server and the database, so more workers than cores pay off (spec 0030 AC-5).
-  workers: process.env.CI ? 3 : undefined,
   // In CI the JSON report (path from PLAYWRIGHT_JSON_OUTPUT_NAME) feeds the slowest-tests summary (spec 0030 AC-4).
   reporter: [["list"], ["html", { open: "never" }], ...(process.env.PLAYWRIGHT_JSON_OUTPUT_NAME ? [["json"] as const] : [])],
   timeout: 60_000,
