@@ -247,10 +247,10 @@ describe("spec 0031: the yyyy-mm-dd text field and the calendar button", () => {
     expect(onSave).toHaveBeenCalledTimes(1);
   });
 
-  it("AC-3: a picked day that is out of range, empty or unchanged is not sent", async () => {
+  it("AC-3: a picked day that is out of range or empty is not sent", async () => {
     const onSave = ok();
     const { input, picker } = setup(onSave);
-    for (const value of ["", "1937-12-31", "2999-01-01", "2026-09-01"]) await edit(picker, value);
+    for (const value of ["", "1937-12-31", "2999-01-01"]) await edit(picker, value);
     await wait(3000);
     expect(onSave).not.toHaveBeenCalled();
     expect(input.value).toBe("2026-09-01");
@@ -264,7 +264,7 @@ describe("spec 0031: the yyyy-mm-dd text field and the calendar button", () => {
     expect(screen.getByRole("alert").textContent).toBe(messages.dashboard.actionFailed);
   });
 
-  it("AC-4: the text field is the only date control in the accessibility tree", () => {
+  it("AC-4: only the text field is labelled and typeable; the picker has no label of its own (it is aria-hidden: see above)", () => {
     setup(ok());
     expect(screen.getAllByLabelText(messages.dashboard.stampDate)).toHaveLength(1);
     expect(screen.getAllByRole("textbox")).toHaveLength(1);

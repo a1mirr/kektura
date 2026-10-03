@@ -23,7 +23,7 @@ written `yyyy-mm-dd`, in every language and browser, and a calendar is still one
   day fills the field and saves it at once (a pick is one complete date: no pause is needed); failures and
   expired sessions behave as in spec 0016 AC-7.
 - **AC-4**: The picker is an implementation detail of the button: it is hidden from keyboard and screen
-  readers, so the text field is the only date control they meet.
+  readers, so the text field is the only date field they meet (the calendar button stays reachable, AC-3).
 - **AC-5**: The button's label exists in `ru`, `en` and `hu`. The placeholder is the format itself and is not
   translated.
 

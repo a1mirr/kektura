@@ -60,10 +60,12 @@ need `current_date`, which can't be part of a constraint that must hold when a d
   without it an update is silently ignored by RLS.
 - The earlier `upsert(..., { onConflict })` overwrite is gone: an update-only action can't create rows by
   accident and doesn't depend on how PostgREST parses `on_conflict`.
-- Checking the value isn't enough to avoid saving half-typed dates: while a date is typed, the field
-  reports a complete date after most keystrokes (typing the day `26` passes through `02`). The year's
-  prefixes (`0002`, `0020`, `0202`) are real dates but below 1938, so the range check already rejects
-  them; the day and month digits are what the pause (or blur) protects against.
+- Checking the value isn't enough to avoid saving half-typed dates: correcting a typed date passes through
+  other complete dates (changing the day of `2026-09-02` to `26` is `2026-09-02`, then `2026-09-2`, then
+  `2026-09-26`; only complete `yyyy-mm-dd` strings count, so the prefixes of a typed year are never dates).
+  The pause (or blur) protects against saving the intermediate ones. (With the native `<input type="date">`
+  of the first versions every prefix of the year was a real date, e.g. `0002`, `0020`, `0202`, which the range
+  check rejects.)
 
 ## Coverage
 
