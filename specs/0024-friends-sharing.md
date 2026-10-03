@@ -2,7 +2,7 @@
 
 Status: Done
 Owner code: `src/lib/friends.ts`, `src/lib/friends-flag.ts`, `src/lib/display-name.ts`, `src/app/[locale]/(pages)/friends/*`,
-`supabase/migrations/0009_friends.sql`
+`supabase/migrations/0024_friends.sql`
 
 ## Goal
 
