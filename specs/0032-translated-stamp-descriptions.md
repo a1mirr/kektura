@@ -23,7 +23,8 @@ description is also available in `ru` and `en`; Hungarian visitors keep the orig
   until it is translated.
 - **AC-4**: A translation keeps the technical marker codes of the original, for example `(NDB020INF)` and
   `(OKTPH_21_1)` at the end of a place description, in the same order, so the stamp can be matched with MTSZ's
-  tables and the posts in the field. A translation is a translation: it differs from the Hungarian text.
+  tables and the posts in the field. A translation is a translation: it differs from the Hungarian text, except a description that is only a street
+  address ("József Attila u. 5."), which is the same in every language.
 - **AC-5**: The Hungarian original stays in the database and in the seeds as the single source (spec 0004); the
   translations are ours, kept in the repository, and are not changed by regenerating the seeds.
 

@@ -45,7 +45,7 @@ stretches count as walked, how many km that is, and the per-stage view of the li
 ### Descriptions
 
 - **AC-10**: Every place row on the dashboard and on a friend's page (spec 0024), and every extra stamp row (spec 0013),
-  shows the official description of each of its stamps in full: long text wraps onto further lines, it is
+  shows the official description of each of its stamps (in the page's language, spec 0032) in full: long text wraps onto further lines, it is
   never cut off with an ellipsis, and it never sticks out of its row (also at 375 px).
 
 ## Out of scope
