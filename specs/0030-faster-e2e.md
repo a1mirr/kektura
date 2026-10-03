@@ -5,7 +5,7 @@ Owner code: `e2e/helpers.ts`, `e2e/auth.spec.ts`, `.github/workflows/ci.yml`
 
 ## Goal
 
-The E2E suite (68 tests, spec 0006) is the slowest part of every pull request. Cut the work that every test
+The E2E suite (about 70 tests, spec 0006) is the slowest part of every pull request. Cut the work that every test
 repeats, and the setup time of the CI job, without making the suite less faithful: the sign-in form itself
 stays covered, and nothing is skipped.
 
@@ -41,11 +41,14 @@ else is sent" (`e2e/stamp-dates.spec.ts`). Caching the Supabase Docker images.
   render the dashboard a second time).
 - `e2e/auth.spec.ts` already posts to the route for the invalid-email case, which shows the pattern works.
 
+- Status stays `Accepted` until a CI run shows the whole suite green with the new sign-in and the caches
+  restoring (the author had no Docker to run `npm run e2e`); then it becomes `Done`.
+
 ## Coverage
 
 | AC | Test |
 | --- | --- |
-| AC-1 | every E2E test; `e2e/auth.spec.ts` ("AC-1: the helper's sign-in opens the dashboard with the session cookies") |
+| AC-1 | `e2e/auth.spec.ts` ("0030 AC-1: the helper's sign-in leaves the session cookies…", which fails if no session reaches the browser); every other E2E test signs in through the helper. Not asserted: that the landing page isn't loaded, and the "refused" error message (both read from `e2e/helpers.ts`) |
 | AC-2 | `e2e/auth.spec.ts` ("0006 AC-3, AC-5 + 0030 AC-2") |
 | AC-3 | manual: the `e2e` job log of a second run on the same lockfile shows "Cache restored" for both caches |
 | AC-4 | `tests/slowest-tests.test.ts` (the table); manual: the job summary of a CI run shows it |

@@ -55,7 +55,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: .next-e2e/cache
-          key: next-e2e-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**', 'messages/**', 'next.config.ts') }}
+          key: next-e2e-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**', 'messages/**', 'public/**', 'next.config.ts', 'tsconfig.json') }}
           restore-keys: next-e2e-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
       - run: npx playwright install --with-deps chromium
       # Builds the test server through scripts/test-env.mjs (reads `supabase status`) and runs it.
