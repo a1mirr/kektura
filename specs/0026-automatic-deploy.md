@@ -4,7 +4,7 @@ Status: Accepted
 (It becomes Done after the first successful automatic deploy: that needs the secrets and the baseline run of
 `deploy/README.md`, which only the owner can do.)
 Owner code: `.github/workflows/deploy.yml`, `scripts/migrate-production.mjs`, `scripts/smoke-test.mjs`,
-`scripts/notify-telegram.mjs`, `scripts/lib/deploy.mjs`, `deploy/ssh-gate.sh`, `deploy/README.md`
+`scripts/notify-telegram.mjs`, `scripts/deploy-plan.mjs`, `scripts/lib/deploy.mjs`, `deploy/ssh-gate.sh`, `deploy/README.md`
 
 ## Goal
 
@@ -100,7 +100,7 @@ Secrets (repository secrets, used by `deploy.yml` only): `DEPLOY_SSH_KEY` (priva
 ### What is deployed
 
 - **AC-12**: A merge whose changes, compared with the commit production already runs, touch only
-  documentation, specs, tests and repository tooling (`specs/`, `tests/`, `e2e/`, `.github/`, `.claude/`,
+  documentation, specs, tests and repository tooling (both sides of a rename count) (`specs/`, `tests/`, `e2e/`, `.github/`, `.claude/`,
   `.githooks/` and `*.md`) is not deployed and applies no migration; the run says why. Anything else deploys,
   `supabase/`, `deploy/` and `package.json` included. A commit that production already contains, or that is
   older than what it runs, is skipped as well, so a run that finishes late never puts older code over newer.
@@ -152,6 +152,9 @@ seeds (spec 0004) and clearing the dashboard cache afterwards, which stay manual
   hook, `deploy/README.md`). The workflow fails in that case (AC-7); it does not retry by itself.
 - A manual deploy (the fallback: migrations through the MCP, then a push by hand) must record each
   applied file in `public.applied_migrations`, or the next automatic run applies it again (`deploy/README.md`).
+- The migration step has no `lock_timeout`: a migration that queues behind a long transaction holds the job until the
+  step's timeout (10 minutes). Passing one through `PGOPTIONS` was left out because the pooler may not accept
+  startup options; try it on the first real migration if it ever matters.
 - The first run needs the baseline (AC-13): production has every file in `supabase/migrations/` today, so the
   baseline is the newest file name, `0024_friends.sql`. The setup steps are in `deploy/README.md`.
 - The deploy workflow is started by the end of CI (`workflow_run`), not by the push itself, because that is
@@ -165,6 +168,7 @@ seeds (spec 0004) and clearing the dashboard cache afterwards, which stay manual
 | --- | --- |
 | AC-1, AC-2, AC-3, AC-10 | `tests/deploy-workflow.test.ts` (the trigger and its conditions, the commit picked (the newest whose CI passed), a manual run only from `main` and only for a commit CI passed, the concurrency group on the job and a separate one for dry runs, a timeout on the push step, the `dry_run` input, read-only permissions, secrets only in `env`, none echoed) |
 | AC-4, AC-6, AC-13 | `tests/migrate-production.test.ts` (order, recorded in the same transaction, skipped when recorded, a file that sorts before the latest applied one, stop at the first failure, the baseline rules, the password redacted) |
+| AC-4, AC-13 (against a real database) | manual, once: the real `migrate()` against the local test database through `docker exec psql` (2026-10-03): refused without a baseline, a baseline recorded without running its files, a failing file rolled back with nothing recorded and the later file not tried, the record table with row level security and no grants for the API roles, a second run applying nothing, a baseline on a table with records refused; repeat after any change to the SQL in `scripts/migrate-production.mjs` |
 | AC-5 | `tests/review-process.test.ts` (the reviewer's brief, spec 0022 and `CLAUDE.md` ask for it); manual: reviewed with every migration |
 | AC-7 | `tests/deploy.test.ts` (the hook, spec 0020), `tests/deploy-workflow.test.ts` (pushes only to `production`, never forced; fails unless the hook's `Deployed <sha>` line comes back, and the hook prints exactly that; the gate script allows only that repository: run for real on Linux) |
 | AC-8 | `tests/smoke-test.test.ts` (the checks and the retry, against a local server); manual, once: run against the E2E build of this app (2026-10-03: `/en` 200, `/ru` 200, an unknown page 404) |

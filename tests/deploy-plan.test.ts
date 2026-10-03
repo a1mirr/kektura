@@ -83,16 +83,26 @@ describe("spec 0026 AC-12: what is read from git", () => {
   it("lists the changed paths and whether the target is behind production", () => {
     const run = git({
       [`cat-file -e ${A}^{commit}`]: { status: 0 },
-      [`diff --name-only ${A} ${B}`]: { status: 0, stdout: "src/a.ts\nspecs/x.md\n" },
+      [`diff --name-only --no-renames ${A} ${B}`]: { status: 0, stdout: "src/a.ts\nspecs/x.md\n" },
       [`merge-base --is-ancestor ${B} ${A}`]: { status: 1 },
     });
     expect(inspect(A, B, run)).toEqual({ changed: ["src/a.ts", "specs/x.md"], targetIsBehind: false, comparable: true });
   });
 
+  it("lists both sides of a rename: moving app code into tests/ or specs/ must not look like a docs-only merge", () => {
+    let asked: string[] = [];
+    const run = (...args: string[]) => {
+      if (args[0] === "diff") asked = args;
+      return { status: args[0] === "merge-base" ? 1 : 0, stdout: "", stderr: "" };
+    };
+    inspect(A, B, run);
+    expect(asked).toContain("--no-renames"); // by default git prints only the new path of a rename
+  });
+
   it("notices a target that production already contains", () => {
     const run = git({
       [`cat-file -e ${B}^{commit}`]: { status: 0 },
-      [`diff --name-only ${B} ${A}`]: { status: 0, stdout: "src/a.ts\n" },
+      [`diff --name-only --no-renames ${B} ${A}`]: { status: 0, stdout: "src/a.ts\n" },
       [`merge-base --is-ancestor ${A} ${B}`]: { status: 0 },
     });
     expect(inspect(B, A, run).targetIsBehind).toBe(true);

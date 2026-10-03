@@ -37,7 +37,7 @@ export function productionMain(remote, run = git) {
 export function inspect(production, target, run = git) {
   if (!production || production === target) return { changed: [], targetIsBehind: false, comparable: true };
   if (run("cat-file", "-e", `${production}^{commit}`).status !== 0) return { changed: [], targetIsBehind: false, comparable: false };
-  const diff = run("diff", "--name-only", production, target);
+  const diff = run("diff", "--name-only", "--no-renames", production, target);
   if (diff.status !== 0) throw new Problem(`git diff ${production.slice(0, 7)} ${target.slice(0, 7)} failed:\n${diff.stderr.trim()}`);
   return {
     changed: diff.stdout.split("\n").filter(Boolean),

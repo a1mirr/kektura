@@ -11,7 +11,7 @@ Stack: Next.js 16 (App Router, TS, Tailwind 4), next-intl (`ru` default, `en`, `
 - `npm run e2e`: Playwright against a production build of the test server on port 3002
 
 ## Workflow
-A change goes through these steps in order. CI (`.github/workflows/ci.yml`) runs the same checks plus E2E on every push; `backup.yml` dumps user data weekly.
+A change goes through these steps in order. CI (`.github/workflows/ci.yml`) runs the same checks plus E2E on every push; `backup.yml` dumps user data weekly; `deploy.yml` deploys after a merge (spec 0026).
 
 1. **Spec first.** Every feature, behaviour change or non-trivial fix starts as `specs/NNNN-slug.md` (from `specs/_template.md`) with numbered acceptance criteria; settle open questions with the user before coding. Specs are always written in English. Tests cite them: `describe("spec NNNN: …")`, `it("AC-n: …")`. Changing behaviour = edit the owning spec (never renumber ACs) + its tests in the same change. Details: `specs/README.md`.
 2. **Build.** Logic in `src/lib` as pure functions with unit tests; pages only fetch and render. Components get `*.test.tsx` with `// @vitest-environment jsdom`. Async Server Components can't be unit-tested: cover them with E2E. The **Stop hook** (`.claude/hooks/stop-check.mjs`) blocks the end of a turn until typecheck + lint + unit tests are green, and asks once when app code changed without a spec/test change: fix the failure, don't work around it. Run `npm run e2e` yourself before committing user-flow changes (needs Docker, so the hook doesn't).
