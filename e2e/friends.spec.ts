@@ -71,7 +71,7 @@ test.describe("spec 0024: friends", () => {
     await expect(bobPage.getByRole("heading", { name: "Ana" })).toBeVisible();
     await expect(stat(bobPage, "Stamps")).toHaveText("2 / 161");
     await expect(stat(bobPage, "Kilometres")).toHaveText("8.1");
-    await expect(bobPage.locator("input[type=date]")).toHaveCount(0); // no stamp dates
+    await expect(bobPage.getByLabel("Date of the stamp")).toHaveCount(0); // no stamp dates
     const friendPage = bobPage.url();
 
     // AC-9: Ana stops sharing; Bob sees "not sharing" and cannot open her page. The switch is hers alone.

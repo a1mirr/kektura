@@ -37,8 +37,9 @@ user's own day. This spec replaces it.
   touch only the caller's rows (RLS and an explicit `user_id` filter), and answer `failed` when no row
   was updated (nothing was stamped). An invalid date is rejected without database access; a missing
   session is `unauthorized`. Both log failures like the other stamp actions (spec 0008).
-- **AC-5**: Stamped places and extra stamps show a date field (`<input type="date">`) with an accessible
-  label, `min` 1938-01-01 and `max` tomorrow (UTC).
+- **AC-5**: Stamped places and extra stamps show a date field with an accessible label that only accepts
+  dates from 1938-01-01 to tomorrow (UTC). Since spec 0031 it is a `yyyy-mm-dd` text field with a calendar
+  button (first it was `<input type="date">`); the range limits sit on the calendar picker.
 - **AC-6**: The field saves a valid, changed date after 700 ms without typing, or at once when the user
   leaves the field. It never sends an empty, incomplete, invalid, out-of-range or unchanged value; leaving
   the field with such a value restores the saved date.
