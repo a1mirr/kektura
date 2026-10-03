@@ -1,6 +1,8 @@
 # 0026: Automatic migrations and deploy after a merge
 
 Status: Accepted
+(It becomes Done after the first successful automatic deploy: that needs the secrets and the baseline run of
+`deploy/README.md`, which only the owner can do.)
 Owner code: `.github/workflows/deploy.yml`, `scripts/migrate-production.mjs`, `scripts/smoke-test.mjs`,
 `scripts/notify-telegram.mjs`, `scripts/lib/deploy.mjs`, `deploy/ssh-gate.sh`, `deploy/README.md`
 
@@ -54,7 +56,9 @@ Secrets (repository secrets, used by `deploy.yml` only): `DEPLOY_SSH_KEY` (priva
 - **AC-2**: Only one deploy runs at a time. A merge that arrives while one is running waits for it and then
   deploys the newest `main` (the older one is skipped, not run in parallel). The deploy job has the concurrency
   group, not the workflow, so a run whose job is skipped (CI failed on `main`, say) never takes the place of a
-  deploy that is waiting.
+  deploy that is waiting, and a dry run has a group of its own. What a run deploys is not the commit whose CI
+  started it but the newest commit of `main` whose CI passed, so it does not matter which waiting run survives
+  or in which order the CI runs of two merges finish.
 - **AC-3**: A deploy can also be started by hand from the Actions tab (`workflow_dispatch`), only from `main`
   (another branch never reaches the secrets), for the current `main`, with an option `dry_run` (on by default)
   that lists the migrations that would be applied and the commit that would be deployed, and changes nothing.
@@ -120,7 +124,8 @@ Secrets (repository secrets, used by `deploy.yml` only): `DEPLOY_SSH_KEY` (priva
 A staging environment; preview deployments of pull requests; blue-green or zero-downtime deploys (spec 0020
 leaves that to be tried on the server first); automatic rollback of a deployed build or a migration; running
 the Supabase advisors (they exist only in the Supabase MCP, so they stay a manual look after a schema change);
-turning feature flags on (a flag is switched by hand on the server, spec 0023 and 0024).
+turning feature flags on (a flag is switched by hand on the server, spec 0023 and 0024); applying regenerated trail
+seeds (spec 0004) and clearing the dashboard cache afterwards, which stay manual (`deploy/README.md`).
 
 ## Open questions
 
@@ -158,11 +163,11 @@ turning feature flags on (a flag is switched by hand on the server, spec 0023 an
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-2, AC-3, AC-10 | `tests/deploy-workflow.test.ts` (the trigger and its conditions, a manual run only from `main` and only for a commit CI passed, the concurrency group on the job, the `dry_run` input, read-only permissions, secrets only in `env`, none echoed) |
+| AC-1, AC-2, AC-3, AC-10 | `tests/deploy-workflow.test.ts` (the trigger and its conditions, the commit picked (the newest whose CI passed), a manual run only from `main` and only for a commit CI passed, the concurrency group on the job and a separate one for dry runs, a timeout on the push step, the `dry_run` input, read-only permissions, secrets only in `env`, none echoed) |
 | AC-4, AC-6, AC-13 | `tests/migrate-production.test.ts` (order, recorded in the same transaction, skipped when recorded, a file that sorts before the latest applied one, stop at the first failure, the baseline rules, the password redacted) |
 | AC-5 | `tests/review-process.test.ts` (the reviewer's brief, spec 0022 and `CLAUDE.md` ask for it); manual: reviewed with every migration |
 | AC-7 | `tests/deploy.test.ts` (the hook, spec 0020), `tests/deploy-workflow.test.ts` (pushes only to `production`, never forced; fails unless the hook's `Deployed <sha>` line comes back, and the hook prints exactly that; the gate script allows only that repository: run for real on Linux) |
-| AC-8 | `tests/smoke-test.test.ts` (the checks and the retry, against a local server) |
+| AC-8 | `tests/smoke-test.test.ts` (the checks and the retry, against a local server); manual, once: run against the E2E build of this app (2026-10-03: `/en` 200, `/ru` 200, an unknown page 404) |
 | AC-9 | `tests/deploy-workflow.test.ts` (failure notification step, job summary), `tests/notify-telegram.test.ts` (the message, no token in the output, against a fake API); manual: break a step on purpose once on a throwaway commit |
 | AC-11 | `tests/deploy-workflow.test.ts` (`CLAUDE.md` and `deploy/README.md` describe the workflow and the fallback) |
 | AC-12 | `tests/deploy-plan.test.ts` (which paths deploy, older and already deployed commits) |

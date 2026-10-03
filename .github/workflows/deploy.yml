@@ -34,10 +34,12 @@ jobs:
   deploy:
     name: Migrate, deploy, check
     # One deploy at a time (AC-2). A merge that arrives while one runs waits; GitHub keeps only the newest waiting
-    # run. It is the job that has the group, not the workflow: a run whose job is skipped (CI failed, say) must not
-    # take the waiting place of a deploy that is still to come.
+    # run, and every run deploys the newest commit of main whose CI passed (the "Pick" step), so it does not matter
+    # which run survives. It is the job that has the group, not the workflow: a run whose job is skipped (CI failed,
+    # say) must not take the waiting place of a deploy that is still to come, and a dry run, which changes nothing,
+    # has a group of its own for the same reason.
     concurrency:
-      group: deploy
+      group: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'deploy-dry-run' || 'deploy' }}
       cancel-in-progress: false
     # Started by hand only from main: another branch must never reach the secrets or production (AC-1, AC-3).
     if: >-
@@ -51,7 +53,6 @@ jobs:
     env:
       # A step's `if` can't read secrets, so only whether they are set goes into a variable.
       CONFIGURED: ${{ secrets.DEPLOY_SSH_KEY != '' && secrets.DEPLOY_KNOWN_HOSTS != '' && secrets.SUPABASE_DB_URL != '' }}
-      TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
       DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
       BASELINE: ${{ inputs.baseline }}
       DEPLOY_REMOTE: a1mirr@188.166.117.212:~/kektura.git
@@ -61,16 +62,40 @@ jobs:
         if: env.CONFIGURED != 'true'
         run: echo "::notice title=Deploy skipped::Add the repository secrets DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS and SUPABASE_DB_URL (deploy/README.md, 'Automatic deploys')."
 
+      # No `ref`: for both triggers this is the tip of main, with all its history.
       - uses: actions/checkout@v7
         if: env.CONFIGURED == 'true'
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v7
         if: env.CONFIGURED == 'true'
         with:
           node-version: 24
+
+      # What to deploy: the newest commit of main whose CI passed. After a merge that is the newest CI run on main
+      # that succeeded, not the run that happened to start this workflow: CI runs can finish out of merge order, and
+      # a waiting run may have replaced a newer one. By hand it is the tip of main (checked for CI below).
+      - name: Pick the commit to deploy
+        id: pick
+        if: env.CONFIGURED == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = "workflow_run" ]; then
+            sha=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --branch main --event push --status success --limit 1 --json headSha --jq '.[0].headSha // empty')
+          else
+            sha="$GITHUB_SHA"
+          fi
+          if [ -z "$sha" ]; then
+            echo "::error title=No commit to deploy::No CI run on main has passed."
+            exit 1
+          fi
+          # It has to be part of main's history, which is what is checked out.
+          git merge-base --is-ancestor "$sha" HEAD
+          echo "TARGET_SHA=$sha" >> "$GITHUB_ENV"
+          echo "Deploying ${sha:0:7}, the newest commit of main whose CI passed."
 
       - name: Set up the deploy key
         if: env.CONFIGURED == 'true'
@@ -123,6 +148,9 @@ jobs:
       - name: Push the code to production
         id: push
         if: env.CONFIGURED == 'true' && steps.plan.outputs.deploy == 'true' && env.DRY_RUN != 'true'
+        # The ssh connection stays open while the server builds. A step that times out fails, so the failure step
+        # below still runs; a job that times out is cancelled, and `failure()` does not catch that.
+        timeout-minutes: 20
         run: |
           set -euo pipefail
           # A fast-forward only, never forced: the server's hook builds and reloads (spec 0020).
@@ -146,8 +174,9 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          DEPLOY_SHA: ${{ env.TARGET_SHA || github.event.workflow_run.head_sha || github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PICK_OUTCOME: ${{ steps.pick.outcome }}
           CI_OUTCOME: ${{ steps.ci.outcome }}
           PLAN_OUTCOME: ${{ steps.plan.outcome }}
           MIGRATE_OUTCOME: ${{ steps.migrate.outcome }}

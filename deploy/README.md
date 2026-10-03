@@ -108,6 +108,9 @@ If the hook changed, copy the new `deploy/post-receive` to `~/kektura.git/hooks/
 
 ## After the seeds change
 
+The automatic deploy does not apply seeds: regenerated trail data (spec 0004) goes to production by hand, around
+the merge that ships the code that needs it.
+
 The dashboard caches the checkpoints and extra stamps on the server for up to 24 hours (spec 0009), on
 disk as well as in memory, so the cache survives deploys and restarts. After applying changed seeds to
 production (spec 0004), delete the cache folder and restart, otherwise old places are served for up to a day:

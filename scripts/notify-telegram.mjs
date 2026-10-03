@@ -35,7 +35,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const text = failureMessage({
     sha: env.DEPLOY_SHA ?? "",
     runUrl: env.RUN_URL ?? "",
-    outcomes: { ci: env.CI_OUTCOME, plan: env.PLAN_OUTCOME, migrate: env.MIGRATE_OUTCOME, push: env.PUSH_OUTCOME, smoke: env.SMOKE_OUTCOME },
+    outcomes: { pick: env.PICK_OUTCOME, ci: env.CI_OUTCOME, plan: env.PLAN_OUTCOME, migrate: env.MIGRATE_OUTCOME, push: env.PUSH_OUTCOME, smoke: env.SMOKE_OUTCOME },
   });
   const result = await notify({
     token: env.TELEGRAM_BOT_TOKEN?.trim(),

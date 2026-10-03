@@ -46,6 +46,7 @@ describe("spec 0026 AC-9: the failure message", () => {
   });
 
   it.each([
+    [{ pick: "failure" }, "choosing the commit to deploy"],
     [{ ci: "failure" }, "checking that CI passed"],
     [{ plan: "failure" }, "reaching production"],
     [{ plan: "success", migrate: "success", push: "failure" }, "pushing the code to production"],

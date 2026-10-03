@@ -51,14 +51,28 @@ describe("spec 0026: the deploy workflow", () => {
       expect(triggers).not.toMatch(/pull_request/);
       expect(triggers).not.toMatch(/^ {2}push:/m);
       expect(step("Notice when the secrets are missing")).toBeTruthy();
-      expect(workflow).toContain("ref: ${{ github.event.workflow_run.head_sha || github.sha }}");
+      expect(workflow).not.toMatch(/^\s+ref:/m); // no pinned ref: the tip of main, with its whole history
+      expect(workflow).toContain("fetch-depth: 0");
       expect(workflow).toContain("persist-credentials: false");
     });
   });
 
   describe("AC-2: one deploy at a time", () => {
-    it("the deploy job has the concurrency group, and nothing is cancelled for it", () => {
-      expect(workflow).toMatch(/^ {4}concurrency:\s*\n {6}group: deploy\s*\n {6}cancel-in-progress: false/m);
+    it("the deploy job has the concurrency group, nothing is cancelled for it, and a dry run has a group of its own", () => {
+      expect(workflow).toMatch(/^ {4}concurrency:\s*\n {6}group: \$\{\{ github\.event_name == 'workflow_dispatch' && inputs\.dry_run && 'deploy-dry-run' \|\| 'deploy' \}\}\s*\n {6}cancel-in-progress: false/m);
+    });
+
+    it("deploys the newest commit of main whose CI passed, whichever waiting run survives or finishes first", () => {
+      const pick = step("Pick the commit to deploy");
+      expect(pick).toContain("id: pick");
+      expect(pick).toContain('gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --branch main --event push --status success --limit 1');
+      expect(pick).toContain("--json headSha");
+      expect(pick).toContain('git merge-base --is-ancestor "$sha" HEAD'); // part of main's history
+      expect(pick).toContain('echo "TARGET_SHA=$sha" >> "$GITHUB_ENV"');
+      expect(pick).toContain('sha="$GITHUB_SHA"'); // by hand: the tip of main (CI is checked in the next step)
+      expect(workflow).not.toMatch(/^ {6}TARGET_SHA:/m); // not fixed by the run that started the workflow
+      const order = ["- name: Pick the commit to deploy", "- name: Check that CI passed on this commit", "- name: Reach production and decide what to deploy"].map((name) => workflow.indexOf(name));
+      expect([...order].sort((a, b) => a - b)).toEqual(order);
     });
 
     it("the group is on the job, not the workflow: a run whose job is skipped must not take a waiting deploy's place", () => {
@@ -117,6 +131,14 @@ describe("spec 0026: the deploy workflow", () => {
       expect(code.match(/git push/g)).toHaveLength(1);
     });
 
+    it("has its own timeout, so a build that hangs fails the step and still reaches the failure message", () => {
+      expect(step("Push the code to production")).toMatch(/timeout-minutes: (\d+)/);
+      const minutes = Number(/timeout-minutes: (\d+)/.exec(step("Push the code to production"))![1]);
+      const job = Number(/^ {4}timeout-minutes: (\d+)/m.exec(workflow)![1]);
+      expect(minutes).toBeGreaterThanOrEqual(10); // the build takes minutes on this server
+      expect(minutes).toBeLessThan(job);
+    });
+
     it("counts the push only when the server's hook reports it deployed this commit (git push exits 0 when the hook fails)", () => {
       const push = step("Push the code to production");
       expect(push).toContain('2>&1 | tee "$RUNNER_TEMP/push.log"');
@@ -166,12 +188,13 @@ describe("spec 0026: the deploy workflow", () => {
       expect(failure).toContain("GITHUB_STEP_SUMMARY");
       expect(failure).toMatch(/Nothing was rolled back by itself/);
       expect(failure).toMatch(/revert the pull request on main and merge the revert/);
-      for (const id of ["ci", "plan", "migrate", "push", "smoke"]) expect(failure).toContain(`steps.${id}.outcome`);
+      for (const id of ["pick", "ci", "plan", "migrate", "push", "smoke"]) expect(failure).toContain(`steps.${id}.outcome`);
+      expect(failure).toContain("DEPLOY_SHA: ${{ env.TARGET_SHA ||");
       expect(failure).toMatch(/rebuild on the server by hand/); // a push whose build failed can't be re-run
     });
 
     it("names the steps the failure message refers to", () => {
-      for (const id of ["ci", "plan", "migrate", "push", "smoke"]) expect(workflow).toContain(`id: ${id}`);
+      for (const id of ["pick", "ci", "plan", "migrate", "push", "smoke"]) expect(workflow).toContain(`id: ${id}`);
     });
   });
 
@@ -207,10 +230,16 @@ describe("spec 0026: the deploy workflow", () => {
     it("ends with a notice instead of failing while the secrets are missing", () => {
       expect(workflow).toContain("CONFIGURED: ${{ secrets.DEPLOY_SSH_KEY != '' && secrets.DEPLOY_KNOWN_HOSTS != '' && secrets.SUPABASE_DB_URL != '' }}");
       expect(step("Notice when the secrets are missing")).toContain("if: env.CONFIGURED != 'true'");
-      for (const name of ["Set up the deploy key", "Reach production and decide what to deploy", "Apply the missing migrations", "Push the code to production", "Check that the site answers"]) {
+      for (const name of ["Pick the commit to deploy", "Set up the deploy key", "Reach production and decide what to deploy", "Apply the missing migrations", "Push the code to production", "Check that the site answers"]) {
         expect(step(name), name).toContain("env.CONFIGURED == 'true'");
       }
     });
+  });
+
+  it("AC-4: the weekly backup leaves the record table out (it is not user data, and the dump check fails on any unexpected table)", () => {
+    const backup = read(".github/workflows/backup.yml");
+    expect(backup).toMatch(/public\.extra_stamps public\.applied_migrations\n/);
+    expect(read("specs/0012-backups.md")).toContain("`public.applied_migrations`");
   });
 
   it("AC-11: CLAUDE.md and deploy/README.md describe the workflow and keep the manual way as the fallback", () => {
@@ -219,9 +248,10 @@ describe("spec 0026: the deploy workflow", () => {
     expect(claude).toContain("only for a rollback or when the workflow is broken");
     expect(claude).toMatch(/never push to `production` unless the user asks/);
     expect(claude).toContain("insert into public.applied_migrations (file_name) values ('0031_x.sql')"); // the fallback records what it applied
+    expect(claude).toContain("regenerated trail seeds (spec 0004) are not applied by the workflow");
     expect(claude).not.toContain("Nothing deploys by itself");
     const readme = read("deploy/README.md");
-    for (const part of ["## Automatic deploys", "### One-time setup", "## Deploying by hand (the fallback)", "DEPLOY_SSH_KEY", "DEPLOY_KNOWN_HOSTS", "SUPABASE_DB_URL", "TELEGRAM_BOT_TOKEN", "deploy-gate", 'restrict,command="/home/a1mirr/bin/deploy-gate"', "dry_run", "baseline", "0024_friends.sql", "insert into public.applied_migrations (file_name) values ('0031_x.sql')", "post-receive", "The server did not report a deploy"]) {
+    for (const part of ["## Automatic deploys", "### One-time setup", "## Deploying by hand (the fallback)", "DEPLOY_SSH_KEY", "DEPLOY_KNOWN_HOSTS", "SUPABASE_DB_URL", "TELEGRAM_BOT_TOKEN", "deploy-gate", 'restrict,command="/home/a1mirr/bin/deploy-gate"', "dry_run", "baseline", "0024_friends.sql", "insert into public.applied_migrations (file_name) values ('0031_x.sql')", "post-receive", "The server did not report a deploy", "The automatic deploy does not apply seeds"]) {
       expect(readme, part).toContain(part);
     }
   });
