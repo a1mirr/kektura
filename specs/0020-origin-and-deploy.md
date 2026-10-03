@@ -64,6 +64,6 @@ be tried on the server first.
 | AC | Test |
 | --- | --- |
 | AC-1, AC-2 | `src/lib/origin.test.ts` |
-| AC-3 | `e2e/auth.spec.ts` (sign-out and dummy login redirect to the right place); the callback needs a real OAuth round trip: manual |
+| AC-3 | `e2e/auth.spec.ts` (sign-out and dummy login redirect to the right place; the callback's failure path on the address the user is on, with a forwarded host); the callback's success path needs a real Google sign-in: manual (a real OAuth round trip). Last checked: never recorded. |
 | AC-4, AC-6 | review of `deploy/` |
 | AC-4, AC-5 | `tests/deploy.test.ts` (files in place, the hook fails fast and deploys only main, HTTPS proxy config, the README's contents); by hand: `bash -n` on both scripts and a dry run of the hook's branch filter (main deploys; another branch and a tag don't) |

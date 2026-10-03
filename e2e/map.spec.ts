@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { expandAllStages, signInAsNewUser } from "./helpers";
+import { expandAllStages, signInAsNewUser, stat } from "./helpers";
 
 // Spec 0003: the map behaviours the DOM allows. The map is a WebGL canvas, so there
 // is no pixel clicking on stamps except through the app's own list -> map flow: the 📍 button flies
@@ -135,5 +135,94 @@ test.describe("spec 0003: the trail map", () => {
 
     await panel.getByRole("button", { name: "Clear" }).click();
     await expect(panel).toHaveCount(0);
+  });
+
+  test("AC-12: a failed save keeps the popup open with the error and a working button; the next try marks the stamp and closes it", async ({
+    page,
+  }) => {
+    await openDashboardWithMap(page);
+    await expandAllStages(page);
+
+    await openStampPopup(page, "OKTPH_01_DDKPH_01", "Mark as walked");
+    // Server actions are POSTs to the page: refuse them, as a lost connection would.
+    await page.route("**/en/dashboard", (route) => (route.request().method() === "POST" ? route.abort() : route.continue()));
+    await page.getByRole("button", { name: "Mark as walked" }).dispatchEvent("click"); // the popup's buttons overlap in the small test window
+    await expect(page.locator(".maplibregl-popup").getByText("Couldn't save, try again.")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Mark as walked" })).toBeEnabled();
+    await expect(stat(page, "Stamps")).toHaveText("0 / 161");
+
+    await page.unroute("**/en/dashboard");
+    await page.getByRole("button", { name: "Mark as walked" }).dispatchEvent("click"); // the popup's buttons overlap in the small test window
+    await expect(page.getByRole("button", { name: "Mark as walked" })).toHaveCount(0); // the popup closed
+    await expect(stat(page, "Stamps")).toHaveText("1 / 161");
+  });
+
+  test("AC-9: the detailed route is requested once, on first need (zoom 9 or more), and again after a failed load on the next zoom change", async ({
+    page,
+  }) => {
+    const detail = "**/data/okt-route-detail.json";
+    let requests = 0;
+    let refuse = true;
+    await page.route(detail, (route) => {
+      requests += 1;
+      return refuse ? route.abort() : route.continue();
+    });
+    await openDashboardWithMap(page);
+    await expandAllStages(page);
+    expect(requests).toBe(0); // the overview is enough at the start
+
+    await page.locator("#place-OKTPH_02").getByRole("button", { name: "Show on map" }).click(); // flies to zoom 12 or more
+    await expect.poll(() => requests).toBe(1); // refused: the map stays on the overview
+
+    refuse = false;
+    await page.locator(".maplibregl-ctrl-zoom-in").click(); // the next zoom change retries
+    await expect.poll(() => requests).toBe(2);
+
+    await page.locator(".maplibregl-ctrl-zoom-in").click();
+    await page.locator(".maplibregl-ctrl-zoom-out").click();
+    await page.waitForTimeout(1_000);
+    expect(requests).toBe(2); // loaded: never requested again
+  });
+
+  test("AC-13: pressing 📍 on an extra stamp's row switches the extra stamps layer on", async ({ page }) => {
+    await openDashboardWithMap(page);
+    const extras = mapSection(page).getByLabel(/^Show extra stamps \(\d+\)$/);
+    await expect(extras).not.toBeChecked();
+    await page.locator("#extra-stamps li").first().getByRole("button", { name: "Show on map" }).click();
+    await expect(extras).toBeChecked();
+    await expect(canvas(page)).toBeInViewport();
+  });
+
+  test("AC-16: stamping from the list keeps the map where it is", async ({ page }) => {
+    await openDashboardWithMap(page);
+    await expandAllStages(page);
+    await page.locator("#place-OKTPH_02").getByRole("button", { name: "Show on map" }).click();
+    const label = page.locator(".maplibregl-popup").filter({ hasText: /\S/ }).last();
+    await expect(label).toBeVisible();
+    await expect(async () => {
+      const before = await label.boundingBox();
+      await page.waitForTimeout(500);
+      expect(await label.boundingBox()).toEqual(before);
+    }).toPass();
+    const onCanvas = async () => {
+      const [l, c] = [await label.boundingBox(), await canvas(page).boundingBox()];
+      return { x: l!.x - c!.x, y: l!.y - c!.y };
+    };
+    const before = await onCanvas();
+
+    await page.locator("#place-OKTPH_02").getByRole("button", { name: "Add stamp" }).click();
+    await expect(stat(page, "Stamps")).toHaveText("1 / 161");
+    await page.waitForTimeout(500); // the refreshed page has had time to reach the map
+    await expect(label).toBeVisible(); // a new map would have lost the stamp's label
+    expect(await onCanvas()).toEqual(before); // same position and zoom
+  });
+
+  test("AC-12: with an expired session the popup's action sends the visitor to the landing page", async ({ page }) => {
+    await openDashboardWithMap(page);
+    await expandAllStages(page);
+    await openStampPopup(page, "OKTPH_01_DDKPH_01", "Mark as walked");
+    await page.context().clearCookies(); // the session is gone, as after signing out in another tab
+    await page.getByRole("button", { name: "Mark as walked" }).dispatchEvent("click");
+    await expect(page).toHaveURL(/\/en$/);
   });
 });

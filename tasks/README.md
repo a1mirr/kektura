@@ -29,3 +29,4 @@ A finished task stays as history and is not updated when behaviour changes later
 | [0035](0035-specs-and-tasks.md) | Introduce tasks next to specs | Done |
 | [0036](0036-reshape-specs.md) | Turn the existing specs into area specs and tasks | In progress |
 | [0037](0037-regenerate-seeds.md) | Regenerate the seeds with the current generator | Open |
+| [0039](0039-manual-coverage-rows.md) | Audit the manual coverage rows | Done |

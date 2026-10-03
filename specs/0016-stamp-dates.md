@@ -91,6 +91,6 @@ chart) keep their localized form: this spec covers the fields where a date is en
 | AC-1 | `stamp-date.test.ts` (local day), `actions.test.ts` (date goes to new rows only), `e2e/stamp-dates.spec.ts` (a user far ahead of UTC gets their own day) |
 | AC-3, AC-4 | `src/app/[locale]/dashboard/actions.test.ts`, `src/lib/stamp-date.test.ts` (calendar dates) |
 | AC-5, AC-6, AC-7, AC-9, AC-10, AC-12 | `src/components/StampDateInput.test.tsx` (timers, blur, invalid and other-format text, failure, focus, the calendar button and its fallbacks, the hidden picker, following the server), `e2e/stamp-dates.spec.ts` (typing a whole date makes one request; a future date is refused and restored; a day picked in the calendar is saved at once and the picker's range is 1938-01-01 to tomorrow in UTC; persistence after reload; extra stamps) |
-| AC-9 (the native picker itself) | manual: click the calendar button in Chrome, Firefox and Safari (also on a phone): the picker opens on the field's date, a day that is picked appears in the field and is saved |
+| AC-9 (the native picker itself) | manual (native browser UI): click the calendar button in Chrome, Firefox and Safari (also on a phone): the picker opens on the field's date, a day that is picked appears in the field and is saved. Last checked: never recorded. |
 | AC-8 | `src/lib/progress.test.ts` (months from `stamped_on`) |
 | AC-11 | `tests/messages.test.ts` (parity) |

@@ -1,4 +1,4 @@
-// Spec 0026 AC-8: the smoke test, against a local server whose answers the test controls.
+// Spec 0026 AC-8 and spec 0006 AC-4: the smoke test, against a local server whose answers the test controls.
 import http from "node:http";
 import type { AddressInfo } from "node:net";
 import { afterEach, describe, expect, it } from "vitest";
@@ -8,13 +8,16 @@ type Answers = Record<string, number>;
 
 let server: http.Server | undefined;
 const requests: string[] = [];
+const methods: string[] = [];
+const CHECKS_PER_ROUND = 4;
 
 // Starts a server that answers each path with the status in `answers` (404 for any other path).
 async function serve(answers: Answers, beforeReady = 0) {
   let served = 0;
   server = http.createServer((request, response) => {
     requests.push(request.url ?? "");
-    const failing = served++ < beforeReady * 3; // three checks per round
+    methods.push(request.method ?? "");
+    const failing = served++ < beforeReady * CHECKS_PER_ROUND;
     response.statusCode = failing ? 502 : (answers[request.url ?? ""] ?? 404);
     response.end("x");
   });
@@ -24,6 +27,7 @@ async function serve(answers: Answers, beforeReady = 0) {
 
 afterEach(async () => {
   requests.length = 0;
+  methods.length = 0;
   if (server) await new Promise((resolve) => server!.close(resolve));
   server = undefined;
 });
@@ -35,7 +39,14 @@ describe("spec 0026 AC-8: the smoke test", () => {
   it("passes when /en and /ru answer 200 and an unknown route answers 404", async () => {
     const base = await serve(HEALTHY);
     expect(await checkOnce(base)).toEqual([]);
-    expect(requests).toEqual(["/en", "/ru", "/en/smoke-test-no-such-page"]);
+    expect(requests).toEqual(["/en", "/ru", "/en/smoke-test-no-such-page", "/auth/test-login"]);
+  });
+
+  it("0006 AC-4: posts to the dummy login and fails when it signs anybody in instead of answering 404", async () => {
+    const open = await serve({ ...HEALTHY, "/auth/test-login": 303 });
+    expect(await checkOnce(open)).toEqual(["/auth/test-login: expected 404, got 303"]);
+    expect(methods.at(-1)).toBe("POST");
+    expect(methods.slice(0, 3)).toEqual(["GET", "GET", "GET"]);
   });
 
   it("says which route is wrong and what it answered", async () => {
@@ -55,7 +66,7 @@ describe("spec 0026 AC-8: the smoke test", () => {
 
   it("reports a server that is not there at all, without the URL", async () => {
     const wrong = await checkOnce("http://127.0.0.1:1");
-    expect(wrong).toHaveLength(3);
+    expect(wrong).toHaveLength(CHECKS_PER_ROUND);
     for (const line of wrong) expect(line).toMatch(/no answer \(\w+\)$/);
     expect(wrong.join()).not.toContain("127.0.0.1");
   });

@@ -37,7 +37,7 @@ jobs:
 
       # The CLI (version pinned in package-lock.json) can't pick tables, only schemas plus an exclude
       # list of schema.table names (no wildcards). So: everything in auth and public except the tables
-      # below, and the next step fails if a table outside the wanted four still turns up.
+      # below, and the next step fails if a table outside the wanted six still turns up.
       - name: Dump user data
         if: env.CONFIGURED == 'true'
         env:
@@ -52,7 +52,7 @@ jobs:
             auth.oauth_clients auth.oauth_consents auth.one_time_tokens auth.refresh_tokens \
             auth.saml_providers auth.saml_relay_states auth.scim_tokens auth.scim_users \
             auth.sessions auth.sso_domains auth.sso_providers auth.webauthn_challenges \
-            auth.webauthn_credentials public.checkpoints public.extra_stamps public.applied_migrations
+            auth.webauthn_credentials public.checkpoints public.extra_stamps public.applied_migrations public.user_feedback
           do
             exclude+=(-x "$table")
           done
@@ -69,7 +69,7 @@ jobs:
           found=$(sed -nE 's/^INSERT INTO "([^"]+)"\."([^"]+)".*/\1.\2/p' "${dump[0]}" | sort -u)
           echo "Tables in the dump:"
           echo "$found"
-          unexpected=$(echo "$found" | grep -vxE 'auth\.(users|identities)|public\.(user_stamps|user_extra_stamps)' || true)
+          unexpected=$(echo "$found" | grep -vxE 'auth\.(users|identities)|public\.(user_stamps|user_extra_stamps|profiles|friendships)' || true)
           if [ -n "$unexpected" ]; then
             rm -rf backup
             echo "::error title=Unexpected tables in the dump::Add these to the exclude list in backup.yml: $unexpected"

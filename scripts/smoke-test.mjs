@@ -1,5 +1,5 @@
-// Checks that the site answers after a deploy (spec 0026 AC-8): /en and /ru give 200 and an unknown route gives
-// 404. It is a sanity check of the running build, not a test suite. It retries, because the reload takes a moment.
+// Checks that the site answers after a deploy (spec 0026 AC-8): /en and /ru give 200, an unknown route gives
+// 404, and the test server's dummy login is not there (404, spec 0006 AC-4). It is a sanity check of the running build, not a test suite. It retries, because the reload takes a moment.
 //
 //   node scripts/smoke-test.mjs <base url> [timeout seconds]
 import fs from "node:fs";
@@ -12,6 +12,8 @@ export const CHECKS = [
   { path: "/en", status: 200 },
   { path: "/ru", status: 200 },
   { path: "/en/smoke-test-no-such-page", status: 404 },
+  // The dummy login signs anybody in: a stray TEST_LOGIN=1 must never open it on the public address.
+  { path: "/auth/test-login", status: 404, method: "POST" },
 ];
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -24,9 +26,9 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  */
 export async function checkOnce(base, fetchFn = fetch) {
   const wrong = [];
-  for (const { path, status } of CHECKS) {
+  for (const { path, status, method = "GET" } of CHECKS) {
     try {
-      const response = await fetchFn(new URL(path, base), { redirect: "manual", signal: AbortSignal.timeout(10_000) });
+      const response = await fetchFn(new URL(path, base), { method, redirect: "manual", signal: AbortSignal.timeout(10_000) });
       await response.arrayBuffer().catch(() => {}); // release the connection
       if (response.status !== status) wrong.push(`${path}: expected ${status}, got ${response.status}`);
     } catch (error) {

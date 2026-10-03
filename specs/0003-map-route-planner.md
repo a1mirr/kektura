@@ -87,20 +87,17 @@ Routing off the trail; replacing MapLibre.
 | AC | Test |
 | --- | --- |
 | AC-1, AC-2, AC-3 (line) | `src/lib/route-geometry.test.ts` |
-| AC-2 (toggle), AC-3 (fit) | manual: dashboard map |
+| AC-2 (line colours, toggle), AC-3 (amber highlight, fit) | manual (the map is WebGL pixels that E2E cannot read): see the checklist below. Last checked: never recorded. |
 | AC-4 ... AC-8 | `src/lib/route-stats.test.ts` |
 | Table totals | `tests/trail-data.test.ts` (0004 AC-6) |
-| AC-10, AC-11, AC-13 | `e2e/map.spec.ts` |
+| AC-9, AC-10, AC-11, AC-13, AC-16 | `e2e/map.spec.ts` (the detailed route is requested once on first need and again after a failed load on the next zoom change; toggles and their persistence; fullscreen; 📍 on a place and on an extra stamp, which switches that layer on; stamping from the list keeps the stamp's label where it was on the map) |
 | AC-17 | `src/lib/map-storage.test.ts`, `map-data.test.ts`, `map-layers.test.ts`, `map-popups.test.ts`, `map-reveal.test.ts` (the pure helpers); the file sizes are checked in review (today the largest is `src/lib/map-layers.ts`, 118 lines) |
-| AC-4, AC-8, AC-12 (route from / to) | `e2e/map.spec.ts`: two stamps picked through their popups show the stretch's numbers |
-| AC-2 (layer visibility), AC-9, AC-12, AC-13 (extras), AC-14, AC-16 | manual, see the checklist below; AC-15 popup builders: `src/lib/map-popups.test.ts` |
+| AC-4, AC-8, AC-12 (route from / to, mark and unmark) | `e2e/map.spec.ts`: two stamps picked through their popups show the stretch's numbers; a failed and a later successful save from the popup |
+| AC-14 (restaurants), AC-12 ("Show in list" in a collapsed stage) | manual (canvas hover and click): see the checklist below; AC-15 popup builders: `src/lib/map-popups.test.ts`; the reveal of a list row: `src/lib/map-reveal.test.ts`. Last checked: never recorded. |
 
 Manual checklist (dashboard, `npm run dev:test`, canvas interactions):
 
-- AC-10 visibility: untick "Stamps" and "Walked stretches" (the whole trail turns grey dashed), tick "Show extra stamps" and "Show restaurants"; dots and lines appear and disappear at once, without a reload.
-- AC-9: zoom in past level 9; the line gets visibly more detailed (the detailed file is requested once in the network tab); zoom out and it swaps back. Block that request and zoom again: the overview stays and the next zoom retries.
-- AC-16: pan and zoom, then mark a stamp from its row; the map's position and zoom do not change and the dot fills in.
-- AC-12: click a stamp, "Mark as walked" then "Remove mark" (official place and extra stamp); the popup closes and the dot, stats and list update. With an expired session (delete the auth cookie, then click) the page reloads to sign-in; with the network off the popup shows "Couldn't save" and the button works again.
+- AC-2 visibility: untick "Stamps" and "Walked stretches" (the whole trail turns grey dashed), tick "Show extra stamps" and "Show restaurants"; dots and lines appear and disappear at once, without a reload.
+- AC-3: pick a start and an end through the popups: the stretch between them is highlighted amber and the map fits it; clearing removes it.
 - AC-12: "Show in list" in a collapsed stage opens the stage, scrolls to the row and flashes it; in fullscreen it leaves fullscreen first.
-- AC-13: with extra stamps off, press 📍 on an extra stamp's row; the extra-stamps layer switches on and the map flies there (zoom >= 12).
 - AC-14: with restaurants on, hover one (name and distance) and click it (pinned popup with an "Open on etteremhet.hu" link that opens in a new tab).

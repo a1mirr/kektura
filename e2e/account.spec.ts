@@ -158,3 +158,26 @@ test.describe("spec 0014: sign out and the account link", () => {
     }
   });
 });
+
+test.describe("spec 0001: the stamps-per-month chart on the account page", () => {
+  test("AC-5: month labels and the tooltip follow the page's language", async ({ page }) => {
+    await signInAsNewUser(page);
+    await expandAllStages(page);
+    await page.locator("#place-OKTPH_02").getByRole("button", { name: "Add stamp" }).click();
+    await expect(stat(page, "Stamps")).toHaveText("1 / 161");
+
+    const now = new Date();
+    const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`; // the stamp's own day, as the browser sent it
+    const labels = new Set<string>();
+    for (const locale of ["en", "ru", "hu"]) {
+      const label = new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${month}-01T00:00:00Z`));
+      labels.add(label);
+      await page.goto(`/${locale}/account`);
+      const chart = page.locator(".recharts-wrapper");
+      await expect(chart.locator(".recharts-cartesian-axis-tick-value").first()).toHaveText(label);
+      await chart.locator(".recharts-bar-rectangle").first().hover();
+      await expect(chart.locator(".recharts-tooltip-wrapper")).toContainText(label);
+    }
+    expect(labels.size, "the three languages write the month differently").toBe(3);
+  });
+});

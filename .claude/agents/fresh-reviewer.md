@@ -47,6 +47,9 @@ not only the ACs the diff mentions.
 - An AC that the code no longer satisfies although the diff did not touch it, or that the diff made untrue.
 - A spec whose Goal or Notes tell the story of a change ("X was added, make it Y") instead of describing the
   area, and a task that describes how the product behaves (behaviour belongs in a spec, spec 0034 AC-3).
+- A `manual` coverage row of a touched area (spec 0034 AC-11) that has no reason, no way to check it or no
+  `Last checked`, one that a test could replace, and, where you can do the check yourself (a command, reading the
+  code), say whether it still holds; name the rows the change may have invalidated.
 - An acceptance criterion with no test, or a test that cites it but would pass without the behaviour
   (assertions too weak, mocks standing in for the thing under test). `manual` rows must say how to check.
 - Spec hygiene: acceptance criteria renumbered or deleted instead of marked `Removed`; the owning spec of

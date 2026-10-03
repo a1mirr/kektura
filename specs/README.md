@@ -22,7 +22,8 @@ nobody touches it? Yes: spec. No: task.
 2. **Agree on it.** Resolve the open questions and set status `Accepted` before implementing.
 3. **Write the tests from the ACs.** `describe("spec NNNN: <area>")`, and every test title starts
    with the AC it covers (`it("AC-3: ...")`). An AC that can't be automated yet is listed as
-   `manual` in the spec's coverage table, with how to check it.
+   `manual` in the spec's coverage table: `manual (why it can't be automated): how to check it. Last checked: <date>`
+   (spec 0034 AC-11). Prefer a test; a manual row is the exception, and its date is written by whoever did the check.
 4. **Implement** until `npm run check` (typecheck + lint + tests) is green.
 5. **Make the spec true.** Reread every spec the task touches against the code as built and edit it to mirror
    reality: an AC for behaviour that exists and no AC states, `Removed` for an AC that was dropped, status `Done`,
@@ -85,7 +86,7 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0022](0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Done |
 | [0023](0023-feature-flags.md) | Feature flags | Draft |
 | [0024](0024-friends-sharing.md) | Sharing progress with friends | Done |
-| [0026](0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Accepted |
+| [0026](0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Done |
 | [0027](0027-feature-flags-via-telegram.md) | Switching feature flags from the Telegram bot | Draft |
 | [0028](0028-landing-screenshots.md) | Screenshots on the landing page | Draft |
 | [0029](0029-site-logo-link.md) | A logo that leads home, on every page | Draft |

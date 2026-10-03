@@ -70,4 +70,10 @@ describe("spec 0033: translated stamp descriptions", () => {
       expect(table[p.code].ru!.endsWith(code!), `${p.code} ru`).toBe(true);
     }
   });
+
+  it("AC-5: the seed generator neither reads nor writes the translations, so regenerating the seeds leaves them alone", () => {
+    const generator = fs.readFileSync(new URL("../scripts/build-data.mjs", import.meta.url), "utf8");
+    expect(generator).not.toMatch(/stamp-descriptions/);
+    expect(fs.readFileSync(new URL("../supabase/seed.sql", import.meta.url), "utf8")).not.toMatch(/stamp-descriptions/);
+  });
 });

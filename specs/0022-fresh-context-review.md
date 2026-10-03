@@ -103,4 +103,4 @@ author's context, and wants that to be part of how work is done here, not someth
 | AC | Test |
 | --- | --- |
 | AC-1, AC-2, AC-3, AC-4 | `tests/review-process.test.ts` (the rule is in `CLAUDE.md` and `specs/README.md`; the agent file exists, is read-only and names what it checks; the pull request template has the checklist and the findings section) |
-| AC-3 (quality of the reviews) | manual: the owner reads the findings in each pull request |
+| AC-3 (quality of the reviews) | manual (judgement): the owner reads the findings in each pull request. Last checked: every pull request. |

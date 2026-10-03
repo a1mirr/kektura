@@ -50,6 +50,6 @@ complete in all three languages, with message keys and locales checked at compil
 | --- | --- |
 | AC-1 | `src/proxy.test.ts` |
 | AC-2, AC-3, AC-6 | `e2e/auth.spec.ts` (test server, spec 0006) |
-| AC-4 | manual: `/auth/callback?locale=xx` -> `/ru?error=auth` (needs a real OAuth round trip for the success path; the dummy login's `next` is covered by `e2e/friends.spec.ts`) |
+| AC-4 | `e2e/auth.spec.ts` (a failed code exchange, no code, an unknown locale and a markup-carrying locale all end on `/<known locale>?error=auth` on the address the user is on; a forwarded host is honoured and a malformed one is not); `src/lib/landing-path.test.ts` (`next`); the dummy login's `next` is covered by `e2e/friends.spec.ts`. The success path needs a real Google sign-in: manual (a real OAuth round trip). Last checked: never recorded. |
 | AC-5 | `tests/messages.test.ts` |
 | AC-7, AC-8 | `src/i18n/typed-messages.test.ts`: `// @ts-expect-error` on unknown keys and namespaces (hook and server API, namespaced and root) and on a plain `string` as `locale`, so `npm run typecheck` fails if the typing ever stops working (an unused directive is an error); `useLocale()` is `"ru" \| "en" \| "hu"` and `"de"` is not a `Locale` |
