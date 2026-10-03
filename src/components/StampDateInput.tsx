@@ -83,8 +83,12 @@ export default function StampDateInput({
   function openCalendar() {
     const input = picker.current;
     if (!input) return;
-    if (typeof input.showPicker === "function") input.showPicker();
-    else input.click();
+    try {
+      if (typeof input.showPicker === "function") input.showPicker();
+      else input.click();
+    } catch {
+      input.click(); // showPicker() throws when the browser refuses (no user gesture, a sandboxed frame)
+    }
   }
 
   function handlePick(date: string) {
@@ -109,7 +113,6 @@ export default function StampDateInput({
       )}
       <input
         type="text"
-        inputMode="numeric"
         autoComplete="off"
         placeholder="yyyy-mm-dd"
         maxLength={10}

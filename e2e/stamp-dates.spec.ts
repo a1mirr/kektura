@@ -42,7 +42,8 @@ test.describe("spec 0016: stamp dates", () => {
     await expect(field).toHaveAttribute("placeholder", "yyyy-mm-dd");
     const picker = place(page, "OKTPH_02").locator("input[type=date]");
     await expect(picker).toHaveAttribute("min", "1938-01-01");
-    await expect(picker).toHaveAttribute("max", /^\d{4}-\d{2}-\d{2}$/);
+    const tomorrowUtc = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+    await expect(picker).toHaveAttribute("max", tomorrowUtc);
     await expect(place(page, "OKTPH_02").getByRole("button", { name: "Open calendar" })).toBeVisible();
     expect(storedDate(email, "OKTPH_02")).toBe(today());
     // The place that isn't stamped has no field.

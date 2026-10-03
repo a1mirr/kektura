@@ -44,83 +44,6 @@ const blur = (input: HTMLElement) => act(() => void fireEvent.blur(input));
 const wait = (ms: number) => act(async () => void (await vi.advanceTimersByTimeAsync(ms)));
 
 describe("spec 0016: the date field", () => {
-  it("0031 AC-1: an accessible yyyy-mm-dd text field showing the saved date", () => {
-    const { input } = setup(ok());
-    expect(input.type).toBe("text");
-    expect(input.value).toBe("2026-09-01");
-    expect(input.placeholder).toBe("yyyy-mm-dd");
-    expect(input.maxLength).toBe(10);
-    expect(input.inputMode).toBe("numeric");
-  });
-
-  it("0031 AC-3, AC-4: the calendar button opens a hidden picker limited to the valid range", () => {
-    const { picker } = setup(ok());
-    const showPicker = vi.fn();
-    picker.showPicker = showPicker;
-    expect(picker.type).toBe("date");
-    expect(picker.value).toBe("2026-09-01"); // opens on the date of the field
-    expect(picker.min).toBe("1938-01-01");
-    expect(picker.max).toBe("2026-10-03");
-    expect(picker.getAttribute("aria-hidden")).toBe("true");
-    expect(picker.tabIndex).toBe(-1);
-    act(() => void fireEvent.click(screen.getByRole("button", { name: messages.dashboard.openCalendar })));
-    expect(showPicker).toHaveBeenCalledTimes(1);
-  });
-
-  it("0031 AC-3: without showPicker the button clicks the hidden date input", () => {
-    const { picker } = setup(ok());
-    const click = vi.fn();
-    picker.showPicker = undefined as unknown as () => void;
-    picker.addEventListener("click", click);
-    act(() => void fireEvent.click(screen.getByRole("button", { name: messages.dashboard.openCalendar })));
-    expect(click).toHaveBeenCalledTimes(1);
-  });
-
-  it("0031 AC-3: a day picked in the calendar fills the field and is saved at once", async () => {
-    const onSave = ok();
-    const { input, picker } = setup(onSave);
-    await edit(picker, "2026-09-12");
-    expect(onSave.mock.calls).toEqual([["2026-09-12"]]); // no pause
-    expect(input.value).toBe("2026-09-12");
-    await wait(3000);
-    expect(onSave).toHaveBeenCalledTimes(1);
-  });
-
-  it("0031 AC-3: a picked day that is out of range, empty or unchanged is not sent", async () => {
-    const onSave = ok();
-    const { input, picker } = setup(onSave);
-    for (const value of ["", "1937-12-31", "2999-01-01", "2026-09-01"]) await edit(picker, value);
-    await wait(3000);
-    expect(onSave).not.toHaveBeenCalled();
-    expect(input.value).toBe("2026-09-01");
-  });
-
-  it("0031 AC-3: a failed save of a picked day restores the saved date and says so", async () => {
-    const onSave = vi.fn(async (): Promise<ActionResult> => ({ ok: false, reason: "failed" }));
-    const { input, picker } = setup(onSave);
-    await edit(picker, "2026-09-12");
-    expect(input.value).toBe("2026-09-01");
-    expect(screen.getByRole("alert").textContent).toBe(messages.dashboard.actionFailed);
-  });
-
-  it("0031 AC-4: the text field is the only date control in the accessibility tree", () => {
-    setup(ok());
-    expect(screen.getAllByLabelText(messages.dashboard.stampDate)).toHaveLength(1);
-    expect(screen.getAllByRole("textbox")).toHaveLength(1);
-  });
-
-  it("0031 AC-2: text in another format is never sent, and leaving the field restores the saved date", async () => {
-    const onSave = ok();
-    const { input } = setup(onSave);
-    for (const value of ["15/09/2026", "2026-9-5", "09/15/2026", "2026-02-30", "20260915", "2026-09-15x", "tomorrow"]) {
-      await edit(input, value);
-      await wait(2000);
-      await blur(input);
-      expect(input.value, value).toBe("2026-09-01");
-    }
-    expect(onSave).not.toHaveBeenCalled();
-  });
-
   it("AC-6: a valid, changed date is saved once, after a pause of 700 ms", async () => {
     const onSave = ok();
     const { input } = setup(onSave);
@@ -267,5 +190,95 @@ describe("spec 0016: the date field", () => {
     await edit(input, "2026-09-20");
     rerender("2026-08-15");
     expect(input.value).toBe("2026-09-20");
+  });
+});
+
+describe("spec 0031: the yyyy-mm-dd text field and the calendar button", () => {
+  it("AC-1: an accessible yyyy-mm-dd text field showing the saved date", () => {
+    const { input } = setup(ok());
+    expect(input.type).toBe("text");
+    expect(input.value).toBe("2026-09-01");
+    expect(input.placeholder).toBe("yyyy-mm-dd");
+    expect(input.maxLength).toBe(10);
+    expect(input.inputMode).toBe(""); // no numeric keypad: the iPhone's has no hyphen
+  });
+
+  it("AC-3, AC-4: the calendar button opens a hidden picker limited to the valid range", () => {
+    const { picker } = setup(ok());
+    const showPicker = vi.fn();
+    picker.showPicker = showPicker;
+    expect(picker.type).toBe("date");
+    expect(picker.value).toBe("2026-09-01"); // opens on the date of the field
+    expect(picker.min).toBe("1938-01-01");
+    expect(picker.max).toBe("2026-10-03");
+    expect(picker.getAttribute("aria-hidden")).toBe("true");
+    expect(picker.tabIndex).toBe(-1);
+    act(() => void fireEvent.click(screen.getByRole("button", { name: messages.dashboard.openCalendar })));
+    expect(showPicker).toHaveBeenCalledTimes(1);
+  });
+
+  it("AC-3: when showPicker refuses (it throws), the button falls back to clicking the date input", () => {
+    const { picker } = setup(ok());
+    const click = vi.fn();
+    picker.showPicker = () => {
+      throw new DOMException("no user gesture", "NotAllowedError");
+    };
+    picker.addEventListener("click", click);
+    expect(() => act(() => void fireEvent.click(screen.getByRole("button", { name: messages.dashboard.openCalendar })))).not.toThrow();
+    expect(click).toHaveBeenCalledTimes(1);
+  });
+
+  it("AC-3: without showPicker the button clicks the hidden date input", () => {
+    const { picker } = setup(ok());
+    const click = vi.fn();
+    picker.showPicker = undefined as unknown as () => void;
+    picker.addEventListener("click", click);
+    act(() => void fireEvent.click(screen.getByRole("button", { name: messages.dashboard.openCalendar })));
+    expect(click).toHaveBeenCalledTimes(1);
+  });
+
+  it("AC-3: a day picked in the calendar fills the field and is saved at once", async () => {
+    const onSave = ok();
+    const { input, picker } = setup(onSave);
+    await edit(picker, "2026-09-12");
+    expect(onSave.mock.calls).toEqual([["2026-09-12"]]); // no pause
+    expect(input.value).toBe("2026-09-12");
+    await wait(3000);
+    expect(onSave).toHaveBeenCalledTimes(1);
+  });
+
+  it("AC-3: a picked day that is out of range, empty or unchanged is not sent", async () => {
+    const onSave = ok();
+    const { input, picker } = setup(onSave);
+    for (const value of ["", "1937-12-31", "2999-01-01", "2026-09-01"]) await edit(picker, value);
+    await wait(3000);
+    expect(onSave).not.toHaveBeenCalled();
+    expect(input.value).toBe("2026-09-01");
+  });
+
+  it("AC-3: a failed save of a picked day restores the saved date and says so", async () => {
+    const onSave = vi.fn(async (): Promise<ActionResult> => ({ ok: false, reason: "failed" }));
+    const { input, picker } = setup(onSave);
+    await edit(picker, "2026-09-12");
+    expect(input.value).toBe("2026-09-01");
+    expect(screen.getByRole("alert").textContent).toBe(messages.dashboard.actionFailed);
+  });
+
+  it("AC-4: the text field is the only date control in the accessibility tree", () => {
+    setup(ok());
+    expect(screen.getAllByLabelText(messages.dashboard.stampDate)).toHaveLength(1);
+    expect(screen.getAllByRole("textbox")).toHaveLength(1);
+  });
+
+  it("AC-2: text in another format is never sent, and leaving the field restores the saved date", async () => {
+    const onSave = ok();
+    const { input } = setup(onSave);
+    for (const value of ["15/09/2026", "2026-9-5", "09/15/2026", "2026-02-30", "20260915", "2026-09-15x", "tomorrow"]) {
+      await edit(input, value);
+      await wait(2000);
+      await blur(input);
+      expect(input.value, value).toBe("2026-09-01");
+    }
+    expect(onSave).not.toHaveBeenCalled();
   });
 });

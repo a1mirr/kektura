@@ -13,7 +13,7 @@ written `yyyy-mm-dd`, in every language and browser, and a calendar is still one
 ## Behaviour
 
 - **AC-1**: The date of a stamp (places and extra stamps) is a text field showing and accepting `yyyy-mm-dd`
-  (`2026-10-02`): placeholder `yyyy-mm-dd`, at most 10 characters, a numeric keyboard on phones. It has the
+  (`2026-10-02`): placeholder `yyyy-mm-dd`, at most 10 characters. It has the
   accessible label "Date of the stamp" (spec 0016 AC-5) and shows the saved date.
 - **AC-2**: The saving rules of spec 0016 AC-6 and AC-7 are unchanged. Text that isn't a valid stamp date
   (spec 0016 AC-2), such as `15/09/2026`, `2026-9-5` or `2026-02-30`, is never sent, and leaving the field
@@ -36,6 +36,8 @@ their localized form: this spec covers the fields where a date is entered. A cus
 
 - `showPicker()` opens the native picker from a click; where a browser lacks it the button falls back to
   `click()` on the hidden date input.
+- The field does not ask phones for a numeric keypad (`inputmode`): the iPhone's digits-only keypad has no hyphen, so
+  the date couldn't be typed there. The calendar button is the quick way on a phone.
 - The hidden date input also keeps the browser's own range limits, so the calendar can't pick an invalid day.
 
 ## Coverage
@@ -43,4 +45,5 @@ their localized form: this spec covers the fields where a date is entered. A cus
 | AC | Test |
 | --- | --- |
 | AC-1, AC-2, AC-3, AC-4, AC-5 | `src/components/StampDateInput.test.tsx`, `tests/messages.test.ts` (parity) |
-| AC-1, AC-2, AC-3 on the real dashboard | `e2e/stamp-dates.spec.ts` |
+| AC-1, AC-2, AC-3 on the real dashboard | `e2e/stamp-dates.spec.ts` (the range of the picker: 1938-01-01 to tomorrow in UTC) |
+| AC-3 (the native picker itself) | manual: click the calendar button in Chrome, Firefox and Safari (also on a phone): the picker opens on the field's date, a day that is picked appears in the field and is saved |
