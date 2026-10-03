@@ -40,7 +40,6 @@ Google account and without touching real data. Production keeps Google sign-in o
   `start:e2e`, CI), even when `.env.local` holds the real bot, so feedback submitted by a manual test
   or an E2E run is only stored in the local database and never sent to the developer's Telegram
   (spec 0017 AC-4 sends only when both are set).
-
 - **AC-8**: The E2E helpers `signInAsNewUser` and `signInWithEmail` (`e2e/helpers.ts`) sign in by posting to `POST
   /auth/test-login` (the route the dummy form submits to, AC-3) with the page's request context, then open
   `/en/dashboard`. They do not load the landing page or fill in the form. The session cookies the route sets end up

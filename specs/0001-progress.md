@@ -53,10 +53,10 @@ extra stamp belongs to.
 
 - **AC-12**: An extra stamp belongs to a stage when its `km_from_start` is within the stage's start km (inclusive)
   and end km (exclusive; inclusive for the final stage). The stage's start km is the km of its starting point (the
-  first place's km for the first stage); its end km is the km of its last place. An extra stamp outside every
+  first place's km for a stage with no starting point); its end km is the km of its last place. An extra stamp outside every
   stage (in the gap between two stages that don't join, or beyond the trail) belongs to none.
-- **AC-13**: Every extra stamp that lies on a stage names it in the "Extra stamps" section ("· Stage N" after
-  its name, in the page's language); the list is in km order, so the stage numbers only stay or grow.
+- **AC-13**: Every extra stamp that lies on a stage names it in its row of the "Extra stamps" section ("· Stage N" after the
+  km, in the page's language); the list is in km order, so the stage numbers only stay or grow.
 - **AC-14**: A stage that contains at least one extra stamp has a "go to extra stamps (N)" link in its header
   controls, N being the number of its extra stamps; it scrolls to the first of those stamps in the Extra stamps section (its anchor `#extra-<id>`).
   Stages without extra stamps have no such link.

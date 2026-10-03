@@ -142,7 +142,7 @@ test.describe("spec 0014: sign out and the account link", () => {
     }
   });
 
-  test("AC-3, AC-5: the link, the page and the button are translated, and signing out returns to the landing page of that language", async ({ page }) => {
+  test("AC-16, AC-18: the link, the page and the button are translated, and signing out returns to the landing page of that language", async ({ page }) => {
     for (const [locale, account, signOut] of [
       ["ru", "Аккаунт", "Выйти"],
       ["hu", "Fiók", "Kijelentkezés"],

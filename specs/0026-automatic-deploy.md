@@ -140,9 +140,8 @@ seeds (spec 0004) and clearing the dashboard cache afterwards, which stay manual
 - `NEXT_PUBLIC_*` values are compiled into the build the server makes from its own `.env.local`; nothing the
   workflow knows reaches the build.
 - Migration file names are the record of what is applied, so a file must never be renamed after it was
-  merged (the one rename done before the first deploy of `0024_friends.sql` was possible only because nothing
-  had been applied yet).
-- **State on 2026-10-03**: the deploy key is installed on the droplet behind `deploy/ssh-gate.sh`, the secrets
+  merged.
+- **State**: the deploy key is installed on the droplet behind `deploy/ssh-gate.sh`, the secrets
   `DEPLOY_SSH_KEY` and `DEPLOY_KNOWN_HOSTS` are set (`SUPABASE_DB_URL` already was), and a first real run started by
   hand (`dry_run` off, `baseline` `0024_friends.sql`) recorded the 9 files as applied, pushed `c09dedb`, saw the
   server build and report `Deployed`, and passed the smoke test. What is still to be seen is a run started by a merge

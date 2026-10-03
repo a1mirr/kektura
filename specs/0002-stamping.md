@@ -95,5 +95,6 @@ Notes; photo uploads; offline stamping and a queue of pending stamps; optimistic
 | AC-12 | spec 0016 (`StampDateInput.test.tsx`, `e2e/stamp-dates.spec.ts`) |
 | AC-15, AC-16 | `src/lib/dashboard-data.test.ts` (mocked clients: reference data via the cookie-less client under a tag and a one-day revalidation, never cached when the read fails; stamps via the cookie client). That the cache really serves later requests rests on these mocked-options tests plus a manual check: build, `next start`, clear `.next-e2e/cache/fetch-cache`, stamp repeatedly, count reference reads (a temporary log in `fetchReferenceData`; expect one) |
 | AC-13 | `src/components/ActionButton.test.tsx` (label and style flip while pending, revert on `failed` with the error, revert and refresh on `unauthorized`) |
+| AC-13 (date field after the answer) | manual: stamp a place on the dashboard; the button flips at once, and the date field appears a moment later, once the server has answered |
 | AC-14 | `e2e/stamping.spec.ts` and the other dashboard E2E specs (stats, counters and map come from the server's answer); `actions.test.ts` (the actions call `refresh()`) |
 | RLS | manual: Supabase advisors (`get_advisors`) clean; policies in `0006_rls_initplan.sql` |

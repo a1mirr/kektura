@@ -33,7 +33,7 @@ deploy a broken build.
 
 - **AC-4**: `deploy/` holds what runs on the production server, nothing else lives at the repository root:
   `post-receive` (the git hook), `Caddyfile` (the one proxy configuration, HTTPS), `server-setup.sh` (swap
-  space and log clean-up, safe to run again) and `README.md` (how production is built, the environment
+  space and log clean-up, safe to run again), `ssh-gate.sh` (the forced command of the deploy key, spec 0026 AC-7) and `README.md` (how production is built, the environment
   variables, how to deploy, roll back and read logs).
 - **AC-5**: The deploy hook stops at the first failing step (`set -euo pipefail`), so a failed install or
   build never reloads the running app; it deploys only pushes to `main`.
