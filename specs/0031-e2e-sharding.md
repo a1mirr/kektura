@@ -17,9 +17,10 @@ keep what depends on the check's name working.
   local Supabase and its own build of the test server. Together the shards run every test exactly once. The matrix sets `fail-fast: false`, so a failing
   shard never cancels the other one: both always finish and report, and a run shows every failure at once.
 - **AC-2**: The check keeps its name. A final job named `End-to-end tests` depends on all shards (`needs`, and
-  `if: always()`) and fails unless every shard succeeded (a cancelled or skipped shard counts as failed), so branch protection and `CLAUDE.md` step 7 (which name
-  "Typecheck, lint, unit tests" and "End-to-end tests") keep working. The shard jobs themselves have other names
-  (`E2E shard 1/2`, `E2E shard 2/2`).
+  `if: always()`) and fails unless every shard succeeded (a cancelled or skipped shard counts as failed). That gives a
+  pull request one E2E result to read, keeps the job names `CLAUDE.md` step 7 names ("Typecheck, lint, unit tests"
+  and "End-to-end tests") true, and means a branch protection rule turned on later needs no change. The shard jobs
+  themselves have other names (`E2E shard 1/2`, `E2E shard 2/2`).
 - **AC-3**: The checks that need the database but not the tests (`types:check`, the friends-migration rule tests
   of spec 0024) run once, in shard 1 only (`if: matrix.shard == 1`), not in both.
 - **AC-4**: Each shard saves its own Playwright report and JSON report under a name that includes the shard number
@@ -43,10 +44,6 @@ and changes to the tests themselves.
 - Is Playwright's default split even enough? `fullyParallel: true` is set, so it shards individual tests, not files,
   and the slow friends and map tests spread over both shards. Check the two shards' times on the first real runs;
   only if they differ a lot is a hand-made split worth it.
-- Branch protection: does it require the check by name? A required check matches the job's display name, so the
-  aggregating job's `name: End-to-end tests` is enough, as long as the matrix job gets a different id and a name
-  that includes the shard (`E2E shard 1/2`). The settings could not be read from the session that wrote this spec
-  (403), so the owner has to confirm it before this becomes Accepted.
 
 ## Notes
 
@@ -58,6 +55,12 @@ Specs that say "the `e2e` job" and become wrong when this lands, and are reworde
 `0007-ci.md` AC-2 and AC-3 (one job runs `npm run e2e` and `types:check`), `0030-faster-e2e.md` AC-3 and AC-4 (one
 job, one JSON report, one summary) and the pointer in `0006-test-server.md` AC-6; `CLAUDE.md` step 7 only if the
 check's name changes.
+
+`main` has no branch protection (the repository is private on the free plan, where GitHub offers neither protection
+rules nor rulesets: the settings API answers 403 "Upgrade to GitHub Pro or make this repository public"), so no check
+is required by name today and CI gates merges only by the convention in `CLAUDE.md` step 7. The aggregating job of
+AC-2 is therefore for readability and for the day protection is switched on, not a requirement of it. Spec 0021 owns the pull request rules and says why protection
+is off; if that changes, this note goes stale.
 
 ## Coverage
 
