@@ -49,7 +49,7 @@ describe("spec 0026: which merges deploy", () => {
     });
 
     it("skips a merge that changed only documentation, specs, tests and tooling, and says why", () => {
-      const plan = planDeploy({ production: A, target: B, changed: ["specs/0025-account-page.md", "tests/x.test.ts", "CLAUDE.md"] });
+      const plan = planDeploy({ production: A, target: B, changed: ["specs/0014-pages-and-settings.md", "tests/x.test.ts", "CLAUDE.md"] });
       expect(plan.deploy).toBe(false);
       expect(plan.reason).toMatch(/documentation, specs, tests and repository tooling/);
     });

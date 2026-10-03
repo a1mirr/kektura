@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { signInAsNewUser } from "./helpers";
 
-// Spec 0013: extra stamps are linked to the stage they lie in. The numbers aren't hard-coded: the page
+// Spec 0001 AC-12 to AC-14: extra stamps are linked to the stage they lie in. The numbers aren't hard-coded: the page
 // has to agree with itself (what the stages say they link to is what the extra stamps say they are).
-test.describe("spec 0013: extra stamps in stages", () => {
-  test("AC-1, AC-2: every extra stamp that lies on a stage names it, in order along the trail", async ({ page }) => {
+test.describe("spec 0001: extra stamps in stages", () => {
+  test("AC-12, AC-13: every extra stamp that lies on a stage names it, in order along the trail", async ({ page }) => {
     await signInAsNewUser(page);
     const rows = page.locator("#extra-stamps li");
     expect(await rows.count()).toBeGreaterThan(50); // the 72 extra stamps
@@ -21,7 +21,7 @@ test.describe("spec 0013: extra stamps in stages", () => {
     expect(stages[0]).toBe(1);
   });
 
-  test("AC-3: a stage's 'go to extra stamps (N)' counts exactly its extra stamps, and jumps to them", async ({ page }) => {
+  test("AC-14: a stage's 'go to extra stamps (N)' counts exactly its extra stamps, and jumps to them", async ({ page }) => {
     await signInAsNewUser(page);
     const stage1 = page.locator("#stage-1");
     const link = stage1.getByRole("link", { name: /^go to extra stamps \(\d+\)$/ });
@@ -37,7 +37,7 @@ test.describe("spec 0013: extra stamps in stages", () => {
     await expect(inStage1.first()).toBeInViewport();
   });
 
-  test("AC-3: stages without extra stamps have no such link, and the links add up to the labelled stamps", async ({ page }) => {
+  test("AC-14: stages without extra stamps have no such link, and the links add up to the labelled stamps", async ({ page }) => {
     await signInAsNewUser(page);
     const links = page.getByRole("link", { name: /^go to extra stamps \(\d+\)$/ });
     const counts = (await links.allTextContents()).map((text) => Number(/\((\d+)\)/.exec(text)![1]));

@@ -39,7 +39,7 @@ async function asUser(action: StampAction, write: (session: Session) => Promise<
     };
     const result = await write({ supabase, user, fail });
     // refresh() re-renders the page in this response. Not revalidatePath: it would also expire the
-    // dashboard's cached reference data, which is the point of spec 0009 AC-1.
+    // dashboard's cached reference data, which is the point of spec 0002 AC-15.
     if (result.ok) refresh();
     return result;
   } catch (error) {

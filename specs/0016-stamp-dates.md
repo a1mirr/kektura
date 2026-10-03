@@ -2,16 +2,15 @@
 
 Status: Done
 Owner code: `src/lib/stamp-date.ts`, `src/app/[locale]/dashboard/actions.ts`, `src/components/StampDateInput.tsx`,
-`StampButton.tsx`, `ExtraStampButton.tsx`, `StageStampButton.tsx`, `supabase/migrations/0007_edit_dates.sql`
+`StampButton.tsx`, `ExtraStampButton.tsx`, `StageStampButton.tsx`, `supabase/migrations/0007_edit_dates.sql`,
+`messages/*.json` (`dashboard.stampDate`, `dashboard.openCalendar`)
 
 ## Goal
 
-Every stamp has a date, and the user can correct it ("I collected this one in June"). The first version
-(commit `fa0940f`) made the date argument of the stamp actions double as an "overwrite" flag and saved on
-every `change` event of the date field. Chrome fires `change` for every typed digit, so typing the year
-saved a date for every keystroke (`0002-…` while typing the year, `…-02` on the way to `…-26`), and the field disabled itself mid-typing and lost focus. It also accepted
-`2026-13-45` and any far-past or far-future date, and gave new stamps the server's UTC date instead of the
-user's own day. This spec replaces it.
+Every stamp has a date, and the user can correct it ("I collected this one in June"). A new stamp gets the
+user's own day. A date is only ever saved when it is a real, complete one, never a half-typed one, and it reads
+`yyyy-mm-dd` in every language and browser (a native date field would show `10/02/2026`, which is 2 October or
+10 February depending on who looks), with a calendar one click away.
 
 ## Behaviour
 
@@ -37,35 +36,52 @@ user's own day. This spec replaces it.
   touch only the caller's rows (RLS and an explicit `user_id` filter), and answer `failed` when no row
   was updated (nothing was stamped). An invalid date is rejected without database access; a missing
   session is `unauthorized`. Both log failures like the other stamp actions (spec 0008).
-- **AC-5**: Stamped places and extra stamps show a date field with an accessible label that only accepts
-  dates from 1938-01-01 to tomorrow (UTC). Since spec 0032 it is a `yyyy-mm-dd` text field with a calendar
-  button (first it was `<input type="date">`); the range limits sit on the calendar picker.
+- **AC-5**: Stamped places and extra stamps show a text field for the date, showing and accepting `yyyy-mm-dd`
+  (`2026-10-02`): placeholder `yyyy-mm-dd`, at most 10 characters, the accessible label "Date of the stamp", the
+  saved date as its value. It does not ask phones for a numeric keypad.
 - **AC-6**: The field saves a valid, changed date after 700 ms without typing, or at once when the user
-  leaves the field. It never sends an empty, incomplete, invalid, out-of-range or unchanged value; leaving
-  the field with such a value restores the saved date.
+  leaves the field. It never sends an empty, incomplete, invalid, out-of-range or unchanged value, nor text in
+  another format (`15/09/2026`, `2026-9-5`, `2026-02-30`); leaving the field with such a value restores the
+  saved date.
 - **AC-7**: While saving, the field stays enabled and keeps focus. A failed save restores the saved date and
   shows the usual "Couldn't save, try again." (spec 0002 AC-10); an expired session refreshes the page
   (0002 AC-11). Several quick edits are one save.
 - **AC-8**: The dates are what the per-month statistics use (0001 AC-5), so correcting a date moves the
   stamp to its new month.
+- **AC-9**: Next to the field is a calendar button (accessible name "Open calendar"). It opens the browser's date
+  picker on the current date of the field, limited to the valid range (1938-01-01 to tomorrow, UTC). Picking a day
+  fills the field and saves it at once (a pick is one complete date: no pause is needed); a picked day that is
+  empty or out of range is not sent; failures and expired sessions behave as in AC-7.
+- **AC-10**: The picker is an implementation detail of the button: it is hidden from keyboard and screen readers,
+  so the text field is the only date field they meet (the calendar button stays reachable).
+- **AC-11**: The calendar button's label exists in `ru`, `en` and `hu`. The placeholder is the format itself and
+  is not translated.
+- **AC-12**: The field follows the saved date when the server's value changes (the page refreshed after a save,
+  another tab edited it), unless the user is in the middle of changing it: what they are typing is never
+  overwritten.
 
 ## Out of scope
 
 Notes on a stamp; a time of day; editing many dates at once; a database check on the date range (it would
-need `current_date`, which can't be part of a constraint that must hold when a dump is reloaded).
+need `current_date`, which can't be part of a constraint that must hold when a dump is reloaded); a custom-built
+calendar widget. Other dates on the site (the changelog's long dates, the month labels of the "Stamps per month"
+chart) keep their localized form: this spec covers the fields where a date is entered.
 
 ## Notes
 
-- `0007_edit_dates.sql` adds the UPDATE policy on `user_extra_stamps` (`user_stamps` already had one):
-  without it an update is silently ignored by RLS.
-- The earlier `upsert(..., { onConflict })` overwrite is gone: an update-only action can't create rows by
-  accident and doesn't depend on how PostgREST parses `on_conflict`.
-- Checking the value isn't enough to avoid saving half-typed dates: correcting a typed date passes through
-  other complete dates (changing the day of `2026-09-02` to `26` is `2026-09-02`, then `2026-09-2`, then
-  `2026-09-26`; only complete `yyyy-mm-dd` strings count, so the prefixes of a typed year are never dates).
-  The pause (or blur) protects against saving the intermediate ones. (With the native `<input type="date">`
-  of the first versions every prefix of the year was a real date, e.g. `0002`, `0020`, `0202`, which the range
-  check rejects.)
+- `0007_edit_dates.sql` adds the UPDATE policy on `user_extra_stamps` (`user_stamps` already had one): without it
+  an update is silently ignored by RLS.
+- The date is edited by an update-only action, not by stamping again: it can't create rows by accident and doesn't
+  depend on how PostgREST parses `on_conflict`.
+- The field must not save on every change: a text field fires `change` per keystroke, and correcting a typed date
+  passes through other complete dates (changing the day of `2026-09-02` to `26` is `2026-09-02`, then
+  `2026-09-2`, then `2026-09-26`; only complete `yyyy-mm-dd` strings count). The pause (or leaving the field)
+  protects against saving the intermediate ones, and a disabled field would lose focus mid-typing, so it stays
+  enabled while saving.
+- `showPicker()` opens the native picker from a click; where a browser lacks it, or refuses, the button falls back
+  to `click()` on the hidden date input. The hidden date input also keeps the browser's own range limits.
+- The field does not ask phones for a numeric keypad (`inputmode`): the iPhone's digits-only keypad has no hyphen,
+  so the date couldn't be typed there. The calendar button is the quick way on a phone.
 
 ## Coverage
 
@@ -74,5 +90,7 @@ need `current_date`, which can't be part of a constraint that must hold when a d
 | AC-2 | `src/lib/stamp-date.test.ts` |
 | AC-1 | `stamp-date.test.ts` (local day), `actions.test.ts` (date goes to new rows only), `e2e/stamp-dates.spec.ts` (a user far ahead of UTC gets their own day) |
 | AC-3, AC-4 | `src/app/[locale]/dashboard/actions.test.ts`, `src/lib/stamp-date.test.ts` (calendar dates) |
-| AC-5, AC-6, AC-7 | `src/components/StampDateInput.test.tsx` (timers, blur, invalid, failure, focus), `e2e/stamp-dates.spec.ts` (typing a whole date makes one request; a future date is refused and restored; persistence after reload; extra stamps) |
+| AC-5, AC-6, AC-7, AC-9, AC-10, AC-12 | `src/components/StampDateInput.test.tsx` (timers, blur, invalid and other-format text, failure, focus, the calendar button and its fallbacks, the hidden picker, following the server), `e2e/stamp-dates.spec.ts` (typing a whole date makes one request; a future date is refused and restored; a day picked in the calendar is saved at once and the picker's range is 1938-01-01 to tomorrow in UTC; persistence after reload; extra stamps) |
+| AC-9 (the native picker itself) | manual: click the calendar button in Chrome, Firefox and Safari (also on a phone): the picker opens on the field's date, a day that is picked appears in the field and is saved |
 | AC-8 | `src/lib/progress.test.ts` (months from `stamped_on`) |
+| AC-11 | `tests/messages.test.ts` (parity) |

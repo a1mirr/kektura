@@ -179,13 +179,13 @@ describe("spec 0016: the date field", () => {
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
-  it("the date follows the server when it changes and the user isn't editing", async () => {
+  it("AC-12: the date follows the server when it changes and the user isn't editing", async () => {
     const { input, rerender } = setup(ok(), "2026-09-01", MAX);
     rerender("2026-08-15");
     expect(input.value).toBe("2026-08-15");
   });
 
-  it("the date from the server doesn't overwrite what the user is typing", async () => {
+  it("AC-12: the date from the server doesn't overwrite what the user is typing", async () => {
     const { input, rerender } = setup(ok(), "2026-09-01", MAX);
     await edit(input, "2026-09-20");
     rerender("2026-08-15");
@@ -193,8 +193,8 @@ describe("spec 0016: the date field", () => {
   });
 });
 
-describe("spec 0032: the yyyy-mm-dd text field and the calendar button", () => {
-  it("AC-1: an accessible yyyy-mm-dd text field showing the saved date", () => {
+describe("spec 0016: the yyyy-mm-dd text field and the calendar button", () => {
+  it("AC-5: an accessible yyyy-mm-dd text field showing the saved date", () => {
     const { input } = setup(ok());
     expect(input.type).toBe("text");
     expect(input.value).toBe("2026-09-01");
@@ -203,7 +203,7 @@ describe("spec 0032: the yyyy-mm-dd text field and the calendar button", () => {
     expect(input.inputMode).toBe(""); // no numeric keypad: the iPhone's has no hyphen
   });
 
-  it("AC-3, AC-4: the calendar button opens a hidden picker limited to the valid range", () => {
+  it("AC-9, AC-10: the calendar button opens a hidden picker limited to the valid range", () => {
     const { picker } = setup(ok());
     const showPicker = vi.fn();
     picker.showPicker = showPicker;
@@ -217,7 +217,7 @@ describe("spec 0032: the yyyy-mm-dd text field and the calendar button", () => {
     expect(showPicker).toHaveBeenCalledTimes(1);
   });
 
-  it("AC-3: when showPicker refuses (it throws), the button falls back to clicking the date input", () => {
+  it("AC-9: when showPicker refuses (it throws), the button falls back to clicking the date input", () => {
     const { picker } = setup(ok());
     const click = vi.fn();
     picker.showPicker = () => {
@@ -228,7 +228,7 @@ describe("spec 0032: the yyyy-mm-dd text field and the calendar button", () => {
     expect(click).toHaveBeenCalledTimes(1);
   });
 
-  it("AC-3: without showPicker the button clicks the hidden date input", () => {
+  it("AC-9: without showPicker the button clicks the hidden date input", () => {
     const { picker } = setup(ok());
     const click = vi.fn();
     picker.showPicker = undefined as unknown as () => void;
@@ -237,7 +237,7 @@ describe("spec 0032: the yyyy-mm-dd text field and the calendar button", () => {
     expect(click).toHaveBeenCalledTimes(1);
   });
 
-  it("AC-3: a day picked in the calendar fills the field and is saved at once", async () => {
+  it("AC-9: a day picked in the calendar fills the field and is saved at once", async () => {
     const onSave = ok();
     const { input, picker } = setup(onSave);
     await edit(picker, "2026-09-12");
@@ -247,7 +247,7 @@ describe("spec 0032: the yyyy-mm-dd text field and the calendar button", () => {
     expect(onSave).toHaveBeenCalledTimes(1);
   });
 
-  it("AC-3: a picked day that is out of range or empty is not sent", async () => {
+  it("AC-9: a picked day that is out of range or empty is not sent", async () => {
     const onSave = ok();
     const { input, picker } = setup(onSave);
     for (const value of ["", "1937-12-31", "2999-01-01"]) await edit(picker, value);
@@ -256,7 +256,7 @@ describe("spec 0032: the yyyy-mm-dd text field and the calendar button", () => {
     expect(input.value).toBe("2026-09-01");
   });
 
-  it("AC-3: a failed save of a picked day restores the saved date and says so", async () => {
+  it("AC-9: a failed save of a picked day restores the saved date and says so", async () => {
     const onSave = vi.fn(async (): Promise<ActionResult> => ({ ok: false, reason: "failed" }));
     const { input, picker } = setup(onSave);
     await edit(picker, "2026-09-12");
@@ -264,13 +264,13 @@ describe("spec 0032: the yyyy-mm-dd text field and the calendar button", () => {
     expect(screen.getByRole("alert").textContent).toBe(messages.dashboard.actionFailed);
   });
 
-  it("AC-4: only the text field is labelled and typeable; the picker has no label of its own (it is aria-hidden: see above)", () => {
+  it("AC-10: only the text field is labelled and typeable; the picker has no label of its own (it is aria-hidden: see above)", () => {
     setup(ok());
     expect(screen.getAllByLabelText(messages.dashboard.stampDate)).toHaveLength(1);
     expect(screen.getAllByRole("textbox")).toHaveLength(1);
   });
 
-  it("AC-2: text in another format is never sent, and leaving the field restores the saved date", async () => {
+  it("AC-6: text in another format is never sent, and leaving the field restores the saved date", async () => {
     const onSave = ok();
     const { input } = setup(onSave);
     for (const value of ["15/09/2026", "2026-9-5", "09/15/2026", "2026-02-30", "20260915", "2026-09-15x", "tomorrow"]) {

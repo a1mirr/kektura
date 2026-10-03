@@ -47,7 +47,7 @@ export default async function Dashboard({
   } = await supabase.auth.getUser();
   if (!user) return redirect({ href: "/", locale });
 
-  // Reference data comes from a shared server cache; only the user's own stamps hit the database (spec 0009).
+  // Reference data comes from a shared server cache; only the user's own stamps hit the database (spec 0002 AC-15, AC-16).
   const { checkpoints, extras: extraList, stamps, extraStamps } = await loadDashboardData(supabase);
   const extraDone = new Map(extraStamps.map((s) => [s.extra_id, s.stamped_on]));
   const mapExtras = extraList.map((e) => ({

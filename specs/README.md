@@ -65,21 +65,17 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 
 | Spec | Area | Status |
 | --- | --- | --- |
-| [0001](0001-progress.md) | Progress: places, walked stretches, stats, stages | Done |
-| [0002](0002-stamping.md) | Stamping: server actions and stamp buttons | Done |
-| [0003](0003-map-route-planner.md) | Map lines and the route planner | Done |
+| [0001](0001-progress.md) | Progress: places, walked stretches, stats, stages, extra stamps in stages | Done |
+| [0002](0002-stamping.md) | Stamping: server actions, stamp buttons, cached reference data | Done |
+| [0003](0003-map-route-planner.md) | Map lines, the route planner and how the map code is structured | Done |
 | [0004](0004-trail-data.md) | Generated trail data and seeds | Done |
-| [0005](0005-auth-routing-i18n.md) | Sign-in, routing, translations | Done |
-| [0006](0006-test-server.md) | Test server with dummy login, E2E tests | Done |
-| [0007](0007-ci.md) | CI, generated-types check, Dependabot | Done |
+| [0005](0005-auth-routing-i18n.md) | Sign-in, routing, translations, typed message keys | Done |
+| [0006](0006-test-server.md) | Test server with dummy login, E2E tests and how they sign in | Done |
+| [0007](0007-ci.md) | CI, E2E caches and timing report, generated-types check, Dependabot | Done |
 | [0008](0008-action-logging.md) | Server-side logging of failed stamp actions | Done |
-| [0009](0009-fast-stamping.md) | Cached reference data, instant stamp buttons | Done |
-| [0010](0010-typed-translations.md) | Typed translation keys | Done |
-| [0011](0011-trailmap-split.md) | Split TrailMap, map E2E safety net | Done |
 | [0012](0012-backups.md) | Weekly backup of production user data | Done |
-| [0013](0013-extra-stamps-stages.md) | Extra stamps linked to stages | Done |
-| [0014](0014-pages-and-settings.md) | Footer pages, account page, account deletion | Done |
-| [0016](0016-stamp-dates.md) | Stamp dates: validation, own time zone, safe editing | Done |
+| [0014](0014-pages-and-settings.md) | Footer pages, account page (sign out, chart, account deletion) | Done |
+| [0016](0016-stamp-dates.md) | Stamp dates: validation, own time zone, safe editing, the yyyy-mm-dd field | Done |
 | [0017](0017-feedback.md) | Feedback form with Telegram notifications | Done |
 | [0018](0018-changelog.md) | Changelog page | Done |
 | [0019](0019-useful-links.md) | Useful links page | Done |
@@ -89,13 +85,10 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0022](0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Done |
 | [0023](0023-feature-flags.md) | Feature flags | Draft |
 | [0024](0024-friends-sharing.md) | Sharing progress with friends | Done |
-| [0025](0025-account-page.md) | Account page: sign out moves in, "Settings" becomes "Account" | Done |
 | [0026](0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Accepted |
 | [0027](0027-feature-flags-via-telegram.md) | Switching feature flags from the Telegram bot | Draft |
 | [0028](0028-landing-screenshots.md) | Screenshots on the landing page | Draft |
 | [0029](0029-site-logo-link.md) | A logo that leads home, on every page | Draft |
-| [0030](0030-faster-e2e.md) | Faster end-to-end tests: API sign-in, CI caches, timing report | Done |
 | [0031](0031-e2e-sharding.md) | Sharded end-to-end tests: two parallel CI jobs | Draft |
-| [0032](0032-iso-date-input.md) | Stamp dates typed and shown as yyyy-mm-dd, with a calendar button | Done |
 | [0033](0033-translated-stamp-descriptions.md) | Stamp descriptions translated into ru and en | Done |
 | [0034](0034-specs-and-tasks.md) | Specs and tasks: how work is written down | Done |

@@ -1,7 +1,7 @@
 # 0003: Map lines and the route planner
 
 Status: Done
-Owner code: `src/lib/route-geometry.ts`, `src/lib/route-stats.ts`, `src/components/TrailMap.tsx` (split into `src/components/trail-map/` and `src/lib/map-*.ts` by spec 0011)
+Owner code: `src/lib/route-geometry.ts`, `src/lib/route-stats.ts`, `src/components/TrailMap.tsx`, `src/components/trail-map/`, `src/lib/map-*.ts`
 
 ## Goal
 
@@ -59,9 +59,28 @@ From `public/data/okt-hops.json`: 160 hops between neighbouring places, from the
 - **AC-16**: Updating stamps keeps the map's position and zoom (new data is pushed into the existing
   map, not a new one).
 
+### Structure
+
+- **AC-17**: `TrailMap.tsx` is a composition of focused hooks and modules (`src/components/trail-map/`: map
+  creation with its sources and layers, stamp and restaurant popups, route planner state, fullscreen, layer
+  toggles with persistence, data and focus listeners) and of pure helpers in `src/lib/map-*.ts` (popup DOM builders,
+  storage helpers, layer definitions, GeoJSON builders, row reveal), and no file of them is over about 300 lines.
+  The pure helpers have unit tests.
+
 ## Out of scope
 
-Routing off the trail.
+Routing off the trail; replacing MapLibre.
+
+## Notes
+
+- The map is not React state: `TrailMap` keeps one mutable handle (`map`, `ready`, `route`) in a ref and the hooks
+  update the map in place, which is what keeps position and zoom when a stamp changes (AC-16). Hooks and map
+  event handlers read other changing values through `useLatest` refs.
+- The route-planner E2E test needs no test hook in production code: it uses the 📍 button to fly the map to a
+  stamp, which centres it, then clicks the canvas centre to open the stamp's popup.
+- What E2E cannot see (canvas-only) is checked by hand with the checklist below: layer visibility changing on the
+  map, the swap to the detailed route and its retry, position and zoom surviving a stamp change, marking from the
+  popup, restaurant popups, the amber highlight and map fit, the hover tooltips and the walked lines.
 
 ## Coverage
 
@@ -71,7 +90,8 @@ Routing off the trail.
 | AC-2 (toggle), AC-3 (fit) | manual: dashboard map |
 | AC-4 ... AC-8 | `src/lib/route-stats.test.ts` |
 | Table totals | `tests/trail-data.test.ts` (0004 AC-6) |
-| AC-10, AC-11, AC-13 | `e2e/map.spec.ts` (spec 0011) |
+| AC-10, AC-11, AC-13 | `e2e/map.spec.ts` |
+| AC-17 | `src/lib/map-storage.test.ts`, `map-data.test.ts`, `map-layers.test.ts`, `map-popups.test.ts`, `map-reveal.test.ts` (the pure helpers); the file sizes are checked in review (today the largest is `src/lib/map-layers.ts`, 118 lines) |
 | AC-4, AC-8, AC-12 (route from / to) | `e2e/map.spec.ts`: two stamps picked through their popups show the stretch's numbers |
 | AC-2 (layer visibility), AC-9, AC-12, AC-13 (extras), AC-14, AC-16 | manual, see the checklist below; AC-15 popup builders: `src/lib/map-popups.test.ts` |
 

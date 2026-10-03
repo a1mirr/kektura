@@ -1,4 +1,4 @@
-// Prints the slowest Playwright tests from a JSON report as a Markdown table (spec 0030 AC-4), for the CI job summary.
+// Prints the slowest Playwright tests from a JSON report as a Markdown table (spec 0007 AC-7), for the CI job summary.
 // Usage: node scripts/slowest-tests.mjs [report.json] [count]
 import { readFileSync } from "node:fs";
 

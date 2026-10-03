@@ -7,7 +7,7 @@ import { useStampAction } from "@/lib/use-stamp-action";
 
 // Button that runs a stamp server action: disabled while it runs, with a short message on failure.
 // `done` = the thing is already stamped, so the button offers to undo it. On click it shows the new
-// state at once (optimistic, spec 0009 AC-3): the other label and style until the server answers; a
+// state at once (optimistic, spec 0002 AC-13): the other label and style until the server answers; a
 // failed action puts the old state back. The stats and the map are never touched optimistically.
 export default function ActionButton({
   action,

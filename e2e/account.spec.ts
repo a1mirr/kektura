@@ -14,14 +14,14 @@ async function openDeleteConfirmation(page: Page) {
 const count = (sql: string) => Number(psql(sql));
 
 test.describe("spec 0014: the account page", () => {
-  test("AC-7 (and 0025 AC-2): signed-out visitors are sent to the landing page", async ({ page }) => {
+  test("AC-7, AC-15: signed-out visitors are sent to the landing page", async ({ page }) => {
     await page.goto("/en/account");
     await expect(page).toHaveURL(/\/en$/);
     await page.goto("/en/settings"); // the old address: redirected to /account, then to the landing page
     await expect(page).toHaveURL(/\/en$/);
   });
 
-  test("AC-7, AC-8, AC-9 (and 0025 AC-1, AC-2): the dashboard header leads to the account page; cancelling deletes nothing", async ({ page }) => {
+  test("AC-7, AC-8, AC-9, AC-14, AC-15: the dashboard header leads to the account page; cancelling deletes nothing", async ({ page }) => {
     const email = await signInAsNewUser(page);
     // AC-8: the chart is on the account page, not here (the dashboard renders in one piece, so once its
     // Account link is there, a missing chart really is missing).
@@ -93,8 +93,8 @@ test.describe("spec 0014: the account page", () => {
   });
 });
 
-test.describe("spec 0025: sign out and the account link", () => {
-  test("AC-1: the dashboard header has one Account link and no Settings link or Sign out control", async ({ page }) => {
+test.describe("spec 0014: sign out and the account link", () => {
+  test("AC-14: the dashboard header has one Account link and no Settings link or Sign out control", async ({ page }) => {
     await signInAsNewUser(page);
     const header = page.locator("main > header");
     await expect(header.getByRole("link", { name: "Account", exact: true })).toHaveAttribute("href", "/en/account");
@@ -102,7 +102,7 @@ test.describe("spec 0025: sign out and the account link", () => {
     await expect(page.getByRole("button", { name: "Sign out" })).toHaveCount(0);
   });
 
-  test("AC-2: the old /settings address redirects to /account in the same language", async ({ page }) => {
+  test("AC-15: the old /settings address redirects to /account in the same language", async ({ page }) => {
     await signInAsNewUser(page);
     for (const locale of ["en", "ru", "hu"]) {
       await page.goto(`/${locale}/settings`);
@@ -112,7 +112,7 @@ test.describe("spec 0025: sign out and the account link", () => {
     await expect(page).toHaveURL(/\/(ru|en|hu)\/account$/);
   });
 
-  test("AC-3: signing out from the account page ends the session for the dashboard and the account page", async ({ page }) => {
+  test("AC-16: signing out from the account page ends the session for the dashboard and the account page", async ({ page }) => {
     await signInAsNewUser(page);
     await page.getByRole("link", { name: "Account", exact: true }).click();
     await expect(page).toHaveURL(/\/en\/account$/);
@@ -127,7 +127,7 @@ test.describe("spec 0025: sign out and the account link", () => {
     }
   });
 
-  test("AC-4: the Sign out button works with JavaScript off", async ({ page, browser, baseURL }) => {
+  test("AC-17: the Sign out button works with JavaScript off", async ({ page, browser, baseURL }) => {
     await signInAsNewUser(page);
     const context = await browser.newContext({ baseURL, javaScriptEnabled: false, storageState: await page.context().storageState() });
     try {
@@ -142,7 +142,7 @@ test.describe("spec 0025: sign out and the account link", () => {
     }
   });
 
-  test("AC-3, AC-5: the link, the page and the button are translated, and signing out returns to the landing page of that language", async ({ page }) => {
+  test("AC-16, AC-18: the link, the page and the button are translated, and signing out returns to the landing page of that language", async ({ page }) => {
     for (const [locale, account, signOut] of [
       ["ru", "Аккаунт", "Выйти"],
       ["hu", "Fiók", "Kijelentkezés"],

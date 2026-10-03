@@ -3,7 +3,7 @@ import { expect, type Page } from "@playwright/test";
 
 // Signs in through the dummy login with this email; the account is created on first use (spec 0006 AC-3).
 // Posts to the route the form submits to instead of loading the landing page and filling in the form
-// (spec 0030 AC-1): the session cookies land in the page's browser context, and the 303 is not followed so
+// (spec 0006 AC-8): the session cookies land in the page's browser context, and the 303 is not followed so
 // the dashboard is rendered once, by the goto.
 export async function signInWithEmail(page: Page, email: string) {
   const response = await page.request.post("/auth/test-login", { form: { email, locale: "en" }, maxRedirects: 0 });
@@ -15,7 +15,7 @@ export async function signInWithEmail(page: Page, email: string) {
   await expect(page).toHaveURL(/\/en\/dashboard$/);
 }
 
-// The same sign-in through the page itself: landing page, email field, button (spec 0030 AC-2).
+// The same sign-in through the page itself: landing page, email field, button (spec 0006 AC-9).
 export async function signInThroughForm(page: Page, email: string) {
   await page.goto("/en");
   await page.getByLabel(/^Test login/).fill(email);

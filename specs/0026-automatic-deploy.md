@@ -8,11 +8,11 @@ Owner code: `.github/workflows/deploy.yml`, `scripts/migrate-production.mjs`, `s
 
 ## Goal
 
-Today a merged change reaches production only when someone runs the same manual sequence by hand: apply the new
-migrations through the Supabase MCP, check the generated types and the advisors, then `git push production main`
-(`CLAUDE.md`, spec 0020). It is easy to do in the wrong order or to forget, and a merged pull request that sits
-undeployed is invisible. After a merge to `main` with green CI, production should update itself: migrations
-first, then the code, then a check that the site answers, and a failure must stop the chain and say so.
+After a merge to `main` with green CI, production updates itself: migrations first, then the code, then a check
+that the site answers, and a failure stops the chain and says so. The manual sequence (apply the new migrations,
+check the generated types and the advisors, then `git push production main`, `CLAUDE.md`, spec 0020) stays as the
+fallback for a rollback or a broken workflow: done by hand it is easy to get in the wrong order or to forget, and a
+merged pull request that sits undeployed is invisible.
 
 ## Decisions
 
@@ -127,11 +127,6 @@ the Supabase advisors (they exist only in the Supabase MCP, so they stay a manua
 turning feature flags on (a flag is switched by hand on the server, spec 0023 and 0024); applying regenerated trail
 seeds (spec 0004) and clearing the dashboard cache afterwards, which stay manual (`deploy/README.md`).
 
-## Open questions
-
-None. (Settled on 2026-10-03: GitHub's runners reach the droplet's SSH port and the database; the first manual
-`dry_run` and the first real run both went through.)
-
 ## Notes
 
 - The current manual sequence, now automated: `apply_migration` for each new file, `npm run types:gen` and
@@ -145,9 +140,8 @@ None. (Settled on 2026-10-03: GitHub's runners reach the droplet's SSH port and 
 - `NEXT_PUBLIC_*` values are compiled into the build the server makes from its own `.env.local`; nothing the
   workflow knows reaches the build.
 - Migration file names are the record of what is applied, so a file must never be renamed after it was
-  merged (the one rename done before the first deploy of `0024_friends.sql` was possible only because nothing
-  had been applied yet).
-- **State on 2026-10-03**: the deploy key is installed on the droplet behind `deploy/ssh-gate.sh`, the secrets
+  merged.
+- **State**: the deploy key is installed on the droplet behind `deploy/ssh-gate.sh`, the secrets
   `DEPLOY_SSH_KEY` and `DEPLOY_KNOWN_HOSTS` are set (`SUPABASE_DB_URL` already was), and a first real run started by
   hand (`dry_run` off, `baseline` `0024_friends.sql`) recorded the 9 files as applied, pushed `c09dedb`, saw the
   server build and report `Deployed`, and passed the smoke test. What is still to be seen is a run started by a merge

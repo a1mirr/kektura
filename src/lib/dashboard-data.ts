@@ -3,11 +3,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 import { createPublicClient } from "@/lib/supabase/public";
 
-// Spec 0009: what the dashboard reads from the database, split by who may share it.
+// Spec 0002: what the dashboard reads from the database, split by who may share it.
 //  - Reference data (checkpoints, extra stamps) is the same for everybody and only changes when the
-//    seeds are regenerated: read through a cookie-less client and cached on the server (AC-1).
+//    seeds are regenerated: read through a cookie-less client and cached on the server (AC-15).
 //  - A user's own stamps are read per request through the cookie-based client, under RLS, and are
-//    never cached (AC-2).
+//    never cached (AC-16).
 
 export const REFERENCE_DATA_TAG = "reference-data"; // `revalidateTag(REFERENCE_DATA_TAG, "max")` expires it on demand
 export const REFERENCE_DATA_REVALIDATE_SECONDS = 60 * 60 * 24;

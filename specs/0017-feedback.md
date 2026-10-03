@@ -7,9 +7,8 @@ Owner code: `src/app/[locale]/(pages)/feedback/*`, `src/lib/feedback.ts`, `src/l
 ## Goal
 
 Visitors and users can tell the developer about a bug or an idea, and the developer actually hears
-about it. Spec 0014 added a form that writes a row into `user_feedback`, but nobody is told, so
-messages would sit unread. Deliver every message to the developer's Telegram, keep the database row as
-the source of truth, and keep the form safe to expose to anyone (it is public, in the footer).
+about it: every message is stored in `user_feedback` (the source of truth) and delivered to the developer's
+Telegram, and the form is safe to expose to anyone (it is public, in the footer).
 
 ## Why Telegram
 

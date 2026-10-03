@@ -5,8 +5,8 @@ Owner code: `src/app/[locale]/(pages)/links/page.tsx`, `src/content/links.ts`, `
 
 ## Goal
 
-Spec 0014's `/links` has a single link. Make it a short, curated, grouped list of places a Kéktúra
-hiker needs, each with a line saying what it is, in the user's language.
+`/links` is a short, curated, grouped list of places a Kéktúra hiker needs, each with a line saying what it is,
+in the user's language.
 
 ## Behaviour
 
@@ -19,7 +19,7 @@ hiker needs, each with a line saying what it is, in the user's language.
 - **AC-4**: Every link has a description in all three languages (the message-parity test), links are
   unique, and every group has at least one link. The list is data (`src/content/links.ts`), so
   adding a link is one entry plus three sentences.
-- **AC-5**: Only links that were checked are listed: each answered with HTTP 200 on 2026-10-02 and its
+- **AC-5**: Only links that were checked are listed: each answered with HTTP 200 when last checked (2026-10-03) and its
   page says what the description says. Today's list:
   - the trail: kektura.hu (official site), kektura.hu/okt-szakaszok (stages and GPX files),
     the MTSZ stage table (PDF), mtsz.org (the association behind it), Wikipedia (English);
@@ -45,4 +45,4 @@ sites being up); per-language link lists.
 | --- | --- |
 | AC-3 (https, unique), AC-4 | `src/content/links.test.ts`, `tests/messages.test.ts` |
 | AC-1, AC-2, AC-3 (new tab, rel) | `e2e/links.spec.ts` |
-| AC-5 | checked by hand on 2026-10-02 (status and page titles) |
+| AC-5 | checked by hand on 2026-10-03 (status of every link; page titles checked when the link was added) |

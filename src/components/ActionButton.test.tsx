@@ -30,8 +30,8 @@ async function click(button: HTMLElement) {
   });
 }
 
-describe("spec 0002 + 0009: stamp buttons", () => {
-  it("0009 AC-3: the button shows the new state at once, while the action runs", async () => {
+describe("spec 0002: stamp buttons", () => {
+  it("AC-13: the button shows the new state at once, while the action runs", async () => {
     let finish!: (r: ActionResult) => void;
     const button = renderButton(() => new Promise((resolve) => (finish = resolve)));
     expect(button.textContent).toBe("Add stamp");
@@ -43,7 +43,7 @@ describe("spec 0002 + 0009: stamp buttons", () => {
     await act(async () => finish({ ok: true }));
   });
 
-  it("0009 AC-3: a failed action flips the button back and shows the error", async () => {
+  it("AC-13: a failed action flips the button back and shows the error", async () => {
     let finish!: (r: ActionResult) => void;
     const button = renderButton(() => new Promise((resolve) => (finish = resolve)));
     await click(button);
@@ -53,7 +53,7 @@ describe("spec 0002 + 0009: stamp buttons", () => {
     expect(screen.getByRole("alert").textContent).toBe(messages.dashboard.actionFailed);
   });
 
-  it("0009 AC-3: an expired session flips the button back and refreshes the page", async () => {
+  it("AC-13: an expired session flips the button back and refreshes the page", async () => {
     const button = renderButton(async () => ({ ok: false, reason: "unauthorized" }));
     await click(button);
     expect(button.textContent).toBe("Add stamp");

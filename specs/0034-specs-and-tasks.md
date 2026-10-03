@@ -60,7 +60,9 @@ once it is made, and scatters one area's behaviour over several files.
 
 - **AC-9**: `tests/specs.test.ts` checks that `specs/README.md` and `tasks/README.md` list every spec and task
   once with the status written in the file, that statuses are valid for the kind, that no number is used twice
-  across both folders, and that both folders are written in English.
+  across both folders, and that both folders are written in English. It also checks that a test title citing an AC
+  (under `describe("spec NNNN …")` or as `NNNN AC-n`) cites one that exists, and that the repository files named
+  in backticks by a `Done` or `Accepted` spec exist.
 - **AC-10**: The Stop hook watches `tasks/` as well as `specs/`, and once the checks pass it asks, once per turn
   end, when app code changed and no spec did: has behaviour changed (then the spec and its tests are updated), or
   not (then say so in one line).
@@ -82,7 +84,7 @@ in the repository so the reviewer and the hook see them.
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-9 | `tests/specs.test.ts` (file names, indexes, statuses, unique numbers, English) |
+| AC-1, AC-9 | `tests/specs.test.ts` (file names, indexes, statuses, unique numbers, English, test titles that cite an AC that does not exist, files named by a spec that do not exist) |
 | AC-2, AC-3, AC-4, AC-5, AC-6, AC-7 | `tests/specs.test.ts` (the rules are written in `specs/README.md`, `tasks/README.md`, `CLAUDE.md`; the templates have the sections) and `tests/review-process.test.ts` |
 | AC-8 | `tests/review-process.test.ts` (reviewer brief, `CLAUDE.md`, pull request template) |
 | AC-10 | `tests/specs.test.ts` (the hook source watches `tasks/` and nudges on a missing spec change) and manual: change a file under `src/` only, finish a turn, and the hook asks once; change a file under `tasks/` and the hook runs the checks |

@@ -19,5 +19,13 @@ A finished task stays as history and is not updated when behaviour changes later
 
 | Task | What | Status |
 | --- | --- | --- |
+| [0009](0009-fast-stamping.md) | Fast stamping: cached reference data, instant buttons (now spec 0002) | Done |
+| [0010](0010-typed-translations.md) | Typed translation keys (now spec 0005) | Done |
+| [0011](0011-trailmap-split.md) | Split TrailMap, map E2E safety net (now spec 0003) | Done |
+| [0013](0013-extra-stamps-stages.md) | Extra stamps linked to stages (now spec 0001) | Done |
+| [0025](0025-account-page.md) | Account page: sign out moves in, "Settings" becomes "Account" (now spec 0014) | Done |
+| [0030](0030-faster-e2e.md) | Faster end-to-end tests (now specs 0006 and 0007) | Done |
+| [0032](0032-iso-date-input.md) | Stamp dates as yyyy-mm-dd (now spec 0016) | Done |
 | [0035](0035-specs-and-tasks.md) | Introduce tasks next to specs | Done |
-| [0036](0036-reshape-specs.md) | Turn the existing specs into area specs and tasks | Open |
+| [0036](0036-reshape-specs.md) | Turn the existing specs into area specs and tasks | In progress |
+| [0037](0037-regenerate-seeds.md) | Regenerate the seeds with the current generator | Open |

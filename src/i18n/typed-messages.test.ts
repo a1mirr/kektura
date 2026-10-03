@@ -51,14 +51,14 @@ function typedLocale() {
   return [supported, unsupported];
 }
 
-describe("spec 0010: typed translations", () => {
-  it("AC-1: unknown keys and namespaces fail the typecheck", () => {
+describe("spec 0005: typed translations", () => {
+  it("AC-7: unknown keys and namespaces fail the typecheck", () => {
     // The assertions are the @ts-expect-error comments above: tsc fails if one becomes unnecessary.
     expect(typeof useTypedHooks).toBe("function");
     expect(typeof typedServerApi).toBe("function");
   });
 
-  it("AC-2: the locale type is the routing locales", () => {
+  it("AC-8: the locale type is the routing locales", () => {
     const locales: Locale[] = [...routing.locales];
     expect(locales).toEqual(["ru", "en", "hu"]);
     expect(typeof typedLocale).toBe("function");
