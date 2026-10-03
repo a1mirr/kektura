@@ -1,7 +1,8 @@
 # 0001: Progress: places, walked stretches, stats, stages
 
 Status: Done
-Owner code: `src/lib/progress.ts`, `src/app/[locale]/dashboard/page.tsx`, `src/components/StageSection.tsx`
+Owner code: `src/lib/progress.ts`, `src/app/[locale]/dashboard/page.tsx`, `src/components/StageSection.tsx`,
+`src/components/StampDescriptions.tsx`
 
 ## Goal
 
@@ -41,6 +42,12 @@ stretches count as walked, how many km that is, and the per-stage view of the li
 - **AC-9**: A stage event opens/closes one stage (a map click on a stamp in a collapsed stage) or all
   stages (expand all / collapse all).
 
+### Descriptions
+
+- **AC-10**: Every place row on the dashboard and on a friend's page (spec 0024), and every extra stamp row (spec 0013),
+  shows the official description of each of its stamps in full: long text wraps onto further lines, it is
+  never cut off with an ellipsis, and it never sticks out of its row (also at 375 px).
+
 ## Out of scope
 
 Elevation-based stats; walked time; stamps outside the official 161 (see extra stamps in 0002).
@@ -53,3 +60,4 @@ Elevation-based stats; walked time; stamps outside the official 161 (see extra s
 | AC-3, AC-4, AC-7 on the real dashboard | `e2e/stamping.spec.ts` |
 | AC-5 (localized labels) | manual: switch locale on the dashboard, check month labels and tooltip |
 | AC-8, AC-9 | `src/components/StageSection.test.tsx` |
+| AC-10 | `src/components/StampDescriptions.test.tsx` (every description rendered, no truncation classes), `e2e/stamping.spec.ts` (nothing clipped or sticking out of its row at 375 px) |

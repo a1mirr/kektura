@@ -41,4 +41,30 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
     await expect(stat(page, "Stamps")).toHaveText("1 / 161");
     await expect(place(page, "OKTPH_09").getByRole("button", { name: "Remove" })).toBeVisible(); // Sárvár stays
   });
+
+  test("0001 AC-10: stamp descriptions wrap in full: nothing is clipped or sticks out of its row at 375 px", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await signInAsNewUser(page);
+    await expandAllStages(page);
+
+    const rows = await page.locator("li[id^=place-], #extra-stamps li").evaluateAll((lis) =>
+      lis.flatMap((li) =>
+        [...li.querySelectorAll<HTMLElement>("div.text-xs")].map((d) => {
+          const s = getComputedStyle(d);
+          return {
+            id: li.id,
+            clipped:
+              s.textOverflow === "ellipsis" ||
+              s.whiteSpace === "nowrap" ||
+              d.scrollWidth > d.clientWidth ||
+              d.getBoundingClientRect().right > li.getBoundingClientRect().right,
+          };
+        }),
+      ),
+    );
+    expect(rows.length).toBeGreaterThan(200); // 161 places (220 stamps) + 72 extra stamps
+    expect(rows.filter((r) => r.clipped).map((r) => r.id)).toEqual([]);
+  });
 });

@@ -8,6 +8,7 @@ import { friendsOn } from '@/lib/friends-flag';
 import { Link, redirect } from '@/i18n/navigation';
 import StageControls from '@/components/StageControls';
 import StageSection from '@/components/StageSection';
+import StampDescriptions from '@/components/StampDescriptions';
 
 export default async function FriendPage({
   params,
@@ -92,11 +93,7 @@ export default async function FriendPage({
                         {p.name}
                         <span className="ml-2 text-sm text-stone-500">{t("kmValue", { km: format.number(p.km) })}</span>
                       </div>
-                      {p.variants.map((v) => (
-                        <div key={v.id} className="truncate text-xs text-stone-500">
-                          {v.description}
-                        </div>
-                      ))}
+                      <StampDescriptions descriptions={p.variants.map((v) => v.description)} />
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
                       <div className="flex h-10 w-10 items-center justify-center">
