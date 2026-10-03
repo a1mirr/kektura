@@ -1,6 +1,6 @@
 # 0030: Faster end-to-end tests
 
-Status: Accepted
+Status: Done
 Owner code: `e2e/helpers.ts`, `e2e/auth.spec.ts`, `.github/workflows/ci.yml`
 
 ## Goal
@@ -46,8 +46,16 @@ else is sent" (`e2e/stamp-dates.spec.ts`). Caching the Supabase Docker images.
   render the dashboard a second time).
 - `e2e/auth.spec.ts` already posts to the route for the invalid-email case, which shows the pattern works.
 
-- Status stays `Accepted` until a CI run shows the whole suite green with the new sign-in and the caches
-  restoring (the author had no Docker to run `npm run e2e`); then it becomes `Done`.
+- Measured in CI, one run per row (the E2E job, single worker on the 2-core runner):
+
+  | | before (`main`, run 56) | after (run 37130160394) |
+  | --- | --- | --- |
+  | Next build before the tests | about 27 s | about 13 s (cache hit) |
+  | Playwright browser install | 30 s | 17 s (cache hit) |
+  | Test phase | 143 s | about 120 s |
+  | Whole job | 4 m 56 s | 4 m 00 s |
+
+  The sign-in change alone is within noise (about 6 s over 67 tests); the caches are most of the gain.
 
 ## Coverage
 
