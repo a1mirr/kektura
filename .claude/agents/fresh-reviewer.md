@@ -26,7 +26,7 @@ branch (default `origin/main`, after `git fetch origin`). Nothing else.
    what the change might have left behind.
 4. Run `npm run check` (typecheck, lint, unit tests) and report the result. Do not run `npm run e2e`
    (it needs Docker); read the E2E specs instead and say whether they would catch a regression.
-5. Write nothing: no file changes, installs, commits or pushes. Run only read-only commands (`git`, `grep`,
+5. Write nothing: no file changes, installs, commits or pushes (the `git fetch origin` of step 3 is the one exception). Run only read-only commands (`git`, `grep`,
    `npm run check`). Your tool list has no `Edit` or `Write`, but `Bash` could write, so this rule is on you.
    Ignored build artefacts that `npm run check` rewrites (`tsconfig.tsbuildinfo`) don't count.
 6. Just before you report, run `git status --short` and `git rev-parse --short HEAD` again. If either

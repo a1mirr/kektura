@@ -34,10 +34,11 @@ on GitHub, for everybody who works in a clone of this repository, Claude Code in
   `.github/pull_request_template.md`, which `gh` doesn't apply to `--body-file`. Merging happens only when the
   user asked for it in chat, CI is green and the fresh-context review (spec 0022) is
   done; never `--admin`. After the merge the pull request's branch is deleted, remote and local, once it is
-  verified (after a `git fetch`) to be contained in `main`, and never with `-D`; only branches of pull requests
-  that were merged are deleted; the remote branch always goes, but a local branch another session has checked out
-  is left to that session (and the user is told). Nothing is deployed unless asked. It also gives where `gh` is installed (per user, on the user's
-  PATH).
+  verified (after a `git fetch`) to be contained in `main`, and never with `-D`; an open pull request based on
+  the branch is retargeted to `main` first. Only branches of pull requests the author merged, or was asked to clean
+  up, are deleted; the remote branch always goes, but a local branch another session has checked out is left to
+  that session (and the user is told). Nothing is deployed unless asked. It also gives where `gh` is installed
+  (per user, on the user's PATH).
 
 ## Out of scope
 
