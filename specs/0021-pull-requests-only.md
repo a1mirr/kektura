@@ -16,7 +16,8 @@ on GitHub, for everybody who works in a clone of this repository, Claude Code in
   `git@github.com:…`, `ssh://git@github.com/…`) is refused by the `pre-push` hook before anything is sent,
   whichever way it is spelled (`git push origin main`, `HEAD:main`, `+main`, `:main`). The message says to
   push a topic branch and open a pull request instead.
-- **AC-2**: Pushing any other branch, or a tag, to GitHub is not affected.
+- **AC-2**: Pushing any other branch, or a tag, to GitHub is not affected; deleting a topic branch is not either
+  (that is how a merged branch is cleaned up).
 - **AC-3**: Other remotes are not affected: the deploy push (`git push production main`) works as before.
 - **AC-4**: The hook is versioned in `.githooks/` (a small `pre-push` shell script that runs `guard.mjs`).
   `npm run hooks:install` points a clone at it (`git config core.hooksPath .githooks`); that is done once per
@@ -33,8 +34,8 @@ on GitHub, for everybody who works in a clone of this repository, Claude Code in
   `.github/pull_request_template.md`, which `gh` doesn't apply to `--body-file`. Merging happens only when the
   user asked for it in chat, CI is green and the fresh-context review (spec 0022) is
   done; never `--admin`. After the merge the pull request's branch is deleted, remote and local, once it is
-  verified to be contained in `main`; only branches of pull requests that were merged are deleted, never another
-  session's. Nothing is deployed unless asked. It also gives where `gh` is installed (per user, on the user's
+  verified (after a `git fetch`) to be contained in `main`, and never with `-D`; only branches of pull requests
+  that were merged are deleted, and a branch another session has checked out is left to it. Nothing is deployed unless asked. It also gives where `gh` is installed (per user, on the user's
   PATH).
 
 ## Out of scope

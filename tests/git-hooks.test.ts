@@ -39,6 +39,7 @@ describe("spec 0021: pull requests only", () => {
       ["a branch whose name only contains main", line("refs/heads/main-menu", "refs/heads/main-menu")],
       ["a branch under a main/ prefix", line("refs/heads/main/fix", "refs/heads/main/fix")],
       ["a tag", line("refs/tags/v1", "refs/tags/v1")],
+      ["deleting a topic branch (the cleanup after a merge)", line("(delete)", "refs/heads/topic", ZERO, SHA)],
       ["a local main pushed to a topic branch", line("refs/heads/main", "refs/heads/topic")],
       ["nothing at all", ""],
     ])("%s", (_name, stdin) => {
@@ -125,5 +126,10 @@ describe("spec 0021: pull requests only", () => {
     // No control characters other than line breaks and tabs (an earlier edit turned `\b` into a backspace).
     const control = [...claude].filter((ch) => ch.charCodeAt(0) < 32 && !["\n", "\r", "\t"].includes(ch));
     expect(control).toEqual([]);
+    expect(claude).not.toMatch(/\r(?!\n)/); // a lone carriage return: this is what `\r` in a path turned into
+    expect(claude).toContain(String.raw`%LOCALAPPDATA%\Docker\run`); // the same damage once hit this gotcha
+    expect(claude).toContain("Spec 0021 owns these pull request rules");
+    expect(claude).toContain("`git fetch origin`, check it is in `main`");
+    expect(claude).toContain("never `-D`");
   });
 });

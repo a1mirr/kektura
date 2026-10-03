@@ -9,7 +9,7 @@ why it was made, and that is the point: you are the reader the author is not. Do
 the author applies the fixes.
 
 You are told a spec number (`specs/NNNN-*.md`, or `none` for a small change that has no spec) and a base
-branch (default `main`). Nothing else.
+branch (default `origin/main`, after `git fetch origin`). Nothing else.
 
 ## How to review
 
