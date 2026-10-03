@@ -11,7 +11,8 @@ import { telegramConfig } from "@/lib/telegram";
 import { testServerEnv } from "../scripts/lib/test-server-env.mjs";
 
 const local = { API_URL: "http://127.0.0.1:54321", ANON_KEY: "anon" };
-const nextEnvModule = createRequire(import.meta.url).resolve("@next/env");
+// `@next/env` is Next's own dependency, so it is found from Next's folder, not from this project's.
+const nextEnvModule = createRequire(createRequire(import.meta.url).resolve("next/package.json")).resolve("@next/env");
 
 let projectDir: string;
 beforeAll(() => {
@@ -48,7 +49,15 @@ describe("spec 0006: test server environment", () => {
     expect(telegramConfig(loadedByNext(testServerEnv(shell, local, false)))).toBeNull();
   });
 
-  it("AC-2, AC-4, AC-6: still points at the local Supabase, with the dummy login and its own build folder", () => {
+  // The script itself needs Docker (`supabase status`), so it can't run here: this keeps it from going back
+  // to an inline environment that skips the blanking.
+  it("AC-7: scripts/test-env.mjs builds the server's environment with testServerEnv and starts the server with it", () => {
+    const script = fs.readFileSync(new URL("../scripts/test-env.mjs", import.meta.url), "utf8");
+    expect(script).toMatch(/\benv = testServerEnv\(process\.env, local, e2e\)/);
+    expect(script).toMatch(/\bspawn\(.*\benv\b.*\);/);
+  });
+
+  it("AC-7: the rest of the test server's environment is unchanged: local Supabase, dummy login, own build folder", () => {
     expect(testServerEnv({ KEEP: "me" }, local, true)).toMatchObject({
       KEEP: "me",
       NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321",
