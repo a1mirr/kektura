@@ -15,7 +15,7 @@ const taskFiles = files(tasksDir);
 
 const indexOf = (readme: string) =>
   new Map(
-    [...readme.matchAll(/^\| \[(\d{4})\]\(([^)]+)\) \|.*\| (\w+) \|\r?$/gm)].map((m) => [m[2], { number: m[1], status: m[3] }]),
+    [...readme.matchAll(/^\| \[(\d{4})\]\(([^)]+)\) \|.*\| ([^|]+?) \|\r?$/gm)].map((m) => [m[2], { number: m[1], status: m[3] }]),
   );
 
 describe("spec 0034: specs/README.md and tasks/README.md", () => {
@@ -37,6 +37,14 @@ describe("spec 0034: specs/README.md and tasks/README.md", () => {
         expect(indexed.get(name)?.number, name).toBe(name.slice(0, 4));
       }
     });
+  });
+
+  it("AC-1: every file in specs/ and tasks/ is NNNN-slug.md, README.md or _template.md", () => {
+    for (const dir of [specsDir, tasksDir]) {
+      for (const name of fs.readdirSync(dir)) {
+        expect(name, `${dir.pathname}${name}`).toMatch(/^(\d{4}-[a-z0-9-]+\.md|README\.md|_template\.md)$/);
+      }
+    }
   });
 
   it("AC-1: no number is used twice across specs/ and tasks/", () => {

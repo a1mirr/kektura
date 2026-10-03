@@ -3,7 +3,7 @@
 // When Claude is about to finish and source files differ from the last green run, run typecheck,
 // lint and unit tests in parallel (E2E needs Docker and is run by hand: `npm run e2e`). On failure exit 2: stderr goes back to Claude, which keeps working.
 // After MAX_ATTEMPTS failed attempts in a row it lets the turn end and tells the user instead of
-// looping. Once checks pass, app code changed without any spec or test change gets one nudge.
+// looping. Once checks pass, app code changed without any spec change gets one nudge (specs/0034 AC-10).
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";

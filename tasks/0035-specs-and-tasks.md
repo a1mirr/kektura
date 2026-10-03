@@ -26,5 +26,8 @@ hook to match, and add the "make the specs true" step.
 
 ## Notes
 
-- The existing specs keep their numbers and files: tests, comments, migrations and the deploy check cite them.
-  Task 0036 reshapes them.
+- Why: until now every piece of work became a numbered spec. Most described a change ("spec 0014 added X, make it
+  Y") and one area's behaviour was scattered over several of them (the account page is 0014 plus 0025; stamping is
+  0002, 0009, 0013 and 0016).
+- The existing specs keep their numbers and files for now: tests, comments, migrations and the deploy check cite
+  them. Task 0036 reshapes them in steps.

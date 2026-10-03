@@ -7,12 +7,10 @@ Owner code: `specs/README.md`, `specs/_template.md`, `tasks/README.md`, `tasks/_
 
 ## Goal
 
-Until now every piece of work, a feature as much as a CI tweak or a rename, became a numbered spec. A spec is
-supposed to be the contract of how the product behaves, but most of them describe a change ("spec 0014 added X,
-make it Y") and stop being useful once it is made, while the behaviour of one area ended up scattered over
-several of them (the account page is 0014 plus 0025; stamping is 0002, 0009, 0013 and 0016). Reading specs no
-longer says what the product does today. Two kinds of file, with two lifecycles, fix that: a **spec** says what
-is true now and is kept true; a **task** says what is being done and stays as history.
+Reading the specs should say what the product does today, and the record of the work should not get in the way.
+Two kinds of file with two lifecycles do that: a **spec** says what is true now and is kept true; a **task** says
+what is being done and stays as history. Work that is written as a spec describes a change, stops being useful
+once it is made, and scatters one area's behaviour over several files.
 
 ## Behaviour
 
@@ -69,24 +67,23 @@ is true now and is kept true; a **task** says what is being done and stays as hi
 
 ## Out of scope
 
-Enforcing that a spec is true: only a person or the reviewer can tell. Folding the existing task-shaped specs
-into area specs (task 0036). Moving tasks to GitHub issues: they stay in the repository so the reviewer and the
-hook see them.
+Enforcing that a spec is true: only a person or the reviewer can tell. Moving tasks to GitHub issues: they stay
+in the repository so the reviewer and the hook see them.
 
 ## Notes
 
 - The test for the split: "will this sentence still be true in a year if nobody touches it?" Yes: a spec. No: a
   task.
-- Existing specs keep their numbers and files for now, because tests, code comments, migrations and the deploy
-  check cite them; task 0036 reshapes them in steps.
-- Spec 0022 (the fresh-context review) owns the reviewer; its ACs name what the reviewer is told, and were
-  reworded to match AC-8.
+- Spec 0022 (the fresh-context review) owns the reviewer; its ACs name what the reviewer is told, which AC-8
+  restates.
+- Numbers are stable ids: tests, code comments and migrations cite them, which is why a spec that is absorbed
+  into another stays as a short pointer instead of disappearing.
 
 ## Coverage
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-9 | `tests/specs.test.ts` (indexes, statuses, unique numbers, English) |
+| AC-1, AC-9 | `tests/specs.test.ts` (file names, indexes, statuses, unique numbers, English) |
 | AC-2, AC-3, AC-4, AC-5, AC-6, AC-7 | `tests/specs.test.ts` (the rules are written in `specs/README.md`, `tasks/README.md`, `CLAUDE.md`; the templates have the sections) and `tests/review-process.test.ts` |
 | AC-8 | `tests/review-process.test.ts` (reviewer brief, `CLAUDE.md`, pull request template) |
 | AC-10 | manual: change a file under `src/` only, finish a turn, and the hook asks once; change a file under `tasks/` and the hook runs the checks |
