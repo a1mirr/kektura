@@ -1,6 +1,6 @@
 # 0038: Retry the GitHub API calls of the deploy workflow
 
-Status: In progress
+Status: Done
 Specs: [0026](../specs/0026-automatic-deploy.md) AC-1, AC-2, AC-3 (relied on, unchanged), AC-9 (relied on, unchanged)
 
 ## Goal
@@ -20,7 +20,7 @@ pause and fail only when every attempt fails, so a real failure still fails the 
       from transient failures, fails after the last attempt with that attempt's exit code and prints only the
       successful attempt's output; and checks that no `gh` call in the workflow is made without it
 - [x] `npm run check` is green
-- [ ] Fresh-context review done (spec 0022), pull request merged
+- [x] Fresh-context review done (spec 0022), pull request merged
 - [x] The specs listed above mirror the code as built (spec 0034 AC-6)
 
 ## Spec changes
@@ -34,3 +34,6 @@ None. Spec 0026 says what is deployed and when (AC-1 to AC-3) and that a failed 
   `scripts/deploy-plan.mjs`) and the database have their own failure handling and are not touched.
 - The helper retries any failure of the call, not only 5xx: a permanent error (a bad token, say) costs 30 seconds
   more and then fails the step as before.
+- The fresh review asked whether an AC in 0026 should state the retry. It is left out on purpose: it is how the
+  workflow reads GitHub, not something a user or operator relies on beyond AC-9, which still holds. The tests
+  therefore cite this task, not an AC.

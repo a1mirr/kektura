@@ -84,7 +84,7 @@ describe("spec 0026: the deploy workflow", () => {
     });
   });
 
-  describe("AC-1, AC-2, AC-3: the reads of GitHub's API retry before they fail the deploy", () => {
+  describe("task 0038: the reads of GitHub's API retry before they fail the deploy (no AC states this; AC-9 still holds: a real failure fails the run)", () => {
     // The helper is written to a file by its own step; this is that file, as the shell will see it.
     const helper = () => {
       const text = step("Define the retry helper for GitHub API calls");
