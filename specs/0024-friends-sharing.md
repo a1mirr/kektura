@@ -127,7 +127,7 @@ route plan.
 | AC-8 | `src/lib/friends.test.ts` (equal to `progress.ts`), `e2e/friends.spec.ts` (same numbers as the dashboard) |
 | AC-9, AC-10 | `tests/friends-migration.test.ts`, `e2e/friends.spec.ts` |
 | AC-11 | `e2e/friends.spec.ts` (delete the account, the friend's list is empty) |
-| AC-12 | `tests/friends-migration.test.ts` (forged friendship, direct writes, token column, anon); Supabase advisors after applying |
+| AC-12 | `tests/friends-migration.test.ts` (forged friendship, direct writes, token column, anon, the trigger function); Supabase advisors after applying |
 | AC-13, AC-14 | `src/app/[locale]/(pages)/friends/actions.test.ts` (an action that fails is shown on the page: `e2e/friends.spec.ts`) |
 | AC-15 | `src/lib/friends.test.ts` (flag), `actions.test.ts` (`disabled`); manual: build once without `FF_FRIENDS`, start with `FF_FRIENDS=1` (and the other way round): the dashboard link, `/friends`, `/friends/invite/<token>` and the About paragraph follow the start-up value, not the build (the E2E server runs with the flag on) |
 | AC-16 | `tests/messages.test.ts`, `e2e/friends.spec.ts` (About paragraph); the changelog entry waits for the flag |
