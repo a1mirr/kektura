@@ -25,7 +25,7 @@ Spec first: every task gets a spec with numbered acceptance criteria in `specs/`
   production into a workflow artifact; it needs the `SUPABASE_DB_URL` repository secret.
 - `.github/workflows/deploy.yml` (spec 0026) applies the missing migrations, deploys and smoke-tests production
   after a merge to `main` whose CI passed; it needs the `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS` and `SUPABASE_DB_URL`
-  repository secrets (setup in `deploy/README.md`) and does nothing until they exist.
+  repository secrets (setup in `deploy/README.md`, done on 2026-10-03) and does nothing without them.
 
 ## Test server
 A second environment with its own local database and a dummy login (no Google account needed).
