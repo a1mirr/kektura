@@ -53,4 +53,19 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
     expect(measured).toBeGreaterThan(200); // 161 places (220 stamps) + 72 extra stamps
     expect(clipped).toEqual([]);
   });
+
+  test("0032 AC-1: stamp descriptions follow the page language, the Hungarian original stays in hu", async ({ page }) => {
+    await signInAsNewUser(page);
+    const expected = {
+      // a place (Piliscsaba) and the first extra stamp (Velem, 3.8 km)
+      en: ["Piliscsaba - At the junction of Wesselényi, Árpád vezér and Kálmán király streets, on an electricity pole. (OKTPH_66)", "At the Szent Vid chapel."],
+      ru: ["Piliscsaba - На пересечении улиц Wesselényi, Árpád vezér и Kálmán király, на электрическом столбе. (OKTPH_66)", "У часовни Szent Vid."],
+      hu: ["Piliscsaba - A Wesselényi-, Árpád vezér- és Kálmán király utca találkozásánál, egy villanyoszlopon. (OKTPH_66)", "A Szent Vid-kápolnánál."],
+    };
+    for (const [locale, [placeText, extraText]] of Object.entries(expected)) {
+      await page.goto(`/${locale}/dashboard`);
+      await expect(place(page, "OKTPH_66")).toContainText(placeText);
+      await expect(page.locator("#extra-stamps li").first()).toContainText(extraText);
+    }
+  });
 });

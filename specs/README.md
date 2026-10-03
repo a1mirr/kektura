@@ -82,3 +82,4 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0028](0028-landing-screenshots.md) | Screenshots on the landing page | Draft |
 | [0029](0029-site-logo-link.md) | A logo that leads home, on every page | Draft |
 | [0031](0031-iso-date-input.md) | Stamp dates typed and shown as yyyy-mm-dd, with a calendar button | Done |
+| [0032](0032-translated-stamp-descriptions.md) | Stamp descriptions translated into ru and en | Done |

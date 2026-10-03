@@ -188,7 +188,7 @@ test.describe("spec 0024: friends", () => {
     expect(await overflow(bobPage), "invite page").toBeLessThanOrEqual(0);
   });
 
-  test("0001 AC-10: a friend's page shows the stamp descriptions in full at 375 px", async ({ browser }) => {
+  test("0001 AC-10 + 0032 AC-1: a friend's page shows the stamp descriptions in full at 375 px, in the page's language", async ({ browser }) => {
     const { anaPage, bobId } = await requestedFriendship(browser);
     await approve(anaPage);
     await anaPage.setViewportSize({ width: 375, height: 812 });
@@ -197,6 +197,9 @@ test.describe("spec 0024: friends", () => {
     const { measured, clipped } = await measureDescriptions(anaPage);
     expect(measured).toBeGreaterThan(200); // every stamp of the 161 places, stamped or not
     expect(clipped).toEqual([]);
+
+    await anaPage.goto(`/ru/friends/${bobId}`);
+    await expect(anaPage.locator("#place-OKTPH_66")).toContainText("На пересечении улиц Wesselényi");
   });
 
   test("AC-14: an action that fails says so on the page instead of doing nothing", async ({ page }) => {

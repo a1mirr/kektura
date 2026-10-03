@@ -9,6 +9,7 @@ import { Link, redirect } from '@/i18n/navigation';
 import StageControls from '@/components/StageControls';
 import StageSection from '@/components/StageSection';
 import StampDescriptions from '@/components/StampDescriptions';
+import { localizedDescription } from '@/lib/stamp-description';
 
 export default async function FriendPage({
   params,
@@ -93,7 +94,7 @@ export default async function FriendPage({
                         {p.name}
                         <span className="ml-2 text-sm text-stone-500">{t("kmValue", { km: format.number(p.km) })}</span>
                       </div>
-                      <StampDescriptions descriptions={p.variants.map((v) => v.description)} />
+                      <StampDescriptions descriptions={p.variants.map((v) => localizedDescription(v.code, v.description, locale))} />
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
                       <div className="flex h-10 w-10 items-center justify-center">
