@@ -43,6 +43,14 @@ export const CHANGELOG: ChangelogEntry[] = [
           hu: "A bélyegzés dátumát yyyy-mm-dd (év-hónap-nap) formában írod és látod, minden böngészőben egyformán, mellette naptár gombbal.",
         },
       },
+      {
+        kind: "fixed",
+        text: {
+          en: "The progress page no longer scrolls sideways on a phone: the buttons and the date of a stamp move to their own line when they don't fit next to the name.",
+          ru: "Страница прогресса больше не прокручивается вбок на телефоне: кнопки и дата печати переходят на отдельную строку, если не помещаются рядом с названием.",
+          hu: "A haladás oldal telefonon már nem görgethető oldalra: a gombok és a bélyegző dátuma külön sorba kerülnek, ha nem férnek el a név mellett.",
+        },
+      },
     ],
   },
   {

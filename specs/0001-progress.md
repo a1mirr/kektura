@@ -48,6 +48,15 @@ stretches count as walked, how many km that is, and the per-stage view of the li
   shows the official description of each of its stamps (in the page's language, spec 0033) in full: long text wraps onto further lines, it is
   never cut off with an ellipsis, and it never sticks out of its row (also at 375 px).
 
+### Layout
+
+- **AC-11**: The dashboard never scrolls sideways on a phone: at 375 px wide, in every language, the page is
+  no wider than the viewport (`scrollWidth <= innerWidth`) with every stage collapsed and with every stage
+  expanded, also when places and extra stamps are stamped (their date fields add controls to the row). Where a
+  row's controls (show on map, date, stamp / remove) or a stage header's actions don't fit beside the text,
+  they wrap onto a further line (by design under the text, right-aligned: checked by eye) instead of widening the
+  page.
+
 ## Out of scope
 
 Elevation-based stats; walked time; stamps outside the official 161 (see extra stamps in 0002).
@@ -61,3 +70,5 @@ Elevation-based stats; walked time; stamps outside the official 161 (see extra s
 | AC-5 (localized labels) | manual: switch locale on the dashboard, check month labels and tooltip |
 | AC-8, AC-9 | `src/components/StageSection.test.tsx` |
 | AC-10 | `src/components/StampDescriptions.test.tsx` (every description rendered, no truncation classes), `e2e/stamping.spec.ts` (dashboard) and `e2e/friends.spec.ts` (a friend's page): nothing clipped or sticking out of its row at 375 px |
+| AC-11 | `e2e/stamping.spec.ts` (375 px in en, hu and ru: no sideways scroll with every stage collapsed, expanded, and with a stamped place and extra stamp) |
+| AC-11 (own line, right-aligned) | manual: at 375 px stamp a place on the dashboard; the date, calendar button and Remove sit on their own right-aligned line under the text |

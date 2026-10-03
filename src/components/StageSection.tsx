@@ -64,12 +64,12 @@ export default function StageSection({
 
   return (
     <section id={`stage-${stage}`} className="scroll-mt-24 rounded-lg bg-white shadow-sm">
-      <div className="flex items-center gap-2 px-4 py-3">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 px-4 py-3">
         <button
           type="button"
           aria-expanded={open}
           onClick={() => apply(!open)}
-          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+          className="flex min-w-0 flex-1 basis-48 items-center gap-3 text-left"
         >
           <span
             aria-hidden
