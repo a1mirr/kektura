@@ -1,7 +1,7 @@
 # 0035: Introduce tasks next to specs
 
 Status: Done
-Specs: [0034](../specs/0034-specs-and-tasks.md) (new, all ACs), [0022](../specs/0022-fresh-context-review.md) AC-1, AC-2, AC-4 (reworded), [0026](../specs/0026-automatic-deploy.md) AC-6 (migrations are named after the task)
+Specs: [0034](../specs/0034-specs-and-tasks.md) (new, all ACs), [0022](../specs/0022-fresh-context-review.md) AC-1, AC-2, AC-3, AC-4 and Notes (reworded), [0026](../specs/0026-automatic-deploy.md) AC-6 (migrations are named after the task)
 
 ## Goal
 
@@ -20,8 +20,10 @@ hook to match, and add the "make the specs true" step.
 ## Spec changes
 
 - 0034 added.
-- 0022 AC-1 and AC-4: the reviewer is told a task number (or a spec number, or `none`), and the pull request
-  template asks for the task. AC-2: the workflow in `specs/README.md` still ends with the review.
+- 0022 AC-1: the reviewer is told a task number (or a spec number, or `none`). AC-2: the review comes after the
+  specs are made true. AC-3: the reviewer starts from 0034, the task and its specs, and checks the specs against
+  the code in both directions. AC-4: the pull request template asks whether the touched specs mirror the code.
+  Notes: the author passes the task number.
 - 0026 AC-6: migrations are named after the task that adds them, not after a spec.
 
 ## Notes

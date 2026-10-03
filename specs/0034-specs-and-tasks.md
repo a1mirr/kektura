@@ -3,7 +3,7 @@
 Status: Done
 Owner code: `specs/README.md`, `specs/_template.md`, `tasks/README.md`, `tasks/_template.md`, `CLAUDE.md` (Workflow),
 `.claude/agents/fresh-reviewer.md`, `.claude/hooks/stop-check.mjs`, `.github/pull_request_template.md`,
-`tests/specs.test.ts`
+`tests/specs.test.ts`, `tests/review-process.test.ts`
 
 ## Goal
 
@@ -76,8 +76,7 @@ in the repository so the reviewer and the hook see them.
   task.
 - Spec 0022 (the fresh-context review) owns the reviewer; its ACs name what the reviewer is told, which AC-8
   restates.
-- Numbers are stable ids: tests, code comments and migrations cite them, which is why a spec that is absorbed
-  into another stays as a short pointer instead of disappearing.
+- Numbers are stable ids: tests, code comments and migrations cite them.
 
 ## Coverage
 
@@ -86,4 +85,4 @@ in the repository so the reviewer and the hook see them.
 | AC-1, AC-9 | `tests/specs.test.ts` (file names, indexes, statuses, unique numbers, English) |
 | AC-2, AC-3, AC-4, AC-5, AC-6, AC-7 | `tests/specs.test.ts` (the rules are written in `specs/README.md`, `tasks/README.md`, `CLAUDE.md`; the templates have the sections) and `tests/review-process.test.ts` |
 | AC-8 | `tests/review-process.test.ts` (reviewer brief, `CLAUDE.md`, pull request template) |
-| AC-10 | manual: change a file under `src/` only, finish a turn, and the hook asks once; change a file under `tasks/` and the hook runs the checks |
+| AC-10 | `tests/specs.test.ts` (the hook source watches `tasks/` and nudges on a missing spec change) and manual: change a file under `src/` only, finish a turn, and the hook asks once; change a file under `tasks/` and the hook runs the checks |
