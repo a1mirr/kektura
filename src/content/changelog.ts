@@ -14,9 +14,9 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     date: "2026-10-03",
     title: {
-      en: "Full stamp descriptions",
-      ru: "Описания печатей целиком",
-      hu: "Teljes bélyegzőleírások",
+      en: "Full stamp descriptions and yyyy-mm-dd dates",
+      ru: "Описания печатей целиком и даты yyyy-mm-dd",
+      hu: "Teljes bélyegzőleírások és yyyy-mm-dd dátumok",
     },
     changes: [
       {
@@ -25,6 +25,14 @@ export const CHANGELOG: ChangelogEntry[] = [
           en: "Where to find a stamp is now shown in full: long descriptions wrap onto more lines instead of being cut off with “…”.",
           ru: "Описание, где искать печать, теперь показывается целиком: длинный текст переносится на следующие строки, а не обрезается многоточием.",
           hu: "A bélyegző helyének leírása mostantól teljes egészében látszik: a hosszú szöveg új sorba tör, és nem vágja le a „…”.",
+        },
+      },
+      {
+        kind: "improved",
+        text: {
+          en: "The date of a stamp is typed and shown as yyyy-mm-dd, the same in every browser, with a calendar button next to it.",
+          ru: "Дата печати вводится и показывается в формате yyyy-mm-dd (год-месяц-день), одинаково во всех браузерах; рядом есть кнопка календаря.",
+          hu: "A bélyegzés dátumát yyyy-mm-dd (év-hónap-nap) formában írod és látod, minden böngészőben egyformán, mellette naptár gombbal.",
         },
       },
     ],

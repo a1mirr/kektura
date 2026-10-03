@@ -33,13 +33,18 @@ async function stampFirstPlaces(page: Page) {
 }
 
 test.describe("spec 0016: stamp dates", () => {
-  test("AC-1, AC-5: a new stamp shows today's date in a labelled field with a valid range", async ({ page }) => {
+  test("0016 AC-1, AC-5 + 0032 AC-1, AC-3: a new stamp shows today's date as yyyy-mm-dd in a labelled field; the calendar has a valid range", async ({ page }) => {
     const email = await signInAsNewUser(page);
     await stampFirstPlaces(page);
     const field = dateField(place(page, "OKTPH_02"));
     await expect(field).toHaveValue(today());
-    await expect(field).toHaveAttribute("min", "1938-01-01");
-    await expect(field).toHaveAttribute("max", /^\d{4}-\d{2}-\d{2}$/);
+    await expect(field).toHaveAttribute("type", "text");
+    await expect(field).toHaveAttribute("placeholder", "yyyy-mm-dd");
+    const picker = place(page, "OKTPH_02").locator("input[type=date]");
+    await expect(picker).toHaveAttribute("min", "1938-01-01");
+    const tomorrowUtc = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+    await expect(picker).toHaveAttribute("max", tomorrowUtc);
+    await expect(place(page, "OKTPH_02").getByRole("button", { name: "Open calendar" })).toBeVisible();
     expect(storedDate(email, "OKTPH_02")).toBe(today());
     // The place that isn't stamped has no field.
     await expect(dateField(place(page, "OKTPH_03"))).toHaveCount(0);
@@ -51,9 +56,9 @@ test.describe("spec 0016: stamp dates", () => {
     const field = dateField(place(page, "OKTPH_02"));
     const actions = countServerActions(page);
 
-    // Chrome (en-US) reports a valid date for every digit of the year: 0002, 0020, 0202, 2026.
     await field.focus();
-    await page.keyboard.type("09152025", { delay: 30 });
+    await field.press("ControlOrMeta+a");
+    await page.keyboard.type("2025-09-15", { delay: 30 });
     await expect(field).toHaveValue("2025-09-15");
     await expect.poll(() => storedDate(email, "OKTPH_02")).toBe("2025-09-15");
     await page.waitForTimeout(1500); // nothing else is sent afterwards
@@ -81,9 +86,26 @@ test.describe("spec 0016: stamp dates", () => {
     await field.fill("");
     await field.blur();
     await expect(field).toHaveValue("2025-06-01");
+    for (const other of ["15/09/2025", "2025-9-5", "09/15/2025"]) {
+      await field.fill(other); // 0032 AC-2: only yyyy-mm-dd
+      await field.blur();
+      await expect(field).toHaveValue("2025-06-01");
+    }
     await page.waitForTimeout(1200);
     expect(actions.count).toBe(1); // none of those was sent
     expect(storedDate(email, "OKTPH_02")).toBe("2025-06-01");
+  });
+
+  test("0032 AC-3: a day picked in the calendar fills the field and is saved at once", async ({ page }) => {
+    const email = await signInAsNewUser(page);
+    await stampFirstPlaces(page);
+    const row = place(page, "OKTPH_02");
+    await row.locator("input[type=date]").fill("2025-05-05"); // what choosing a day in the native picker does
+    await expect(dateField(row)).toHaveValue("2025-05-05");
+    await expect.poll(() => storedDate(email, "OKTPH_02")).toBe("2025-05-05");
+    await page.reload();
+    await expandAllStages(page);
+    await expect(dateField(place(page, "OKTPH_02"))).toHaveValue("2025-05-05");
   });
 
   test("AC-4: stamping again doesn't change the date of a stamp that already exists", async ({ page }) => {

@@ -83,3 +83,4 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0029](0029-site-logo-link.md) | A logo that leads home, on every page | Draft |
 | [0030](0030-faster-e2e.md) | Faster end-to-end tests: API sign-in, CI caches, timing report | Done |
 | [0031](0031-e2e-sharding.md) | Sharded end-to-end tests: two parallel CI jobs | Draft |
+| [0032](0032-iso-date-input.md) | Stamp dates typed and shown as yyyy-mm-dd, with a calendar button | Done |

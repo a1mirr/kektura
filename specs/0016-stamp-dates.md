@@ -37,8 +37,9 @@ user's own day. This spec replaces it.
   touch only the caller's rows (RLS and an explicit `user_id` filter), and answer `failed` when no row
   was updated (nothing was stamped). An invalid date is rejected without database access; a missing
   session is `unauthorized`. Both log failures like the other stamp actions (spec 0008).
-- **AC-5**: Stamped places and extra stamps show a date field (`<input type="date">`) with an accessible
-  label, `min` 1938-01-01 and `max` tomorrow (UTC).
+- **AC-5**: Stamped places and extra stamps show a date field with an accessible label that only accepts
+  dates from 1938-01-01 to tomorrow (UTC). Since spec 0032 it is a `yyyy-mm-dd` text field with a calendar
+  button (first it was `<input type="date">`); the range limits sit on the calendar picker.
 - **AC-6**: The field saves a valid, changed date after 700 ms without typing, or at once when the user
   leaves the field. It never sends an empty, incomplete, invalid, out-of-range or unchanged value; leaving
   the field with such a value restores the saved date.
@@ -59,17 +60,19 @@ need `current_date`, which can't be part of a constraint that must hold when a d
   without it an update is silently ignored by RLS.
 - The earlier `upsert(..., { onConflict })` overwrite is gone: an update-only action can't create rows by
   accident and doesn't depend on how PostgREST parses `on_conflict`.
-- Checking the value isn't enough to avoid saving half-typed dates: while a date is typed, the field
-  reports a complete date after most keystrokes (typing the day `26` passes through `02`). The year's
-  prefixes (`0002`, `0020`, `0202`) are real dates but below 1938, so the range check already rejects
-  them; the day and month digits are what the pause (or blur) protects against.
+- Checking the value isn't enough to avoid saving half-typed dates: correcting a typed date passes through
+  other complete dates (changing the day of `2026-09-02` to `26` is `2026-09-02`, then `2026-09-2`, then
+  `2026-09-26`; only complete `yyyy-mm-dd` strings count, so the prefixes of a typed year are never dates).
+  The pause (or blur) protects against saving the intermediate ones. (With the native `<input type="date">`
+  of the first versions every prefix of the year was a real date, e.g. `0002`, `0020`, `0202`, which the range
+  check rejects.)
 
 ## Coverage
 
 | AC | Test |
 | --- | --- |
 | AC-2 | `src/lib/stamp-date.test.ts` |
-| AC-1 | `stamp-date.test.ts` (local day), `actions.test.ts` (date goes to new rows only), `e2e/stamping.spec.ts` (a user far ahead of UTC gets their own day) |
+| AC-1 | `stamp-date.test.ts` (local day), `actions.test.ts` (date goes to new rows only), `e2e/stamp-dates.spec.ts` (a user far ahead of UTC gets their own day) |
 | AC-3, AC-4 | `src/app/[locale]/dashboard/actions.test.ts`, `src/lib/stamp-date.test.ts` (calendar dates) |
-| AC-5, AC-6, AC-7 | `src/components/StampDateInput.test.tsx` (timers, blur, invalid, failure, focus), `e2e/stamping.spec.ts` (typing a whole date makes one request; a future date is refused and restored; persistence after reload; extra stamps) |
+| AC-5, AC-6, AC-7 | `src/components/StampDateInput.test.tsx` (timers, blur, invalid, failure, focus), `e2e/stamp-dates.spec.ts` (typing a whole date makes one request; a future date is refused and restored; persistence after reload; extra stamps) |
 | AC-8 | `src/lib/progress.test.ts` (months from `stamped_on`) |
