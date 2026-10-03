@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockRefresh = vi.fn();
-vi.mock("next/cache", () => ({ refresh: () => mockRefresh() }));
-
 const U2 = "3f0c1b6e-9d41-4c55-8a39-2b7a5c1e9d02";
 
 const mockRpc = vi.fn();
@@ -31,7 +28,6 @@ describe("spec 0024: friends actions", () => {
     const { sendRequest } = await load();
     mockRpc.mockResolvedValueOnce({ data: "ok", error: null });
     expect(await sendRequest("abc")).toEqual({ ok: true });
-    expect(mockRefresh).toHaveBeenCalledTimes(1);
     for (const reason of ["invalid_token", "own_token", "already_friends", "already_pending", "incoming_pending"]) {
       mockRpc.mockResolvedValueOnce({ data: reason, error: null });
       expect(await sendRequest("abc")).toEqual({ ok: false, reason });
@@ -47,18 +43,16 @@ describe("spec 0024: friends actions", () => {
     ["setSharing", [U2, false], "set_sharing", { other_id: U2, sharing: false }],
     ["regenerateInvite", [], "regenerate_invite", undefined],
     ["setDisplayName", ["Anna"], "set_display_name", { name: "Anna" }],
-  ] as const)("AC-5, AC-9, AC-10: %s calls %s and revalidates", async (action, args, fn, rpcArgs) => {
+  ] as const)("AC-5, AC-9, AC-10: %s calls %s", async (action, args, fn, rpcArgs) => {
     const actions = (await load()) as Record<string, (...a: unknown[]) => Promise<unknown>>;
     expect(await actions[action](...args)).toEqual({ ok: true });
     expect(mockRpc).toHaveBeenCalledWith(fn, ...(rpcArgs ? [rpcArgs] : []));
-    expect(mockRefresh).toHaveBeenCalledTimes(1);
   });
 
   it("AC-14: a database error, a thrown error and a bad name all come back as `failed`, never thrown", async () => {
     const { approveRequest, sendRequest, setDisplayName, removeFriend } = await load();
     mockRpc.mockResolvedValueOnce({ data: null, error: { code: "P0001", message: "boom" } });
     expect(await approveRequest(U2)).toEqual({ ok: false, reason: "failed" });
-    expect(mockRefresh).not.toHaveBeenCalled();
 
     mockRpc.mockRejectedValueOnce(new Error("network down"));
     expect(await sendRequest("abc")).toEqual({ ok: false, reason: "failed" });

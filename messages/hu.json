@@ -194,6 +194,7 @@
     "inviteSignIn": "Meghívtak barátnak a Kéktúra-követőben. Jelentkezz be a folytatáshoz.",
     "error_unauthorized": "Előbb jelentkezz be.",
     "friendNotSharing": "Nem oszt meg veled",
-    "error_incoming_pending": "Ez a személy már kérte, hogy kapcsolódjatok: fogadd el a kérést lent."
+    "error_incoming_pending": "Ez a személy már kérte, hogy kapcsolódjatok: fogadd el a kérést lent.",
+    "requestSent": "Kérés elküldve. Itt fog megjelenni, ha elfogadja."
   }
 }

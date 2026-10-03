@@ -1,7 +1,7 @@
 # 0024: Sharing progress with friends
 
 Status: Done
-Owner code: `src/lib/friends.ts`, `src/lib/friends-flag.ts`, `src/lib/display-name.ts`, `src/app/[locale]/(pages)/friends/*`,
+Owner code: `src/lib/friends.ts`, `src/lib/friends-flag.ts`, `src/lib/friends-input.ts`, `src/app/[locale]/(pages)/friends/*`,
 `supabase/migrations/0024_friends.sql`
 
 ## Goal
@@ -30,7 +30,8 @@ sharing at any moment. Ships behind the feature flag `friends` (spec 0023).
   can find a stranger. A user can regenerate their link, which immediately invalidates the old token.
 - **AC-3**: Opening an invite link signed out sends the visitor through sign-in and back to the link; the
   page before sign-in reveals neither the owner nor whether the link is valid. Signed in, the page shows the
-  inviter's display name and a "Send request" button. Opening an unknown
+  inviter's display name and a "Send request" button. After a request is sent the Friends page says so
+  ("Request sent"), since the requester has nothing else to see until the inviter approves. Opening an unknown
   or revoked token shows a "this link is not valid" page. Opening your own link says it is yours.
   Sending a request when already friends, when you already asked, or when that person already asked you
   (approve it on `/friends`) says so. The `send_request`
@@ -66,7 +67,8 @@ sharing at any moment. Ships behind the feature flag `friends` (spec 0023).
   stamps stay unreadable to everyone but themselves (spec 0002); a friend's progress is read only through
   `security definer` functions (empty `search_path`, executable by `authenticated` only, revoked from `anon`)
   that check the friendship and the friend's sharing switch, and return nothing else than the stamped place ids.
-  Asking for a user who is not a friend returns the same empty answer as asking for an unknown id.
+  Someone who is not an accepted friend, or whose sharing switch towards me is off, simply does not appear in
+  the answer: there is no way to ask about a particular user.
   Nobody writes `profiles` or `friendships` directly: creating, approving, ignoring, removing and switching
   a friendship, changing the display name and regenerating the invite are `security definer` functions, and
   the tables have no insert, update or delete privilege or policy for `anon` or `authenticated` (otherwise
@@ -77,7 +79,7 @@ sharing at any moment. Ships behind the feature flag `friends` (spec 0023).
   index on `friend_id` to support querying requests.
 - **AC-13**: Regenerating an invite, sending a request, and approving/ignoring are rate limited per user (30
   per hour, one shared budget). There is no limit on the number of friends.
-- **AC-14**: The actions (create invite, send request, approve, ignore, remove, set sharing, set display name)
+- **AC-14**: The actions (regenerate invite, send request, approve, ignore, remove, set sharing, set display name)
   never throw: they return an `ActionResult` (`unauthorized` when signed out, `failed` for anything else,
   including a network error) and log a failure as one `[friends]` line without tokens, names or user ids
   (spec 0008's rules).
@@ -87,7 +89,8 @@ sharing at any moment. Ships behind the feature flag `friends` (spec 0023).
 - **AC-15**: While the flag `friends` is off, `/friends`, `/friends/<id>` and `/friends/invite/*` answer 404,
   the actions return `disabled` without touching the database and no link to them is shown (the dashboard
   link, the About page paragraph). Until the mechanism of spec 0023 exists the flag is the server environment
-  variable `FF_FRIENDS=1`: read on every request (a restart of the server applies a change, no rebuild), off
+  variable `FF_FRIENDS=1`: read on every request (a restart of the server applies a change, no rebuild: the
+  pages that would otherwise be static opt into per-request rendering), off
   unless set, the same for every viewer. Spec 0023 replaces it with the per-user flag; then this AC says "off
   for the viewer" (0023 AC-5).
 - **AC-16**: Every user-visible string exists in `ru`, `en` and `hu`. The About page (spec 0015) tells
@@ -124,5 +127,5 @@ route plan.
 | AC-11 | `e2e/friends.spec.ts` (delete the account, the friend's list is empty) |
 | AC-12 | `tests/friends-migration.test.ts` (forged friendship, direct writes, token column, anon); Supabase advisors after applying |
 | AC-13, AC-14 | `src/app/[locale]/(pages)/friends/actions.test.ts` (an action that fails is shown on the page: `e2e/friends.spec.ts`) |
-| AC-15 | `src/lib/friends.test.ts` (flag), `actions.test.ts` (`disabled`); manual: with `FF_FRIENDS` unset the dashboard has no Friends link, `/friends` is 404 and the About page has no friends paragraph (the E2E server runs with the flag on) |
+| AC-15 | `src/lib/friends.test.ts` (flag), `actions.test.ts` (`disabled`); manual: build once without `FF_FRIENDS`, start with `FF_FRIENDS=1` (and the other way round): the dashboard link, `/friends`, `/friends/invite/<token>` and the About paragraph follow the start-up value, not the build (the E2E server runs with the flag on) |
 | AC-16 | `tests/messages.test.ts`, `e2e/friends.spec.ts` (About paragraph); the changelog entry waits for the flag |

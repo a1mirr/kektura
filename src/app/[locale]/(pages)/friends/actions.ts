@@ -1,7 +1,6 @@
 "use server";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { refresh } from "next/cache";
 import type { ActionResult } from "@/lib/action-result";
 import { friendsEnabled } from "@/lib/friends-flag";
 import { isUuid, isValidDisplayName, REQUEST_REFUSALS, type RequestRefusal } from "@/lib/friends-input";
@@ -33,14 +32,12 @@ async function run<T>(name: string, limited: boolean, work: (supabase: SupabaseC
   }
 }
 
-// Turns the outcome of a database call into an ActionResult; a failure is logged and the page left as it is.
+// Turns the outcome of a database call into an ActionResult, logging a failure. The page that called the action
+// reloads itself with a redirect (see `done` in page.tsx), so nothing is revalidated here.
 function finish(name: string, error: unknown): ActionResult {
-  if (error) {
-    logFriendsError(name, error);
-    return { ok: false, reason: "failed" };
-  }
-  refresh();
-  return { ok: true };
+  if (!error) return { ok: true };
+  logFriendsError(name, error);
+  return { ok: false, reason: "failed" };
 }
 
 const BAD_INPUT: Failure = { ok: false, reason: "failed" };

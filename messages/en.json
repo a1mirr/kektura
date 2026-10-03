@@ -194,6 +194,7 @@
     "inviteSignIn": "You have been invited to connect on the Kéktúra tracker. Sign in to continue.",
     "error_unauthorized": "Please sign in first.",
     "friendNotSharing": "Not sharing with you",
-    "error_incoming_pending": "This person already asked to connect with you: approve the request below."
+    "error_incoming_pending": "This person already asked to connect with you: approve the request below.",
+    "requestSent": "Request sent. You will see them here once they approve it."
   }
 }

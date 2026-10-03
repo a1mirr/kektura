@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import SignInButton from "@/components/SignInButton";
 import TestLoginForm from "@/components/TestLoginForm";
 import { routing } from "@/i18n/routing";
-import { friendsEnabled } from "@/lib/friends-flag";
+import { friendsOn } from "@/lib/friends-flag";
 import { createClient } from "@/lib/supabase/server";
 import { testLoginEnabled } from "@/lib/test-login";
 import { sendRequest } from "../../actions";
@@ -16,7 +16,7 @@ export default async function InvitePage({
 }: {
   params: Promise<{ locale: string; token: string }>;
 }) {
-  if (!friendsEnabled()) notFound();
+  if (!(await friendsOn())) notFound();
   const { locale, token } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
@@ -67,7 +67,7 @@ export default async function InvitePage({
         action={async () => {
           "use server";
           const res = await sendRequest(token);
-          redirect(`/${locale}/friends${res.ok ? "" : `?error=${res.reason}`}`);
+          redirect(`/${locale}/friends?${res.ok ? "sent=1" : `error=${res.reason}`}`);
         }}
       >
         <button className="rounded-lg bg-blue-600 px-6 py-2 font-medium text-white hover:bg-blue-700">

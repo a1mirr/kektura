@@ -34,7 +34,8 @@ async function requestedFriendship(browser: Browser) {
   await expect(bobPage.getByRole("heading", { name: "Invite from Ana" })).toBeVisible();
 
   await bobPage.getByRole("button", { name: "Send request" }).click();
-  await expect(bobPage).toHaveURL(/\/en\/friends$/);
+  await expect(bobPage).toHaveURL(/\/en\/friends\?sent=1$/);
+  await expect(bobPage.getByText("Request sent.")).toBeVisible(); // AC-3: the requester is told
   const userId = (email: string) => psql(`select id from auth.users where email = '${email}'`);
   return { anaPage, bobPage, anaId: userId(anaEmail), bobId: userId(bobEmail), inviteUrl };
 }
@@ -154,14 +155,26 @@ test.describe("spec 0024: friends", () => {
     await expect(other.getByText("You are already friends.")).toBeVisible();
   });
 
-  test("AC-7: the Friends page fits a phone screen", async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 812 });
-    await signInAsNewUser(page);
-    for (const path of ["/hu/friends", "/ru/friends"]) {
-      await page.goto(path); // hu and ru: the longest words
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-      expect(overflow, path).toBeLessThanOrEqual(0);
+  test("AC-7: the Friends page fits a phone screen, also with the longest names", async ({ browser }) => {
+    const { anaPage, bobPage, anaId, bobId } = await requestedFriendship(browser);
+    const overflow = (page: Page) =>
+      page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    psql(`update public.profiles set display_name = repeat('W', 40) where id in ('${anaId}', '${bobId}')`);
+    await anaPage.setViewportSize({ width: 375, height: 812 });
+
+    for (const locale of ["hu", "ru"]) {
+      await anaPage.goto(`/${locale}/friends`); // the longest words; Bob's request is pending
+      await expect(anaPage.getByRole("button", { name: locale === "hu" ? "Elfogadás" : "Одобрить" })).toBeVisible();
+      expect(await overflow(anaPage), `${locale} pending`).toBeLessThanOrEqual(0);
     }
+    await anaPage.goto("/en/friends");
+    await anaPage.getByRole("button", { name: "Approve" }).click();
+    await expect(anaPage.getByRole("button", { name: "Approve" })).toHaveCount(0);
+    for (const locale of ["hu", "ru"]) {
+      await anaPage.goto(`/${locale}/friends`);
+      expect(await overflow(anaPage), `${locale} friend`).toBeLessThanOrEqual(0);
+    }
+    await bobPage.close();
   });
 
   test("AC-14: an action that fails says so on the page instead of doing nothing", async ({ page }) => {
@@ -170,6 +183,12 @@ test.describe("spec 0024: friends", () => {
     await page.getByLabel("Your name (shown to friends)").fill("   ");
     await page.getByRole("button", { name: "Save" }).click();
     await expect(page.getByText("Something went wrong, please try again.")).toBeVisible();
+
+    // The message goes away with the next action that works.
+    await page.getByLabel("Your name (shown to friends)").fill("Anna");
+    await page.getByRole("button", { name: "Save" }).click();
+    await expect(page.getByText("Something went wrong, please try again.")).toHaveCount(0);
+    await expect(page).toHaveURL(/\/en\/friends$/);
   });
 
   test("AC-3: someone who already asked you is told to approve instead", async ({ browser }) => {

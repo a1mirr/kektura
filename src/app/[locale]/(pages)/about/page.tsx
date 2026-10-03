@@ -4,7 +4,7 @@ import { hasLocale } from "next-intl";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import { friendsEnabled } from "@/lib/friends-flag";
+import { friendsOn } from "@/lib/friends-flag";
 import { TRAIL_FACTS } from "@/lib/trail-facts";
 
 // See specs/0015-about-page.md. Everything the page says has to be true of the app today.
@@ -34,6 +34,7 @@ export default async function AboutPage({ params }: Props) {
   setRequestLocale(locale);
   const t = await getTranslations("about");
   const format = await getFormatter();
+  const showFriends = await friendsOn();
 
   const facts = [
     { label: t("factsStages"), value: format.number(TRAIL_FACTS.stages) },
@@ -108,7 +109,7 @@ export default async function AboutPage({ params }: Props) {
               ),
             })}
           </p>
-          {friendsEnabled() && <p>{t("data4")}</p>}
+          {showFriends && <p>{t("data4")}</p>}
         </div>
       </section>
 

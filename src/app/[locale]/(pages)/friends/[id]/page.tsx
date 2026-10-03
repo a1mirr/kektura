@@ -4,7 +4,7 @@ import { routing } from '@/i18n/routing';
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server';
 import { getFriends, getFriendProgress } from '@/lib/friends';
 import { createClient } from '@/lib/supabase/server';
-import { friendsEnabled } from '@/lib/friends-flag';
+import { friendsOn } from '@/lib/friends-flag';
 import { Link, redirect } from '@/i18n/navigation';
 import StageControls from '@/components/StageControls';
 import StageSection from '@/components/StageSection';
@@ -14,7 +14,7 @@ export default async function FriendPage({
 }: {
   params: Promise<{ locale: string; id: string }>;
 }) {
-  if (!friendsEnabled()) notFound();
+  if (!(await friendsOn())) notFound();
   const { locale, id } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
