@@ -26,7 +26,7 @@ export function planDeploy({ production, target, changed = [], targetIsBehind = 
   return { deploy: true, reason: `${changed.length} changed file${changed.length === 1 ? "" : "s"} since production's commit` };
 }
 
-// 0001_init.sql, 0024_friends.sql ...: four digits, the owning spec's number, then a slug.
+// 0001_init.sql, 0024_friends.sql ...: four digits (the number of the task that adds it), then a slug.
 const MIGRATION_FILE = /^\d{4}_[a-z0-9_]+\.sql$/;
 
 /** The migration files among `names`, in the order they are applied: by name (AC-4). */

@@ -74,7 +74,7 @@ Secrets (repository secrets, used by `deploy.yml` only): `DEPLOY_SSH_KEY` (priva
   previous commit): while the deploy runs, old code meets the new schema. Dropping or renaming something the
   running code uses is done in two merges, the second after the first has been deployed. The review of a
   migration checks this (`specs/README.md`), the workflow cannot.
-- **AC-6**: Migrations are named after the spec that owns them (`CLAUDE.md`), so a new file can sort before one
+- **AC-6**: Migrations are named after the task that adds them (`CLAUDE.md`, spec 0034 AC-5), so a new file can sort before one
   that is already applied (`0023_…` merged after `0024_…`). It is applied anyway, in order of its name among
   the ones that are still missing; a file that is already recorded is never applied again, and the content of
   an applied file is not compared or re-run.

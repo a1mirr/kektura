@@ -16,12 +16,13 @@ author's context, and wants that to be part of how work is done here, not someth
 - **AC-1**: `CLAUDE.md` (Workflow) states the rule: before a pull request is merged, an agent with no
   context of the work reviews the committed change; every valid finding is fixed and the rest answered in
   the pull request, with the commit that was reviewed; a pull request is not handed over as ready to merge
-  before that. It names the agent (`fresh-reviewer`), says what the author tells it (the spec number, or
-  `none` for a small change without a spec, and the base branch, nothing else), that fixes which change
+  before that. It names the agent (`fresh-reviewer`), says what the author tells it (the task number, the spec
+  number for a change that is only a spec, or `none` for a small change with neither, and the base branch,
+  nothing else), that fixes which change
   code, tests or behaviour get another fresh review (a review of an earlier state doesn't count) and
   wording-only fixes don't, that documentation changes are reviewed too, and that Dependabot's pull
   requests are not. `CLAUDE.md` lists the spec among "Where the rules live".
-- **AC-2**: `specs/README.md` has the review as the last step of the workflow, after the spec is closed.
+- **AC-2**: `specs/README.md` has the review as the last step of the workflow, after the specs are made true.
 - **AC-3**: The `fresh-reviewer` agent is defined in `.claude/agents/fresh-reviewer.md`:
   - its tools are exactly `Read`, `Grep`, `Glob` and `Bash`: no `Edit`, `Write` or `NotebookEdit`. `Bash`
     could still write, so the brief forbids it;
@@ -30,9 +31,12 @@ author's context, and wants that to be part of how work is done here, not someth
     anything not committed yet,
     and starts its report with the commit it reviewed and whether the working tree was clean, so a review of
     uncommitted work can't pass for a review of the final state;
-  - it starts from `CLAUDE.md` and the spec it is given (with `none`, from the specs that own the behaviour
-    the diff touches, saying whether the change needed a spec of its own), and does not trust the spec's
-    status or its coverage table: it checks each AC against the code and the tests;
+  - it starts from `CLAUDE.md`, `specs/0034-specs-and-tasks.md` and the task it is given and the specs that
+    task lists (with a spec number, that spec; with `none`, the specs that own the behaviour the diff touches,
+    saying whether the change needed a spec or a task of its own), and does not trust the spec's status or its
+    coverage table: it checks each AC of the touched specs against the code and the tests, and the behaviour of
+    the touched area against the ACs, so a spec that has drifted from the code is a finding even where the
+    diff did not touch it (spec 0034 AC-8);
   - it looks for: ACs not implemented or built twice, ACs without a test that really asserts them, behaviour
     that no AC describes, changes users can see that are missing from the changelog or described untruly
     there (spec 0018 AC-7), leftovers of what was renamed or moved (code, messages in all three languages,
@@ -51,7 +55,7 @@ author's context, and wants that to be part of how work is done here, not someth
   - it reports findings most severe first, each with `file:line`, what is wrong and a concrete failing
     scenario, then what it checked and found fine; "no findings" is a valid answer.
 - **AC-4**: `.github/pull_request_template.md` gives every pull request the checklist (spec first, or a small
-  change that needs none; checks and E2E run; everything users can see is in the changelog; fresh-context
+  change that needs none; the touched specs mirror the code as built; checks and E2E run; everything users can see is in the changelog; fresh-context
   review done at the commit named in the pull
   request, with only wording fixes after it) and a section to record the reviewed commit, the review's
   findings and what was done about each.
@@ -70,8 +74,8 @@ author's context, and wants that to be part of how work is done here, not someth
 ## Notes
 
 - Why "no context": a reviewer that is told what the change is for, and why it was done this way, tends to
-  confirm it. The author passes only the spec number and the base branch; the agent works out the rest from
-  the spec and the diff. If the spec can't explain the change to a stranger, that is itself a finding.
+  confirm it. The author passes only the task number and the base branch; the agent works out the rest from
+  the task, the specs and the diff. If the specs can't explain the change to a stranger, that is itself a finding.
 - Project agents are loaded when a Claude Code session starts. In the session that creates or edits
   `.claude/agents/fresh-reviewer.md`, spawn a general-purpose agent and give it the same brief (the body of
   that file); every later session has `fresh-reviewer`.

@@ -3,7 +3,7 @@
 // When Claude is about to finish and source files differ from the last green run, run typecheck,
 // lint and unit tests in parallel (E2E needs Docker and is run by hand: `npm run e2e`). On failure exit 2: stderr goes back to Claude, which keeps working.
 // After MAX_ATTEMPTS failed attempts in a row it lets the turn end and tells the user instead of
-// looping. Once checks pass, app code changed without any spec or test change gets one nudge.
+// looping. Once checks pass, app code changed without any spec change gets one nudge (specs/0034 AC-10).
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
@@ -12,6 +12,7 @@ import path from "node:path";
 const MAX_ATTEMPTS = 3;
 const WATCHED = [
   "specs",
+  "tasks",
   "src",
   "tests",
   "e2e",
@@ -110,14 +111,14 @@ state.green = fingerprint;
 state.attempts = 0;
 save();
 
-// Spec-driven nudge (once per change set): app code changed, but no spec and no test did.
+// Spec-driven nudge: app code changed, but no spec did (a spec must mirror the code, specs/0034 AC-6).
 const isTest = (f) => /\.test\.[cm]?[jt]sx?$/.test(f) || f.startsWith("tests/") || f.startsWith("e2e/");
 const appCode = changed.filter((f) => /^src\/.*\.(ts|tsx)$/.test(f) && !isTest(f) && !f.endsWith(".types.ts"));
-const specOrTest = changed.some((f) => f.startsWith("specs/") || isTest(f));
-if (appCode.length && !specOrTest && !input.stop_hook_active) {
+const specChanged = changed.some((f) => f.startsWith("specs/"));
+if (appCode.length && !specChanged && !input.stop_hook_active) {
   console.error(
-    `Checks pass, but app code changed without a spec or test change:\n  ${appCode.join("\n  ")}\n\n` +
-      "If behaviour changed: update or add the spec in specs/ (acceptance criteria) and the tests that cite it. " +
+    `Checks pass, but app code changed without a spec change:\n  ${appCode.join("\n  ")}\n\n` +
+      "If behaviour changed: edit the spec that owns it in specs/ (acceptance criteria) so it mirrors the code as built, and the tests that cite it. " +
       "If not (refactor, copy or styling only), say so in one line and finish.",
   );
   process.exit(2);
