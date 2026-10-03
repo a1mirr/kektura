@@ -34,6 +34,9 @@ begin
 end;
 $$;
 
+-- A trigger fires without the caller having EXECUTE on its function; nobody should call it through the API.
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+
 create trigger on_auth_user_created
 after insert on auth.users
 for each row execute procedure public.handle_new_user();

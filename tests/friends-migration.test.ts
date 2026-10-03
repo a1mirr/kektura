@@ -4,7 +4,7 @@
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { beforeAll, describe, expect, it } from "vitest";
-import { localSupabase } from "../e2e/local-db";
+import { localSupabase, psql } from "../e2e/local-db";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Client = SupabaseClient<Database>;
@@ -46,7 +46,7 @@ beforeAll(async () => {
     return; // no local Supabase: the tests skip (CI's end-to-end job runs them against one)
   }
   [ana, bob, cleo] = [await signUp("Ana Maria Kovacs"), await signUp(), await signUp("Cleo")];
-});
+}, 60_000); // `supabase status` and three sign-ups, while the whole suite runs in parallel
 
 describe("spec 0024: friends database rules", () => {
   it("AC-1: the display name defaults to the first name, with a fallback, and stays 1 to 40 characters", async (ctx) => {
@@ -108,10 +108,11 @@ describe("spec 0024: friends database rules", () => {
     expect((await anon.client.from("profiles").select("id")).error ?? null).not.toBeNull();
   });
 
-  it("AC-12: the sign-up trigger function is not callable through the API, by anyone", async (ctx) => {
+  it("AC-12: nobody but the database itself may execute the sign-up trigger function", async (ctx) => {
     if (!local) return ctx.skip();
-    for (const who of [{ client: connect(), id: "" }, ana]) {
-      expect((await rpc(who, "handle_new_user")).error?.message).toMatch(/permission denied|Could not find the function/);
+    // PostgREST hides trigger functions whatever their grants, so the privilege itself is what is checked.
+    for (const role of ["anon", "authenticated"]) {
+      expect(psql(`select has_function_privilege('${role}', 'public.handle_new_user()', 'execute')`), role).toBe("f");
     }
   });
 
