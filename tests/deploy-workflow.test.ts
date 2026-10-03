@@ -319,7 +319,7 @@ describe("spec 0026: the deploy workflow", () => {
 
   it("AC-4: the weekly backup leaves the record table out (it is not user data, and the dump check fails on any unexpected table)", () => {
     const backup = read(".github/workflows/backup.yml");
-    expect(backup).toMatch(/public\.extra_stamps public\.applied_migrations\n/);
+    expect(backup).toMatch(/public\.extra_stamps public\.applied_migrations( |\n)/);
     expect(read("specs/0012-backups.md")).toContain("`public.applied_migrations`");
   });
 
