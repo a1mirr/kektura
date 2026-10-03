@@ -1,0 +1,137 @@
+# Spec 0026. After a merge to main whose CI passed: apply the missing migrations to production, push the code to
+# the server (its post-receive hook builds and reloads it), then check that the site answers. Merges that change
+# only documentation, specs, tests or repository tooling are skipped (AC-12).
+#
+# Needs the repository secrets DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS and SUPABASE_DB_URL (setup: deploy/README.md);
+# TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are optional (a failure message). Without the first three the run ends
+# with a notice, so this file can be merged before they exist. Secrets are only ever referenced in a step's `env`,
+# never printed: no `set -x`, no echo of them.
+name: Deploy
+
+on:
+  # Started by the end of CI, because that is the only way to start after both CI jobs passed on this very commit.
+  # Such a run has the secrets of the default branch, so it only ever deploys a commit of main (AC-1).
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Only list what would be applied and deployed; change nothing"
+        type: boolean
+        default: true
+      baseline:
+        description: "First run only: record this migration file, and every file before it, as already applied (spec 0026 AC-13)"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+# One deploy at a time. A merge that arrives while one runs waits; GitHub keeps only the newest waiting run.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Migrate, deploy, check
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # A step's `if` can't read secrets, so only whether they are set goes into a variable.
+      CONFIGURED: ${{ secrets.DEPLOY_SSH_KEY != '' && secrets.DEPLOY_KNOWN_HOSTS != '' && secrets.SUPABASE_DB_URL != '' }}
+      TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+      BASELINE: ${{ inputs.baseline }}
+      DEPLOY_REMOTE: a1mirr@188.166.117.212:~/kektura.git
+      SITE_URL: https://kektura-tracker.com
+    steps:
+      - name: Notice when the secrets are missing
+        if: env.CONFIGURED != 'true'
+        run: echo "::notice title=Deploy skipped::Add the repository secrets DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS and SUPABASE_DB_URL (deploy/README.md, 'Automatic deploys')."
+
+      - uses: actions/checkout@v7
+        if: env.CONFIGURED == 'true'
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        if: env.CONFIGURED == 'true'
+        with:
+          node-version: 24
+
+      - name: Set up the deploy key
+        if: env.CONFIGURED == 'true'
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          git remote add production "$DEPLOY_REMOTE"
+          echo "GIT_SSH_COMMAND=ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts" >> "$GITHUB_ENV"
+
+      - name: Reach production and decide what to deploy
+        id: plan
+        if: env.CONFIGURED == 'true'
+        run: node scripts/deploy-plan.mjs "$TARGET_SHA" production
+
+      - name: Apply the missing migrations
+        id: migrate
+        # Also with a baseline (the first manual run, AC-13): that has to be recorded even when nothing else is deployed.
+        if: env.CONFIGURED == 'true' && (steps.plan.outputs.deploy == 'true' || env.BASELINE != '')
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          args=()
+          if [ "$DRY_RUN" = "true" ]; then args+=(--dry-run); fi
+          if [ -n "$BASELINE" ]; then args+=(--baseline "$BASELINE"); fi
+          node scripts/migrate-production.mjs "${args[@]}"
+
+      - name: Push the code to production
+        id: push
+        if: env.CONFIGURED == 'true' && steps.plan.outputs.deploy == 'true' && env.DRY_RUN != 'true'
+        run: |
+          set -euo pipefail
+          # A fast-forward only, never forced: the server's hook builds and reloads (spec 0020).
+          git push production "$TARGET_SHA:refs/heads/main"
+          echo "### Deployed" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Pushed ${TARGET_SHA:0:7} to production; the server built it and reloaded." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check that the site answers
+        id: smoke
+        if: env.CONFIGURED == 'true' && steps.plan.outputs.deploy == 'true' && env.DRY_RUN != 'true'
+        run: node scripts/smoke-test.mjs "$SITE_URL" 120
+
+      - name: Tell the developer, and say how to roll back
+        if: failure()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PLAN_OUTCOME: ${{ steps.plan.outcome }}
+          MIGRATE_OUTCOME: ${{ steps.migrate.outcome }}
+          PUSH_OUTCOME: ${{ steps.push.outcome }}
+          SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+        run: |
+          {
+            echo "### The deploy failed"
+            echo "- Nothing was rolled back by itself."
+            echo "- Migrations that were applied stay applied (each ran in its own transaction); one that failed left nothing behind."
+            echo "- Roll back the code: revert the pull request on main and merge the revert; in an emergency, see deploy/README.md ('When something is wrong')."
+          } >> "$GITHUB_STEP_SUMMARY"
+          node scripts/notify-telegram.mjs

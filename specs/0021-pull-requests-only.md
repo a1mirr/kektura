@@ -31,13 +31,13 @@ on GitHub, for everybody who works in a clone of this repository, Claude Code in
   given: a shell without a terminal can't answer gh's prompts), `gh pr checks <n> --watch`,
   `gh pr merge <n> --merge --match-head-commit <full-sha>` (the full sha of the pull request's current head: the
   reviewed commit plus, at most, wording fixes). The body file starts from a copy of
-  `.github/pull_request_template.md`, which `gh` doesn't apply to `--body-file`. Merging happens only when the
-  user asked for it in chat, CI is green and the fresh-context review (spec 0022) is
-  done; never `--admin`. After the merge the pull request's branch is deleted, remote and local, once it is
+  `.github/pull_request_template.md`, which `gh` doesn't apply to `--body-file`. Merging happens on the owner's
+  standing permission (given in chat on 2026-10-03, revocable) for pull requests the author wrote, once CI is green
+  and the fresh-context review (spec 0022) is done; a merge deploys by itself (spec 0026); never `--admin`. After the merge the pull request's branch is deleted, remote and local, once it is
   verified (after a `git fetch`) to be contained in `main`, and never with `-D`; an open pull request based on
   the branch is retargeted to `main` first. Only branches of pull requests the author merged, or was asked to clean
   up, are deleted; the remote branch always goes, but a local branch another session has checked out is left to
-  that session (and the user is told). Nothing is deployed unless asked. It also gives where `gh` is installed
+  that session (and the user is told). A push to `production` by hand is only for a rollback or a broken deploy workflow (spec 0026), and only when asked. It also gives where `gh` is installed
   (per user, on the user's PATH).
 
 ## Out of scope
