@@ -67,7 +67,7 @@ document).
 | --- | --- |
 | AC-1 | `e2e/about.spec.ts` (footer link, title, back link, headings; signed out) |
 | AC-2 | `src/lib/trail-facts.test.ts` (function and the real data file), `tests/trail-data.test.ts` (matches the seed), `e2e/about.spec.ts` (shown) |
-| AC-3 | `e2e/about.spec.ts` (four points, the rule's wording); content checked by hand against specs 0001 and 0002 |
-| AC-5 | `e2e/about.spec.ts` (links), `e2e/friends.spec.ts` (friends paragraph, flag on); wording checked by hand against spec 0014 and migration 0008 |
+| AC-3 | `e2e/about.spec.ts` (four points, the rule's wording); the content against specs 0001 and 0002: manual (judgement): read the four points next to those specs. Last checked: never recorded. |
+| AC-5 | `e2e/about.spec.ts` (links), `e2e/friends.spec.ts` (friends paragraph, flag on); the wording against spec 0014 and migration 0008: manual (judgement): read it next to them. Last checked: never recorded. |
 | AC-4 | `e2e/about.spec.ts` (every external link is `https:`, opens in a new tab with `noopener`) |
 | AC-6, AC-7 | `tests/messages.test.ts` (parity incl. rich-text tags; no open-source / PWA wording in any locale), `e2e/about.spec.ts` (ru and hu, no overflow at 375 px) |

@@ -137,7 +137,7 @@ test.describe("spec 0003: the trail map", () => {
     await expect(panel).toHaveCount(0);
   });
 
-  test("AC-12: a failed save keeps the popup open with the error and a working button; the next try marks the stamp and closes it", async ({
+  test("AC-12: a failed save keeps the popup open with the error and a working button; the next try marks the stamp, and the popup of a marked stamp unmarks it", async ({
     page,
   }) => {
     await openDashboardWithMap(page);
@@ -155,6 +155,12 @@ test.describe("spec 0003: the trail map", () => {
     await page.getByRole("button", { name: "Mark as walked" }).dispatchEvent("click"); // the popup's buttons overlap in the small test window
     await expect(page.getByRole("button", { name: "Mark as walked" })).toHaveCount(0); // the popup closed
     await expect(stat(page, "Stamps")).toHaveText("1 / 161");
+
+    // The popup of a marked stamp unmarks it.
+    await openStampPopup(page, "OKTPH_01_DDKPH_01", "Remove mark");
+    await page.getByRole("button", { name: "Remove mark" }).dispatchEvent("click");
+    await expect(page.getByRole("button", { name: "Remove mark" })).toHaveCount(0);
+    await expect(stat(page, "Stamps")).toHaveText("0 / 161");
   });
 
   test("AC-9: the detailed route is requested once, on first need (zoom 9 or more), and again after a failed load on the next zoom change", async ({

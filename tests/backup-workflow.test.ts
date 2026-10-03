@@ -28,7 +28,7 @@ describe("spec 0012: the backup workflow", () => {
     for (const table of ["public.checkpoints", "public.extra_stamps", "public.applied_migrations", "auth.sessions", "auth.refresh_tokens"]) {
       expect(dump, table).toContain(table);
     }
-    // the four wanted tables are never excluded
+    // the six wanted tables are never excluded
     for (const table of ["auth.users", "auth.identities", "public.user_stamps", "public.user_extra_stamps", "public.profiles", "public.friendships"]) {
       expect(dump, table).not.toMatch(new RegExp(`${table.replace(".", "\\.")}(\\s|$)`));
     }

@@ -63,7 +63,7 @@ once it is made, and scatters one area's behaviour over several files.
 - **AC-11**: An AC that cannot be automated is covered by a `manual` row in the spec's coverage table, and a manual
   row is the exception: where a test would do, there is a test. A manual row says why it cannot be automated
   (`manual (reason)`: a real Google sign-in, native browser UI, WebGL pixels, a real deploy), how to check it, and
-  when it was last checked: `Last checked: YYYY-MM-DD`, `never recorded` for a check nobody has written down, or
+  when it was last checked: `Last checked: YYYY-MM-DD`, `never recorded` for a check nobody has written down (or nobody has done), or
   `every pull request` for a judgement the owner or the reviewer makes each time. The date is written only by
   whoever did the check.
 
@@ -98,6 +98,6 @@ in the repository so the reviewer and the hook see them.
 | --- | --- |
 | AC-1, AC-9 | `tests/specs.test.ts` (file names, indexes, statuses, unique numbers, English, test titles that cite an AC that does not exist, files named by a spec that do not exist) |
 | AC-2, AC-3, AC-4, AC-5, AC-6, AC-7 | `tests/specs.test.ts` (the rules are written in `specs/README.md`, `tasks/README.md`, `CLAUDE.md`; the templates have the sections) and `tests/review-process.test.ts` |
-| AC-8 | `tests/review-process.test.ts` (reviewer brief, `CLAUDE.md`, pull request template) |
+| AC-8 | `tests/review-process.test.ts` (reviewer brief, `CLAUDE.md`, pull request template) and `tests/specs.test.ts` (the reviewer re-checks the hand-checked rows of what it touches) |
 | AC-10 | `tests/specs.test.ts` (the hook source watches `tasks/` and nudges on a missing spec change); manual (it runs a Claude Code hook): change a file under `src/` only, finish a turn, and the hook asks once; change a file under `tasks/` and the hook runs the checks. Last checked: never recorded. |
-| AC-11 | `tests/specs.test.ts` (every hand-checked row of a Done or Accepted spec has a reason, and a `Last checked` of a date, `never recorded` or `every pull request`); `tests/review-process.test.ts` (the reviewer's brief) |
+| AC-11 | `tests/specs.test.ts` (every hand-checked row of a Done or Accepted spec has a reason and a `Last checked` of a date, `never recorded` or `every pull request`; the rule is written in `CLAUDE.md`, `specs/README.md` and the reviewer's brief) |

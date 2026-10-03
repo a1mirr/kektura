@@ -69,7 +69,7 @@ extra stamp belongs to.
   no wider than the viewport (`scrollWidth <= innerWidth`) with every stage collapsed and with every stage
   expanded, also when places and extra stamps are stamped (their date fields add controls to the row). Where a
   row's controls (show on map, date, stamp / remove) or a stage header's actions don't fit beside the text,
-  they wrap onto a further line (by design under the text, right-aligned: checked by eye) instead of widening the
+  they wrap onto a further line (by design under the text, right-aligned) instead of widening the
   page.
 
 ## Out of scope

@@ -27,10 +27,13 @@ New tests for what was manual:
 - 0003 AC-9, AC-12, AC-13, AC-16 (detailed route request and retry, popup saves, the extras layer, the map keeps its place): `e2e/map.spec.ts`
 - 0001 AC-5 (month labels, tooltip) and AC-11 (controls on their own right-aligned line): `e2e/account.spec.ts`, `e2e/stamping.spec.ts`
 - 0005 AC-4 and 0020 AC-3 (the callback's failure paths and the address it redirects to): `e2e/auth.spec.ts`
-- 0006 AC-4 (no dummy login on the public address): the deploy workflow's smoke test now POSTs to `/auth/test-login` and expects 404 (0026 AC-8)
+- 0006 AC-4 (no dummy login on the public address): the deploy workflow's smoke test now POSTs to `/auth/test-login` and expects 404 (0026 AC-8); it has run only against a fake server so far, the first deploy after this change is its first real check (a manual row says so)
+- 0003 AC-17 (file sizes): `tests/map-structure.test.ts`; 0020 AC-4 to AC-6 (no shell script at the root, `bash -n` on the server scripts): `tests/deploy.test.ts`
 - 0033 AC-5: `tests/stamp-descriptions.test.ts`
 
-Still manual, with a reason: 0002 advisors, 0003 canvas checks (line colours, amber highlight, restaurants, "Show in list"),
+Hand checks that did not say "manual" (by hand, review of, checked in review) were found by the review and put in the same form (0015, 0019, 0020, 0021); the test now looks for them too.
+
+Still manual, with a reason: 0002 advisors, 0003 canvas checks (line colours, amber highlight, hover names, restaurants, "Show in list", the flight zoom, the look of the detailed route), 0015 AC-3 and AC-5 (wording against other specs), 0019 AC-5 (external links), 0020 AC-5 (the hook's branch filter), 0021 AC-4 (the refusal in a clone),
 0004 AC-9, the success path of the OAuth callback (0005 AC-4, 0020 AC-3), 0006 AC-2, 0016 AC-9 (the native picker),
 0021 AC-6, 0022 AC-3, 0024 AC-15, 0026 AC-4 and AC-13 against a real database, AC-5 and AC-9, 0034 AC-10.
 

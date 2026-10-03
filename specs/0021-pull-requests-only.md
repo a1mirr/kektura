@@ -64,7 +64,8 @@ on GitHub, for everybody who works in a clone of this repository, Claude Code in
 | AC | Test |
 | --- | --- |
 | AC-1, AC-2, AC-3 | `tests/git-hooks.test.ts` (`checkPush` for the three URL forms, every spelling of a push to `main`, topic branches, deleting a topic branch, tags, the deploy remote, a look-alike host; the guard run as a process: exit codes and message) |
-| AC-4 | `tests/git-hooks.test.ts` (hook script calls the guard, `hooks:install` sets `core.hooksPath`, no `prepare`/`postinstall`/`preinstall` script); by hand: with the hook installed, `git push origin HEAD:main --dry-run` is refused |
+| AC-4 | `tests/git-hooks.test.ts` (hook script calls the guard, `hooks:install` sets `core.hooksPath`, no `prepare`/`postinstall`/`preinstall` script) |
+| AC-4 (the refusal in a clone) | manual (it needs a clone with the hook installed and a GitHub remote): `git push origin HEAD:main --dry-run` is refused. Last checked: never recorded. |
 | AC-5 | `tests/git-hooks.test.ts` (CLAUDE.md mentions the rule and `hooks:install`) |
 | AC-6 | `tests/git-hooks.test.ts` (CLAUDE.md names the three commands with the options that make them work without a terminal, the conditions for merging, the deletion of the merged branch and its check, and the install path, and has no control characters) |
-| AC-6 (the deletion recipe works) | manual (it needs a real GitHub branch), after any change to the recipe: on a throwaway branch, push it, merge it, then run the recipe from a detached `origin/main` and confirm that `git branch -d` succeeds and that a branch with a commit added after the merge is refused. Last checked: 2026-10-04 (the deletion worked for two merges; the refusal of a later commit: never recorded). |
+| AC-6 (the deletion recipe works) | manual (it needs a real GitHub branch), after any change to the recipe: on a throwaway branch, push it, merge it, then run the recipe from a detached `origin/main` and confirm that `git branch -d` succeeds and that a branch with a commit added after the merge is refused. Last checked: 2026-10-04 (only the deletion: it worked for two merges). |

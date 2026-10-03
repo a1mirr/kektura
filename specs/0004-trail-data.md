@@ -83,4 +83,4 @@ exists in any open source (MTSZ owns it), so don't scrape for it; the plan is us
 | AC | Test |
 | --- | --- |
 | AC-1 ... AC-8 | `tests/trail-data.test.ts` |
-| AC-9 | manual (it needs a regenerated seed and a database with stamps): read the generated seed's `begin` ... `commit` block, then check the cleanup with a read-only query first (codes not in the new list, stamps that would move); a simulated drop of `OKTPH_03_1` should move its stamps to `OKTPH_03_2`. Last checked: never (the committed seeds predate the cleanup, task 0037). |
+| AC-9 | manual (it needs a regenerated seed and a database with stamps): read the generated seed's `begin` ... `commit` block, then check the cleanup with a read-only query first (codes not in the new list, stamps that would move); a simulated drop of `OKTPH_03_1` should move its stamps to `OKTPH_03_2`. Last checked: never recorded (the committed seeds predate the cleanup, task 0037). |

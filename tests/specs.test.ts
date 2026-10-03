@@ -214,13 +214,13 @@ describe("spec 0034: manual checks", () => {
       .split("\n")
       .filter((line) => line.startsWith("|") && !/^\|\s*(AC\s*\||-{3})/.test(line));
 
-  it("AC-11: every coverage row of a Done or Accepted spec that says manual gives a reason and a Last checked", () => {
+  it("AC-11: every coverage row of a Done or Accepted spec that says manual gives a reason and a Last checked (also when it says by hand or review)", () => {
     const incomplete: string[] = [];
     let manualRows = 0;
     for (const name of specFiles) {
       const text = read(specsDir, name);
       if (!/^Status: (Done|Accepted)\s*$/m.test(text)) continue;
-      for (const row of coverageRows(text).filter((line) => /\bmanual\b/i.test(line))) {
+      for (const row of coverageRows(text).filter((line) => /\bmanual\b|\bby hand\b|checked in review|\breview of\b/i.test(line))) {
         manualRows += 1;
         const cell = row.slice(0, 60);
         if (!/\bmanual \([^)]+\)/.test(row)) incomplete.push(`${name}: no "manual (reason)": ${cell}`);
