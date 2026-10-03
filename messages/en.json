@@ -65,7 +65,8 @@
     "kmValue": "{km} km",
     "mapAttribution": "© OpenStreetMap contributors · route: MTSZ",
     "account": "Account",
-    "stampDate": "Date of the stamp"
+    "stampDate": "Date of the stamp",
+    "friends": "Friends"
   },
   "error": {
     "title": "Something went wrong",
@@ -105,7 +106,8 @@
     "data2": "Cookies keep you signed in. Your browser also remembers display choices, such as which stages are open and which map layers are on.",
     "data3": "You can delete your account and all your stamps at any time on the <account>Account</account> page. Feedback messages you have already sent are kept, but are no longer linked to you.",
     "contactTitle": "Questions or ideas?",
-    "contactText": "Found a bug or have an idea for the tracker? Send it through the <feedback>feedback form</feedback>."
+    "contactText": "Found a bug or have an idea for the tracker? Send it through the <feedback>feedback form</feedback>.",
+    "data4": "If you connect with friends, they can see your display name and your stage-by-stage progress (official stamps, kilometres, stages). They cannot see your stamp dates or extra stamps. You can stop sharing your progress with a friend at any time on the Friends page."
   },
   "changelog": {
     "title": "Changelog",
@@ -162,5 +164,38 @@
     "deleteButton": "Yes, permanently delete my account",
     "cancel": "Cancel",
     "deleteFailed": "Couldn't delete the account. Please try again."
+  },
+  "friends": {
+    "title": "Friends",
+    "inviteTitle": "Your invite link",
+    "regenerate": "Regenerate",
+    "pendingTitle": "Pending requests",
+    "approve": "Approve",
+    "ignore": "Ignore",
+    "acceptedTitle": "Your friends",
+    "noFriends": "You haven't added any friends yet.",
+    "remove": "Remove",
+    "startSharing": "Start sharing",
+    "stopSharing": "Stop sharing",
+    "isSharing": "Sharing progress",
+    "notSharing": "You are not sharing",
+    "ownLink": "This is your own invite link.",
+    "sendRequest": "Send request",
+    "invalidToken": "This link is not valid",
+    "inviteFrom": "Invite from {name}",
+    "error_invalid_token": "This invite link is invalid.",
+    "error_own_token": "You cannot invite yourself.",
+    "error_already_friends": "You are already friends.",
+    "error_already_pending": "You already sent a request.",
+    "error_failed": "Something went wrong, please try again.",
+    "summary": "{stamps} of {total} stamps · {km} · stages completed: {stages}",
+    "displayNameLabel": "Your name (shown to friends)",
+    "displayNameSave": "Save",
+    "inviteSignIn": "You have been invited to connect on the Kéktúra tracker. Sign in to continue.",
+    "error_unauthorized": "Please sign in first.",
+    "friendNotSharing": "Not sharing with you",
+    "error_incoming_pending": "This person already asked to connect with you: approve the request below.",
+    "requestSent": "Request sent. You will see them here once they approve it.",
+    "back": "← Back to the tracker"
   }
 }

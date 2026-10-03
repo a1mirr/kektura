@@ -3,7 +3,8 @@
 import { useLocale, useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 
-export default function SignInButton() {
+// `next` is the path (without locale) to land on after sign-in: the dashboard unless a page asks otherwise.
+export default function SignInButton({ next = "/dashboard" }: { next?: string }) {
   const t = useTranslations("home");
   const locale = useLocale();
 
@@ -11,7 +12,7 @@ export default function SignInButton() {
     await createClient().auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${location.origin}/auth/callback?locale=${locale}`,
+        redirectTo: `${location.origin}/auth/callback?locale=${locale}&next=${encodeURIComponent(next)}`,
       },
     });
   }

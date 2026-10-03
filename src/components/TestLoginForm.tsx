@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { TEST_EMAIL } from "@/lib/test-login";
 
 // Dummy login of the test server (spec 0006). A plain form: works without client JS.
-export default async function TestLoginForm({ locale }: { locale: string }) {
+export default async function TestLoginForm({ locale, next = "/dashboard" }: { locale: string; next?: string }) {
   const t = await getTranslations("home");
 
   return (
@@ -12,6 +12,7 @@ export default async function TestLoginForm({ locale }: { locale: string }) {
       className="flex w-full max-w-sm flex-col gap-2 rounded-lg border border-dashed border-amber-400 bg-amber-50 p-4 text-left"
     >
       <input type="hidden" name="locale" value={locale} />
+      <input type="hidden" name="next" value={next} />
       <label className="flex flex-col gap-1 text-sm">
         {t("testLoginEmail")}
         <input

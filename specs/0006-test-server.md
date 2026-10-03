@@ -25,7 +25,7 @@ Google account and without touching real data. Production keeps Google sign-in o
   `supabase status`), with the dummy login switched on. It can run next to the normal dev server.
 - **AC-3**: On the test server the landing page shows a dummy login: an email field (pre-filled with
   `tester@kektura.test`) and "Sign in as test user". Any valid email signs in with a fixed password,
-  creating the account on first use, and lands on the dashboard. An invalid email shows the sign-in
+  creating the account on first use, and lands on the dashboard (or on the page of an optional `next` path, e.g. an invite link, spec 0024). An invalid email shows the sign-in
   error.
 - **AC-4**: The dummy login exists only when `TEST_LOGIN=1` **and** the Supabase URL points at this
   machine (localhost / 127.0.0.1 / ::1). Otherwise the form is not rendered and `POST

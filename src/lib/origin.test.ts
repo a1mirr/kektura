@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { requestOrigin } from "./origin";
+import { originFromHeaders, requestOrigin } from "./origin";
 
 const req = (url: string, headers: Record<string, string> = {}) => new Request(url, { headers });
 const BEHIND_CADDY = "http://localhost:3000/auth/callback?code=x";
@@ -72,5 +72,12 @@ describe("spec 0020: request origin", () => {
     const origin = requestOrigin(req("http://localhost:3000/x"), {});
     expect(origin).not.toMatch(/null|undefined/);
     expect(origin).toBe("http://localhost:3000");
+  });
+
+  it("AC-1, AC-2: a page that only has the headers gets the same origin (the invite link on /friends)", () => {
+    const headers = new Headers({ host: "localhost:3000", "x-forwarded-host": "kektura-tracker.com", "x-forwarded-proto": "https" });
+    expect(originFromHeaders(headers, "http://localhost:3000", {})).toBe("https://kektura-tracker.com");
+    expect(originFromHeaders(headers, "http://localhost:3000", { SITE_URL: "https://example.org" })).toBe("https://example.org");
+    expect(originFromHeaders(new Headers(), "http://localhost:3000", {})).toBe("http://localhost:3000");
   });
 });

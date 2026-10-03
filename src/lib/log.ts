@@ -60,3 +60,10 @@ export function logAccountDeletionError(stage: "rpc" | "exception", error: unkno
     `[account-delete] stage=${stage} user=${userId ?? "unknown"} code=${code ?? "-"} message=${quote(message)}`,
   );
 }
+
+// Friends actions (spec 0024 AC-14): the action name and the error's own code and message, no user ids,
+// names or tokens.
+export function logFriendsError(action: string, error: unknown): void {
+  const { code, message } = describeError(error);
+  console.error(`[friends] action=${action} code=${code ?? "-"} message=${quote(message)}`);
+}

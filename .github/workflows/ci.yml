@@ -40,6 +40,9 @@ jobs:
         run: npx supabase start -x studio,mailpit,imgproxy,vector,logflare,supavisor,edge-runtime,realtime,storage-api
       - name: Generated types are up to date
         run: npm run types:check
+      # The database rules of spec 0024 (they skip themselves without a local Supabase, so only here do they run).
+      - name: Database rule tests
+        run: npx vitest run tests/friends-migration.test.ts
       - run: npx playwright install --with-deps chromium
       # Builds the test server through scripts/test-env.mjs (reads `supabase status`) and runs it.
       - run: npm run e2e

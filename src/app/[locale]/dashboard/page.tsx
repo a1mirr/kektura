@@ -4,6 +4,7 @@ import { getFormatter, getTranslations, setRequestLocale } from "next-intl/serve
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { loadDashboardData } from "@/lib/dashboard-data";
+import { friendsEnabled } from "@/lib/friends-flag";
 import { createClient } from "@/lib/supabase/server";
 import {
   buildPlaces,
@@ -93,8 +94,13 @@ export default async function Dashboard({
     <main className="mx-auto max-w-3xl space-y-8 px-6 py-8">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-blue-700">{t("title")}</h1>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
           <LocaleSwitcher />
+          {friendsEnabled() && (
+            <Link href="/friends" className="text-sm text-stone-600 hover:underline">
+              {t("friends")}
+            </Link>
+          )}
           <Link href="/account" className="text-sm text-stone-600 hover:underline">
             {t("account")}
           </Link>

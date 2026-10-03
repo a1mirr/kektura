@@ -22,6 +22,8 @@ that were added to the repository root in one place, in a form that can't deploy
   2. the `x-forwarded-proto` and `x-forwarded-host` headers (first value of a list), with `host` when
      there is no forwarded host and the request's own scheme when there is no forwarded proto;
   3. the origin of `request.url`.
+  A Server Component, which has the headers but no request (the invite link on `/friends`, spec 0024), calls
+  `originFromHeaders(headers, own)`: the same rules, `own` standing in for `request.url`.
 - **AC-2**: Header values are only used when they look like a scheme (`http`, `https`) and a host name or
   address with an optional port; anything else (`evil.com/path`, `a@b`, spaces, `javascript`) is ignored and
   the next step is used. It never produces `null` or `undefined` parts.
