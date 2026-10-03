@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 const read = (file: string) => fs.readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 const hasBash = spawnSync("bash", ["-c", "true"]).status === 0;
@@ -46,7 +46,7 @@ describe("spec 0026: the deploy workflow", () => {
       }
     });
 
-    it("never reacts to pull requests, and checks out the commit CI ran on, not a moving branch", () => {
+    it("never reacts to pull requests, and works from the history of main (the commit is picked and checked out in the Pick step)", () => {
       const triggers = workflow.slice(workflow.indexOf("\non:"), workflow.indexOf("\npermissions:"));
       expect(triggers).not.toMatch(/pull_request/);
       expect(triggers).not.toMatch(/^ {2}push:/m);
@@ -68,6 +68,9 @@ describe("spec 0026: the deploy workflow", () => {
       expect(pick).toContain('gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --branch main --event push --status success --limit 1');
       expect(pick).toContain("--json headSha");
       expect(pick).toContain('git merge-base --is-ancestor "$sha" HEAD'); // part of main's history
+      // migrations, scripts and the pushed code all come from that one commit, not from the tip of main
+      expect(pick.indexOf('git checkout --detach "$sha"')).toBeGreaterThan(pick.indexOf("git merge-base --is-ancestor"));
+      expect(pick.indexOf('git checkout --detach "$sha"')).toBeLessThan(pick.indexOf('echo "TARGET_SHA=$sha"'));
       expect(pick).toContain('echo "TARGET_SHA=$sha" >> "$GITHUB_ENV"');
       expect(pick).toContain('sha="$GITHUB_SHA"'); // by hand: the tip of main (CI is checked in the next step)
       expect(workflow).not.toMatch(/^ {6}TARGET_SHA:/m); // not fixed by the run that started the workflow
@@ -129,6 +132,12 @@ describe("spec 0026: the deploy workflow", () => {
       expect(workflow).not.toMatch(/--force|--force-with-lease|git push [^\n]* -f\b|git push [^\n]*\+/);
       const code = lines.filter((line) => !line.trim().startsWith("#")).join("\n"); // comments may talk about `git push`
       expect(code.match(/git push/g)).toHaveLength(1);
+    });
+
+    it("the migration step has a timeout too: a lock that never frees must fail the step, not cancel the job", () => {
+      const minutes = Number(/timeout-minutes: (\d+)/.exec(step("Apply the missing migrations"))![1]);
+      expect(minutes).toBeGreaterThanOrEqual(5);
+      expect(minutes).toBeLessThan(Number(/^ {4}timeout-minutes: (\d+)/m.exec(workflow)![1]));
     });
 
     it("has its own timeout, so a build that hangs fails the step and still reaches the failure message", () => {
@@ -288,18 +297,23 @@ describe("spec 0026 AC-7: deploy/ssh-gate.sh", () => {
       git("push", repo, "main");
       return home;
     }
+    // Built once: these tests only read it, and spawning git for each of them is slow under load.
+    const server = { home: "" };
+    beforeAll(() => {
+      server.home = serverHome();
+    }, 60_000);
     const gateRun = (home: string, command: string | undefined, input = "0000") =>
       spawnSync("sh", [gate], { input, encoding: "utf8", env: { ...process.env, HOME: home, ...(command === undefined ? { SSH_ORIGINAL_COMMAND: undefined } : { SSH_ORIGINAL_COMMAND: command }) } as NodeJS.ProcessEnv });
 
     it.each(["~/kektura.git", "/home/a1mirr/kektura.git", "kektura.git"])("lets git read the refs of %s", (spelling) => {
-      const home = serverHome();
+      const home = server.home;
       const result = gateRun(home, `git-upload-pack '${spelling}'`);
       expect(result.status, result.stderr).toBe(0);
       expect(result.stdout).toMatch(/refs\/heads\/main/); // the advertisement lists main
     });
 
     it.each(["~/kektura.git", "/home/a1mirr/kektura.git", "kektura.git"])("lets git push to %s (the receive side answers)", (spelling) => {
-      const home = serverHome();
+      const home = server.home;
       const result = gateRun(home, `git-receive-pack '${spelling}'`);
       expect(result.status, result.stderr).toBe(0);
       expect(result.stdout).toMatch(/refs\/heads\/main/);
@@ -317,7 +331,7 @@ describe("spec 0026 AC-7: deploy/ssh-gate.sh", () => {
       ["an archive request", "git-upload-archive '~/kektura.git'"],
       ["a substitution", "git-upload-pack '~/kektura.git' $(id)"],
     ])("refuses %s", (_name, command) => {
-      const home = serverHome();
+      const home = server.home;
       const result = gateRun(home, command);
       expect(result.status).toBe(1);
       expect(result.stdout).toBe("");

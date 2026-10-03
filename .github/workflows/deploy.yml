@@ -94,6 +94,9 @@ jobs:
           fi
           # It has to be part of main's history, which is what is checked out.
           git merge-base --is-ancestor "$sha" HEAD
+          # Work from exactly that commit: the migrations that are applied, the scripts that run and the code that is
+          # pushed all have to be the same, not the tip of main when that is newer (its CI may not have passed).
+          git checkout --detach "$sha"
           echo "TARGET_SHA=$sha" >> "$GITHUB_ENV"
           echo "Deploying ${sha:0:7}, the newest commit of main whose CI passed."
 
@@ -136,6 +139,9 @@ jobs:
         id: migrate
         # Also with a baseline (the first manual run, AC-13): that has to be recorded even when nothing else is deployed.
         if: env.CONFIGURED == 'true' && (steps.plan.outputs.deploy == 'true' || env.BASELINE != '')
+        # A migration that waits on a lock would otherwise hold the job until its own timeout, which cancels the job
+        # (and `failure()` does not catch a cancelled job): this way it fails the step and reaches the message.
+        timeout-minutes: 10
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
