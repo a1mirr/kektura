@@ -23,8 +23,8 @@ export default function StageStampButton({
     <ActionButton
       action={() => setPlacesStamped(done ? unstampKeys : stampKeys, !done, done ? undefined : newStampDate())}
       done={done}
-    >
-      {done ? t("unstampStage") : t("stampStage")}
-    </ActionButton>
+      doneLabel={t("unstampStage")}
+      todoLabel={t("stampStage")}
+    />
   );
 }

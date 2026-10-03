@@ -1,7 +1,7 @@
 "use server";
 
 import type { User } from "@supabase/supabase-js";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/action-result";
 import { logStampActionError, logStampActionInvalidInput, type StampAction, type StampStage } from "@/lib/log";
@@ -38,7 +38,9 @@ async function asUser(action: StampAction, write: (session: Session) => Promise<
       return failed;
     };
     const result = await write({ supabase, user, fail });
-    if (result.ok) revalidatePath("/[locale]/dashboard", "page");
+    // refresh() re-renders the page in this response. Not revalidatePath: it would also expire the
+    // dashboard's cached reference data, which is the point of spec 0009 AC-1.
+    if (result.ok) refresh();
     return result;
   } catch (error) {
     logStampActionError(action, "exception", error, userId);

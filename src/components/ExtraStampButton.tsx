@@ -26,10 +26,10 @@ export default function ExtraStampButton({
       <ActionButton
         action={() => setExtraStamped(extraId, !stamped, stamped ? undefined : newStampDate())}
         done={stamped}
+        doneLabel={t("unstamp")}
+        todoLabel={t("stamp")}
         accent="amber"
-      >
-        {stamped ? t("unstamp") : t("stamp")}
-      </ActionButton>
+      />
     </div>
   );
 }

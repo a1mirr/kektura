@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { hasLocale } from "next-intl";
 import { routing } from "@/i18n/routing";
+import { landingPath } from "@/lib/landing-path";
 import { requestOrigin } from "@/lib/origin";
 import { createClient } from "@/lib/supabase/server";
 import { isTestEmail, TEST_PASSWORD, testLoginEnabled } from "@/lib/test-login";
@@ -21,5 +22,5 @@ export async function POST(request: Request) {
   const credentials = { email, password: TEST_PASSWORD };
   let { error } = await supabase.auth.signInWithPassword(credentials);
   if (error) ({ error } = await supabase.auth.signUp(credentials));
-  return to(error ? "?error=auth" : "/dashboard");
+  return to(error ? "?error=auth" : landingPath(form.get("next")));
 }

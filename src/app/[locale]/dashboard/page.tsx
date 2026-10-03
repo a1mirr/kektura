@@ -3,6 +3,8 @@ import { hasLocale } from "next-intl";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import { loadDashboardData } from "@/lib/dashboard-data";
+import { friendsEnabled } from "@/lib/friends-flag";
 import { createClient } from "@/lib/supabase/server";
 import {
   buildPlaces,
@@ -43,15 +45,9 @@ export default async function Dashboard({
   } = await supabase.auth.getUser();
   if (!user) return redirect({ href: "/", locale });
 
-  const [{ data: checkpoints }, { data: stamps }, { data: extraRows }, { data: extraStamps }] =
-    await Promise.all([
-      supabase.from("checkpoints").select("*").order("seq"),
-      supabase.from("user_stamps").select("checkpoint_id, stamped_on"),
-      supabase.from("extra_stamps").select("*").order("km_from_start"),
-      supabase.from("user_extra_stamps").select("extra_id, stamped_on"),
-    ]);
-  const extraDone = new Map((extraStamps ?? []).map((s) => [s.extra_id, s.stamped_on]));
-  const extraList = extraRows ?? [];
+  // Reference data comes from a shared server cache; only the user's own stamps hit the database (spec 0009).
+  const { checkpoints, extras: extraList, stamps, extraStamps } = await loadDashboardData(supabase);
+  const extraDone = new Map(extraStamps.map((s) => [s.extra_id, s.stamped_on]));
   const mapExtras = extraList.map((e) => ({
     id: e.id,
     name: e.name,
@@ -60,11 +56,10 @@ export default async function Dashboard({
     stamped: extraDone.has(e.id),
   }));
 
-  const cps = checkpoints ?? [];
-  const placeList = buildPlaces(cps);
+  const placeList = buildPlaces(checkpoints);
   const placeKm = new Map(placeList.map((p) => [p.key, p.km]));
   const stages = buildStages(placeList, stagesData.stages);
-  const stampedPlaces = stampedPlaceKeys(placeList, stamps ?? []);
+  const stampedPlaces = stampedPlaceKeys(placeList, stamps);
   const doneRanges = walkedRanges(placeList, stampedPlaces);
   const summary = progressSummary(placeList, doneRanges);
 
@@ -74,7 +69,7 @@ export default async function Dashboard({
   }));
 
 
-  const mapPoints = cps
+  const mapPoints = checkpoints
     .filter((c) => c.lat != null && c.lng != null)
     .map((c) => {
       const key = placeKeyOf(c);
@@ -99,8 +94,13 @@ export default async function Dashboard({
     <main className="mx-auto max-w-3xl space-y-8 px-6 py-8">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-blue-700">{t("title")}</h1>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
           <LocaleSwitcher />
+          {friendsEnabled() && (
+            <Link href="/friends" className="text-sm text-stone-600 hover:underline">
+              {t("friends")}
+            </Link>
+          )}
           <Link href="/account" className="text-sm text-stone-600 hover:underline">
             {t("account")}
           </Link>

@@ -21,10 +21,11 @@ In `~/kektura_app/.env.local` on the server (never committed; `.env.example` has
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | the app | public values, compiled into the build: **rebuild** after changing them |
 | `SITE_URL` | redirects (spec 0020) | `https://kektura-tracker.com`; optional, without it the proxy's forwarded headers are used |
+| `FF_FRIENDS` | friends feature flag (spec 0024) | `1` switches the Friends pages, the dashboard link and the About paragraph on; unset = off. Read on every request: a restart applies it, no rebuild |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | feedback notifications (spec 0017) | secrets; server-only. Check with `npm run telegram:check` |
 
 Never set `TEST_LOGIN` here: it switches on the dummy login (the app also requires a localhost database).
-Server-only values (`SITE_URL`, `TELEGRAM_*`) take effect with `pm2 restart kektura --update-env`.
+Server-only values (`SITE_URL`, `FF_FRIENDS`, `TELEGRAM_*`) take effect with `pm2 restart kektura --update-env`.
 
 ## First-time setup
 
@@ -54,6 +55,17 @@ Server-only values (`SITE_URL`, `TELEGRAM_*`) take effect with `pm2 restart kekt
    server.
 
 If the hook changed, copy the new `deploy/post-receive` to `~/kektura.git/hooks/` on the server.
+
+## After the seeds change
+
+The dashboard caches the checkpoints and extra stamps on the server for up to 24 hours (spec 0009), on
+disk as well as in memory, so the cache survives deploys and restarts. After applying changed seeds to
+production (spec 0004), delete the cache folder and restart, otherwise old places are served for up to a day:
+
+```
+rm -rf ~/kektura_app/.next/cache/fetch-cache
+pm2 restart kektura
+```
 
 ## When something is wrong
 

@@ -21,7 +21,7 @@ export default function StageSection({
   kmText: string;
   done: number;
   total: number;
-  actions: React.ReactNode;
+  actions?: React.ReactNode;
   children: React.ReactNode;
 }) {
   // Collapsed on first render (matches the server HTML); the remembered state is applied after mount.

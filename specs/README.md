@@ -1,6 +1,6 @@
 # Specs
 
-Every task (feature, behaviour change, non-trivial bug fix) gets a spec here **before** code. The
+Every task (feature, behaviour change, non-trivial bug fix) gets a spec here **before** code. Specs are always written in English. The
 spec is the contract; tests prove it; the Stop hook keeps it proven.
 
 ## Workflow
@@ -60,9 +60,9 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0006](0006-test-server.md) | Test server with dummy login, E2E tests | Done |
 | [0007](0007-ci.md) | CI, generated-types check, Dependabot | Done |
 | [0008](0008-action-logging.md) | Server-side logging of failed stamp actions | Done |
-| [0009](0009-fast-stamping.md) | Cached reference data, instant stamp buttons | Accepted |
+| [0009](0009-fast-stamping.md) | Cached reference data, instant stamp buttons | Done |
 | [0010](0010-typed-translations.md) | Typed translation keys | Done |
-| [0011](0011-trailmap-split.md) | Split TrailMap, map E2E safety net | Accepted |
+| [0011](0011-trailmap-split.md) | Split TrailMap, map E2E safety net | Done |
 | [0012](0012-backups.md) | Weekly backup of production user data | Done |
 | [0013](0013-extra-stamps-stages.md) | Extra stamps linked to stages | Done |
 | [0014](0014-pages-and-settings.md) | Footer pages, account page, account deletion | Done |
@@ -74,4 +74,10 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0015](0015-about-page.md) | About page | Done |
 | [0021](0021-pull-requests-only.md) | main only changes through pull requests (local pre-push guard; opening and merging them with gh) | Done |
 | [0022](0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Done |
+| [0023](0023-feature-flags.md) | Feature flags | Draft |
+| [0024](0024-friends-sharing.md) | Sharing progress with friends | Done |
 | [0025](0025-account-page.md) | Account page: sign out moves in, "Settings" becomes "Account" | Done |
+| [0026](0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Draft |
+| [0027](0027-feature-flags-via-telegram.md) | Switching feature flags from the Telegram bot | Draft |
+| [0028](0028-landing-screenshots.md) | Screenshots on the landing page | Draft |
+| [0029](0029-site-logo-link.md) | A logo that leads home, on every page | Draft |

@@ -37,7 +37,10 @@ be true of the app today.
     which map layers are on);
   - the "Account" page deletes the account and all stamps; feedback messages already sent are kept but
     no longer linked to the user;
-  - links to `/account` and `/feedback`.
+  - links to `/account` and `/feedback`;
+  - while the friends feature is on (spec 0024, `FF_FRIENDS=1`): what a connected friend can see (display name,
+    official stamps, kilometres, stages; no dates or extra stamps) and that sharing can be stopped on the
+    Friends page. With the feature off this paragraph is not shown.
 - **AC-6**: The page makes no claim that isn't true today. In particular it doesn't call the app open
   source (the repository is private) or a progressive web app (no manifest or service worker). Whoever
   makes either true edits this AC and its test.
@@ -67,6 +70,6 @@ document).
 | AC-1 | `e2e/about.spec.ts` (footer link, title, back link, headings; signed out) |
 | AC-2 | `src/lib/trail-facts.test.ts` (function and the real data file), `tests/trail-data.test.ts` (matches the seed), `e2e/about.spec.ts` (shown) |
 | AC-3 | `e2e/about.spec.ts` (four points, the rule's wording); content checked by hand against specs 0001 and 0002 |
-| AC-5 | `e2e/about.spec.ts` (links); wording checked by hand against spec 0014 and migration 0008 |
+| AC-5 | `e2e/about.spec.ts` (links), `e2e/friends.spec.ts` (friends paragraph, flag on); wording checked by hand against spec 0014 and migration 0008 |
 | AC-4 | `e2e/about.spec.ts` (every external link is `https:`, opens in a new tab with `noopener`) |
 | AC-6, AC-7 | `tests/messages.test.ts` (parity incl. rich-text tags; no open-source / PWA wording in any locale), `e2e/about.spec.ts` (ru and hu, no overflow at 375 px) |
