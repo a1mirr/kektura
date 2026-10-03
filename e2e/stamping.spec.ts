@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expandAllStages, signInAsNewUser, stat } from "./helpers";
+import { expandAllStages, measureDescriptions, signInAsNewUser, stat } from "./helpers";
 
 const place = (page: import("@playwright/test").Page, key: string) => page.locator(`#place-${key}`);
 
@@ -40,5 +40,17 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
     await stage2.getByRole("button", { name: "Clear stage" }).click();
     await expect(stat(page, "Stamps")).toHaveText("1 / 161");
     await expect(place(page, "OKTPH_09").getByRole("button", { name: "Remove" })).toBeVisible(); // Sárvár stays
+  });
+
+  test("0001 AC-10: stamp descriptions wrap in full: nothing is clipped or sticks out of its row at 375 px", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await signInAsNewUser(page);
+    await expandAllStages(page);
+
+    const { measured, clipped } = await measureDescriptions(page);
+    expect(measured).toBeGreaterThan(200); // 161 places (220 stamps) + 72 extra stamps
+    expect(clipped).toEqual([]);
   });
 });

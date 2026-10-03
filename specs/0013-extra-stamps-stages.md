@@ -13,6 +13,7 @@ Link extra stamps to their corresponding official stages, so users know which st
 - **AC-2**: Given an extra stamp in the "Extra Stamps" section, the UI mentions which stage it belongs to (e.g. as a subtle text/badge).
 - **AC-3**: Given a stage that contains at least one extra stamp, its header/controls area in the "Checkpoints" section includes a link or button saying "go to extra stamps (N)", where N is the count of extra stamps in that stage. Clicking this navigates/scrolls to the Extra Stamps section, specifically highlighting or jumping to those stamps.
 - **AC-4**: A pure function `findStageForKm(km, stages, placeKm)` returns the stage number for any given `km_from_start`.
+- **AC-5**: An extra stamp's description is shown in full and wraps, never cut off: the rule is spec 0001 AC-10.
 
 ## Out of scope
 
@@ -28,4 +29,5 @@ Modifying the official 161 checkpoints count, or moving extra stamps into the ma
 | AC | Test |
 | --- | --- |
 | AC-1, AC-4 | `src/lib/progress.test.ts` |
+| AC-5 | spec 0001 AC-10 (same tests) |
 | AC-2, AC-3 | `e2e/extra-stamps-stages.spec.ts` (every extra stamp names a stage, in order along the trail; each stage's "go to extra stamps (N)" counts exactly its extra stamps and jumps to them; the counts add up) |

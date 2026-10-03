@@ -12,6 +12,24 @@ export type ChangelogEntry = { date: string; title: Localized; changes: Change[]
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-03",
+    title: {
+      en: "Full stamp descriptions",
+      ru: "Описания печатей целиком",
+      hu: "Teljes bélyegzőleírások",
+    },
+    changes: [
+      {
+        kind: "fixed",
+        text: {
+          en: "Where to find a stamp is now shown in full: long descriptions wrap onto more lines instead of being cut off with “…”.",
+          ru: "Описание, где искать печать, теперь показывается целиком: длинный текст переносится на следующие строки, а не обрезается многоточием.",
+          hu: "A bélyegző helyének leírása mostantól teljes egészében látszik: a hosszú szöveg új sorba tör, és nem vágja le a „…”.",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-10-02",
     title: {
       en: "Pages, feedback and stamp dates",
