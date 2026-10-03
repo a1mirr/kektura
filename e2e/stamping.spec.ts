@@ -150,7 +150,7 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
     expect(gapToRight).toBeGreaterThanOrEqual(0);
   });
 
-  test("0002 AC-15, AC-16: after the first load, stamping and reloading hardly read the reference data from the database again", async ({
+  test("0002 AC-15: after the first load, stamping and reloading hardly read the reference data from the database again", async ({
     page,
   }) => {
     await signInAsNewUser(page);

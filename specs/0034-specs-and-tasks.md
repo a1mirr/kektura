@@ -74,7 +74,7 @@ once it is made, and scatters one area's behaviour over several files.
   across both folders, and that both folders are written in English. It also checks that a test title citing an AC
   (under `describe("spec NNNN …")` or as `NNNN AC-n`) cites one that exists, and that the repository files named
   in backticks by a `Done` or `Accepted` spec exist, and that every coverage row of a `Done` or `Accepted` spec that
-  says `manual` has the three parts of AC-11.
+  says `manual` has a reason and a `Last checked` (the way to check it is for the reviewer, AC-8).
 - **AC-10**: The Stop hook watches `tasks/` as well as `specs/`, and once the checks pass it asks, once per turn
   end, when app code changed and no spec did: has behaviour changed (then the spec and its tests are updated), or
   not (then say so in one line).

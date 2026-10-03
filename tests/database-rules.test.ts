@@ -73,7 +73,7 @@ describe("spec 0002: row level security of the stamp tables", () => {
     expect((await ana.client.from("user_extra_stamps").delete().eq("extra_id", 1).select()).data).toHaveLength(1);
   });
 
-  it("AC-2: an anonymous visitor cannot read or write stamps", async (ctx) => {
+  it("an anonymous visitor cannot read or write stamps", async (ctx) => {
     if (!local) return ctx.skip();
     const anon = connect();
     const read = await anon.from("user_stamps").select("*");

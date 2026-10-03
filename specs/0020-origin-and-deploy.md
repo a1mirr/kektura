@@ -65,6 +65,5 @@ be tried on the server first.
 | --- | --- |
 | AC-1, AC-2 | `src/lib/origin.test.ts` |
 | AC-3 | `e2e/auth.spec.ts` (sign-out and dummy login redirect to the right place; the callback's failure path on the address the user is on, with a forwarded host); the callback's success path needs a real Google sign-in: manual (a real OAuth round trip). Last checked: never recorded. |
-
 | AC-4, AC-5, AC-6 | `tests/deploy.test.ts` (files in place and no server script at the repository root, the hook fails fast and deploys only main, HTTPS proxy config, the README's contents; `bash -n` on both scripts) |
 | AC-5 (the hook's branch filter) | manual (it needs a bare repository and the server's tools): a dry run of the hook's branch filter: main deploys, another branch and a tag don't. Last checked: never recorded. |
