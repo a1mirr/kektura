@@ -1,4 +1,4 @@
-# 0001: Progress: places, walked stretches, stats, stages
+# 0001: Progress: places, walked stretches, stats, stages, extra stamps in stages
 
 Status: Done
 Owner code: `src/lib/progress.ts`, `src/app/[locale]/dashboard/page.tsx`, `src/components/StageSection.tsx`,
@@ -7,7 +7,8 @@ Owner code: `src/lib/progress.ts`, `src/app/[locale]/dashboard/page.tsx`, `src/c
 ## Goal
 
 Turn a user's stamps into progress along the Országos Kéktúra: which stamping places are done, which
-stretches count as walked, how many km that is, and the per-stage view of the list.
+stretches count as walked, how many km that is, and the per-stage view of the list, including which stage each
+extra stamp belongs to.
 
 ## Behaviour
 
@@ -44,9 +45,23 @@ stretches count as walked, how many km that is, and the per-stage view of the li
 
 ### Descriptions
 
-- **AC-10**: Every place row on the dashboard and on a friend's page (spec 0024), and every extra stamp row (spec 0013),
+- **AC-10**: Every place row on the dashboard and on a friend's page (spec 0024), and every extra stamp row,
   shows the official description of each of its stamps (in the page's language, spec 0033) in full: long text wraps onto further lines, it is
   never cut off with an ellipsis, and it never sticks out of its row (also at 375 px).
+
+### Extra stamps and stages
+
+- **AC-12**: An extra stamp belongs to a stage when its `km_from_start` is within the stage's start km (inclusive)
+  and end km (exclusive; inclusive for the final stage). The stage's start km is the km of its starting point (the
+  first place's km for the first stage); its end km is the km of its last place. An extra stamp outside every
+  stage (in the gap between two stages that don't join, or beyond the trail) belongs to none.
+- **AC-13**: Every extra stamp that lies on a stage names it in the "Extra stamps" section ("· Stage N" after
+  its name, in the page's language); the list is in km order, so the stage numbers only stay or grow.
+- **AC-14**: A stage that contains at least one extra stamp has a "go to extra stamps (N)" link in its header
+  controls, N being the number of its extra stamps; it scrolls to the first of those stamps in the Extra stamps section (its anchor `#extra-<id>`).
+  Stages without extra stamps have no such link.
+- **AC-15**: A pure function `findStageForKm(km, stages, placeKm)` returns the stage number of a `km_from_start`,
+  or `null` for none.
 
 ### Layout
 
@@ -59,13 +74,15 @@ stretches count as walked, how many km that is, and the per-stage view of the li
 
 ## Out of scope
 
-Elevation-based stats; walked time; stamps outside the official 161 (see extra stamps in 0002).
+Elevation-based stats; walked time; stamps outside the official 161 (stamping extra stamps is spec 0002; their
+stage is AC-12 to AC-15); moving extra stamps into the stage's place list; changing the count of 161.
 
 ## Coverage
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-2, AC-3, AC-4, AC-5 (counting), AC-6, AC-7 | `src/lib/progress.test.ts` |
+| AC-1, AC-2, AC-3, AC-4, AC-5 (counting), AC-6, AC-7, AC-12, AC-15 | `src/lib/progress.test.ts` |
+| AC-13, AC-14 | `e2e/extra-stamps-stages.spec.ts` (every extra stamp names a stage, in order along the trail; each stage's "go to extra stamps (N)" counts exactly its extra stamps and jumps to them; stages without any have no link; the counts add up) |
 | AC-3, AC-4, AC-7 on the real dashboard | `e2e/stamping.spec.ts` |
 | AC-5 (localized labels) | manual: switch locale on the dashboard, check month labels and tooltip |
 | AC-8, AC-9 | `src/components/StageSection.test.tsx` |

@@ -14,13 +14,13 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("spec 0011: map storage helpers (spec 0003 AC-10)", () => {
-  it("AC-4: nothing stored gives the fallback (false unless told otherwise)", () => {
+describe("spec 0003: map storage helpers (AC-10)", () => {
+  it("AC-17: nothing stored gives the fallback (false unless told otherwise)", () => {
     expect(readStored(STORAGE_KEY_EXTRAS)).toBe(false);
     expect(readStored(STORAGE_KEY_DONE, true)).toBe(true);
   });
 
-  it("AC-4: a stored choice wins over the fallback and round-trips", () => {
+  it("AC-17: a stored choice wins over the fallback and round-trips", () => {
     store(STORAGE_KEY_DONE, false);
     expect(localStorage.getItem(STORAGE_KEY_DONE)).toBe("0");
     expect(readStored(STORAGE_KEY_DONE, true)).toBe(false);
@@ -29,7 +29,7 @@ describe("spec 0011: map storage helpers (spec 0003 AC-10)", () => {
     expect(readStored(STORAGE_KEY_DONE)).toBe(true);
   });
 
-  it("AC-4: unavailable storage neither throws nor remembers", () => {
+  it("AC-17: unavailable storage neither throws nor remembers", () => {
     vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
       throw new Error("blocked");
     });
@@ -41,7 +41,7 @@ describe("spec 0011: map storage helpers (spec 0003 AC-10)", () => {
     expect(readStored(STORAGE_KEY_EXTRAS)).toBe(false);
   });
 
-  it("AC-4: the storage keys keep their old names, so existing choices survive the refactor", () => {
+  it("AC-17: the storage keys keep their old names, so existing choices survive the refactor", () => {
     expect({
       extras: STORAGE_KEY_EXTRAS,
       restaurants: STORAGE_KEY_RESTAURANTS,

@@ -65,18 +65,15 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 
 | Spec | Area | Status |
 | --- | --- | --- |
-| [0001](0001-progress.md) | Progress: places, walked stretches, stats, stages | Done |
+| [0001](0001-progress.md) | Progress: places, walked stretches, stats, stages, extra stamps in stages | Done |
 | [0002](0002-stamping.md) | Stamping: server actions, stamp buttons, cached reference data | Done |
-| [0003](0003-map-route-planner.md) | Map lines and the route planner | Done |
+| [0003](0003-map-route-planner.md) | Map lines, the route planner and how the map code is structured | Done |
 | [0004](0004-trail-data.md) | Generated trail data and seeds | Done |
-| [0005](0005-auth-routing-i18n.md) | Sign-in, routing, translations | Done |
+| [0005](0005-auth-routing-i18n.md) | Sign-in, routing, translations, typed message keys | Done |
 | [0006](0006-test-server.md) | Test server with dummy login, E2E tests | Done |
 | [0007](0007-ci.md) | CI, generated-types check, Dependabot | Done |
 | [0008](0008-action-logging.md) | Server-side logging of failed stamp actions | Done |
-| [0010](0010-typed-translations.md) | Typed translation keys | Done |
-| [0011](0011-trailmap-split.md) | Split TrailMap, map E2E safety net | Done |
 | [0012](0012-backups.md) | Weekly backup of production user data | Done |
-| [0013](0013-extra-stamps-stages.md) | Extra stamps linked to stages | Done |
 | [0014](0014-pages-and-settings.md) | Footer pages, account page, account deletion | Done |
 | [0016](0016-stamp-dates.md) | Stamp dates: validation, own time zone, safe editing, the yyyy-mm-dd field | Done |
 | [0017](0017-feedback.md) | Feedback form with Telegram notifications | Done |

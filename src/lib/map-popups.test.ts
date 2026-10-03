@@ -4,8 +4,8 @@ import { buildMenu, buildRestaurantPopup } from "./map-popups";
 
 const evil = '<img src=x onerror="alert(1)">';
 
-describe("spec 0011: popup DOM builders (spec 0003 AC-12, AC-14, AC-15)", () => {
-  it("AC-4: a menu has the title, the subtitle and one button per action, in order", () => {
+describe("spec 0003: popup DOM builders (AC-12, AC-14, AC-15)", () => {
+  it("AC-17: a menu has the title, the subtitle and one button per action, in order", () => {
     const box = buildMenu("Írott-kő", "0.0 km from Írott-kő", [
       { label: "Route from here", run: () => {} },
       { label: "Show in list", run: () => {} },
@@ -15,12 +15,12 @@ describe("spec 0011: popup DOM builders (spec 0003 AC-12, AC-14, AC-15)", () => 
     expect([...box.querySelectorAll("button")].map((b) => b.textContent)).toEqual(["Route from here", "Show in list"]);
   });
 
-  it("AC-4: a menu without a subtitle has none", () => {
+  it("AC-17: a menu without a subtitle has none", () => {
     const box = buildMenu("Name", null, []);
     expect(box.children).toHaveLength(2); // title + the hidden error line
   });
 
-  it("AC-4: clicking a button runs its action with that button; the error line starts hidden and is shown on request", () => {
+  it("AC-17: clicking a button runs its action with that button; the error line starts hidden and is shown on request", () => {
     const run = vi.fn();
     const box = buildMenu("Name", null, [{ label: "Go", run }]);
     const error = box.querySelector<HTMLElement>('[role="alert"]')!;
@@ -39,14 +39,14 @@ describe("spec 0011: popup DOM builders (spec 0003 AC-12, AC-14, AC-15)", () => 
     expect(error.hidden).toBe(true);
   });
 
-  it("AC-4 + 0003 AC-15: titles, subtitles and labels are text, never markup", () => {
+  it("AC-15, AC-17: titles, subtitles and labels are text, never markup", () => {
     const box = buildMenu(evil, evil, [{ label: evil, run: () => {} }]);
     expect(box.querySelector("img")).toBeNull();
     expect(box.querySelector("strong")?.textContent).toBe(evil);
     expect(box.querySelector("button")?.textContent).toBe(evil);
   });
 
-  it("AC-4: a restaurant popup shows name (city), the distance and a safe link to its page", () => {
+  it("AC-17: a restaurant popup shows name (city), the distance and a safe link to its page", () => {
     const box = buildRestaurantPopup({
       name: "Étterem",
       city: "Sopron",
@@ -63,7 +63,7 @@ describe("spec 0011: popup DOM builders (spec 0003 AC-12, AC-14, AC-15)", () => 
     expect(link.rel).toBe("noopener noreferrer");
   });
 
-  it("AC-4 + 0003 AC-15: only https: URLs become links; markup in names stays text", () => {
+  it("AC-15, AC-17: only https: URLs become links; markup in names stays text", () => {
     for (const url of ["javascript:alert(1)", "http://insecure.example/", "data:text/html,x", ""]) {
       const box = buildRestaurantPopup({
         name: "N",

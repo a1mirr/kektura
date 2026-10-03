@@ -21,7 +21,7 @@ import { useRoutePlanner } from "./trail-map/useRoutePlanner";
 export type { MapExtra, MapPoint };
 
 // The dashboard's trail map and route planner (spec 0003), composed from the pieces in
-// `./trail-map` (spec 0011): the map itself lives outside React state, the hooks keep it in step.
+// `./trail-map` (spec 0003 AC-17): the map itself lives outside React state, the hooks keep it in step.
 export default function TrailMap({
   points,
   extras = [],

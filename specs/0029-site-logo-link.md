@@ -65,7 +65,7 @@ only); animating the logo.
   logo bar is a normal-height row above the `flex-grow` column.
 - `src/app/not-found.tsx` is outside the locale layout and renders its own `<html>`: it cannot reuse the layout's
   component for free and needs the same component rendered by hand.
-- The map's fullscreen mode (spec 0011, 0003 AC-11) is `position: fixed` and covers the bar; it needs no change.
+- The map's fullscreen mode (spec 0003 AC-11) is `position: fixed` and covers the bar; it needs no change.
 
 ## Coverage
 

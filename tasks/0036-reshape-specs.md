@@ -44,7 +44,8 @@ Task-only (no lasting behaviour): 0009 and 0011 mostly, 0010, 0025, 0030, 0031.
 A few related areas per pull request; each step audits the area's ACs against the code and the tests (a script lists ACs that no
 test cites), then folds, moves and re-cites.
 
-- [x] Stamping: 0002 absorbed 0009 (AC-13 to AC-16); 0016 absorbed 0032 (AC-5, AC-6, AC-9 to AC-11) and gained AC-12 for behaviour that was tested but not stated (the field follows the server's date)
+- [x] Stamping, progress, map, sign-in and translations: 0002 absorbed 0009; 0001 absorbed 0013; 0003 absorbed 0011 (as AC-17, the structure); 0005 absorbed 0010 (AC-7, AC-8). Trail data (0004) and translated descriptions (0033) stay two specs: 0033 is already an area spec. Finding: the committed seeds predate the cleanup that 0004 AC-9 describes (task 0037)
+- [x] Stamping detail: 0002 absorbed 0009 (AC-13 to AC-16); 0016 absorbed 0032 (AC-5, AC-6, AC-9 to AC-11) and gained AC-12 for behaviour that was tested but not stated (the field follows the server's date)
 
 ## Spec changes
 

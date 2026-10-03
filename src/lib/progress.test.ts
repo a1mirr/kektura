@@ -171,7 +171,7 @@ describe("spec 0001: stages", () => {
     expect(stageStampKeys(s3)).toEqual({ stamp: ["D", "E"], unstamp: ["D", "E"] });
   });
 
-  it("spec 0013: findStageForKm maps an extra stamp to a stage based on km bounds", () => {
+  it("AC-12, AC-15: findStageForKm maps an extra stamp to a stage based on km bounds, or to none", () => {
     const [s1, s2, s3] = buildStages(places, meta);
     const placeKm = new Map(places.map(p => [p.key, p.km]));
     const stages = [s1, s2, s3];

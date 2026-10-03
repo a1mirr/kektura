@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { expandAllStages, signInAsNewUser } from "./helpers";
 
-// Spec 0011 AC-1: the map behaviours the DOM allows (spec 0003). The map is a WebGL canvas, so there
+// Spec 0003: the map behaviours the DOM allows. The map is a WebGL canvas, so there
 // is no pixel clicking on stamps except through the app's own list -> map flow: the 📍 button flies
 // the map to a stamp and centres it, so a click on the canvas centre hits that stamp's dot.
 
@@ -32,8 +32,8 @@ async function openStampPopup(page: Page, placeKey: string, action: string) {
   await expect(page.getByRole("button", { name: action })).toBeVisible();
 }
 
-test.describe("spec 0011 + 0003: the trail map", () => {
-  test("0011 AC-1, 0003 AC-9: the map canvas renders with the OpenStreetMap attribution", async ({ page }) => {
+test.describe("spec 0003: the trail map", () => {
+  test("AC-9: the map canvas renders with the OpenStreetMap attribution", async ({ page }) => {
     await openDashboardWithMap(page);
     const box = await canvas(page).boundingBox();
     expect(box?.width).toBeGreaterThan(200);
@@ -41,7 +41,7 @@ test.describe("spec 0011 + 0003: the trail map", () => {
     await expect(page.locator(".maplibregl-ctrl-attrib")).toContainText("OpenStreetMap");
   });
 
-  test("0011 AC-1, 0003 AC-10: layer toggles have their defaults and persist across a reload", async ({ page }) => {
+  test("AC-10: layer toggles have their defaults and persist across a reload", async ({ page }) => {
     await openDashboardWithMap(page);
     const section = mapSection(page);
     const walked = section.getByLabel("Walked stretches");
@@ -68,7 +68,7 @@ test.describe("spec 0011 + 0003: the trail map", () => {
     await expect(walked).toBeChecked();
   });
 
-  test("0011 AC-1, 0003 AC-10: the extra stamps toggle (with its count) persists across a reload", async ({ page }) => {
+  test("AC-10: the extra stamps toggle (with its count) persists across a reload", async ({ page }) => {
     await openDashboardWithMap(page);
     const extras = mapSection(page).getByLabel(/^Show extra stamps \(\d+\)$/);
     await expect(extras).not.toBeChecked();
@@ -78,7 +78,7 @@ test.describe("spec 0011 + 0003: the trail map", () => {
     await expect(extras).toBeChecked();
   });
 
-  test("0011 AC-1, 0003 AC-11: fullscreen is entered by its button and left by Esc or the button", async ({ page }) => {
+  test("AC-11: fullscreen is entered by its button and left by Esc or the button", async ({ page }) => {
     await openDashboardWithMap(page);
     await expect(page.locator("body")).not.toHaveCSS("overflow", "hidden");
 
@@ -97,7 +97,7 @@ test.describe("spec 0011 + 0003: the trail map", () => {
     await expect(page.locator("body")).not.toHaveCSS("overflow", "hidden");
   });
 
-  test("0011 AC-1, 0003 AC-13: the 📍 button in a list row scrolls the map into view and labels the stamp", async ({
+  test("AC-13: the 📍 button in a list row scrolls the map into view and labels the stamp", async ({
     page,
   }) => {
     await openDashboardWithMap(page);
@@ -112,7 +112,7 @@ test.describe("spec 0011 + 0003: the trail map", () => {
     await expect(page.locator(".maplibregl-popup")).toContainText("Hollóháza");
   });
 
-  test("0011 AC-1, 0003 AC-4, AC-8, AC-12: picking two stamps shows the stretch's numbers; Clear removes the panel", async ({
+  test("AC-4, AC-8, AC-12: picking two stamps shows the stretch's numbers; Clear removes the panel", async ({
     page,
   }) => {
     await openDashboardWithMap(page);
