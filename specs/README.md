@@ -70,8 +70,8 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0003](0003-map-route-planner.md) | Map lines, the route planner and how the map code is structured | Done |
 | [0004](0004-trail-data.md) | Generated trail data and seeds | Done |
 | [0005](0005-auth-routing-i18n.md) | Sign-in, routing, translations, typed message keys | Done |
-| [0006](0006-test-server.md) | Test server with dummy login, E2E tests | Done |
-| [0007](0007-ci.md) | CI, generated-types check, Dependabot | Done |
+| [0006](0006-test-server.md) | Test server with dummy login, E2E tests and how they sign in | Done |
+| [0007](0007-ci.md) | CI, E2E caches and timing report, generated-types check, Dependabot | Done |
 | [0008](0008-action-logging.md) | Server-side logging of failed stamp actions | Done |
 | [0012](0012-backups.md) | Weekly backup of production user data | Done |
 | [0014](0014-pages-and-settings.md) | Footer pages, account page, account deletion | Done |
@@ -90,7 +90,6 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0027](0027-feature-flags-via-telegram.md) | Switching feature flags from the Telegram bot | Draft |
 | [0028](0028-landing-screenshots.md) | Screenshots on the landing page | Draft |
 | [0029](0029-site-logo-link.md) | A logo that leads home, on every page | Draft |
-| [0030](0030-faster-e2e.md) | Faster end-to-end tests: API sign-in, CI caches, timing report | Done |
 | [0031](0031-e2e-sharding.md) | Sharded end-to-end tests: two parallel CI jobs | Draft |
 | [0033](0033-translated-stamp-descriptions.md) | Stamp descriptions translated into ru and en | Done |
 | [0034](0034-specs-and-tasks.md) | Specs and tasks: how work is written down | Done |

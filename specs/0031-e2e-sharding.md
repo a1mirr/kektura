@@ -6,7 +6,7 @@ Owner code: `.github/workflows/ci.yml`, `scripts/slowest-tests.mjs`
 ## Goal
 
 The `e2e` job is the longest check of every pull request (about 4 to 5 minutes). Its tests already run as fast as the
-2-core runner allows: more Playwright workers in one job were slower (spec 0030 AC-5, 162 s against 143 s), because
+2-core runner allows: more Playwright workers in one job were slower (spec 0007, notes: 162 s against 143 s), because
 Next, Postgres and Chromium use both cores. The only way left to use more cores without a paid runner is more jobs.
 Split the suite across two parallel jobs (Playwright `--shard`), so the check finishes in roughly 3 minutes, and
 keep what depends on the check's name working.
@@ -25,7 +25,7 @@ keep what depends on the check's name working.
   of spec 0024) run once, in shard 1 only (`if: matrix.shard == 1`), not in both.
 - **AC-4**: Each shard saves its own Playwright report and JSON report under a name that includes the shard number
   (the report is uploaded when the shard fails), and prints its own slowest-tests table to its job summary
-  (spec 0030 AC-4). The browser and Next build caches of spec 0030 AC-3 are restored by both shards and still drop
+  (spec 0007 AC-7). The browser and Next build caches of spec 0007 AC-6 are restored by both shards and still drop
   `fetch-cache` after the restore. Both shards have the same cache key, so only the first to finish can save it
   (the other logs a harmless "Unable to reserve cache" warning); to avoid the noise only shard 1 saves.
 - **AC-5**: It is only kept if it is faster. The spec's Notes record the E2E check's wall time (pull request event,
@@ -47,13 +47,13 @@ and changes to the tests themselves.
 
 ## Notes
 
-Numbers from spec 0030 (single job, 2-core runner): whole job 4 m 00 s to 4 m 52 s; of that Supabase start about
+Numbers from task 0030 (single job, 2-core runner): whole job 4 m 00 s to 4 m 52 s; of that Supabase start about
 60 s, npm ci about 15 to 20 s, browser install about 17 s, build about 13 s with a cache hit, tests about 120 s.
 Two shards would give about 60 s of tests plus the same setup, so roughly 3 minutes, if the split is even.
 
 Specs that say "the `e2e` job" and become wrong when this lands, and are reworded in the same change as the workflow:
-`0007-ci.md` AC-2 and AC-3 (one job runs `npm run e2e` and `types:check`), `0030-faster-e2e.md` AC-3 and AC-4 (one
-job, one JSON report, one summary) and the pointer in `0006-test-server.md` AC-6; `CLAUDE.md` step 7 only if the
+`0007-ci.md` AC-2, AC-3, AC-6 and AC-7 (one job runs `npm run e2e` and `types:check`; one job, one JSON report, one
+summary) and the pointer in `0006-test-server.md` AC-6; `CLAUDE.md` step 7 only if the
 check's name changes.
 
 `main` has no branch protection (the repository is private on the free plan, where GitHub offers neither protection

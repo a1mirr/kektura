@@ -43,7 +43,7 @@ jobs:
       # The database rules of spec 0024 (they skip themselves without a local Supabase, so only here do they run).
       - name: Database rule tests
         run: npx vitest run tests/friends-migration.test.ts
-      # Spec 0030 AC-3: the browser download and Next's incremental build cache survive between runs. A miss
+      # Spec 0007 AC-6: the browser download and Next's incremental build cache survive between runs. A miss
       # only costs time.
       - name: Playwright version
         id: playwright
@@ -63,7 +63,7 @@ jobs:
         run: rm -rf .next-e2e/cache/fetch-cache
       - run: npx playwright install --with-deps chromium
       # Builds the test server through scripts/test-env.mjs (reads `supabase status`) and runs it.
-      # The JSON report feeds the slowest-tests table below (spec 0030 AC-4).
+      # The JSON report feeds the slowest-tests table below (spec 0007 AC-7).
       - run: npm run e2e
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: e2e-report.json

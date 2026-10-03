@@ -3,20 +3,20 @@ import { randomUUID } from "node:crypto";
 import { signInAsNewUser, signInThroughForm, stat } from "./helpers";
 
 test.describe("spec 0006 + 0005: signing in and out on the test server", () => {
-  test("0006 AC-3, AC-5: the dummy login opens an empty dashboard marked as the test server", async ({ page }) => {
+  test("AC-3, AC-5: the dummy login opens an empty dashboard marked as the test server", async ({ page }) => {
     await signInAsNewUser(page);
     await expect(page.getByRole("status")).toContainText("Test server");
     await expect(stat(page, "Stamps")).toHaveText("0 / 161");
     await expect(stat(page, "Completed")).toHaveText("0%");
   });
 
-  test("0006 AC-3, AC-5 + 0030 AC-2: the dummy login form on the landing page signs a visitor in", async ({ page }) => {
+  test("AC-3, AC-5, AC-9: the dummy login form on the landing page signs a visitor in", async ({ page }) => {
     await signInThroughForm(page, `e2e-${randomUUID()}@kektura.test`);
     await expect(page.getByRole("status")).toContainText("Test server");
     await expect(stat(page, "Stamps")).toHaveText("0 / 161");
   });
 
-  test("0030 AC-1: the helper's sign-in leaves the session cookies in the browser and opens the dashboard", async ({ page }) => {
+  test("AC-8: the helper's sign-in leaves the session cookies in the browser and opens the dashboard", async ({ page }) => {
     await signInAsNewUser(page);
     const cookies = await page.context().cookies();
     expect(cookies.some((c) => /^sb-.*-auth-token/.test(c.name))).toBe(true);
@@ -24,7 +24,7 @@ test.describe("spec 0006 + 0005: signing in and out on the test server", () => {
     await expect(page).toHaveURL(/\/en\/dashboard$/);
   });
 
-  test("0006 AC-3: an invalid email is refused with the sign-in error", async ({ page }) => {
+  test("AC-3: an invalid email is refused with the sign-in error", async ({ page }) => {
     // The form's own validation stops this in the browser, so post it directly.
     const response = await page.request.post("/auth/test-login", { form: { email: "not-an-email", locale: "en" } });
     expect(new URL(response.url()).pathname + new URL(response.url()).search).toBe("/en?error=auth");
