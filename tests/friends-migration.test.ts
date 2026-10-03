@@ -108,6 +108,13 @@ describe("spec 0024: friends database rules", () => {
     expect((await anon.client.from("profiles").select("id")).error ?? null).not.toBeNull();
   });
 
+  it("AC-12: the sign-up trigger function is not callable through the API, by anyone", async (ctx) => {
+    if (!local) return ctx.skip();
+    for (const who of [{ client: connect(), id: "" }, ana]) {
+      expect((await rpc(who, "handle_new_user")).error?.message).toMatch(/permission denied|Could not find the function/);
+    }
+  });
+
   it("AC-3: an invite link resolves to the inviter's name and whether it is yours; unknown tokens to nothing", async (ctx) => {
     if (!local) return ctx.skip();
     const token = await tokenOf(ana);
