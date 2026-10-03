@@ -116,7 +116,10 @@ describe("spec 0021: pull requests only", () => {
     expect(claude).toContain("gh pr merge <n> --merge --match-head-commit <full-sha>");
     expect(claude).toMatch(/only when the user asked for it in chat, CI is green and the fresh-context review is done/);
     expect(claude).toContain("never `--admin`");
-    expect(claude).toContain("Don't delete branches or deploy unless asked");
+    expect(claude).toContain("Delete the pull request's branch after the merge, remote and local");
+    expect(claude).toContain("git merge-base --is-ancestor origin/<topic> origin/main");
+    expect(claude).toContain("Delete only branches of pull requests you merged");
+    expect(claude).toContain("Deploy only when asked");
     expect(claude).toContain(String.raw`%LOCALAPPDATA%\Programs\gh\bin`);
     expect(claude).not.toContain("There is no `gh` here");
     // No control characters other than line breaks and tabs (an earlier edit turned `\b` into a backspace).
