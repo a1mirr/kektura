@@ -38,7 +38,7 @@ on GitHub, for everybody who works in a clone of this repository, Claude Code in
   the branch is retargeted to `main` first. Only branches of pull requests the author merged, or was asked to clean
   up, are deleted; the remote branch always goes, but a local branch another session has checked out is left to
   that session (and the user is told). A push to `production` by hand is only for a rollback or a broken deploy workflow (spec 0026), and only when asked. It also gives where `gh` is installed
-  (per user, on the user's PATH).
+  (machine-wide, on the system PATH).
 
 ## Out of scope
 

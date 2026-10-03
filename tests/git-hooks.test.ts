@@ -121,7 +121,8 @@ describe("spec 0021: pull requests only", () => {
     expect(claude).toContain("git merge-base --is-ancestor origin/<topic> origin/main");
     expect(claude).toContain("Delete only branches of pull requests you merged");
     expect(claude).toContain("only for a rollback or when the workflow is broken");
-    expect(claude).toContain(String.raw`%LOCALAPPDATA%\Programs\gh\bin`);
+    expect(claude).toContain(String.raw`C:\Program Files\GitHub CLI`);
+    expect(claude).not.toContain(String.raw`%LOCALAPPDATA%\Programs\gh`); // the per-user copy was replaced by the machine-wide one
     expect(claude).not.toContain("There is no `gh` here");
     // No control characters other than line breaks and tabs (an earlier edit turned `\b` into a backspace).
     const control = [...claude].filter((ch) => ch.charCodeAt(0) < 32 && !["\n", "\r", "\t"].includes(ch));

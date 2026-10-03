@@ -129,8 +129,8 @@ seeds (spec 0004) and clearing the dashboard cache afterwards, which stay manual
 
 ## Open questions
 
-- Whether GitHub's runners can reach the droplet's SSH port and the database (a network restriction on either
-  would show on the first manual `dry_run`: step "Reach production"). Nothing can be settled from here.
+None. (Settled on 2026-10-03: GitHub's runners reach the droplet's SSH port and the database; the first manual
+`dry_run` and the first real run both went through.)
 
 ## Notes
 
@@ -147,6 +147,11 @@ seeds (spec 0004) and clearing the dashboard cache afterwards, which stay manual
 - Migration file names are the record of what is applied, so a file must never be renamed after it was
   merged (the one rename done before the first deploy of `0024_friends.sql` was possible only because nothing
   had been applied yet).
+- **State on 2026-10-03**: the deploy key is installed on the droplet behind `deploy/ssh-gate.sh`, the secrets
+  `DEPLOY_SSH_KEY` and `DEPLOY_KNOWN_HOSTS` are set (`SUPABASE_DB_URL` already was), and a first real run started by
+  hand (`dry_run` off, `baseline` `0024_friends.sql`) recorded the 9 files as applied, pushed `c09dedb`, saw the
+  server build and report `Deployed`, and passed the smoke test. What is still to be seen is a run started by a merge
+  by itself; the spec becomes Done after that.
 - "What production runs" is where its `main` points. After a push whose build failed on the server that is the
   commit that failed, so re-running the workflow skips it: merge a fix, or rebuild on the server by hand (the
   hook, `deploy/README.md`). The workflow fails in that case (AC-7); it does not retry by itself.
