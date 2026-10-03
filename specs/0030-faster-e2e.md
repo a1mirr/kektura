@@ -49,16 +49,18 @@ else is sent" (`e2e/stamp-dates.spec.ts`). Caching the Supabase Docker images.
   render the dashboard a second time).
 - `e2e/auth.spec.ts` already posts to the route for the invalid-email case, which shows the pattern works.
 
-- Measured in CI, one run per row (the E2E job, single worker on the 2-core runner):
+- Measured in CI (the E2E job, single worker on the 2-core runner). Run-to-run variation is large, about 30 s:
 
-  | | before (`main`, run 56) | after (run 37130160394) |
+  | Run | Whole job | `npm run e2e` step (build + tests) |
   | --- | --- | --- |
-  | Next build before the tests | about 27 s | about 13 s (cache hit) |
-  | Playwright browser install | 30 s | 17 s (cache hit) |
-  | Test phase | 143 s | about 120 s |
-  | Whole job | 4 m 56 s | 4 m 00 s |
+  | `main`, run 56 (before) | 4 m 56 s | 171 s |
+  | caches restored, run 37130160394 | 4 m 00 s | 128 s |
+  | final workflow, run 37130610633 | 4 m 16 s | 145 s |
+  | final workflow, run 37130613212 (pull request event) | 4 m 52 s | 179 s |
 
-  The sign-in change alone is within noise (about 6 s over 67 tests); the caches are most of the gain.
+  Other runs of `main` that day took 5 to 5.5 minutes in total. So the net saving is roughly 30 to 60 s of about
+  5 minutes: the caches are most of it (build 27 s to 13 s, browser install 30 s to 17 s); the sign-in change alone
+  is within noise (about 6 s over 67 tests). Running the suite on 3 workers was slower (AC-5).
 
 ## Coverage
 
@@ -66,6 +68,6 @@ else is sent" (`e2e/stamp-dates.spec.ts`). Caching the Supabase Docker images.
 | --- | --- |
 | AC-1 | `e2e/auth.spec.ts` ("0030 AC-1: the helper's sign-in leaves the session cookies…", which fails if no session reaches the browser); every other E2E test signs in through the helper. Not asserted: that the landing page isn't loaded, and the "refused" error message (both read from `e2e/helpers.ts`) |
 | AC-2 | `e2e/auth.spec.ts` ("0006 AC-3, AC-5 + 0030 AC-2") |
-| AC-3 | manual: the `e2e` job log of a second run on the same lockfile shows "Cache restored" for both caches |
+| AC-3 | manual: the `e2e` job log of a second run on the same lockfile shows "Cache restored" for both caches, and no `fetch-cache` folder is left after the "Drop the restored reference-data cache" step |
 | AC-4 | `tests/slowest-tests.test.ts` (the table); manual: the job summary of a CI run shows it |
 | AC-5 | Removed |
