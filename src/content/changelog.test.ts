@@ -53,10 +53,10 @@ describe("spec 0018: changelog data", () => {
   });
 });
 
-describe("spec 0025: the account page in the changelog", () => {
+describe("spec 0018: the account page in the changelog", () => {
   const entry = CHANGELOG.find((e) => e.date === "2026-10-02")!;
 
-  it("AC-6: the 2026-10-02 entry says Sign out moved to the Account page and Settings is now Account, in every language", () => {
+  it("AC-7: the 2026-10-02 entry says Sign out moved to the Account page and Settings is now Account, in every language", () => {
     const words: Record<string, string[]> = {
       en: ["Sign out", "Account", "Settings"],
       ru: ["Выйти", "Аккаунт", "Настройки"],
@@ -68,7 +68,7 @@ describe("spec 0025: the account page in the changelog", () => {
     }
   });
 
-  it("AC-6: it also says, in every language, that the page exists and that the chart moved there, and none of its items calls the page 'Account settings' any more", () => {
+  it("AC-7: it also says, in every language, that the page exists and that the chart moved there, and none of its items calls the page 'Account settings' any more", () => {
     const claims: Record<string, RegExp[]> = {
       en: [/An Account page/, /chart moved to the Account page/],
       ru: [/Страница «Аккаунт»/, /График.*на страницу «Аккаунт»/],

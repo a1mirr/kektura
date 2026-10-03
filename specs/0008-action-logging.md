@@ -6,7 +6,7 @@ Owner code: `src/app/[locale]/dashboard/actions.ts`, `src/lib/log.ts`
 ## Goal
 
 Stamp actions deliberately turn every error into `{ ok: false, reason: "failed" }` for the client
-(spec 0002 AC-6, AC-7), so today a failure leaves no trace anywhere. Log them on the server so
+(spec 0002 AC-6, AC-7), so a failure would leave no trace. Each one is logged on the server instead, so
 production problems can be found in the host's logs.
 
 ## Behaviour

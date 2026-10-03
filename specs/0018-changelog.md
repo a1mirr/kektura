@@ -5,9 +5,9 @@ Owner code: `src/app/[locale]/(pages)/changelog/page.tsx`, `src/content/changelo
 
 ## Goal
 
-Spec 0014's `/changelog` only says "No recent updates". Give users, in their language, a readable
-history of what changed in the tracker, newest first, written for hikers rather than developers (git
-commit messages are not it). Adding an entry must be a small, safe edit that tests protect.
+`/changelog` gives users, in their language, a readable history of what changed in the tracker, newest first,
+written for hikers rather than developers (git commit messages are not it). Adding an entry is a small, safe edit
+that tests protect.
 
 ## Behaviour
 

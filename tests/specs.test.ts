@@ -152,3 +152,58 @@ describe("spec 0034: the rules are written where authors and the reviewer look",
     expect(hook).toMatch(/app code changed without a spec change/);
   });
 });
+
+// Spec 0034 AC-9: what can be checked mechanically about "a spec mirrors the code". Whether an AC is really
+// satisfied only a person or the reviewer can tell; these catch the drift that leaves a trace.
+describe("spec 0034: specs and the repository agree", () => {
+  const skipDirs = new Set(["node_modules", ".git", ".next", ".next-test", ".next-e2e", ".claude", "playwright-report", "test-results"]);
+  const walk = (dir: string): string[] =>
+    fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+      if (skipDirs.has(entry.name)) return [];
+      const full = `${dir}/${entry.name}`;
+      return entry.isDirectory() ? walk(full) : [full];
+    });
+  const root = new URL("..", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1").replace(/\/$/, "");
+  const testFiles = ["src", "tests", "e2e", "scripts"].flatMap((d) => walk(`${root}/${d}`)).filter((f) => /\.(test\.tsx?|spec\.ts)$/.test(f));
+
+  const acsOf = new Map(
+    specFiles.map((name) => [name.slice(0, 4), new Set([...read(specsDir, name).matchAll(/^- \*\*AC-(\d+)\*\*/gm)].map((m) => Number(m[1])))]),
+  );
+
+  it("AC-9: a test title that cites an AC (under describe(\"spec NNNN …\") or as \"NNNN AC-n\") cites one that exists", () => {
+    const dangling: string[] = [];
+    for (const file of testFiles) {
+      let spec: string | null = null;
+      fs.readFileSync(file, "utf8")
+        .split("\n")
+        .forEach((line, i) => {
+          const describe = /describe\(\s*["`']spec (\d{4})/.exec(line);
+          if (describe) spec = describe[1];
+          const title = /\b(?:it|test)(?:\.each\([^)]*\))?\(\s*["`']([^"`']*)/.exec(line);
+          if (!title) return;
+          let current = spec;
+          for (const m of title[1].matchAll(/(?:(\d{4}) )?AC-(\d+)/g)) {
+            if (m[1]) current = m[1];
+            if (current && !acsOf.get(current)?.has(Number(m[2]))) dangling.push(`${file.slice(root.length + 1)}:${i + 1} cites spec ${current} AC-${m[2]}`);
+          }
+        });
+    }
+    expect(dangling).toEqual([]);
+  });
+
+  it("AC-9: repository files named in backticks by a Done or Accepted spec exist", () => {
+    const rooted = /^(src|scripts|e2e|tests|supabase|deploy|public|messages|specs|tasks|\.github|\.githooks)\//;
+    const loose = new Set(["playwright.config.ts", "next.config.ts", "package.json", "tsconfig.json", "CLAUDE.md", "README.md"]);
+    const missing: string[] = [];
+    for (const name of specFiles) {
+      const text = read(specsDir, name);
+      if (!/^Status: (Done|Accepted)\s*$/m.test(text)) continue;
+      for (const m of text.matchAll(/`([^`\s]+)`/g)) {
+        const path = m[1].replace(/[,.;:)]+$/, "");
+        if (!(rooted.test(path) || loose.has(path)) || /[*<>{}$|]|\.\.\.|NNNN/.test(path)) continue;
+        if (!fs.existsSync(`${root}/${path}`)) missing.push(`${name}: ${path}`);
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+});

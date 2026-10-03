@@ -5,10 +5,9 @@ Owner code: `src/app/[locale]/(pages)/about/page.tsx`, `src/lib/trail-facts.ts`,
 
 ## Goal
 
-Spec 0014 added `/about` as a stub (a title and one sentence). Make it a real page for visitors who
-haven't signed in yet and for users who wonder where the numbers come from: what the app is, how
-progress is counted, where the data comes from, and what happens to their data. Everything it says must
-be true of the app today.
+`/about` is a real page for visitors who haven't signed in yet and for users who wonder where the numbers
+come from: what the app is, how progress is counted, where the data comes from, and what happens to their data.
+Everything it says is true of the app today.
 
 ## Behaviour
 
@@ -60,8 +59,7 @@ document).
   affiliated with MTSZ" sentence, and the wording of "Your data" (checked against the code and the
   migration, not against a lawyer).
 - 0014 AC-2 (`/about` renders information about the app) is detailed here.
-- The other 0014 pages still call `setRequestLocale(locale as any)`; the about page narrows the locale
-  with `hasLocale` like every other page (CLAUDE.md, Gotchas).
+- The page narrows the locale with `hasLocale` like every other page (spec 0005 AC-8).
 
 ## Coverage
 

@@ -74,7 +74,7 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0007](0007-ci.md) | CI, E2E caches and timing report, generated-types check, Dependabot | Done |
 | [0008](0008-action-logging.md) | Server-side logging of failed stamp actions | Done |
 | [0012](0012-backups.md) | Weekly backup of production user data | Done |
-| [0014](0014-pages-and-settings.md) | Footer pages, account page, account deletion | Done |
+| [0014](0014-pages-and-settings.md) | Footer pages, account page (sign out, chart, account deletion) | Done |
 | [0016](0016-stamp-dates.md) | Stamp dates: validation, own time zone, safe editing, the yyyy-mm-dd field | Done |
 | [0017](0017-feedback.md) | Feedback form with Telegram notifications | Done |
 | [0018](0018-changelog.md) | Changelog page | Done |
@@ -85,7 +85,6 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0022](0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Done |
 | [0023](0023-feature-flags.md) | Feature flags | Draft |
 | [0024](0024-friends-sharing.md) | Sharing progress with friends | Done |
-| [0025](0025-account-page.md) | Account page: sign out moves in, "Settings" becomes "Account" | Done |
 | [0026](0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Accepted |
 | [0027](0027-feature-flags-via-telegram.md) | Switching feature flags from the Telegram bot | Draft |
 | [0028](0028-landing-screenshots.md) | Screenshots on the landing page | Draft |

@@ -1,6 +1,6 @@
 # 0036: Turn the existing specs into area specs and tasks
 
-Status: Open
+Status: In progress
 Specs: all of `specs/` (0001-0033)
 
 ## Goal
@@ -12,11 +12,11 @@ migrations that carry spec numbers don't all move at once.
 
 ## Done when
 
-- [ ] Every spec was read against the code, and each AC that the code does not satisfy was fixed in the code or marked `Removed` or corrected in the spec
-- [ ] Each area has one spec; a spec absorbed into another moves to `tasks/` (`git mv`: number and history stay), its "Spec changes" section maps old ACs to new ones, and its tests and code comments cite the new spec
-- [ ] Task-shaped specs became tasks (history only), their lasting rules moved into the area spec
-- [ ] Goals and Notes of the remaining specs describe the area, not a change
-- [ ] The indexes in `specs/README.md` and `tasks/README.md` are true
+- [ ] Every spec was read against the code, and each AC that the code does not satisfy was fixed in the code or marked `Removed` or corrected in the spec (see Progress for what was read and what is left)
+- [x] Each area has one spec (the drafts fold into their area when they are built); a spec absorbed into another moves to `tasks/` (`git mv`: number and history stay), its "Spec changes" section maps old ACs to new ones, and its tests and code comments cite the new spec
+- [x] Task-shaped specs became tasks (history only), their lasting rules moved into the area spec
+- [x] Goals and Notes of the remaining specs describe the area, not a change
+- [x] The indexes in `specs/README.md` and `tasks/README.md` are true
 
 ## Proposed grouping
 
@@ -41,15 +41,31 @@ Task-only (no lasting behaviour): 0009 and 0011 mostly, 0010, 0025, 0030, 0031.
 
 ## Progress
 
-A few related areas per pull request; each step audits the area's ACs against the code and the tests (a script lists ACs that no
-test cites), then folds, moves and re-cites.
+Folded and moved (the old file is now a task, its ACs are mapped in its "Spec changes"):
 
-- [x] Stamping, progress, map, sign-in and translations: 0002 absorbed 0009; 0001 absorbed 0013; 0003 absorbed 0011 (as AC-17, the structure); 0005 absorbed 0010 (AC-7, AC-8). Trail data (0004) and translated descriptions (0033) stay two specs: 0033 is already an area spec. Finding: the committed seeds predate the cleanup that 0004 AC-9 describes (task 0037)
-- [x] Stamping detail: 0002 absorbed 0009 (AC-13 to AC-16); 0016 absorbed 0032 (AC-5, AC-6, AC-9 to AC-11) and gained AC-12 for behaviour that was tested but not stated (the field follows the server's date)
+- 0002 absorbed 0009 (AC-13 to AC-16); 0016 absorbed 0032 (AC-5, AC-6, AC-9 to AC-11) and gained AC-12 for behaviour that was tested but not stated (the field follows the server's date)
+- 0001 absorbed 0013 (AC-12 to AC-15)
+- 0003 absorbed 0011 as AC-17 (the structure of the map code)
+- 0005 absorbed 0010 (AC-7, AC-8)
+- 0006 absorbed 0030 AC-1, AC-2 (AC-8, AC-9) and 0007 absorbed 0030 AC-3, AC-4 (AC-6, AC-7)
+- 0014 absorbed 0025 (AC-14 to AC-18); the tests of the changelog entry about it now cite 0018 AC-7
+- Stay as they are: 0004 and 0033 (two areas, trail data and the translations), 0020 and 0026 (origin helper and deploy files, and the automatic deploy), and the drafts 0023, 0027, 0028, 0029, 0031 (0027 folds into 0023 and 0031 into 0007 when they are built)
+
+Goals and Notes that told a story were rewritten to describe the area: 0007, 0008, 0015, 0017, 0018, 0019, 0020, 0026.
+
+Checked against the repository, with scripts (now partly permanent: `tests/specs.test.ts`, spec 0034 AC-9):
+
+- every AC of every spec is cited by a test title or has a `manual` coverage row (the script lists the rest: none is left that no test or manual row covers; 0002 AC-12 points to 0016, 0005 AC-2 and AC-3 are cited as "0005 AC-n" in `e2e/auth.spec.ts`)
+- no test title cites an AC that does not exist; every file that a Done or Accepted spec names exists
+- the links of spec 0019 all answer 200 today (2026-10-03)
+
+Findings: the committed seeds predate the cleanup that 0004 AC-9 describes (task 0037); 0015 carried a note about `as any` that is no longer true (removed); the deploy workflow's "pick the commit" step has no retry and failed once on a GitHub API 504 (merge of #28, a docs-only change, so nothing was lost).
+
+Still to do: read these specs line by line against the code, not only through their tests: 0008, 0012, 0015 to 0019, 0021, 0022, 0024, 0033, and the ACs of 0001, 0003, 0004 and 0005 that are `manual`.
 
 ## Spec changes
 
-Recorded per step (see Progress).
+See Progress for each step; the mapping from old ACs to new ones is in the "Spec changes" of every moved task.
 
 ## Notes
 

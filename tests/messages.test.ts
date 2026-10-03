@@ -55,17 +55,17 @@ describe("spec 0015: about page text", () => {
   });
 });
 
-describe("spec 0025: the account page has one name in every language", () => {
+describe("spec 0014: the account page has one name in every language", () => {
   const expected = { en: "Account", ru: "Аккаунт", hu: "Fiók" };
 
-  it.each(Object.entries(expected))("AC-5: %s: the header link, the page title and the About page's link text say %s", (locale, name) => {
+  it.each(Object.entries(expected))("AC-18: %s: the header link, the page title and the About page's link text say %s", (locale, name) => {
     const messages = { en, ru, hu }[locale as keyof typeof expected];
     expect(messages.dashboard.account).toBe(name);
     expect(messages.account.title).toBe(name);
     expect(messages.about.data3).toContain(`<account>${name}</account>`);
   });
 
-  it.each(Object.entries(expected))("AC-5: %s: nothing is still called settings", (locale) => {
+  it.each(Object.entries(expected))("AC-18: %s: nothing is still called settings", (locale) => {
     const messages = flatten({ en, ru, hu }[locale as keyof typeof expected]);
     expect([...messages.keys()].filter((key) => /(^|\.)settings(\.|$)|signOut/.test(key) && key !== "account.signOut")).toEqual([]);
   });

@@ -6,11 +6,10 @@ Owner code: `src/lib/origin.ts`, `src/app/auth/callback/route.ts`, `src/app/auth
 
 ## Goal
 
-Behind Caddy, `request.url` of a route handler says `localhost`, so redirects built from it send the user to
-the wrong address. Commits `6009201` and `4334067` fixed that by pasting the same few lines into two route
-handlers: they trust `x-forwarded-host` and `host` as they come (a missing host gives `http://null/…`) and
-assume `http` when `x-forwarded-proto` is absent. Make that one tested helper, and put the server scripts
-that were added to the repository root in one place, in a form that can't deploy a broken build.
+Behind Caddy, `request.url` of a route handler says `localhost`, so a redirect built from it would send the user
+to the wrong address. One tested helper decides the public origin of a request (it never trusts a header blindly
+and never produces `http://null/…`), and everything that runs production lives in `deploy/`, in a form that can't
+deploy a broken build.
 
 ## Behaviour
 
@@ -38,8 +37,8 @@ that were added to the repository root in one place, in a form that can't deploy
   variables, how to deploy, roll back and read logs).
 - **AC-5**: The deploy hook stops at the first failing step (`set -euo pipefail`), so a failed install or
   build never reloads the running app; it deploys only pushes to `main`.
-- **AC-6**: The three obsolete root scripts (`caddy_setup.sh`, `caddy_fix.sh`, `final_caddy.sh`: three
-  different Caddy configurations, one of them HTTP only) are gone; what they did once is in the README.
+- **AC-6**: The repository root holds no server scripts: there is one Caddy configuration, `deploy/Caddyfile`
+  (HTTPS), and what the earlier ad-hoc setup scripts did is in the README.
 
 ## Out of scope
 

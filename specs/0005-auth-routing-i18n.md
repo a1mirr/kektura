@@ -24,10 +24,9 @@ complete in all three languages, with message keys and locales checked at compil
   the request's own origin and the validated locale, so it cannot point at another site.
 - **AC-5**: All three message files have exactly the same keys, the same ICU placeholders per key,
   and no empty strings.
-- **AC-6**: "Sign out" (a button on the account page, spec 0025) is a plain form POST to `/auth/sign-out`: it works before the page has
+- **AC-6**: "Sign out" (a button on the account page, spec 0014 AC-16) is a plain form POST to `/auth/sign-out`: it works before the page has
   hydrated, revokes the session at Supabase from the server, clears the session cookies and returns
   to the landing page in the current locale.
-
 - **AC-7**: Message keys are typed from `messages/en.json`, the reference locale: an unknown key or namespace in
   `useTranslations` / `getTranslations` (namespaced or not) fails `npm run typecheck`.
 - **AC-8**: The `Locale` type is `ru | en | hu`, derived from `src/i18n/routing.ts`, so a page that reads
@@ -41,7 +40,7 @@ complete in all three languages, with message keys and locales checked at compil
   holds types (`import type`), so nothing of it reaches the bundle. It is a `.ts`, not a `.d.ts`, on purpose:
   `skipLibCheck` would stop `tsc` from reporting a broken import in a declaration file.
 - ICU arguments are not typed (a missing `{km}` compiles). They would need the literal type of each message
-  string, which a JSON import does not give: next-intl's plugin generates a `messages/en.d.json.ts` for that, and
+  string, which a JSON import does not give: next-intl's plugin generates a declaration file next to the messages for that, and
   this project wires next-intl without the plugin (`CLAUDE.md`, `next.config.ts`). `tests/messages.test.ts` checks
   that all three locales use the same placeholders instead (AC-5).
 

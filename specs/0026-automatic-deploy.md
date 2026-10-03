@@ -8,11 +8,11 @@ Owner code: `.github/workflows/deploy.yml`, `scripts/migrate-production.mjs`, `s
 
 ## Goal
 
-Today a merged change reaches production only when someone runs the same manual sequence by hand: apply the new
-migrations through the Supabase MCP, check the generated types and the advisors, then `git push production main`
-(`CLAUDE.md`, spec 0020). It is easy to do in the wrong order or to forget, and a merged pull request that sits
-undeployed is invisible. After a merge to `main` with green CI, production should update itself: migrations
-first, then the code, then a check that the site answers, and a failure must stop the chain and say so.
+After a merge to `main` with green CI, production updates itself: migrations first, then the code, then a check
+that the site answers, and a failure stops the chain and says so. The manual sequence (apply the new migrations,
+check the generated types and the advisors, then `git push production main`, `CLAUDE.md`, spec 0020) stays as the
+fallback for a rollback or a broken workflow: done by hand it is easy to get in the wrong order or to forget, and a
+merged pull request that sits undeployed is invisible.
 
 ## Decisions
 
@@ -126,11 +126,6 @@ leaves that to be tried on the server first); automatic rollback of a deployed b
 the Supabase advisors (they exist only in the Supabase MCP, so they stay a manual look after a schema change);
 turning feature flags on (a flag is switched by hand on the server, spec 0023 and 0024); applying regenerated trail
 seeds (spec 0004) and clearing the dashboard cache afterwards, which stay manual (`deploy/README.md`).
-
-## Open questions
-
-None. (Settled on 2026-10-03: GitHub's runners reach the droplet's SSH port and the database; the first manual
-`dry_run` and the first real run both went through.)
 
 ## Notes
 
