@@ -26,7 +26,7 @@ Stack: Next.js 16 (App Router, TS, Tailwind 4), next-intl (`ru` default, `en`, `
 - Trail data, sources and regeneration (`scripts/build-data.mjs`; never hand-edit its outputs): spec 0004
 - Auth, routing, translations: spec 0005; test server, dummy login, E2E: spec 0006
 - Footer pages and the account page (sign out, delete account, the `/settings` redirect): specs 0014, 0025; About page (its text must stay true: no "open source"/"PWA" until they are): 0015; changelog (`src/content/changelog.ts`): 0018; useful links (`src/content/links.ts`): 0019
-- Stamp dates (`src/lib/stamp-date.ts`, `StampDateInput`): spec 0016; feedback form + Telegram notifications: 0017; request origin behind the proxy and the `deploy/` files: 0020; pull-request-only guard: 0021; fresh-context review before merge: 0022
+- Stamp dates (`src/lib/stamp-date.ts`, `StampDateInput`): spec 0016; feedback form + Telegram notifications: 0017; request origin behind the proxy and the `deploy/` files: 0020; pull-request-only guard: 0021; fresh-context review before merge: 0022; friends (behind `FF_FRIENDS=1`, off in production until switched on; every friendship write goes through `security definer` functions): 0024
 
 ## Gotchas
 - `next.config.ts` wires next-intl by hand: `createNextIntlPlugin` loads native `@swc/core`, which fails on this Windows machine. Its `distDir` comes from `NEXT_DIST_DIR` (`.next-test` / `.next-e2e` for the test servers).

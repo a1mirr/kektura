@@ -107,7 +107,7 @@
     "data3": "A fiókodat és az összes bélyegzésedet bármikor törölheted a <account>Fiók</account> oldalon. A már elküldött visszajelzések megmaradnak, de már nem kapcsolódnak hozzád.",
     "contactTitle": "Kérdésed vagy ötleted van?",
     "contactText": "Hibát találtál, vagy van ötleted a követőhöz? Írd meg a <feedback>visszajelzési űrlapon</feedback>.",
-    "data4": "Ha barátokkal kapcsolódsz, láthatják a megjelenített nevedet és a szakaszonkénti haladásodat (hivatalos bélyegzők, kilométerek, szakaszok). Nem láthatják a bélyegzések dátumát, a jegyzeteket és az extra bélyegzőket. A haladásod megosztását bármikor leállíthatod a Barátok oldalon."
+    "data4": "Ha barátokkal kapcsolódsz, láthatják a megjelenített nevedet és a szakaszonkénti haladásodat (hivatalos bélyegzők, kilométerek, szakaszok). Nem láthatják a bélyegzések dátumát és az extra bélyegzőket. A haladásod megosztását bármikor leállíthatod a Barátok oldalon."
   },
   "changelog": {
     "title": "Változások",
@@ -175,25 +175,23 @@
     "acceptedTitle": "Barátok",
     "noFriends": "Még nem adtál hozzá barátokat.",
     "remove": "Eltávolítás",
-    "stampsCount": "bélyegző",
     "startSharing": "Megosztás indítása",
     "stopSharing": "Megosztás leállítása",
     "isSharing": "Haladás megosztása",
     "notSharing": "Haladás nincs megosztva",
-    "invalidLink": "Érvénytelen link",
-    "invalidLinkDesc": "Ez a meghívó link érvénytelen vagy visszavonták.",
-    "signInToConnect": "Jelentkezz be, hogy kapcsolódj {name} felhasználóval.",
     "ownLink": "Ez a saját meghívó linked.",
-    "connectWith": "Kapcsolódás {name} felhasználóval?",
     "sendRequest": "Kérés küldése",
-    "unknown_user": "Ismeretlen",
     "invalidToken": "Ez a link nem érvényes",
     "inviteFrom": "Meghívó tőle: {name}",
-    "stagesCount": "szakasz",
     "error_invalid_token": "Ez a meghívó érvénytelen.",
     "error_own_token": "Nem hívhatod meg magad.",
     "error_already_friends": "Már barátok vagytok.",
     "error_already_pending": "Már küldtél kérést.",
-    "error_failed": "Hiba történt, próbáld újra."
+    "error_failed": "Hiba történt, próbáld újra.",
+    "summary": "{stamps} / {total} bélyegző · {km} · befejezett szakaszok: {stages}",
+    "displayNameLabel": "A neved (a barátaid látják)",
+    "displayNameSave": "Mentés",
+    "inviteSignIn": "Meghívtak barátnak a Kéktúra-követőben. Jelentkezz be a folytatáshoz.",
+    "error_unauthorized": "Előbb jelentkezz be."
   }
 }

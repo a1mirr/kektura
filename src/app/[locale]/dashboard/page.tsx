@@ -2,9 +2,9 @@ import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link, redirect } from "@/i18n/navigation";
-import { isFriendsEnabled } from "@/app/[locale]/(pages)/friends/actions";
 import { routing } from "@/i18n/routing";
 import { loadDashboardData } from "@/lib/dashboard-data";
+import { friendsEnabled } from "@/lib/friends-flag";
 import { createClient } from "@/lib/supabase/server";
 import {
   buildPlaces,
@@ -96,8 +96,14 @@ export default async function Dashboard({
         <h1 className="text-2xl font-bold text-blue-700">{t("title")}</h1>
         <div className="flex items-center gap-4">
           <LocaleSwitcher />
-          {(await isFriendsEnabled()) && <Link href="/friends" className="text-sm text-stone-600 hover:underline">{t("friends")}</Link>}
-          <Link href="/account" className="text-sm text-stone-600 hover:underline">{t("account")}</Link>
+          {friendsEnabled() && (
+            <Link href="/friends" className="text-sm text-stone-600 hover:underline">
+              {t("friends")}
+            </Link>
+          )}
+          <Link href="/account" className="text-sm text-stone-600 hover:underline">
+            {t("account")}
+          </Link>
         </div>
       </header>
 

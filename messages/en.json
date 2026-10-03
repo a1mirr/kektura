@@ -107,7 +107,7 @@
     "data3": "You can delete your account and all your stamps at any time on the <account>Account</account> page. Feedback messages you have already sent are kept, but are no longer linked to you.",
     "contactTitle": "Questions or ideas?",
     "contactText": "Found a bug or have an idea for the tracker? Send it through the <feedback>feedback form</feedback>.",
-    "data4": "If you connect with friends, they can see your display name and your stage-by-stage progress (official stamps, kilometres, stages). They cannot see your stamp dates, notes, or extra stamps. You can stop sharing your progress with a friend at any time on the Friends page."
+    "data4": "If you connect with friends, they can see your display name and your stage-by-stage progress (official stamps, kilometres, stages). They cannot see your stamp dates or extra stamps. You can stop sharing your progress with a friend at any time on the Friends page."
   },
   "changelog": {
     "title": "Changelog",
@@ -175,25 +175,23 @@
     "acceptedTitle": "Friends",
     "noFriends": "You haven't added any friends yet.",
     "remove": "Remove",
-    "stampsCount": "stamps",
     "startSharing": "Start sharing",
     "stopSharing": "Stop sharing",
     "isSharing": "Sharing progress",
     "notSharing": "Not sharing progress",
-    "invalidLink": "Invalid link",
-    "invalidLinkDesc": "This invite link is not valid or has been revoked.",
-    "signInToConnect": "Sign in to connect with {name}.",
     "ownLink": "This is your own invite link.",
-    "connectWith": "Connect with {name}?",
     "sendRequest": "Send request",
-    "unknown_user": "Unknown",
     "invalidToken": "This link is not valid",
     "inviteFrom": "Invite from {name}",
-    "stagesCount": "stages",
     "error_invalid_token": "This invite link is invalid.",
     "error_own_token": "You cannot invite yourself.",
     "error_already_friends": "You are already friends.",
     "error_already_pending": "You already sent a request.",
-    "error_failed": "Something went wrong, please try again."
+    "error_failed": "Something went wrong, please try again.",
+    "summary": "{stamps} of {total} stamps · {km} · stages completed: {stages}",
+    "displayNameLabel": "Your name (shown to friends)",
+    "displayNameSave": "Save",
+    "inviteSignIn": "You have been invited to connect on the Kéktúra tracker. Sign in to continue.",
+    "error_unauthorized": "Please sign in first."
   }
 }

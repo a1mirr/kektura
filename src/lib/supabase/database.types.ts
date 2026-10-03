@@ -120,6 +120,9 @@ isOneToOne: false
             "approve_request":
 { Args: { "requester_id": string }; Returns: undefined
                            },
+"default_display_name":
+{ Args: { "meta": Json,"uid": string }; Returns: string
+                           },
 "delete_user_account":
 { Args: Record<PropertyKey, never>; Returns: undefined
                            },
@@ -130,17 +133,26 @@ isOneToOne: false
                            },
 "get_inviter_info":
 { Args: { "token": string }; Returns: {
-              "inviter_id": string,"display_name": string
+              "display_name": string,"is_own": boolean
             }[]
+                           },
+"get_my_invite_token":
+{ Args: Record<PropertyKey, never>; Returns: string
                            },
 "ignore_request":
 { Args: { "requester_id": string }; Returns: undefined
+                           },
+"regenerate_invite":
+{ Args: Record<PropertyKey, never>; Returns: undefined
                            },
 "remove_friend":
 { Args: { "other_id": string }; Returns: undefined
                            },
 "send_request":
 { Args: { "token": string }; Returns: string
+                           },
+"set_display_name":
+{ Args: { "name": string }; Returns: undefined
                            },
 "set_sharing":
 { Args: { "other_id": string,"sharing": boolean }; Returns: undefined

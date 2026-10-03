@@ -4,12 +4,15 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "../../messages/en.json";
 import type { ActionResult } from "@/lib/action-result";
+import { maxStampDate } from "@/lib/stamp-date";
 
 const refresh = vi.fn();
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ refresh }) }));
 
 import StampDateInput from "./StampDateInput";
 
+// The first day the component rejects: the day after tomorrow (UTC), whenever the tests run.
+const PAST_MAX = new Date(Date.parse(maxStampDate()) + 86_400_000).toISOString().slice(0, 10);
 const MAX = "2999-12-31"; // the page passes tomorrow (UTC); anything above it is out of range for the field
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => {
@@ -89,7 +92,7 @@ describe("spec 0016: the date field", () => {
   it("AC-6: never sends an empty, below-range or above-range date, nor the unchanged one", async () => {
     const onSave = ok();
     const { input } = setup(onSave);
-    for (const value of ["", "1937-12-31", "0002-10-02", "2026-10-04", "2999-01-01", "2026-09-01"]) {
+    for (const value of ["", "1937-12-31", "0002-10-02", PAST_MAX, "2999-01-01", "2026-09-01"]) {
       await edit(input, value);
       await wait(2000);
     }

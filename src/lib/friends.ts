@@ -1,7 +1,15 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 import { getReferenceData } from "./dashboard-data";
-import { buildPlaces, stampedPlaceKeys, walkedRanges, progressSummary, buildStages } from "./progress";
+import {
+  buildPlaces,
+  buildStages,
+  progressSummary,
+  stampedPlaceKeys,
+  walkedRanges,
+  type Checkpoint,
+  type StageMeta,
+} from "./progress";
 import stagesData from "../../scripts/data/okt-stages.json";
 
 export type Friend = {
@@ -57,16 +65,18 @@ export async function getFriends(supabase: SupabaseClient<Database>): Promise<Fr
   return result;
 }
 
-export async function getFriendProgress(friend: Friend) {
-  const { checkpoints } = await getReferenceData();
+// Spec 0024 AC-8: a friend's numbers come from the same functions as the owner's dashboard (progress.ts),
+// computed from the stamped checkpoint ids. A stage is completed when all of its places are stamped.
+export function summarizeFriend(checkpoints: Checkpoint[], checkpointIds: number[], stagesMeta: StageMeta[]) {
   const places = buildPlaces(checkpoints);
-  const stampedKeys = stampedPlaceKeys(places, (friend.stamps ?? []).map(s => ({ checkpoint_id: s.checkpoint_id, stamped_on: '2000-01-01' })));
-  const ranges = walkedRanges(places, stampedKeys);
-  const summary = progressSummary(places, ranges);
-  
-  const stages = buildStages(places, stagesData.stages);
-  const completedStages = stages.filter(s => s.places.every(p => stampedKeys.has(p.key))).length;
-  
+  const stampedKeys = stampedPlaceKeys(places, checkpointIds.map((id) => ({ checkpoint_id: id, stamped_on: "" })));
+  const summary = progressSummary(places, walkedRanges(places, stampedKeys));
+  const stages = buildStages(places, stagesMeta);
+  const completedStages = stages.filter((s) => s.places.every((p) => stampedKeys.has(p.key))).length;
   return { summary, places, stampedKeys, completedStages };
 }
 
+export async function getFriendProgress(friend: Friend) {
+  const { checkpoints } = await getReferenceData();
+  return summarizeFriend(checkpoints, (friend.stamps ?? []).map((s) => s.checkpoint_id), stagesData.stages);
+}

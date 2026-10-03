@@ -4,20 +4,19 @@ import { routing } from '@/i18n/routing';
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server';
 import { getFriends, getFriendProgress } from '@/lib/friends';
 import { createClient } from '@/lib/supabase/server';
-import { isFriendsEnabled } from '../actions';
+import { friendsEnabled } from '@/lib/friends-flag';
 import { buildStages } from '@/lib/progress';
 import stagesData from '../../../../../../scripts/data/okt-stages.json';
 import { Link } from '@/i18n/navigation';
 import StageControls from '@/components/StageControls';
 import StageSection from '@/components/StageSection';
-import LocateButton from '@/components/LocateButton';
 
 export default async function FriendPage({
   params,
 }: {
   params: Promise<{ locale: string; id: string }>;
 }) {
-  if (!(await isFriendsEnabled())) notFound();
+  if (!friendsEnabled()) notFound();
   const { locale, id } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
@@ -102,13 +101,6 @@ export default async function FriendPage({
                       ))}
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
-                      <LocateButton
-                        kind="place"
-                        keyId={p.key}
-                        name={p.name}
-                        lat={Number(p.variants[0].lat)}
-                        lng={Number(p.variants[0].lng)}
-                      />
                       <div className="flex h-10 w-10 items-center justify-center">
                         {stampedKeys.has(p.key) && (
                           <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">

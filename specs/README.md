@@ -75,5 +75,5 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0021](0021-pull-requests-only.md) | main only changes through pull requests (local pre-push guard) | Done |
 | [0022](0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Done |
 | [0023](0023-feature-flags.md) | Feature flags | Draft |
-| [0024](0024-friends-sharing.md) | Sharing progress with friends | Accepted |
+| [0024](0024-friends-sharing.md) | Sharing progress with friends | Done |
 | [0025](0025-account-page.md) | Account page: sign out moves in, "Settings" becomes "Account" | Done |
