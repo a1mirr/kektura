@@ -90,13 +90,13 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
 
     await expectFits("every stage collapsed", false);
 
-    // A date field next to the buttons is the widest a row gets: stamp a place and an extra stamp.
+    // A date field with its calendar button next to the buttons is the widest a row gets: stamp a place and an extra stamp.
     await page.goto("/en/dashboard");
     await expandAllStages(page);
     await place(page, "OKTPH_01_DDKPH_01").getByRole("button", { name: "Add stamp" }).click();
     await page.locator("#extra-stamps li").first().getByRole("button", { name: "Add stamp" }).click();
-    await expect(place(page, "OKTPH_01_DDKPH_01").locator("input[type=date]")).toBeVisible();
-    await expect(page.locator("#extra-stamps li").first().locator("input[type=date]")).toBeVisible();
+    await expect(place(page, "OKTPH_01_DDKPH_01").getByRole("button", { name: "Open calendar" })).toBeVisible();
+    await expect(page.locator("#extra-stamps li").first().getByRole("button", { name: "Open calendar" })).toBeVisible();
 
     await expectFits("stamped rows, every stage expanded", true); // the open stages are remembered across languages
   });
