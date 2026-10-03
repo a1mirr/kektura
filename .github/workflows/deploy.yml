@@ -73,6 +73,32 @@ jobs:
         with:
           node-version: 24
 
+      # GitHub's API now and then answers 5xx (a 504 failed the run for a docs-only merge before anything was decided),
+      # so the `gh` calls below go through this helper: up to four attempts with a short pause, and the last
+      # failure is the call's failure, so a real error still fails the step (and the run, and the message).
+      - name: Define the retry helper for GitHub API calls
+        if: env.CONFIGURED == 'true'
+        run: |
+          cat > "$RUNNER_TEMP/gh-retry.sh" <<'EOF'
+          # Runs a command and prints the output of the attempt that worked; a failed attempt's stdout is dropped.
+          gh_retry() {
+            local attempt rc out
+            for attempt in 1 2 3 4; do
+              rc=0
+              out=$("$@") || rc=$?
+              if [ "$rc" -eq 0 ]; then
+                printf '%s\n' "$out"
+                return 0
+              fi
+              if [ "$attempt" -eq 4 ]; then
+                return "$rc"
+              fi
+              echo "::warning title=GitHub API call failed::Attempt $attempt of 4 failed (exit $rc); trying again in $((attempt * 5)) s." >&2
+              sleep $((attempt * 5))
+            done
+          }
+          EOF
+
       # What to deploy: the newest commit of main whose CI passed. After a merge that is the newest CI run on main
       # that succeeded, not the run that happened to start this workflow: CI runs can finish out of merge order, and
       # a waiting run may have replaced a newer one. By hand it is the tip of main (checked for CI below).
@@ -83,8 +109,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          source "$RUNNER_TEMP/gh-retry.sh"
           if [ "$GITHUB_EVENT_NAME" = "workflow_run" ]; then
-            sha=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --branch main --event push --status success --limit 1 --json headSha --jq '.[0].headSha // empty')
+            sha=$(gh_retry gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --branch main --event push --status success --limit 1 --json headSha --jq '.[0].headSha // empty')
           else
             sha="$GITHUB_SHA"
           fi
@@ -123,7 +150,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          passed=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --commit "$TARGET_SHA" --json conclusion --jq '[.[] | select(.conclusion == "success")] | length')
+          source "$RUNNER_TEMP/gh-retry.sh"
+          passed=$(gh_retry gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --commit "$TARGET_SHA" --json conclusion --jq '[.[] | select(.conclusion == "success")] | length')
           if [ "$passed" -lt 1 ]; then
             echo "::error title=CI has not passed on this commit::Wait for CI on ${TARGET_SHA:0:7} to finish and pass, or fix it. A run started by hand deploys only a commit whose CI passed."
             exit 1

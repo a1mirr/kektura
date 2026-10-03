@@ -84,6 +84,78 @@ describe("spec 0026: the deploy workflow", () => {
     });
   });
 
+  describe("task 0038: the reads of GitHub's API retry before they fail the deploy (no AC states this; AC-9 still holds: a real failure fails the run)", () => {
+    // The helper is written to a file by its own step; this is that file, as the shell will see it.
+    const helper = () => {
+      const text = step("Define the retry helper for GitHub API calls");
+      const body = /<<'EOF'\n([\s\S]*?)\n {10}EOF/.exec(text)![1];
+      return body.replace(/^ {10}/gm, "");
+    };
+    // Runs `gh_retry gh ...` with a stub `gh` that fails `failures` times (exit 22, after printing "partial" on stdout
+    // and a 504 on stderr) and then prints "ok", and a stub `sleep` that only records its argument.
+    const run = (failures: number) => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), "retry-"));
+      const slash = (p: string) => p.replace(/\\/g, "/");
+      const readLines = (name: string) => {
+        const file = path.join(dir, name);
+        return fs.existsSync(file) ? fs.readFileSync(file, "utf8").trim().split("\n") : [];
+      };
+      const script = [
+        helper(),
+        `calls=${slash(path.join(dir, "calls"))}; naps=${slash(path.join(dir, "naps"))}`,
+        `gh() { echo x >> "$calls"; if [ "$(wc -l < "$calls")" -le ${failures} ]; then echo partial; echo "HTTP 504" >&2; return 22; fi; echo ok; }`,
+        'sleep() { echo "$1" >> "$naps"; }',
+        "set -euo pipefail",
+        "out=$(gh_retry gh run list)",
+        'echo "out=$out"',
+      ].join("\n");
+      const result = spawnSync("bash", ["-c", script], { encoding: "utf8" });
+      return { status: result.status, stdout: result.stdout, stderr: result.stderr, calls: readLines("calls").length, naps: readLines("naps") };
+    };
+
+    it("defines the helper once, before the first step that calls gh, and every gh call goes through it", () => {
+      const define = "- name: Define the retry helper for GitHub API calls";
+      expect(workflow.indexOf(define)).toBeGreaterThan(-1);
+      expect(workflow.indexOf(define)).toBeLessThan(workflow.indexOf("- name: Pick the commit to deploy"));
+      expect(step("Define the retry helper for GitHub API calls")).toContain("if: env.CONFIGURED == 'true'");
+      const code = lines.filter((line) => !line.trim().startsWith("#"));
+      const calls = code.filter((line) => /(^|[\s($`])gh\s/.test(line));
+      expect(calls.length).toBeGreaterThanOrEqual(2); // the pick and the CI check
+      for (const line of calls) expect(line, line).toMatch(/gh_retry gh /);
+      for (const name of ["Pick the commit to deploy", "Check that CI passed on this commit"]) {
+        expect(step(name), name).toContain('source "$RUNNER_TEMP/gh-retry.sh"');
+      }
+    });
+
+    describe.skipIf(!hasBash)("the helper, run for real with a stub gh", () => {
+      it("a call that works the first time runs once and does not pause", () => {
+        const result = run(0);
+        expect(result.status, result.stderr).toBe(0);
+        expect(result.stdout).toBe("out=ok\n");
+        expect(result.calls).toBe(1);
+        expect(result.naps).toEqual([]);
+      });
+
+      it("recovers from transient failures, pausing a little longer each time, and passes on only the output that worked", () => {
+        const result = run(3);
+        expect(result.status, result.stderr).toBe(0);
+        expect(result.stdout).toBe("out=ok\n"); // not the "partial" that a failed attempt printed
+        expect(result.calls).toBe(4);
+        expect(result.naps).toEqual(["5", "10", "15"]);
+        expect(result.stderr).toContain("::warning title=GitHub API call failed::Attempt 1 of 4 failed");
+      });
+
+      it("a real failure still fails: after the fourth attempt it exits with that attempt's code and passes on no output", () => {
+        const result = run(99);
+        expect(result.status).toBe(22);
+        expect(result.stdout).toBe("");
+        expect(result.calls).toBe(4);
+        expect(result.naps).toEqual(["5", "10", "15"]); // no pause after the last attempt
+        expect(result.stderr).toContain("HTTP 504");
+      });
+    });
+  });
+
   describe("AC-3: a manual run with a dry run that changes nothing", () => {
     it("has a dry_run input that is on by default, and a baseline input", () => {
       expect(workflow).toMatch(/dry_run:\s*\n(\s+.*\n)*?\s+type: boolean\s*\n\s+default: true/);
