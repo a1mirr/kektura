@@ -24,7 +24,7 @@ describe("spec 0001: stamp descriptions", () => {
     }
   });
 
-  it("AC-10: a stamp without a description renders an empty block, not 'null'", () => {
+  it("AC-10: a stamp without a description renders no text, not 'null'", () => {
     const { container } = render(<StampDescriptions descriptions={[null]} />);
     expect(container.textContent).toBe("");
   });
