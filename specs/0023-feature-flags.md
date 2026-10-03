@@ -1,7 +1,7 @@
 # 0023: Feature flags
 
 Status: Draft
-Owner code: `src/lib/feature-flags.ts`, `supabase/migrations/0009_feature_flags.sql`
+Owner code: `src/lib/feature-flags.ts`, `supabase/migrations/NNNN_feature_flags.sql`
 
 ## Goal
 

@@ -36,13 +36,13 @@ export type Database = {
                   ]
                 },"friendships": {
                   Row: {
-                    "created_at": string,"friend_id": string,"friend_is_sharing": boolean,"id": string,"status": string,"updated_at": string,"user_id": string,"user_is_sharing": boolean
+                    "friend_id": string,"friend_is_sharing": boolean,"status": string,"user_id": string,"user_is_sharing": boolean
                   }
                   Insert: {
-                    "created_at"?: string,"friend_id": string,"friend_is_sharing"?: boolean,"id"?: string,"status": string,"updated_at"?: string,"user_id": string,"user_is_sharing"?: boolean
+                    "friend_id": string,"friend_is_sharing"?: boolean,"status": string,"user_id": string,"user_is_sharing"?: boolean
                   }
                   Update: {
-                    "created_at"?: string,"friend_id"?: string,"friend_is_sharing"?: boolean,"id"?: string,"status"?: string,"updated_at"?: string,"user_id"?: string,"user_is_sharing"?: boolean
+                    "friend_id"?: string,"friend_is_sharing"?: boolean,"status"?: string,"user_id"?: string,"user_is_sharing"?: boolean
                   }
                   Relationships: [
                     

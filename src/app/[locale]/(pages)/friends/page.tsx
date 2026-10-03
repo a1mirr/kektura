@@ -6,12 +6,20 @@ import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { friendsEnabled } from "@/lib/friends-flag";
 import { getFriendProgress, getFriends } from "@/lib/friends";
+import { REQUEST_REFUSALS } from "@/lib/friends-input";
 import { originFromHeaders } from "@/lib/origin";
 import { createClient } from "@/lib/supabase/server";
+import type { ActionResult } from "@/lib/action-result";
 import { approveRequest, ignoreRequest, regenerateInvite, removeFriend, setDisplayName, setSharing } from "./actions";
 
-// The `?error=` values the invite page sends back: anything else in the URL is ignored, never shown.
-const ERRORS = ["invalid_token", "own_token", "already_friends", "already_pending", "unauthorized", "failed"] as const;
+// The `?error=` values the page itself sends back (a refused request, or an action that failed): anything
+// else in the URL is ignored, never shown.
+const ERRORS = [...REQUEST_REFUSALS, "unauthorized", "failed"] as const;
+
+// A failed action says so on the reloaded page instead of silently doing nothing.
+function check(locale: (typeof routing.locales)[number], result: ActionResult) {
+  if (!result.ok) redirect({ href: `/friends?error=${result.reason}`, locale });
+}
 
 export default async function FriendsPage({
   params,
@@ -37,12 +45,12 @@ export default async function FriendsPage({
   if (!user) return redirect({ href: "/", locale });
 
   const [friends, { data: token }, { data: profile }] = await Promise.all([
-    getFriends(supabase),
+    getFriends(supabase, user.id),
     supabase.rpc("get_my_invite_token"),
     supabase.from("profiles").select("display_name").eq("id", user.id).single(),
   ]);
 
-  const origin = originFromHeaders(await headers(), "http://localhost:3000");
+  const origin = originFromHeaders(await headers(), "http://localhost");
   const inviteLink = token ? `${origin}/${locale}/friends/invite/${token}` : "";
 
   const pending = friends.filter((f) => f.status === "pending" && !f.isRequester);
@@ -62,17 +70,17 @@ export default async function FriendsPage({
           className="flex gap-2"
           action={async (data: FormData) => {
             "use server";
-            await setDisplayName(String(data.get("name") ?? ""));
+            check(locale, await setDisplayName(String(data.get("name") ?? "")));
           }}
         >
-          <label className="flex flex-1 flex-col gap-1 text-sm text-stone-600">
+          <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm text-stone-600">
             {t("displayNameLabel")}
             <input
               name="name"
               required
               maxLength={40}
               defaultValue={profile?.display_name ?? ""}
-              className="rounded border p-2 text-base text-stone-900"
+              className="w-full rounded border p-2 text-base text-stone-900"
             />
           </label>
           <button className="self-end rounded bg-stone-200 px-4 py-2">{t("displayNameSave")}</button>
@@ -81,12 +89,12 @@ export default async function FriendsPage({
 
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">{t("inviteTitle")}</h2>
-        <div className="flex gap-2">
-          <input readOnly value={inviteLink} className="flex-1 rounded border p-2" />
+        <div className="flex flex-wrap gap-2">
+          <input readOnly value={inviteLink} className="min-w-0 flex-1 basis-48 rounded border p-2" />
           <form
             action={async () => {
               "use server";
-              await regenerateInvite();
+              check(locale, await regenerateInvite());
             }}
           >
             <button className="rounded bg-stone-200 px-4 py-2">{t("regenerate")}</button>
@@ -105,7 +113,7 @@ export default async function FriendsPage({
                   <form
                     action={async () => {
                       "use server";
-                      await approveRequest(f.id);
+                      check(locale, await approveRequest(f.id));
                     }}
                   >
                     <button className="rounded bg-green-500 px-3 py-1 text-white">{t("approve")}</button>
@@ -113,7 +121,7 @@ export default async function FriendsPage({
                   <form
                     action={async () => {
                       "use server";
-                      await ignoreRequest(f.id);
+                      check(locale, await ignoreRequest(f.id));
                     }}
                   >
                     <button className="rounded bg-red-500 px-3 py-1 text-white">{t("ignore")}</button>
@@ -144,7 +152,7 @@ export default async function FriendsPage({
                   <form
                     action={async () => {
                       "use server";
-                      await removeFriend(f.id);
+                      check(locale, await removeFriend(f.id));
                     }}
                   >
                     <button className="text-sm text-red-600">{t("remove")}</button>
@@ -158,12 +166,12 @@ export default async function FriendsPage({
                         km: tDash("kmValue", { km: format.number(f.progress.summary.doneKm) }),
                         stages: f.progress.completedStages,
                       })
-                    : t("notSharing")}
+                    : t("friendNotSharing")}
                 </div>
                 <form
                   action={async () => {
                     "use server";
-                    await setSharing(f.id, !f.isSharing);
+                    check(locale, await setSharing(f.id, !f.isSharing));
                   }}
                   className="flex items-center gap-2"
                 >

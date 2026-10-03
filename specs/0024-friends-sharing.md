@@ -32,7 +32,8 @@ sharing at any moment. Ships behind the feature flag `friends` (spec 0023).
   page before sign-in reveals neither the owner nor whether the link is valid. Signed in, the page shows the
   inviter's display name and a "Send request" button. Opening an unknown
   or revoked token shows a "this link is not valid" page. Opening your own link says it is yours.
-  Sending a request when already friends or if a request is already pending says so. The `send_request`
+  Sending a request when already friends, when you already asked, or when that person already asked you
+  (approve it on `/friends`) says so. The `send_request`
   action must return a clear status so the app can distinguish these outcomes.
 - **AC-4**: Sending a request creates a pending friendship that only the inviter sees. The inviter sees their
   pending requests on `/friends` and can click "Approve" or "Ignore".
@@ -122,6 +123,6 @@ route plan.
 | AC-9, AC-10 | `tests/friends-migration.test.ts`, `e2e/friends.spec.ts` |
 | AC-11 | `e2e/friends.spec.ts` (delete the account, the friend's list is empty) |
 | AC-12 | `tests/friends-migration.test.ts` (forged friendship, direct writes, token column, anon); Supabase advisors after applying |
-| AC-13, AC-14 | `src/app/[locale]/(pages)/friends/actions.test.ts` |
+| AC-13, AC-14 | `src/app/[locale]/(pages)/friends/actions.test.ts` (an action that fails is shown on the page: `e2e/friends.spec.ts`) |
 | AC-15 | `src/lib/friends.test.ts` (flag), `actions.test.ts` (`disabled`); manual: with `FF_FRIENDS` unset the dashboard has no Friends link, `/friends` is 404 and the About page has no friends paragraph (the E2E server runs with the flag on) |
 | AC-16 | `tests/messages.test.ts`, `e2e/friends.spec.ts` (About paragraph); the changelog entry waits for the flag |

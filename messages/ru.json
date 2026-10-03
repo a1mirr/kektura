@@ -172,13 +172,13 @@
     "pendingTitle": "Ожидающие запросы",
     "approve": "Одобрить",
     "ignore": "Игнорировать",
-    "acceptedTitle": "Друзья",
+    "acceptedTitle": "Ваши друзья",
     "noFriends": "У вас пока нет друзей.",
     "remove": "Удалить",
     "startSharing": "Начать делиться",
     "stopSharing": "Перестать делиться",
     "isSharing": "Прогресс виден",
-    "notSharing": "Прогресс скрыт",
+    "notSharing": "Вы не делитесь",
     "ownLink": "Это ваша собственная ссылка.",
     "sendRequest": "Отправить запрос",
     "invalidToken": "Эта ссылка недействительна",
@@ -192,6 +192,8 @@
     "displayNameLabel": "Ваше имя (его видят друзья)",
     "displayNameSave": "Сохранить",
     "inviteSignIn": "Вас пригласили в друзья в трекере Кектуры. Войдите, чтобы продолжить.",
-    "error_unauthorized": "Сначала войдите в аккаунт."
+    "error_unauthorized": "Сначала войдите в аккаунт.",
+    "friendNotSharing": "Не делится с вами",
+    "error_incoming_pending": "Этот человек уже отправил вам запрос: одобрите его ниже."
   }
 }

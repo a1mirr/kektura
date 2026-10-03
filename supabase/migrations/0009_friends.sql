@@ -45,15 +45,12 @@ from auth.users
 on conflict (id) do nothing;
 
 create table public.friendships (
-  id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   friend_id uuid not null references auth.users(id) on delete cascade,
   status text not null check (status in ('pending', 'accepted')),
   user_is_sharing boolean not null default true,
   friend_is_sharing boolean not null default true,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  unique (user_id, friend_id),
+  primary key (user_id, friend_id),
   check (user_id != friend_id)
 );
 
@@ -106,7 +103,7 @@ language plpgsql security definer set search_path = '' as $$
 declare
   v_inviter_id uuid;
   v_uid uuid := (select auth.uid());
-  v_existing_status text;
+  v_existing public.friendships;
 begin
   if v_uid is null then return 'unauthorized'; end if;
 
@@ -114,11 +111,14 @@ begin
   if v_inviter_id is null then return 'invalid_token'; end if;
   if v_inviter_id = v_uid then return 'own_token'; end if;
 
-  select status into v_existing_status from public.friendships
+  select * into v_existing from public.friendships
   where (user_id = v_inviter_id and friend_id = v_uid) or (user_id = v_uid and friend_id = v_inviter_id);
 
-  if v_existing_status = 'accepted' then return 'already_friends'; end if;
-  if v_existing_status = 'pending' then return 'already_pending'; end if;
+  if v_existing.status = 'accepted' then return 'already_friends'; end if;
+  -- Pending: either I asked already, or the inviter asked me first and I only have to approve.
+  if v_existing.status = 'pending' then
+    return case when v_existing.user_id = v_uid then 'already_pending' else 'incoming_pending' end;
+  end if;
 
   insert into public.friendships (user_id, friend_id, status)
   values (v_uid, v_inviter_id, 'pending');
@@ -132,7 +132,7 @@ create function public.approve_request(requester_id uuid) returns void
 language plpgsql security definer set search_path = '' as $$
 begin
   update public.friendships
-  set status = 'accepted', updated_at = now()
+  set status = 'accepted'
   where user_id = requester_id and friend_id = (select auth.uid()) and status = 'pending';
 end;
 $$;
@@ -187,8 +187,7 @@ language plpgsql security definer set search_path = '' as $$
 begin
   update public.friendships
   set user_is_sharing = case when user_id = (select auth.uid()) then sharing else user_is_sharing end,
-      friend_is_sharing = case when friend_id = (select auth.uid()) then sharing else friend_is_sharing end,
-      updated_at = now()
+      friend_is_sharing = case when friend_id = (select auth.uid()) then sharing else friend_is_sharing end
   where ((user_id = (select auth.uid()) and friend_id = other_id) or
          (user_id = other_id and friend_id = (select auth.uid())))
     and status = 'accepted';

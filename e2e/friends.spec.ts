@@ -78,7 +78,7 @@ test.describe("spec 0024: friends", () => {
     await anaPage.getByRole("button", { name: "Stop sharing" }).click();
     await expect(anaPage.getByRole("button", { name: "Start sharing" })).toBeVisible();
     await bobPage.goto("/en/friends");
-    await expect(bobPage.getByRole("listitem").filter({ hasText: "Ana" })).toContainText("Not sharing progress");
+    await expect(bobPage.getByRole("listitem").filter({ hasText: "Ana" })).toContainText("Not sharing with you");
     await expect(bobPage.getByRole("link", { name: "Ana" })).toHaveCount(0);
     expect((await bobPage.request.get(friendPage)).status()).toBe(404);
     await anaPage.getByRole("button", { name: "Start sharing" }).click();
@@ -152,6 +152,33 @@ test.describe("spec 0024: friends", () => {
     await expect(other.getByText("suspended")).toHaveCount(0);
     await other.goto("/en/friends?error=already_friends");
     await expect(other.getByText("You are already friends.")).toBeVisible();
+  });
+
+  test("AC-7: the Friends page fits a phone screen", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await signInAsNewUser(page);
+    for (const path of ["/hu/friends", "/ru/friends"]) {
+      await page.goto(path); // hu and ru: the longest words
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      expect(overflow, path).toBeLessThanOrEqual(0);
+    }
+  });
+
+  test("AC-14: an action that fails says so on the page instead of doing nothing", async ({ page }) => {
+    await signInAsNewUser(page);
+    await page.goto("/en/friends");
+    await page.getByLabel("Your name (shown to friends)").fill("   ");
+    await page.getByRole("button", { name: "Save" }).click();
+    await expect(page.getByText("Something went wrong, please try again.")).toBeVisible();
+  });
+
+  test("AC-3: someone who already asked you is told to approve instead", async ({ browser }) => {
+    const { anaPage, bobPage } = await requestedFriendship(browser);
+    await bobPage.goto("/en/friends");
+    const bobLink = await inviteLink(bobPage);
+    await anaPage.goto(bobLink);
+    await anaPage.getByRole("button", { name: "Send request" }).click();
+    await expect(anaPage.getByText("This person already asked to connect with you")).toBeVisible();
   });
 
   test("AC-16: the dashboard links to the page and the About page tells what friends see (flag on)", async ({ page }) => {

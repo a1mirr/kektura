@@ -172,13 +172,13 @@
     "pendingTitle": "Függőben lévő kérések",
     "approve": "Elfogadás",
     "ignore": "Mellőzés",
-    "acceptedTitle": "Barátok",
+    "acceptedTitle": "Barátaid",
     "noFriends": "Még nem adtál hozzá barátokat.",
     "remove": "Eltávolítás",
     "startSharing": "Megosztás indítása",
     "stopSharing": "Megosztás leállítása",
     "isSharing": "Haladás megosztása",
-    "notSharing": "Haladás nincs megosztva",
+    "notSharing": "Te nem osztod meg",
     "ownLink": "Ez a saját meghívó linked.",
     "sendRequest": "Kérés küldése",
     "invalidToken": "Ez a link nem érvényes",
@@ -192,6 +192,8 @@
     "displayNameLabel": "A neved (a barátaid látják)",
     "displayNameSave": "Mentés",
     "inviteSignIn": "Meghívtak barátnak a Kéktúra-követőben. Jelentkezz be a folytatáshoz.",
-    "error_unauthorized": "Előbb jelentkezz be."
+    "error_unauthorized": "Előbb jelentkezz be.",
+    "friendNotSharing": "Nem oszt meg veled",
+    "error_incoming_pending": "Ez a személy már kérte, hogy kapcsolódjatok: fogadd el a kérést lent."
   }
 }

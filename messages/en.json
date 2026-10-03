@@ -172,13 +172,13 @@
     "pendingTitle": "Pending requests",
     "approve": "Approve",
     "ignore": "Ignore",
-    "acceptedTitle": "Friends",
+    "acceptedTitle": "Your friends",
     "noFriends": "You haven't added any friends yet.",
     "remove": "Remove",
     "startSharing": "Start sharing",
     "stopSharing": "Stop sharing",
     "isSharing": "Sharing progress",
-    "notSharing": "Not sharing progress",
+    "notSharing": "You are not sharing",
     "ownLink": "This is your own invite link.",
     "sendRequest": "Send request",
     "invalidToken": "This link is not valid",
@@ -192,6 +192,8 @@
     "displayNameLabel": "Your name (shown to friends)",
     "displayNameSave": "Save",
     "inviteSignIn": "You have been invited to connect on the Kéktúra tracker. Sign in to continue.",
-    "error_unauthorized": "Please sign in first."
+    "error_unauthorized": "Please sign in first.",
+    "friendNotSharing": "Not sharing with you",
+    "error_incoming_pending": "This person already asked to connect with you: approve the request below."
   }
 }

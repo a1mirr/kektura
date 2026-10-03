@@ -5,9 +5,7 @@ import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/serve
 import { getFriends, getFriendProgress } from '@/lib/friends';
 import { createClient } from '@/lib/supabase/server';
 import { friendsEnabled } from '@/lib/friends-flag';
-import { buildStages } from '@/lib/progress';
-import stagesData from '../../../../../../scripts/data/okt-stages.json';
-import { Link } from '@/i18n/navigation';
+import { Link, redirect } from '@/i18n/navigation';
 import StageControls from '@/components/StageControls';
 import StageSection from '@/components/StageSection';
 
@@ -22,18 +20,20 @@ export default async function FriendPage({
   setRequestLocale(locale);
 
   const supabase = await createClient();
-  const friends = await getFriends(supabase);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return redirect({ href: '/', locale });
+  const friends = await getFriends(supabase, user.id);
   const friend = friends.find(f => f.id === id);
 
   if (!friend || !friend.friendIsSharing || friend.status !== 'accepted') {
     notFound();
   }
 
-  const { summary, places, stampedKeys } = await getFriendProgress(friend);
+  const { summary, places, stages, stampedKeys } = await getFriendProgress(friend);
   const t = await getTranslations('dashboard');
   const format = await getFormatter();
-
-  const stages = buildStages(places, stagesData.stages);
 
   const cards = [
     { label: t("stamps"), value: `${stampedKeys.size} / ${places.length}` },
@@ -46,9 +46,9 @@ export default async function FriendPage({
     <main className="mx-auto max-w-3xl space-y-8 px-6 py-8">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-blue-700">{friend.displayName}</h1>
-        <div className="flex items-center gap-4">
-          <Link href="/friends" className="text-sm text-stone-600 hover:underline">{t("friends")}</Link>
-        </div>
+        <Link href="/friends" className="text-sm text-stone-600 hover:underline">
+          {t("friends")}
+        </Link>
       </header>
 
       <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -79,7 +79,6 @@ export default async function FriendPage({
                 kmText={meta ? t("kmValue", { km: format.number(meta.km) }) : ""}
                 done={done}
                 total={list.length}
-                actions={<></>}
               >
                 {list.map((p) => (
                   <li

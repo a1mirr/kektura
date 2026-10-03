@@ -17,52 +17,36 @@ export type Friend = {
   displayName: string | null;
   isSharing: boolean;
   friendIsSharing: boolean;
-  status: 'pending' | 'accepted';
+  status: "pending" | "accepted";
   isRequester: boolean;
-  stamps?: { checkpoint_id: number }[];
+  stampIds: number[]; // what the friend shares with me: empty while pending or switched off
 };
 
-export async function getFriends(supabase: SupabaseClient<Database>): Promise<Friend[]> {
-  const [{ data: userRes }, { data: profiles }] = await Promise.all([
-    supabase.auth.getUser(),
-    supabase.from('profiles').select('id, display_name')
+// Everything the signed-in user `uid` has with other people: one row per friendship or pending request.
+export async function getFriends(supabase: SupabaseClient<Database>, uid: string): Promise<Friend[]> {
+  const [{ data: profiles }, { data: friendships }, { data: stamps }] = await Promise.all([
+    supabase.from("profiles").select("id, display_name"),
+    supabase.from("friendships").select("*"),
+    supabase.rpc("get_friend_stamps"),
   ]);
-  const uid = userRes.user?.id;
-  if (!uid) return [];
 
-  const { data: friendships } = await supabase.from('friendships').select('*');
-  if (!friendships) return [];
+  const names = new Map(profiles?.map((p) => [p.id, p.display_name]));
+  const stampIds = new Map<string, number[]>();
+  for (const s of stamps ?? []) stampIds.set(s.friend_id, [...(stampIds.get(s.friend_id) ?? []), s.checkpoint_id]);
 
-  const { data: stamps } = await supabase.rpc('get_friend_stamps');
-
-  const profileMap = new Map(profiles?.map(p => [p.id, p.display_name]) ?? []);
-  const stampsMap = new Map<string, { checkpoint_id: number }[]>();
-  
-  if (stamps) {
-    for (const s of stamps) {
-      if (!stampsMap.has(s.friend_id)) stampsMap.set(s.friend_id, []);
-      stampsMap.get(s.friend_id)!.push({ checkpoint_id: s.checkpoint_id });
-    }
-  }
-
-  const result: Friend[] = [];
-  for (const f of friendships) {
+  return (friendships ?? []).map((f) => {
     const isRequester = f.user_id === uid;
-    const friendId = isRequester ? f.friend_id : f.user_id;
-    const isSharing = isRequester ? f.user_is_sharing : f.friend_is_sharing;
-    const friendIsSharing = isRequester ? f.friend_is_sharing : f.user_is_sharing;
-    
-    result.push({
-      id: friendId,
-      displayName: profileMap.get(friendId) ?? null,
-      isSharing,
-      friendIsSharing,
-      status: f.status as 'pending' | 'accepted',
+    const id = isRequester ? f.friend_id : f.user_id;
+    return {
+      id,
+      displayName: names.get(id) ?? null,
+      isSharing: isRequester ? f.user_is_sharing : f.friend_is_sharing,
+      friendIsSharing: isRequester ? f.friend_is_sharing : f.user_is_sharing,
+      status: f.status as Friend["status"],
       isRequester,
-      stamps: stampsMap.get(friendId) ?? [],
-    });
-  }
-  return result;
+      stampIds: stampIds.get(id) ?? [],
+    };
+  });
 }
 
 // Spec 0024 AC-8: a friend's numbers come from the same functions as the owner's dashboard (progress.ts),
@@ -73,10 +57,10 @@ export function summarizeFriend(checkpoints: Checkpoint[], checkpointIds: number
   const summary = progressSummary(places, walkedRanges(places, stampedKeys));
   const stages = buildStages(places, stagesMeta);
   const completedStages = stages.filter((s) => s.places.every((p) => stampedKeys.has(p.key))).length;
-  return { summary, places, stampedKeys, completedStages };
+  return { summary, places, stages, stampedKeys, completedStages };
 }
 
 export async function getFriendProgress(friend: Friend) {
   const { checkpoints } = await getReferenceData();
-  return summarizeFriend(checkpoints, (friend.stamps ?? []).map((s) => s.checkpoint_id), stagesData.stages);
+  return summarizeFriend(checkpoints, friend.stampIds, stagesData.stages);
 }

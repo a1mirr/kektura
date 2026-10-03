@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockRevalidatePath = vi.fn();
-vi.mock("next/cache", () => ({ revalidatePath: (...args: any[]) => mockRevalidatePath(...args) }));
+const mockRefresh = vi.fn();
+vi.mock("next/cache", () => ({ refresh: () => mockRefresh() }));
+
+const U2 = "3f0c1b6e-9d41-4c55-8a39-2b7a5c1e9d02";
 
 const mockRpc = vi.fn();
 const mockGetUser = vi.fn();
@@ -29,8 +31,8 @@ describe("spec 0024: friends actions", () => {
     const { sendRequest } = await load();
     mockRpc.mockResolvedValueOnce({ data: "ok", error: null });
     expect(await sendRequest("abc")).toEqual({ ok: true });
-    expect(mockRevalidatePath).toHaveBeenCalledWith("/friends");
-    for (const reason of ["invalid_token", "own_token", "already_friends", "already_pending"]) {
+    expect(mockRefresh).toHaveBeenCalledTimes(1);
+    for (const reason of ["invalid_token", "own_token", "already_friends", "already_pending", "incoming_pending"]) {
       mockRpc.mockResolvedValueOnce({ data: reason, error: null });
       expect(await sendRequest("abc")).toEqual({ ok: false, reason });
     }
@@ -39,31 +41,31 @@ describe("spec 0024: friends actions", () => {
   });
 
   it.each([
-    ["approveRequest", ["u2"], "approve_request", { requester_id: "u2" }],
-    ["ignoreRequest", ["u2"], "ignore_request", { requester_id: "u2" }],
-    ["removeFriend", ["u2"], "remove_friend", { other_id: "u2" }],
-    ["setSharing", ["u2", false], "set_sharing", { other_id: "u2", sharing: false }],
+    ["approveRequest", [U2], "approve_request", { requester_id: U2 }],
+    ["ignoreRequest", [U2], "ignore_request", { requester_id: U2 }],
+    ["removeFriend", [U2], "remove_friend", { other_id: U2 }],
+    ["setSharing", [U2, false], "set_sharing", { other_id: U2, sharing: false }],
     ["regenerateInvite", [], "regenerate_invite", undefined],
     ["setDisplayName", ["Anna"], "set_display_name", { name: "Anna" }],
   ] as const)("AC-5, AC-9, AC-10: %s calls %s and revalidates", async (action, args, fn, rpcArgs) => {
     const actions = (await load()) as Record<string, (...a: unknown[]) => Promise<unknown>>;
     expect(await actions[action](...args)).toEqual({ ok: true });
     expect(mockRpc).toHaveBeenCalledWith(fn, ...(rpcArgs ? [rpcArgs] : []));
-    expect(mockRevalidatePath).toHaveBeenCalledWith("/friends");
+    expect(mockRefresh).toHaveBeenCalledTimes(1);
   });
 
   it("AC-14: a database error, a thrown error and a bad name all come back as `failed`, never thrown", async () => {
     const { approveRequest, sendRequest, setDisplayName, removeFriend } = await load();
     mockRpc.mockResolvedValueOnce({ data: null, error: { code: "P0001", message: "boom" } });
-    expect(await approveRequest("u2")).toEqual({ ok: false, reason: "failed" });
-    expect(mockRevalidatePath).not.toHaveBeenCalled();
+    expect(await approveRequest(U2)).toEqual({ ok: false, reason: "failed" });
+    expect(mockRefresh).not.toHaveBeenCalled();
 
     mockRpc.mockRejectedValueOnce(new Error("network down"));
     expect(await sendRequest("abc")).toEqual({ ok: false, reason: "failed" });
     mockGetUser.mockRejectedValueOnce(new Error("network down"));
-    expect(await removeFriend("u2")).toEqual({ ok: false, reason: "failed" });
+    expect(await removeFriend(U2)).toEqual({ ok: false, reason: "failed" });
     mockCreateClient.mockRejectedValueOnce(new Error("no cookies"));
-    expect(await removeFriend("u2")).toEqual({ ok: false, reason: "failed" });
+    expect(await removeFriend(U2)).toEqual({ ok: false, reason: "failed" });
 
     mockRpc.mockClear();
     for (const bad of ["", "   ", "x".repeat(41), "a\nb"]) {
@@ -85,10 +87,10 @@ describe("spec 0024: friends actions", () => {
     mockGetUser.mockResolvedValue({ data: { user: null } });
     const calls: [string, unknown[]][] = [
       ["sendRequest", ["abc"]],
-      ["approveRequest", ["u2"]],
-      ["ignoreRequest", ["u2"]],
-      ["removeFriend", ["u2"]],
-      ["setSharing", ["u2", true]],
+      ["approveRequest", [U2]],
+      ["ignoreRequest", [U2]],
+      ["removeFriend", [U2]],
+      ["setSharing", [U2, true]],
       ["regenerateInvite", []],
       ["setDisplayName", ["Anna"]],
     ];
@@ -118,7 +120,7 @@ describe("spec 0024: friends actions", () => {
     mockRpc.mockResolvedValue({ data: "ok", error: null });
     for (let i = 0; i < 30; i++) expect(await sendRequest("abc")).toEqual({ ok: true });
     expect(await sendRequest("abc")).toEqual({ ok: false, reason: "failed" });
-    expect(await approveRequest("u2")).toEqual({ ok: false, reason: "failed" });
+    expect(await approveRequest(U2)).toEqual({ ok: false, reason: "failed" });
     mockGetUser.mockResolvedValue({ data: { user: { id: "u9" } } });
     expect(await sendRequest("abc")).toEqual({ ok: true });
   });

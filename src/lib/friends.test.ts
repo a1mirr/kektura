@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, it } from "vitest";
 import { friendsEnabled } from "./friends-flag";
-import { isValidDisplayName } from "./display-name";
 import { getFriends, summarizeFriend } from "./friends";
+import { isUuid, isValidDisplayName } from "./friends-input";
 import { buildPlaces, progressSummary, stampedPlaceKeys, walkedRanges, type Checkpoint, type StageMeta } from "./progress";
 
-function fakeSupabase(uid: string, profiles: any[], friendships: any[], stamps: any[]) {
+function fakeSupabase(profiles: any[], friendships: any[], stamps: any[]) {
   return {
-    auth: { getUser: async () => ({ data: { user: { id: uid } } }) },
     from: (table: string) => ({
       select: () => Promise.resolve({ data: table === "profiles" ? profiles : friendships }),
     }),
@@ -45,25 +44,24 @@ describe("spec 0024: friends list", () => {
   ];
 
   it("AC-9: the two sharing switches are read from the right side of each row", async () => {
-    const friends = await getFriends(fakeSupabase("u1", profiles, friendships, []));
+    const friends = await getFriends(fakeSupabase(profiles, friendships, []), "u1");
     const bob = friends.find((f) => f.id === "u2")!;
     expect(bob).toMatchObject({ displayName: "Bob", status: "accepted", isRequester: true, isSharing: true, friendIsSharing: false });
     // The same row seen from the other side swaps the two switches.
-    const asBob = (await getFriends(fakeSupabase("u2", profiles, friendships, []))).find((f) => f.id === "u1")!;
+    const asBob = (await getFriends(fakeSupabase(profiles, friendships, []), "u2")).find((f) => f.id === "u1")!;
     expect(asBob).toMatchObject({ isRequester: false, isSharing: false, friendIsSharing: true });
   });
 
   it("AC-4: a request someone else sent to me is pending and not mine", async () => {
-    const charlie = (await getFriends(fakeSupabase("u1", profiles, friendships, []))).find((f) => f.id === "u3")!;
+    const charlie = (await getFriends(fakeSupabase(profiles, friendships, []), "u1")).find((f) => f.id === "u3")!;
     expect(charlie).toMatchObject({ displayName: "Charlie", status: "pending", isRequester: false });
   });
 
   it("AC-7: the stamps of each friend come from get_friend_stamps only", async () => {
-    const friends = await getFriends(
-      fakeSupabase("u1", profiles, friendships, [{ friend_id: "u2", checkpoint_id: 10 }]),
-    );
-    expect(friends.find((f) => f.id === "u2")!.stamps).toEqual([{ checkpoint_id: 10 }]);
-    expect(friends.find((f) => f.id === "u3")!.stamps).toEqual([]);
+    const stamps = [{ friend_id: "u2", checkpoint_id: 10 }, { friend_id: "u2", checkpoint_id: 11 }];
+    const friends = await getFriends(fakeSupabase(profiles, friendships, stamps), "u1");
+    expect(friends.find((f) => f.id === "u2")!.stampIds).toEqual([10, 11]);
+    expect(friends.find((f) => f.id === "u3")!.stampIds).toEqual([]);
   });
 
   it("AC-1: a display name is 1 to 40 characters without control characters", () => {
@@ -71,6 +69,13 @@ describe("spec 0024: friends list", () => {
     expect(isValidDisplayName("  Anna  ")).toBe(true);
     expect(isValidDisplayName("x".repeat(40))).toBe(true);
     for (const bad of ["", "   ", "x".repeat(41), "a\nb", "a\u0007b"]) expect(isValidDisplayName(bad)).toBe(false);
+  });
+
+  it("AC-14: only a well-formed user id is passed on to the database", () => {
+    expect(isUuid("3f0c1b6e-9d41-4c55-8a39-2b7a5c1e9d00")).toBe(true);
+    for (const bad of ["", "abc", "3f0c1b6e9d414c558a392b7a5c1e9d00", "3f0c1b6e-9d41-4c55-8a39-2b7a5c1e9d0z", "x' or 1=1 --"]) {
+      expect(isUuid(bad)).toBe(false);
+    }
   });
 });
 

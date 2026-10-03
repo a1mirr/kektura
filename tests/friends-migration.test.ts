@@ -1,28 +1,18 @@
 // Spec 0024 AC-1, AC-2, AC-4 to AC-6, AC-9, AC-10, AC-12 against the real local database (`npm run testdb:start`).
 // The tests skip themselves when it isn't running. They talk to PostgREST the way a browser could, as
 // signed-in users, so they prove what a malicious client can and cannot do.
-import { execSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { beforeAll, describe, expect, it } from "vitest";
+import { localSupabase } from "../e2e/local-db";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Client = SupabaseClient<Database>;
 type Person = { client: Client; id: string };
 
-let local: { url: string; key: string } | undefined;
+let local: { url: string; anonKey: string } | undefined;
 
-function localSupabase() {
-  try {
-    const out = execSync("npx supabase status -o json", { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
-    const status = JSON.parse(out.slice(out.indexOf("{"), out.lastIndexOf("}") + 1));
-    return { url: status.API_URL as string, key: (status.ANON_KEY ?? status.PUBLISHABLE_KEY) as string };
-  } catch {
-    return undefined;
-  }
-}
-
-const connect = (): Client => createClient<Database>(local!.url, local!.key, { auth: { persistSession: false } });
+const connect = (): Client => createClient<Database>(local!.url, local!.anonKey, { auth: { persistSession: false } });
 
 async function signUp(fullName?: string): Promise<Person> {
   const client = connect();
@@ -50,8 +40,11 @@ let bob: Person;
 let cleo: Person;
 
 beforeAll(async () => {
-  local = localSupabase();
-  if (!local) return;
+  try {
+    local = localSupabase();
+  } catch {
+    return; // no local Supabase: the tests skip (CI's end-to-end job runs them against one)
+  }
   [ana, bob, cleo] = [await signUp("Ana Maria Kovacs"), await signUp(), await signUp("Cleo")];
 });
 
@@ -133,7 +126,7 @@ describe("spec 0024: friends database rules", () => {
     // A request alone shares nothing, in either direction, and only the inviter has anything to approve.
     expect((await rpc(bob, "send_request", { token: await tokenOf(ana) })).data).toBe("ok");
     expect((await rpc(bob, "send_request", { token: await tokenOf(ana) })).data).toBe("already_pending");
-    expect((await rpc(ana, "send_request", { token: await tokenOf(bob) })).data).toBe("already_pending");
+    expect((await rpc(ana, "send_request", { token: await tokenOf(bob) })).data).toBe("incoming_pending");
     expect(await stampsSeenBy(bob)).toEqual([]);
     expect(await stampsSeenBy(ana)).toEqual([]);
     // The requester cannot approve their own request.
