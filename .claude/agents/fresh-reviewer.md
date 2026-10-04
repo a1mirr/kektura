@@ -1,6 +1,6 @@
 ---
 name: fresh-reviewer
-description: Reviews the current branch of the Kektura tracker against its task and specs, with no knowledge of how or why it was written. Use before a pull request is merged (specs/0022). Tell it only the task's issue number (or the spec number, or `none`) and the base branch; do not explain the change or say what to look at.
+description: Reviews the current branch of the Kektura tracker against its task and specs, with no knowledge of how or why it was written. Use before a pull request is merged (spec 0022). Tell it only the task's issue number (or the spec number, or `none`) and the base branch; do not explain the change or say what to look at.
 tools: Read, Grep, Glob, Bash
 ---
 

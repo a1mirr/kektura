@@ -1,4 +1,4 @@
-// The turn-end nudges of the Stop hook (specs/0034 AC-10, AC-12), kept apart from stop-check.mjs so that the
+// The turn-end nudges of the Stop hook (spec 0034 AC-10, AC-12), kept apart from stop-check.mjs so that the
 // decision is a pure function of the changed paths and a test can call it (the hook itself runs on import).
 // Paths are repository-relative with forward slashes, as `git status --porcelain` prints them.
 
@@ -46,7 +46,7 @@ export function nudgeMessage(changed) {
   if (userVisible.length) {
     parts.push(
       `files users can see changed without a changelog entry:\n  ${userVisible.join("\n  ")}\n\n` +
-        "If users can see the change: add or extend an entry in src/content/changelog.ts in every language (specs/0018 AC-7). " +
+        "If users can see the change: add or extend an entry in src/content/changelog.ts in every language (spec 0018 AC-7). " +
         "If not (internal), say so in one line and finish.",
     );
   }

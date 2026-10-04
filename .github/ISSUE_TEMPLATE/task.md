@@ -12,7 +12,7 @@ labels: task
 
 ## Specs
 
-<!-- The specs this touches, with the ACs added, changed or relied on (`specs/00NN-slug.md` AC-n), or `none`. -->
+<!-- The specs this touches, with the ACs added, changed or relied on (`specs/product/00NN-slug.md` or `specs/project/00NN-slug.md`, AC-n), or `none`. -->
 
 ## Goal
 

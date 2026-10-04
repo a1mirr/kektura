@@ -5,7 +5,7 @@
 // lint and unit tests in parallel (E2E needs Docker and is left to CI, which is the authority; `npm run e2e` only to reproduce a failure). On failure exit 2: stderr goes back to Claude, which keeps working.
 // After MAX_ATTEMPTS failed attempts in a row it lets the turn end and tells the user instead of
 // looping. Once checks pass, app code changed without a spec change, or user-visible files changed without a
-// changelog entry, get one nudge (specs/0034 AC-10, AC-12).
+// changelog entry, get one nudge (spec 0034 AC-10, AC-12).
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
@@ -79,9 +79,9 @@ const committed = (() => {
 })();
 if (!changed.length && !committed.length) process.exit(0);
 
-// The turn-end nudge, once per distinct message (specs/0034 AC-10, AC-12): app code changed without a spec change (a
+// The turn-end nudge, once per distinct message (spec 0034 AC-10, AC-12): app code changed without a spec change (a
 // spec mirrors the built code, AC-6, and is edited as the behaviour is built), and/or files users can see changed without
-// a changelog entry (specs/0018 AC-7), counting the working tree and the branch's commits. Both questions go in one
+// a changelog entry (spec 0018 AC-7), counting the working tree and the branch's commits. Both questions go in one
 // message; the decision is in stop-nudges.mjs.
 function askOnce() {
   const head = spawnSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).stdout.trim();

@@ -40,6 +40,24 @@ describe("spec 0034: specs/README.md", () => {
     }
   });
 
+  it("AC-9: the index groups the specs by folder: every row under a \"product/\" or \"project/\" heading links into it, under a topic heading", () => {
+    const index = read(specsDir, "README.md").split("\n## Index")[1] ?? "";
+    let folder = "";
+    let rows = 0;
+    let topics = 0;
+    for (const line of index.split("\n")) {
+      const dir = /^### `(product|project)\/`$/.exec(line);
+      if (dir) folder = dir[1];
+      if (/^#### \S/.test(line)) topics += 1;
+      const row = /^\| \[(\d{4})\]\(([^)]+)\) \|/.exec(line);
+      if (!row) continue;
+      rows += 1;
+      expect(row[2].startsWith(`${folder}/`), `${row[1]} is listed under "${folder}/" but links ${row[2]}`).toBe(true);
+    }
+    expect(rows).toBe(specFiles.length);
+    expect(topics).toBeGreaterThan(1);
+  });
+
   it("AC-1: specs/ holds README.md, _template.md and the folders product/ and project/, nothing else", () => {
     expect(fs.readdirSync(specsDir).sort()).toEqual(["README.md", "_template.md", ...SPEC_FOLDERS].sort());
   });
@@ -287,17 +305,17 @@ describe("spec 0034: spec paths and links resolve", () => {
   const root = new URL("..", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1").replace(/\/$/, "");
   const tracked = execFileSync("git", ["ls-files", "-z"], { cwd: root, encoding: "utf8" })
     .split("\0")
-    .filter((f) => /\.(md|ts|tsx|mjs|mts|yml)$/.test(f));
+    .filter((f) => /\.(md|ts|tsx|mjs|mts|yml)$/.test(f) || f.startsWith(".githooks/"));
   const specPaths = new Set(specFiles.map((name) => `specs/${name}`));
   // Built from parts so that this file does not match its own patterns.
-  const specPath = new RegExp("specs/(?:(" + SPEC_FOLDERS.join("|") + ")/)?(\\d{4}-[a-z0-9-]+\\.md)", "g");
+  const specPath = new RegExp("specs/(?:([a-z-]+)/)?(\\d{4}-[a-z0-9-]+\\.md)", "g");
 
   it("AC-9: every path that names a spec is a spec that exists, in its folder", () => {
     const wrong: string[] = [];
     for (const file of tracked) {
       fs.readFileSync(`${root}/${file}`, "utf8").split("\n").forEach((line, i) => {
         for (const m of line.matchAll(specPath)) {
-          if (!m[1] || !specPaths.has(m[0])) wrong.push(`${file}:${i + 1} ${m[0]}`);
+          if (!m[1] || !SPEC_FOLDERS.includes(m[1]) || !specPaths.has(m[0])) wrong.push(`${file}:${i + 1} ${m[0]}`);
         }
       });
     }
