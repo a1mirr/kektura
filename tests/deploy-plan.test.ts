@@ -10,7 +10,7 @@ const B = "b".repeat(40);
 describe("spec 0026: which merges deploy", () => {
   describe("AC-12: needsDeploy", () => {
     it.each([
-      ["a spec", ["specs/0026-automatic-deploy.md"]],
+      ["a spec", ["specs/project/0026-automatic-deploy.md"]],
       ["tests and E2E", ["tests/messages.test.ts", "e2e/account.spec.ts"]],
       ["a markdown file anywhere", ["README.md", "deploy/README.md", "docs/notes.md"]],
       ["repository tooling", [".github/workflows/ci.yml", ".github/pull_request_template.md", ".claude/agents/fresh-reviewer.md", ".githooks/pre-push"]],
@@ -25,7 +25,7 @@ describe("spec 0026: which merges deploy", () => {
       ["the deploy files (the hook, the Caddyfile)", ["deploy/post-receive"]],
       ["the dependencies", ["package.json"]],
       ["the messages", ["messages/en.json"]],
-      ["one app file among documents", ["specs/0026-automatic-deploy.md", "CLAUDE.md", "src/lib/progress.ts"]],
+      ["one app file among documents", ["specs/project/0026-automatic-deploy.md", "CLAUDE.md", "src/lib/progress.ts"]],
       ["a test-looking path outside tests/", ["src/lib/progress.test.ts"]],
     ])("%s need a deploy", (_name, paths) => {
       expect(needsDeploy(paths)).toBe(true);
@@ -49,7 +49,7 @@ describe("spec 0026: which merges deploy", () => {
     });
 
     it("skips a merge that changed only documentation, specs, tests and tooling, and says why", () => {
-      const plan = planDeploy({ production: A, target: B, changed: ["specs/0014-pages-and-settings.md", "tests/x.test.ts", "CLAUDE.md"] });
+      const plan = planDeploy({ production: A, target: B, changed: ["specs/product/0014-pages-and-settings.md", "tests/x.test.ts", "CLAUDE.md"] });
       expect(plan.deploy).toBe(false);
       expect(plan.reason).toMatch(/documentation, specs, tests and repository tooling/);
     });

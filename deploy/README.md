@@ -54,7 +54,7 @@ Server-only values (`SITE_URL`, `FF_FRIENDS`, `TELEGRAM_*`) take effect with `pm
    six tables of the weekly backup (spec 0012) are dumped by the same action
    (`.github/actions/dump-user-data`) into the workflow artifact `pre-migration-<sha7>` of that run, kept 30 days
    and not encrypted; a dump that fails or does not pass its check stops the deploy before any migration runs. A
-   deploy with no migration takes no dump. To restore after a bad migration see specs/0012-backups.md ("After a bad
+   deploy with no migration takes no dump. To restore after a bad migration see spec 0012 ("After a bad
    migration"). It needs no new secret (`SUPABASE_DB_URL` is the one the weekly backup uses). The upload never
    overwrites, so re-running the failed jobs of a run that already stored its backup fails at the upload: start a new
    run by hand instead (Deploy, Run workflow, `dry_run` unticked);

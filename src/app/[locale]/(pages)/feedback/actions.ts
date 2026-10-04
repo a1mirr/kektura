@@ -9,7 +9,7 @@ import { createRateLimiter } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 import { sendTelegramMessage, telegramConfig } from "@/lib/telegram";
 
-// See specs/0017-feedback.md. The form is public (it is in the footer), so everything that reaches
+// See spec 0017. The form is public (it is in the footer), so everything that reaches
 // this action is untrusted.
 
 export type FeedbackResult =

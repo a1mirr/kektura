@@ -45,7 +45,7 @@ function refusal(where) {
 }
 
 const HOW = [
-  "Make the change in your own worktree on a topic branch, always from a fresh origin/main (specs/0021, CLAUDE.md step 5):",
+  "Make the change in your own worktree on a topic branch, always from a fresh origin/main (spec 0021, CLAUDE.md step 5):",
   "  git fetch origin",
   "  git worktree add .claude/worktrees/<name> -b <topic> origin/main",
   "then work there (the EnterWorktree tool switches the session; a junction to node_modules is enough:",

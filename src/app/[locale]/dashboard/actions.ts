@@ -7,8 +7,8 @@ import type { ActionResult } from "@/lib/action-result";
 import { logStampActionError, logStampActionInvalidInput, type StampAction, type StampStage } from "@/lib/log";
 import { isCalendarDate, isValidStampDate } from "@/lib/stamp-date";
 
-// See specs/0002-stamping.md; failures are logged per specs/0008-action-logging.md; dates per
-// specs/0016-stamp-dates.md.
+// See spec 0002; failures are logged per spec 0008; dates per
+// spec 0016.
 const MAX_PLACES = 200;
 const ok: ActionResult = { ok: true };
 const unauthorized: ActionResult = { ok: false, reason: "unauthorized" };

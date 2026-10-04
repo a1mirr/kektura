@@ -394,7 +394,7 @@ describe("spec 0026: the deploy workflow", () => {
   it("AC-4: the weekly backup leaves the record table out (it is not user data, and the dump check fails on any unexpected table)", () => {
     const backup = read(".github/actions/dump-user-data/action.yml"); // the dump lives in the action, shared with the weekly run
     expect(backup).toMatch(/public\.extra_stamps public\.applied_migrations( |\n)/);
-    expect(read("specs/0012-backups.md")).toContain("`public.applied_migrations`");
+    expect(read("specs/project/0012-backups.md")).toContain("`public.applied_migrations`");
   });
 
   it("AC-11: CLAUDE.md and deploy/README.md describe the workflow and keep the manual way as the fallback", () => {

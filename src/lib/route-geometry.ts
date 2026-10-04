@@ -1,5 +1,5 @@
 // Cutting the trail polyline by distance: walked / not-walked lines and the route-planner highlight.
-// See specs/0003-map-route-planner.md.
+// See spec 0003.
 import type { FeatureCollection, LineString } from "geojson";
 import type { KmRange } from "@/lib/progress";
 

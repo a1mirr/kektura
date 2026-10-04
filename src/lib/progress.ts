@@ -1,5 +1,5 @@
 // Progress domain logic for the dashboard: places, stages, walked stretches, statistics.
-// Pure functions (no I/O) so the rules are unit-tested; see specs/0001-progress.md.
+// Pure functions (no I/O) so the rules are unit-tested; see spec 0001.
 import type { Tables } from "@/lib/supabase/database.types";
 
 export type Checkpoint = Pick<

@@ -1,7 +1,7 @@
 ## What and why
 
 <!-- One or two sentences. Name the task (a GitHub issue) with `Closes #N` on a line of its own, so the merge closes it,
-     and link the specs it touches (specs/NNNN-slug.md). A small change that needs no task says so instead. -->
+     and link the specs it touches (specs/product/NNNN-slug.md, specs/project/NNNN-slug.md). A small change that needs no task says so instead. -->
 
 Closes #
 

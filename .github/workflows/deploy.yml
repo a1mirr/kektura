@@ -261,7 +261,7 @@ jobs:
             echo "### The deploy failed"
             echo "- Nothing was rolled back by itself."
             echo "- Migrations that were applied stay applied (each ran in its own transaction); one that failed left nothing behind."
-            echo "- Before the first missing migration the user data was dumped to the artifact pre-migration-<sha7> (30 days) of this run, unless the run failed before that step; restore: specs/0012-backups.md. A failed backup stops the deploy before any migration."
+            echo "- Before the first missing migration the user data was dumped to the artifact pre-migration-<sha7> (30 days) of this run, unless the run failed before that step; restore: spec 0012. A failed backup stops the deploy before any migration."
             echo "- Roll back the code: revert the pull request on main and merge the revert; in an emergency, see deploy/README.md ('When something is wrong')."
             echo "- If the push went through but the build on the server failed, production's main already points at this commit, so a re-run skips it: merge a fix, or rebuild on the server by hand (deploy/README.md, 'When something is wrong')."
           } >> "$GITHUB_STEP_SUMMARY"

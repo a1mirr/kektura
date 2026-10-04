@@ -10,7 +10,7 @@ import SignOutButton from "@/components/SignOutButton";
 import StampsChart from "@/components/StampsChart";
 import DeleteAccountButton from "./DeleteAccountButton";
 
-// See specs/0014-pages-and-settings.md (AC-7 to AC-18).
+// See spec 0014 (AC-7 to AC-18).
 
 type Props = { params: Promise<{ locale: string }> };
 

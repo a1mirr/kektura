@@ -19,7 +19,7 @@ describe("spec 0007: which changes run the end-to-end job", () => {
   describe("AC-10: the decision", () => {
     it("a pull request that changes only Markdown, anywhere in the tree, needs no end-to-end run", () => {
       expect(pr(["README.md"])).toBe(false);
-      expect(pr(["specs/0007-ci.md", ".github/ISSUE_TEMPLATE/task.md", "CLAUDE.md", ".github/pull_request_template.md", ".claude/agents/fresh-reviewer.md"])).toBe(false);
+      expect(pr(["specs/project/0007-ci.md", ".github/ISSUE_TEMPLATE/task.md", "CLAUDE.md", ".github/pull_request_template.md", ".claude/agents/fresh-reviewer.md"])).toBe(false);
     });
 
     it("any other file makes it run: code, messages, workflows, migrations, scripts, tests, lockfile, MDX and lookalikes", () => {
@@ -29,7 +29,7 @@ describe("spec 0007: which changes run the end-to-end job", () => {
     });
 
     it("a mix of Markdown and one code file runs everything", () => {
-      expect(pr(["specs/0007-ci.md", "src/lib/progress.ts", "specs/0034-specs-and-tasks.md"])).toBe(true);
+      expect(pr(["specs/project/0007-ci.md", "src/lib/progress.ts", "specs/project/0034-specs-and-tasks.md"])).toBe(true);
     });
 
     it("an empty or unreadable list runs everything: running too much is the safe mistake", () => {
