@@ -21,7 +21,7 @@ of the 2,000 monthly minutes were used by 2026-10-04, and the counter resets on 
 - [x] Task 0031 (sharding) says in its Notes that it is parked
 - [ ] ~~After the first merge, a run on `main` exists (the manual check under "Tests to write" is dated)~~ Not something a pull request can do: it needs the merge. The `manual` rows of spec 0007 AC-9 and AC-10 say `Last checked: never recorded` until whoever looks at the first runs after the merge dates them.
 - [x] The specs listed above mirror the code as built (spec 0034 AC-6)
-- [ ] Fresh-context review done
+- [x] Fresh-context review done
 
 ## Requirements
 
