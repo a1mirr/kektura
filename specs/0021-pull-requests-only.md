@@ -81,7 +81,8 @@ leftovers of a merged change are cleaned up.
   one has its directory taken away (run it when no other session is mid-work in a merged worktree), a merged local
   branch is deleted even when another tool made it (its worktree outside `.claude/worktrees` is kept), and
   `--remote` does not check for an open pull request based on the branch (CLAUDE.md step 7 retargets it first).
-- **AC-9**: New work starts from the real `origin/main`, never from a stale local `main` or another branch. The
+- **AC-9**: New work starts from the real `origin/main`, never from a stale local `main` or another branch (checked
+  to the minute only where the hook sees the command, see Notes). The
   `worktree-guard` hook enforces it for the way work is started (`git worktree add`, with `-b`/`-B` or with a path
   alone, which makes a branch from HEAD; `--detach` and an existing branch are left alone); a branch made later inside a
   worktree (`git switch -c`) is not recognised. The hook refuses a `git worktree add` that creates a branch (`-b` or `-B`) unless its base is
@@ -123,7 +124,8 @@ leftovers of a merged change are cleaned up.
 - A worktree made by Claude Code's own `EnterWorktree` tool is not made by a command the hook sees, so the hook's part
   of AC-9 does not cover it: that tool takes its base from the setting `worktree.baseRef` in `.claude/settings.json`,
   which is `fresh` (the remote's default branch; Claude Code fetches it first when the last fetch is older than 24
-  hours, so the base can still be up to a day old). The other value, `head`, would start from the checkout's HEAD, which
+  hours, so the base can still be up to a day old; Claude Code's documentation, "Customize worktree creation" at
+  code.claude.com/docs/en/worktrees, "Choose the base branch", read on 2026-10-04). The other value, `head`, would start from the checkout's HEAD, which
   in the shared checkout can be a stale branch. Making worktrees with `git worktree add` (the hook's refusal text shows
   how) is the way that is enforced to the minute.
 
@@ -132,6 +134,7 @@ leftovers of a merged change are cleaned up.
 | AC | Test |
 | --- | --- |
 | AC-7 | `tests/worktree-guard.test.ts` (`decide` against a real primary checkout and linked worktrees: every file tool, a new file in a new directory, a worktree on `main`, ignored files, other repositories, `git -C` and `cd` (also Git Bash paths), `FOO=1 git`, `command git`, `git.exe`, forward-only updates of `main`, mutating and reading git commands, the settings wiring, the hook run as a process: exit codes and message) |
+| AC-9 (the tool's worktree) | manual (it needs a Claude Code session, and the tool's behaviour is the tool's): from a checkout whose HEAD is a stale branch, enter a worktree with Claude Code's own tool and check that `git log -1 --oneline` there is `origin/main`. Last checked: never recorded. |
 | AC-7 (the hook inside Claude Code) | manual (it needs a Claude Code session): in the primary checkout ask Claude to edit a tracked file and see the refusal with the `git worktree add` line. Last checked: never recorded. |
 | AC-9 | `tests/worktree-guard.test.ts` (the setting `worktree.baseRef` is `fresh`; against a bare origin and a clone: `origin/main` as base allowed, a local main, another branch or no base refused, a stale `origin/main` refused until fetched, an existing branch allowed, a chained fetch refused, no origin allowed); `tests/tidy.test.ts` (a stale local main is fast-forwarded and left alone when a worktree has it) |
 | AC-8 (the step in the workflow), AC-10 | `tests/worktree-guard.test.ts` (`CLAUDE.md` names `npm run tidy`, the hook, `git fetch origin` as a call of its own, and the classifier rule) |
