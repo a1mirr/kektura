@@ -11,7 +11,7 @@ Everything it says is true of the app today.
 
 ## Behaviour
 
-- **AC-1**: `/about` is public (no sign-in) in `ru`, `en` and `hu`, reachable from the footer. It has its
+- **AC-1**: `/about` is public (no sign-in) in every language, reachable from the footer. It has its
   own document title and description, and a single `h1` followed by
   one `h2` per section below (the four sections of AC-2 to AC-5, then AC-8's).
 - **AC-2**: "The trail in numbers" shows the number of stages, of official stamping places and the total

@@ -19,7 +19,7 @@ test.describe("spec 0005: every language", () => {
   for (const locale of routing.locales) {
     const m = messages(locale);
 
-    test(`AC-10, AC-11, 0014 AC-1, 0015 AC-1, AC-7, 0018 AC-3, 0019 AC-2: the public pages are in ${locale}`, async ({ page }) => {
+    test(`AC-10, AC-11, 0014 AC-1, 0015 AC-1, 0015 AC-7, 0018 AC-3, 0019 AC-2: the public pages are in ${locale}`, async ({ page }) => {
       await page.goto(`/${locale}`);
       await expect(page.locator("html")).toHaveAttribute("lang", locale);
       await expect(page.getByRole("combobox", { name: m.app.language })).toHaveValue(locale); // the dropdown (AC-10)

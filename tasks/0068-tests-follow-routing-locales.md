@@ -41,6 +41,7 @@ The smoke test's list is the file names of `messages/` (the owner left the choic
 ## Spec changes
 
 - Spec 0026: AC-8's text says the page of every language is requested, the languages being the files of `messages/`; the coverage row says the same.
+- Spec 0015 AC-1: "in every language" (it said `ru`, `en` and `hu`). Spec 0024: the coverage rows of AC-18, AC-20 and AC-22 name the languages the friends tests now cover (the default and one other; every message file for the unit test).
 - Spec 0005: the coverage rows of AC-9 to AC-11 name `e2e/languages.spec.ts` and the smoke test. No AC changes.
 - Specs 0001, 0014, 0015, 0018, 0019, 0033: coverage rows only, where per-language assertions moved into `e2e/languages.spec.ts` or were reduced to the default language and one other.
 - Code: `next.config.ts` builds the `/settings` redirect from `routing.locales` (it was the last list in the app code); behaviour is unchanged (spec 0014 AC-15).

@@ -65,6 +65,10 @@ describe("spec 0015: about page text", () => {
 describe("spec 0014: the account page has one name in every language", () => {
   const expected = { en: "Account", ru: "Аккаунт", hu: "Fiók", de: "Konto" };
 
+  it("AC-18: the name is given for every language, so a new language fails here until it has one", () => {
+    expect(Object.keys(expected).sort()).toEqual([...routing.locales].sort());
+  });
+
   it.each(Object.entries(expected))("AC-18: %s: the header link, the page title and the About page's link text say %s", (locale, name) => {
     const messages = byLocale[locale] as typeof import("../messages/en.json");
     expect(messages.dashboard.account).toBe(name);
