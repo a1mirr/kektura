@@ -66,7 +66,7 @@ Settled with the owner on 2026-10-04:
 | R-2 | `src/i18n/typed-messages.test.ts` (`Locale` is `hu \| en \| ru \| de`), `src/proxy.test.ts` (`/de` runs the proxy) |
 | R-3 | `tests/messages.test.ts` (parity for `de`), `src/content/changelog.test.ts`, `src/content/links.test.ts`, `tests/stamp-descriptions.test.ts` (every code has a `de` text, marker codes kept) |
 | R-4 | `e2e/language-switcher.spec.ts` (the dropdown on the landing page and dashboard; names and order; choosing a language; keyboard; 44 px; 320 px on the landing page, the dashboard at 320 px is covered by `e2e/site-logo.spec.ts`'s no-overflow check); no component test, the behaviour is the browser's native select |
-| R-5 | E2E (the old language addresses still answer 200 and keep their language) |
+| R-5 | `e2e/language-switcher.spec.ts` (every language's address and its About page answer 200, an unknown language is a 404); that the language is kept is asserted by `e2e/about.spec.ts`, `e2e/changelog.spec.ts` and `e2e/footer.spec.ts` (`lang` and the texts of `ru`, `hu` and `de`) |
 | R-6 | `tests/smoke-test.test.ts`, `e2e/changelog.spec.ts` |
 
 ## Spec changes
