@@ -9,7 +9,7 @@ Owner code: `src/lib/friends.ts`, `src/lib/friends-flag.ts`, `src/lib/friends-in
 Hikers walk the Kéktúra in company or compete quietly. Let a signed-in user connect with a friend who also
 has an account, and let each see the other's progress inside the site: how many of the 161 places, how many
 kilometres, which stages. Nothing is public: only people you accepted can see anything, and you can stop
-sharing at any moment. Ships behind the feature flag `friends` (spec 0023).
+sharing at any moment. Ships behind the feature flag `friends` (AC-15).
 
 ## Behaviour
 
@@ -91,11 +91,9 @@ sharing at any moment. Ships behind the feature flag `friends` (spec 0023).
 
 - **AC-15**: While the flag `friends` is off, `/friends`, `/friends/<id>` and `/friends/invite/*` answer 404,
   the actions return `disabled` without touching the database and no link to them is shown (the dashboard
-  link, the About page paragraph). Until the mechanism of spec 0023 exists the flag is the server environment
-  variable `FF_FRIENDS=1`: read on every request (a restart of the server applies a change, no rebuild: the
-  pages that would otherwise be static opt into per-request rendering), off
-  unless set, the same for every viewer. Spec 0023 replaces it with the per-user flag; then this AC says "off
-  for the viewer" (0023 AC-5).
+  link, the About page paragraph). The flag is the server environment variable `FF_FRIENDS=1`: read on every
+  request (a restart of the server applies a change, no rebuild: the pages that would otherwise be static opt into
+  per-request rendering), off unless set, the same for every viewer.
 - **AC-16**: Every user-visible string exists in `ru`, `en` and `hu`. The About page (spec 0015) tells
   what friends can see and how to stop it (only while the flag is on: with it off the page must not mention
   a page that answers 404), and the changelog gets an entry when the flag goes on for everyone.

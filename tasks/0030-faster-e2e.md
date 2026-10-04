@@ -25,7 +25,7 @@ the measurement behind it is in spec 0007's notes.
 ## Notes
 
 - Out of scope then: changing the app (for example a `data-hydrated` marker to replace the click-until-it-sticks
-  loops), sharding (spec 0031, still a draft), replacing the fixed waits that prove "nothing else is sent"
+  loops), sharding (task 0031, not built), replacing the fixed waits that prove "nothing else is sent"
   (`e2e/stamp-dates.spec.ts`), caching the Supabase Docker images.
 - The route needs no browser: Playwright's `page.request` shares cookies with the page's context, so a POST with
   `maxRedirects: 0` leaves the session in the context and the 303 is not followed.
