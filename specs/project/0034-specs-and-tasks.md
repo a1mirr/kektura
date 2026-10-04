@@ -85,7 +85,7 @@ behaviour would be spread over files that disagree with the code.
 - **AC-9**: `tests/specs.test.ts` checks that `specs/README.md` lists every spec once with the status written in the
   file (`Done`), that no spec number is used twice, that `specs/` is written in English and that the repository has no
   `tasks/` folder. The index (`specs/README.md`) groups the specs under headings that are not paths, and links each
-  spec by its path; a path that names a spec (under `specs/product/` or `specs/project/`) in any tracked text file, and a
+  spec by its path; a path that names a spec (under `specs/product/` or `specs/project/`) in any tracked Markdown, TypeScript, JavaScript or workflow file or git hook, and a
   relative Markdown link, must point at a file that exists, and no file cites a spec by the old flat path. It also checks that a test title citing an AC
   (under `describe("spec NNNN …")` or as `NNNN AC-n`) cites one that exists, and that the repository files named
   in backticks by a spec exist, and that every coverage row of a spec that
