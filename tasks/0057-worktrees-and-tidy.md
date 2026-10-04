@@ -1,4 +1,4 @@
-# 0056: Work only in worktrees from a fresh origin/main, and tidy after a merge
+# 0057: Work only in worktrees from a fresh origin/main, and tidy after a merge
 
 Status: Done
 Specs: [0021](../specs/0021-pull-requests-only.md) AC-7, AC-8, AC-9, AC-10 (added)
@@ -27,8 +27,8 @@ a place to stop) added, with their coverage rows and owner code; the Goal says t
 clean-up are part of the area. Status stays `Done`: every AC holds and has a test, and the one check that needs a
 live Claude Code session is a `manual` row. Spec 0012, Notes: the "Not verified" paragraph now says
 that the weekly backup was run by hand on GitHub on 2026-10-04 and succeeded (a fact found while checking task
-0058's premise; no AC changed). The same pull request also carries task 0063 (spec 0007 AC-8, spec 0022
-AC-4) and the open tasks 0057 to 0062, which change no spec until they are built.
+0059's premise; no AC changed). The same pull request also carries task 0064 (spec 0007 AC-8, spec 0022
+AC-4) and the open tasks 0058 to 0063, which change no spec until they are built.
 
 ## Notes
 
@@ -42,7 +42,7 @@ AC-4) and the open tasks 0057 to 0062, which change no spec until they are built
   lease or a test. Left as documented limits (spec 0021): a `git switch -c` inside a worktree is not checked against
   `origin/main`, stacking a branch on another one is refused, `git branch -f`, a quoted `;` inside a commit message,
   and `tidy` removing a clean merged worktree that another session idles in.
-- Tasks 0057 to 0062 keep the requirements of the spec change they will make in a "Requirements" section, as the owner
+- Tasks 0058 to 0063 keep the requirements of the spec change they will make in a "Requirements" section, as the owner
   asked (planned behaviour does not go into specs until it is built). Spec 0034 AC-3 still says a task describes no
   behaviour; amending it is the owner's separate change and is not made here.
 - `worktree.baseRef` in `.claude/settings.json` is `head`: a worktree made by the `EnterWorktree` tool starts from the
@@ -52,5 +52,5 @@ AC-4) and the open tasks 0057 to 0062, which change no spec until they are built
   sha it checked (never `-D`).
 - GitHub's setting "Automatically delete head branches" would remove the remote half of the clean-up for good. It is a
   repository setting for the owner to switch on: `gh api -X PATCH repos/a1mirr/kektura -f delete_branch_on_merge=true`.
-- The task numbers were 0040 to 0047 until `origin/main` took them for the backlog (tasks 0046 to 0055); they were
-  renumbered to 0056 to 0063.
+- The task numbers were 0040 to 0047, then 0056 to 0063; `origin/main` took each range for the owner's backlog while this
+  change was in review, so they are 0057 to 0064 now.

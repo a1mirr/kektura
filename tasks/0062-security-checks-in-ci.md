@@ -1,4 +1,4 @@
-# 0061: Free security checks in CI
+# 0062: Free security checks in CI
 
 Status: Open
 Specs: [0007](../specs/0007-ci.md) (two ACs are added when this is built)

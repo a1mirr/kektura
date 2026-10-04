@@ -47,11 +47,11 @@ A finished task stays as history and is not updated when behaviour changes later
 | [0054](0054-ci-runs-once-per-change.md) | CI runs once per change | Open |
 | [0055](0055-database-tests-fail-in-ci.md) | Database tests fail in CI instead of skipping | Open |
 | [0056](0056-specs-describe-built-behaviour-only.md) | Specs describe only behaviour that is built | Open |
-| [0056](0056-worktrees-and-tidy.md) | Work only in worktrees from a fresh origin/main, and tidy after a merge (spec 0021) | Done |
-| [0057](0057-review-recorded-check.md) | A CI check that a review was recorded (spec 0022) | Open |
-| [0058](0058-backup-before-migration.md) | A backup before every migration (specs 0012, 0026) | Open |
-| [0059](0059-production-monitoring.md) | Know when production is broken | Open |
-| [0060](0060-mobile-and-accessibility-e2e.md) | End-to-end tests at phone width, and accessibility checks (spec 0006) | Open |
-| [0061](0061-security-checks-in-ci.md) | Free security checks in CI (spec 0007) | Open |
-| [0062](0062-stop-hook-changelog-nudge.md) | The Stop hook also asks about the changelog (spec 0034) | Open |
-| [0063](0063-ci-is-the-e2e-authority.md) | CI is the authority for the end-to-end tests (specs 0007, 0022) | Done |
+| [0057](0057-worktrees-and-tidy.md) | Work only in worktrees from a fresh origin/main, and tidy after a merge (spec 0021) | Done |
+| [0058](0058-review-recorded-check.md) | A CI check that a review was recorded (spec 0022) | Open |
+| [0059](0059-backup-before-migration.md) | A backup before every migration (specs 0012, 0026) | Open |
+| [0060](0060-production-monitoring.md) | Know when production is broken | Open |
+| [0061](0061-mobile-and-accessibility-e2e.md) | End-to-end tests at phone width, and accessibility checks (spec 0006) | Open |
+| [0062](0062-security-checks-in-ci.md) | Free security checks in CI (spec 0007) | Open |
+| [0063](0063-stop-hook-changelog-nudge.md) | The Stop hook also asks about the changelog (spec 0034) | Open |
+| [0064](0064-ci-is-the-e2e-authority.md) | CI is the authority for the end-to-end tests (specs 0007, 0022) | Done |

@@ -1,4 +1,4 @@
-# 0062: The Stop hook also asks about the changelog
+# 0063: The Stop hook also asks about the changelog
 
 Status: Open
 Specs: [0034](../specs/0034-specs-and-tasks.md) (an AC is added when this is built)

@@ -1,4 +1,4 @@
-# 0063: CI is the authority for the end-to-end tests
+# 0064: CI is the authority for the end-to-end tests
 
 Status: Done
 Specs: [0007](../specs/0007-ci.md) AC-8 (added), [0022](../specs/0022-fresh-context-review.md) AC-4 (changed)
