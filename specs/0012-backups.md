@@ -1,6 +1,6 @@
 # 0012: Weekly backup of production user data
 
-Status: Done
+Status: Accepted
 Owner code: `.github/workflows/backup.yml`
 
 ## Goal
@@ -26,6 +26,11 @@ our own.
   `set -x`.
 - **AC-4**: Restore steps are documented under Notes below and tested once against the local test
   database: migrations + seeds, then the dump.
+
+- **AC-5**: The dump is one piece of the repository used by every workflow that takes one, a composite action
+  (under .github/actions/), so the table list, the exclude list and the check step exist once. The weekly
+  run (AC-1) and the dump before a migration (spec 0026 AC-14) differ only in the artifact's name and retention,
+  which they pass in. The action is given the connection string as an input from the caller's `env`, never printed.
 
 ## Out of scope
 
@@ -91,13 +96,12 @@ The dump contained exactly those six tables. Earlier drills (four tables) also s
 backslash, a newline and non-ASCII characters surviving, and a restored password user signing in and seeing their
 stamps through PostgREST with RLS. Repeat the drill after any change to the dump steps or to the tables.
 
-**Not verified** (can't be before the first push and a real secret): the runner's Docker pulling the
-CLI's `pg_dump` image; the connection through the production session pooler; that production's
-`postgres` role may set `session_replication_role` (if not, delete that first line from the file;
-`pg_dump` already orders the tables so that foreign keys hold, but this is untested); that the
-no-secret path ends green with the notice (it can't be run without GitHub); and the exact set of
-production `auth` tables (the check step covers that on the first run). After the first push, run the
-workflow once from the Actions tab (Run workflow) and look at the table list its check step prints.
+**Verified on GitHub** on 2026-10-04: a manual run of the workflow against production succeeded in 1 m 19 s
+(the runner's Docker pulled the CLI's `pg_dump` image, the session pooler connection worked, the check step
+accepted the table list and the artifact `user-data-backup` was stored). **Not verified**: that production's
+`postgres` role may set `session_replication_role` when the dump is loaded (if not, delete that first line from
+the file; `pg_dump` already orders the tables so that foreign keys hold, but this is untested), and that the
+no-secret path ends green with the notice (it can't be run without removing the secret).
 
 ## Coverage
 
@@ -105,3 +109,4 @@ workflow once from the Actions tab (Run workflow) and look at the table list its
 | --- | --- |
 | AC-1 ... AC-3 | `tests/backup-workflow.test.ts` (schedule and dispatch, the dump command and its exclude list, the check step, retention, the no-secret path, the secret handling, and that every table the migrations create is dumped or excluded). That the real run works against production is not asserted: see "Not verified" in Notes |
 | AC-4 | manual (it restores into a database): the restore drill in Notes. Last checked: 2026-10-04. |
+| AC-5 | Not built yet (task 0042): `tests/backup-workflow.test.ts` reads the action and both workflows (the table lists live in the action only, both workflows use it, the secret is passed through `env`) |

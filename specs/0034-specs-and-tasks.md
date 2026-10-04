@@ -1,6 +1,6 @@
 # 0034: Specs and tasks: how work is written down
 
-Status: Done
+Status: Accepted
 Owner code: `specs/README.md`, `specs/_template.md`, `tasks/README.md`, `tasks/_template.md`, `CLAUDE.md` (Workflow),
 `.claude/agents/fresh-reviewer.md`, `.claude/hooks/stop-check.mjs`, `.github/pull_request_template.md`,
 `tests/specs.test.ts`, `tests/review-process.test.ts`
@@ -79,6 +79,12 @@ once it is made, and scatters one area's behaviour over several files.
   end, when app code changed and no spec did: has behaviour changed (then the spec and its tests are updated), or
   not (then say so in one line).
 
+- **AC-12**: The same turn-end nudge covers the changelog (spec 0018 AC-7): once the checks pass, when a file that
+  users can see changed (`messages/*.json`, a `page.tsx` or `layout.tsx` under `src/app`, a component under
+  `src/components` that is not a test) and `src/content/changelog.ts` did not, the hook asks once whether the change
+  belongs in the changelog (then add the entry in three languages) or not (then say so in one line). The decision
+  is a pure function of the changed paths, tested directly.
+
 ## Out of scope
 
 Enforcing that a spec is true: only a person or the reviewer can tell. Moving tasks to GitHub issues: they stay
@@ -100,4 +106,5 @@ in the repository so the reviewer and the hook see them.
 | AC-2, AC-3, AC-4, AC-5, AC-6, AC-7 | `tests/specs.test.ts` (the rules are written in `specs/README.md`, `tasks/README.md`, `CLAUDE.md`; the templates have the sections) and `tests/review-process.test.ts` |
 | AC-8 | `tests/review-process.test.ts` (reviewer brief, `CLAUDE.md`, pull request template) and `tests/specs.test.ts` (the reviewer re-checks the hand-checked rows of what it touches) |
 | AC-10 | `tests/specs.test.ts` (the hook source watches `tasks/` and nudges on a missing spec change); manual (it runs a Claude Code hook): change a file under `src/` only, finish a turn, and the hook asks once; change a file under `tasks/` and the hook runs the checks. Last checked: never recorded. |
+| AC-12 | Not built yet (task 0046): a unit test of the path decision (user-visible files without and with the changelog, tests and `.types.ts` ignored) and `tests/specs.test.ts` (the hook source names the changelog); manual (it runs a Claude Code hook): change a message file only, finish a turn, and the hook asks once. Last checked: never recorded. |
 | AC-11 | `tests/specs.test.ts` (every hand-checked row of a Done or Accepted spec has a reason and a `Last checked` of a date, `never recorded` or `every pull request`; the rule is written in `CLAUDE.md`, `specs/README.md` and the reviewer's brief) |

@@ -1,6 +1,6 @@
 # 0026: Automatic migrations and deploy after a merge
 
-Status: Done
+Status: Accepted
 Owner code: `.github/workflows/deploy.yml`, `scripts/migrate-production.mjs`, `scripts/smoke-test.mjs`,
 `scripts/notify-telegram.mjs`, `scripts/deploy-plan.mjs`, `scripts/lib/deploy.mjs`, `deploy/ssh-gate.sh`, `deploy/README.md`
 
@@ -81,6 +81,13 @@ Secrets (repository secrets, used by `deploy.yml` only): `DEPLOY_SSH_KEY` (priva
   that file and every file that sorts before it as applied, without running them: the owner checks first that
   production has them. `--baseline` on a table that already has records is refused. Secrets, and the database
   password in particular, never appear in its output.
+
+- **AC-14**: Before the first missing migration is applied, the deploy backs up the user data: it dumps the same
+  tables as the weekly backup with the same action (spec 0012 AC-5) and stores the dump as the workflow artifact
+  `pre-migration-<sha7>` for 30 days. A dump that fails or does not pass its check stops the deploy before any
+  migration runs, and the failure is reported (AC-9). A deploy with no missing migration takes no dump. A dry run
+  says that a dump would be taken and takes none. Whether migrations are missing is decided by the script's own
+  dry run (`--dry-run`), so there is one place that knows.
 
 ### The code
 
@@ -167,6 +174,7 @@ seeds (spec 0004) and clearing the dashboard cache afterwards, which stay manual
 | AC-1, AC-2, AC-3, AC-10 | `tests/deploy-workflow.test.ts` (the trigger and its conditions, the commit picked (the newest whose CI passed), a run started from the Actions tab only from `main` and only for a commit CI passed, the concurrency group on the job and a separate one for dry runs, a timeout on the push step, the `dry_run` input, read-only permissions, secrets only in `env`, none echoed) |
 | AC-4, AC-6, AC-13 | `tests/migrate-production.test.ts` (order, recorded in the same transaction, skipped when recorded, a file that sorts before the latest applied one, stop at the first failure, the baseline rules, the password redacted) |
 | AC-4, AC-13 (against a real database) | manual (it runs the script against a database through `docker exec psql`): the real `migrate()` against the local test database: refused without a baseline, a baseline recorded without running its files, a failing file rolled back with nothing recorded and the later file not tried, the record table with row level security and no grants for the API roles, a second run applying nothing, a baseline on a table with records refused. Repeat after any change to the SQL in `scripts/migrate-production.mjs`. Last checked: 2026-10-03. |
+| AC-14 | Not built yet (task 0042): `tests/deploy-workflow.test.ts` (the dump step comes after the plan and before the migration step, runs only when the dry run says a migration is missing, a failing dump stops the chain, the artifact name and 30-day retention, the dry run takes none) |
 | AC-5 | `tests/review-process.test.ts` (the reviewer's brief, spec 0022 and `CLAUDE.md` ask for it); manual (judgement): the reviewer checks every migration against it. Last checked: every pull request. |
 | AC-7 | `tests/deploy.test.ts` (the hook, spec 0020), `tests/deploy-workflow.test.ts` (pushes only to `production`, never forced; fails unless the hook's `Deployed <sha>` line comes back, and the hook prints exactly that; the gate script allows only that repository: run for real on Linux) |
 | AC-8 | `tests/smoke-test.test.ts` (the checks, including that the dummy login answers 404, and the retry, against a local server); the first deploy a merge started by itself (run 37158189942, 2026-10-03) passed the first three checks against production |
