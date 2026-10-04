@@ -4,8 +4,12 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { checkReviewRecorded, inspectCommit, reviewedSha } from "../scripts/check-review-recorded.mjs";
+
+// The git tests spawn several processes each, and the unit tests run in dozens of workers at once: the default 5 s and 10 s
+// (a test and a hook) were missed under load, while the same file passes alone in about a second.
+vi.setConfig({ testTimeout: 30_000, hookTimeout: 60_000 });
 
 const read = (file: string) => fs.readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 

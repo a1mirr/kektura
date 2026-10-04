@@ -28,9 +28,12 @@ that tests protect.
   extends an entry in `src/content/changelog.ts` in the same pull request, in every language; changes
   users can't see (process, tests, refactors, deploy files) add none. Dates can't repeat (AC-4): a change
   made on the date of the newest entry is added to that entry, otherwise a new entry with today's date goes
-  first. `CLAUDE.md` (Workflow), the pull request template and the fresh-context reviewer (spec 0022) each
-  ask for it, and the Stop hook asks once at the end of a turn when a file users can see changed and the
-  changelog did not (spec 0034 AC-12).
+  first. A feature flag does not excuse a missing entry while the flag is on in production, which is looked up (a
+  flagged page answers 404 while the flag is off) and never assumed; a change behind a flag that is off in
+  production needs no entry until the pull request that switches the flag on, which adds one. `CLAUDE.md`
+  (Workflow), the pull request template and the fresh-context reviewer (spec 0022) each ask for it, and the Stop
+  hook asks once at the end of a turn when a file users can see changed, uncommitted or committed on the branch, and
+  the changelog did not (spec 0034 AC-12).
 
 ## Out of scope
 
@@ -54,5 +57,5 @@ Release numbers; a feed (RSS); showing "what's new" inside the app; generating e
 | AC-1, AC-2 | `e2e/changelog.spec.ts` (order, labels, every language; expectations come from `src/content/changelog.ts`, so a new entry doesn't break them) |
 | AC-6 | `src/content/changelog.test.ts` (the three oldest entries are these, in this order), `e2e/changelog.spec.ts` (the oldest entry is the first version) |
 | AC-5 | manual (judgement): the text is read against what the app does. Last checked: every pull request (the fresh-context review, spec 0022, reads the changelog of the change). |
-| AC-7 | `tests/review-process.test.ts` (`CLAUDE.md`, the pull request template and the reviewer's brief ask for it); the Stop hook's question is covered by spec 0034 AC-12 (`tests/stop-nudges.test.ts`) |
+| AC-7 | `tests/review-process.test.ts` (`CLAUDE.md`, the pull request template and the reviewer's brief ask for it, with the feature-flag clause); the Stop hook's question is covered by spec 0034 AC-12 (`tests/stop-nudges.test.ts`) |
 | AC-7 (an entry exists and is true) | manual (judgement): the change is compared with the entry. Last checked: every pull request (the fresh-context review, spec 0022). |

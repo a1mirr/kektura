@@ -63,7 +63,7 @@ not only the ACs the diff mentions.
   0026 AC-5), one that is not named `NNNN_slug.sql` after the task that adds it, or a schema change without
   regenerated types (`npm run types:gen`). A merge deploys by itself, so nobody else will look at this.
 - A change users can see (texts, names, pages, behaviour) with no entry in `src/content/changelog.ts` in
-  every language (spec 0018 AC-7), or an entry that says something untrue about the app as shipped.
+  every language (spec 0018 AC-7), or an entry that says something untrue about the app as shipped. A feature flag does not excuse a missing entry while it is on in production: look up the production state (a flagged page answers 404 while the flag is off), do not accept "it is behind a flag" from the task or the description.
 - Leftovers of anything renamed, moved or removed: code, routes and links, message keys and texts in every language (`messages/*.json`), the About page and the changelog, `README.md`,
   `CLAUDE.md`, other specs, test names.
 - The gotchas listed in `CLAUDE.md` that apply to the files touched (typed locale narrowing, translations in

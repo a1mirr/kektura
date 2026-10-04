@@ -153,6 +153,13 @@ describe("spec 0018: the changelog rule", () => {
     expect(claude).toMatch(/joins that entry/);
   });
 
+  it("AC-7: a feature flag that is on in production is no excuse, and its state is looked up, in CLAUDE.md, the template, the reviewer's brief and the spec", () => {
+    expect(read("CLAUDE.md")).toMatch(/A feature flag is no excuse while it is on in production \(look it up/);
+    expect(read(".github/pull_request_template.md")).toContain("a feature flag that is on in production does not make it invisible");
+    expect(read(".claude/agents/fresh-reviewer.md")).toMatch(/A feature flag does not excuse a missing entry while it is on in production: look up the production state/);
+    expect(read("specs/0018-changelog.md")).toMatch(/A feature flag does not excuse a missing entry while the flag is on in\s+production/);
+  });
+
   it("AC-7: the pull request template asks for it", () => {
     expect(read(".github/pull_request_template.md")).toMatch(/^- \[ \] .*users can see is in the changelog.*src\/content\/changelog\.ts/m);
   });
