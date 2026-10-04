@@ -48,7 +48,7 @@ behaviour would be spread over files that disagree with the code.
   states. A trivial fix needs neither. Tests cite specs (`describe("spec NNNN: …")`, `it("AC-n: …")`), never
   tasks.
 - **AC-5**: A migration is named after the number of the task issue that adds it, padded to four digits
-  (`NNNN_slug.sql`: `0075_x.sql` for #75), so a task owns one migration file: it is edited until it is applied to production, and a later schema change is a task of its
+  (`NNNN_slug.sql`: `0075_x.sql` for #75; a task migrated from a file, whose title starts with its old number such as `0048: …`, takes its issue number, never the old one), so a task owns one migration file: it is edited until it is applied to production, and a later schema change is a task of its
   own. (Migrations 0001-0008 predate the rule and 0024 carries the number of its spec.)
 
 ### Specs stay true
