@@ -61,3 +61,4 @@ A finished task stays as history and is not updated when behaviour changes later
 | [0065](0065-worktree-base-ref-fresh.md) | Claude Code's own worktrees start from the remote's default branch (spec 0021) | Done |
 | [0066](0066-telegram-for-failed-actions.md) | Failed server actions reach Telegram (spec 0008) | Open |
 | [0067](0067-hungarian-default-and-german.md) | Hungarian is the default language, German is added, the language is chosen from a dropdown (now specs 0005, 0033) | Done |
+| [0069](0069-ci-up-to-date-with-main.md) | A pull request that is behind main is flagged by CI and never merged (specs 0007, 0021, 0022) | Done |

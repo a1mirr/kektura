@@ -20,8 +20,8 @@ export function reviewedSha(description) {
 export const isMarkdown = (file) => file.endsWith(".md");
 
 // The decision. `reviewed` says what git knows about the named commit, and is null when it does not exist or is
-// neither the head nor an ancestor of it: { sha: its full sha, changedAfter: the files that differ between it and the
-// head }. The result is { ok, message }.
+// neither the head nor an ancestor of it: { sha: its full sha, changedAfter: the files the pull request's own commits
+// changed after it }. The result is { ok, message }.
 export function checkReviewRecorded({ description, head, reviewed }) {
   const named = reviewedSha(description);
   if (!named) {
@@ -45,8 +45,17 @@ export function checkReviewRecorded({ description, head, reviewed }) {
 }
 
 // What git knows about the named commit, for checkReviewRecorded. `git(...args)` runs git and returns its stdout, and
-// throws when git exits with an error.
-export function inspectCommit(git, sha, head) {
+// throws when git exits with an error. With `base` (the pull request's base branch, such as `origin/main`) only what
+// the pull request's own commits changed counts: files that arrive by merging the base into the branch were reviewed
+// with the pull request that put them there (spec 0022 AC-5); a conflict resolution in a merge commit is the
+// author's own work and counts.
+/**
+ * @param {(...args: string[]) => string} git
+ * @param {string} sha
+ * @param {string} head
+ * @param {string | null} [base]
+ */
+export function inspectCommit(git, sha, head, base = null) {
   let full;
   try {
     full = git("rev-parse", "--verify", "--quiet", `${sha}^{commit}`).trim();
@@ -60,8 +69,23 @@ export function inspectCommit(git, sha, head) {
     return null;
   }
   // --no-renames: a Markdown file renamed to code lists both paths, so the code path shows.
+  if (base) {
+    // --cc lists a merge commit's files only where it differs from every parent (a conflict resolution)
+    const own = git("-c", "core.quotepath=false", "log", "--format=", "--name-only", "--no-renames", "--cc", `${full}..${head}`, `^${base}`);
+    return { sha: full, changedAfter: [...new Set(own.split("\n").filter(Boolean))] };
+  }
   const changedAfter = git("-c", "core.quotepath=false", "diff", "--name-only", "--no-renames", full, head).split("\n").filter(Boolean);
   return { sha: full, changedAfter };
+}
+
+// The base branch as a remote-tracking ref, or null when the clone does not have it (then every file that differs counts).
+function baseRef(git, name) {
+  try {
+    git("rev-parse", "--verify", "--quiet", `origin/${name}`);
+    return `origin/${name}`;
+  } catch {
+    return null;
+  }
 }
 
 function main() {
@@ -78,7 +102,7 @@ function main() {
     : pr.body;
   const git = (...args) => execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
   const named = reviewedSha(description);
-  const result = checkReviewRecorded({ description, head, reviewed: named ? inspectCommit(git, named, head) : null });
+  const result = checkReviewRecorded({ description, head, reviewed: named ? inspectCommit(git, named, head, baseRef(git, pr.base.ref)) : null });
   console.log(result.message);
   if (!result.ok) {
     console.log(`::error title=Review recorded::${result.message}`);
