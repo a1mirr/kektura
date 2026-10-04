@@ -124,7 +124,7 @@ Secrets (repository secrets, used by `deploy.yml` only): `DEPLOY_SSH_KEY` (priva
 A staging environment; preview deployments of pull requests; blue-green or zero-downtime deploys (spec 0020
 leaves that to be tried on the server first); automatic rollback of a deployed build or a migration; running
 the Supabase advisors (they exist only in the Supabase MCP, so they stay a manual look after a schema change);
-turning feature flags on (a flag is switched by hand on the server, spec 0023 and 0024); applying regenerated trail
+turning feature flags on (a flag is switched by hand on the server, spec 0024 AC-15); applying regenerated trail
 seeds (spec 0004) and clearing the dashboard cache afterwards, which stay manual (`deploy/README.md`).
 
 ## Notes
