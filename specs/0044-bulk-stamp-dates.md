@@ -32,9 +32,10 @@ step instead of editing fourteen fields. It works on desktop and on a phone.
   state and a second press sends nothing.
 - **AC-6**: `setStampDates(placeKeys, extraIds, date)` is one server action: it only **updates** `stamped_on` of the
   signed-in user's existing rows (every variant of a place), never inserts, touches only the caller's rows (RLS and a
-  `user_id` filter) and refuses a request over 200 items. An invalid date is rejected without database access (`failed`),
+  `user_id` filter) and refuses a request over 500 items (more than the 161 places and the 72 extra stamps, so "select all" always fits). An invalid date is rejected without database access (`failed`),
   a missing session is `unauthorized`, nothing updated is `failed`. It is all or nothing: a failure leaves every date as
-  it was. It never throws and logs failures like the others (specs 0008, 0016).
+  it was. Once spec 0042 is built, a request that contains a retired stamp with a date on or after its `retired_on` is refused as a whole
+  (`failed`), and the bar names those stamps before Apply. It never throws and logs failures like the others (specs 0008, 0016).
 - **AC-7**: After success the page shows the new dates, the selection is cleared, the mode closes and a message names the
   count ("12 dates changed"). After a failure the saved dates and the selection are kept, "Couldn't save, try again." shows
   (spec 0002 AC-10), and an expired session refreshes the page (spec 0002 AC-11).
@@ -52,7 +53,7 @@ row; undo after Apply; a "same day for a whole stage" shortcut beyond AC-2's sel
 
 ## Open questions
 
-- **Limit.** 200 per request leaves room for the 161 places plus extras; a user may want "everything". Is 200 right?
+- **Limit.** 500 per request leaves room for everything (161 places plus 72 extras are 233). Is a limit needed at all?
 - **Stage as a unit.** A quick "set the date of this stage" on each stage header (no mode) may be what people want most.
   Add it next to AC-2, or leave it?
 - **A mode or an always-visible checkbox.** A mode keeps the stage list calm for the visits that do not edit dates.

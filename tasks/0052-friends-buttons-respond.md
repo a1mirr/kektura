@@ -2,7 +2,7 @@
 
 Status: Open
 Specs: [0043](../specs/0043-friends-comparison-and-feedback.md) AC-11 to AC-17 (added), [0024](../specs/0024-friends-sharing.md) AC-14
-(relied on: the actions' rules)
+(changed: the actions' feedback; their rules are unchanged)
 
 ## Goal
 
@@ -14,7 +14,7 @@ confirmation for the two actions that cannot be undone from the page.
 - [ ] The cause is confirmed: the missing pending state, or also an action that sometimes does not apply (then a separate defect
       with the failing case)
 - [ ] The buttons are built as small client components over the existing server actions, with the tests of the coverage table
-- [ ] They still work without JavaScript; checked at 320 and 375 px; the changelog entry if users can see it
+- [ ] They still work without JavaScript; checked at 320 and 375 px; the changelog entry in all three languages
 - [ ] The specs listed above mirror the code as built (spec 0034 AC-6); fresh-context review done
 
 ## Spec changes

@@ -5,7 +5,8 @@ Owner code: `src/lib/progress.ts` (`stampsPerMonth`, or a new `monthlyProgress`)
 `src/app/[locale]/stats/page.tsx` (new), `src/app/[locale]/account/page.tsx`
 
 Amends, when built: [0001](0001-progress.md) AC-5 (per-month counting: the months are now all shown, and carry stages
-and km) and [0014](0014-pages-and-settings.md) AC-8 (the chart leaves `/account`, replaced by AC-1 here).
+and km) and [0014](0014-pages-and-settings.md) AC-8, its Notes line about the chart's place and its coverage row (the chart leaves
+`/account`, replaced by AC-1 here).
 
 ## Goal
 
@@ -26,24 +27,25 @@ It works on desktop and on a phone.
 
 ### What a month holds
 
-- **AC-3**: For every month between the first and the last stamp date, inclusive, the chart has a bar, including the
+- **AC-3**: For every month between the first and the last stamp date (places and extra stamps both), inclusive, the chart has a bar, including the
   months in which nothing was stamped (a bar of height 0, with the month labelled). No month is skipped.
 - **AC-4**: A month's **stamps** are the places first stamped in it, as in spec 0001 AC-5 (places, not variant rows,
   each in the month of its earliest stamp).
 - **AC-5**: A month's **stages** are the stages that have at least one place first stamped in that month, as stage
   numbers in order. A stage that spans months appears in each month in which one of its places was stamped. Extra
-  stamps (spec 0001 AC-12) are counted like places in their own stage's list, not in the stamp count of AC-4.
+  stamps (spec 0001 AC-12) are listed in their own stage's list too, and counted apart, in `extraStamps`, not in the
+  stamp count of AC-4. The page reads `user_stamps` and `user_extra_stamps`.
 - **AC-6**: A month's **km** are the kilometres that became walked in it. A stretch between two neighbouring places
   (spec 0001 AC-3) is walked when the second of the two is stamped, and its km belong to the month of the **later** of
   its two stamp dates. So a stamp placed next to a stamp of an earlier month adds that whole stretch to *this*
   month, and the km of all months add up to the walked km of the dashboard (spec 0001 AC-4, rounded to 0.1). A
-  stretch is never counted twice and never lost. A stretch that runs across a place waived under spec 0042 (it has no
-  stamp and so no date) is one stretch between the stamped places on either side of it, dated by the later of their two
+  stretch is never counted twice and never lost. Once spec 0042 is built, a stretch that runs across a place it waives (no
+  stamp, so no date) is one stretch between the stamped places on either side of it, dated by the later of their two
   dates.
 - **AC-7**: Changing a stamp's date (spec 0016, bulk: spec 0044) moves the stamp and the km that depend on it to the
   new month; removing a stamp removes the stretches it made walked, from the month they were in.
 - **AC-8**: These are pure functions of the stamps and the places; nothing is read or computed in the component. They
-  return, for every month, `{ month, stamps, stages: number[], km }`, oldest first.
+  return, for every month, `{ month, stamps, extraStamps, stages: number[], km }`, oldest first.
 
 ### The chart
 
@@ -99,6 +101,6 @@ cumulative line; exporting the data.
 | --- | --- |
 | AC-1, AC-2 | planned: `e2e/stats.spec.ts` (signed in and out, the chart is gone from `/account`, the title) |
 | AC-3, AC-4, AC-5, AC-6, AC-7, AC-8 | planned: `src/lib/progress.test.ts` (gaps, a stamp next to an earlier month, the A-C-B order, the sum equals `doneKm`, extras) |
-| AC-9, AC-10, AC-11, AC-12, AC-14 | planned: `src/components/StampsChart.test.tsx` |
-| AC-13 | `tests/messages.test.ts`, plus the plural forms in `src/components/StampsChart.test.tsx` |
+| AC-9, AC-10, AC-11, AC-12, AC-14 | planned: the sentences and labels in `src/lib/progress.test.ts` or a pure formatter test; `e2e/stats.spec.ts` for the tooltip, tap, keyboard focus and axis labels (Recharts has no layout in jsdom, so a component test would assert nothing real) |
+| AC-13 | `tests/messages.test.ts`, plus the plural forms in the formatter test |
 | AC-10 (320 and 375 px) | planned: `e2e/stats.spec.ts` (the frame scrolls, the page does not) |

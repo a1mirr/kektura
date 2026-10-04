@@ -35,7 +35,8 @@ fail the job instead of letting every security test pass unrun.
 ### Database tests that cannot skip
 
 - **AC-6**: One shared helper (in `e2e/local-db.ts`, next to `localSupabase` and `psql`) decides what an unreachable
-  database means for every database test file: skip when the environment variable `REQUIRE_LOCAL_DB` is not set, **fail**
+  database means ("reachable" is `localSupabase()`'s own probe, `supabase status`; `tests/seed-cleanup.test.ts` moves to it
+  from its `docker exec` check) for every database test file: skip when the environment variable `REQUIRE_LOCAL_DB` is not set, **fail**
   with a clear message ("the local Supabase is not running: `npm run testdb:start`") when it is. Only the end-to-end job's
   database step sets it. No test file repeats that decision.
 - **AC-7**: The first job ("Typecheck, lint, unit tests") has no database and keeps skipping: it does not set
@@ -75,8 +76,8 @@ Running the database tests in the first job (it needs Docker and 15 more minutes
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-3, AC-5 | planned: `tests/ci-workflow.test.ts` (parses `ci.yml`: triggers, job names, concurrency) |
+| AC-1, AC-3, AC-5 | planned: `tests/ci-workflow.test.ts`, extended (it exists and asserts the old triggers; it parses `ci.yml`: triggers, job names, concurrency) |
 | AC-2 | manual (a real GitHub Actions run): after the first merge, check that a run on `main` exists. Last checked: never recorded. |
 | AC-4 | manual (a real GitHub Actions run): push a branch without a pull request and check that no run starts. Last checked: never recorded. |
 | AC-6, AC-7, AC-9 | planned: `tests/local-db-helper.test.ts` and a repository test over the database test files |
-| AC-8 | manual (a real GitHub Actions run): stop the local Supabase step on a throwaway pull request and check that the database step fails. Last checked: never recorded. |
+| AC-8 | planned: `tests/ci-workflow.test.ts` (the step runs the check of AC-8 and sets `REQUIRE_LOCAL_DB`) and a unit test of the script that reads the JSON report (0 run, one skipped, all ran); manual (a real GitHub Actions run) for the whole: stop the Supabase step on a throwaway pull request and check that the database step fails. Last checked: never recorded. |

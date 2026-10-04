@@ -23,8 +23,9 @@ cannot be pressed twice, and the page says what happened.
   the km walked by both (the intersection of the two sets of ranges), only by me, only by the friend, and by neither. The
   four km figures add up to the total km (rounded to 0.1 as in spec 0001 AC-4).
 - **AC-2**: The "gaps" are the places and stretches that exactly one of the two lacks. For each stage the comparison
-  lists the number of places each has, so a stage reads as "both complete", "only me", "only them", "neither started" or
-  "partly".
+  lists the number of places each has, and classifies it, in this order, from my count `a`, the friend's `b` and the stage's
+  total `n`: "both complete" (`a = n` and `b = n`), "only me" (`a = n`, `b < n`), "only them" (`b = n`, `a < n`), "neither
+  started" (`a = 0` and `b = 0`), otherwise "partly". The five states are exhaustive and exclusive.
 - **AC-3**: A stretch counts as walked by a person only by the rule of spec 0001 AC-3 (and, once spec 0042 is built, its
   waivers), so the comparison never disagrees with either person's own dashboard.
 - **AC-4**: The functions are pure (no database, no `Date`) and cover: both empty, identical stamps, disjoint stamps,
@@ -58,7 +59,8 @@ whose server action ends with a redirect, so between the click and the reload no
   the same row (approve and ignore of one request) are disabled too.
 - **AC-13**: When the request is done the page says what happened: a success message that names it ("Friend request
   approved", "Link regenerated", "Name saved", "Sharing stopped", "Removed"), announced to screen readers
-  (`role="status"`, `aria-live="polite"`); a failure shows the existing error text with `role="alert"`. A message goes away
+  (`role="status"`, `aria-live="polite"`), through the same mechanism as the existing "request sent" message (`?sent=1`):
+  one whitelisted query value family, never shown raw; a failure shows the existing error text with `role="alert"`. A message goes away
   on the next action.
 - **AC-14**: Remove-friend and regenerate-link ask for confirmation first, in the page (not `window.confirm`), and the
   regenerate step says that the old link stops working. The confirmation is itself a plain form (a `<details>` that reveals

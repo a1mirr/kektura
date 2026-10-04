@@ -6,8 +6,8 @@ Owner code: `scripts/data/okt-stamp-dates.json` (new), `scripts/data/okt-retired
 `src/components/StageSection.tsx`, `src/app/[locale]/dashboard/actions.ts`, `supabase/migrations/` (one per task)
 
 Amends, when built: [0001](0001-progress.md) AC-3 (walked stretches: waived places) and AC-7 (stage stamping skips retired
-rows); [0003](0003-map-route-planner.md) (popups and markers: moved notes, no retired rows); [0004](0004-trail-data.md) AC-9
-(retired rows are kept) and its regeneration steps; [0016](0016-stamp-dates.md) AC-2 (a retired stamp's latest date);
+rows); [0003](0003-map-route-planner.md) (popups and markers: required-from and moved notes, no retired rows); [0004](0004-trail-data.md) AC-9
+(retired rows are kept) and its regeneration steps; [0016](0016-stamp-dates.md) AC-2 and AC-4 (a retired stamp's latest date); [0001](0001-progress.md) AC-1 (the row count changes with retired rows); [0015](0015-about-page.md) (the trail facts and the freshness line stay true);
 [0017](0017-feedback.md) (the form accepts a prefilled stamp code); [0024](0024-friends-sharing.md) AC-7 and AC-12 (what a
 friend's functions return).
 
@@ -29,7 +29,7 @@ a rule they could not have known. It works on desktop and on a phone.
 - **AC-2**: Dates come **only from official publications** of the MTSZ (kektura.hu, mtsz.org), never from guesses or
   third parties. They live in one data file, `scripts/data/okt-stamp-dates.json`: one entry per stamp code with the
   date, the URL of the publication that gives it and, only where that publication says so, a `tolerance_note` flag
-  (AC-15). `build-data.mjs` reads it (spec 0004: outputs are never edited by hand). Entries are added by hand when the MTSZ
+  (AC-15) and, for a moved stamp, `moved_on` (AC-31). `build-data.mjs` reads it (spec 0004: outputs are never edited by hand). Entries are added by hand when the MTSZ
   announces a change, like the stage table. The code is the **current** code in the seed: the MTSZ renames codes (see
   Notes), so an entry for an older code is entered under the code the seed has now.
 - **AC-3**: A test checks every entry: the code exists in the seed, the date is a real date, the source is an
@@ -151,8 +151,9 @@ that anyone who relies on the site's map finds it.
   the same MTSZ publication. A stamp is never shown at a place the drawn line does not pass: a test checks every place's
   distance to the line against a limit written in the test (spec 0004 only prints places over 500 m away today).
 - **AC-31**: A stamp that moved (a change of its coordinates of more than 100 m between two MTSZ files; a smaller shift
-  just replaces the coordinates) in the last 180 days has a `moved_on` date in the data, from an official publication
-  with its URL, like AC-2. For those 180 days its row and popup show a short note: "Moved on 30 Sep 2026: the stamp
+  just replaces the coordinates) in the last 180 days has a `moved_on` date, an entry in the dates file of AC-2 (the date,
+  the official publication's URL), and `build-data.mjs` fails when the coordinates of a code differ by more than 100 m from
+  the previous seed without such an entry. For those 180 days its row and popup show a short note: "Moved on 30 Sep 2026: the stamp
   is now by the lookout. If you use an older map or booklet, check the new place." It says only what the data holds
   (the date and the new description), not how far or which way. Its marker on the map has a ring (not colour alone).
 - **AC-32**: A move reaches the site as one routine: the new MTSZ file, `node scripts/build-data.mjs ...`, the checks,
@@ -219,7 +220,7 @@ re-check against the source, when entering it):
 | `OKTPH_84_B` | Lokó-pihenő (listed by the MTSZ as `OKTPH_85_2`) | 2017-05-26 | same list |
 | `OKTPH_142` | Nagy-nyugodó | 2017-06-11 | same list |
 | `OKTPH_31_B` | Csobánc | 2017-10-27 | same list |
-| `OKTPH_132_B_1`, `_2` | Encs | 2022-05-01 | same list |
+| `OKTPH_132_B_1`, `_2` | Encs (verify before entering: a new place, as the `_B` suffix suggests, or a second stamp at an existing one) | 2022-05-01 | same list |
 | `OKTPH_30_B` | Badacsony | 2025-05-08 | [new stamps, 2025](https://www.kektura.hu/hir/uj-belyegzok-a-kekturan) |
 | `OKTPH_63_C` | Nagy-Gete | 2025-05-08 | same |
 | `OKTPH_80_B` | Julianus-kilátó | 2025-05-08 | same |
@@ -256,8 +257,8 @@ re-check against the source, when entering it):
   Nyírjesi forester's house, whose stamp (on the gate's fence, in the 2009 booklet) was about 5 km from the new one on the
   699 m Vércverés summit. So the route changed, not only the stamp. The seed has no Nyírjesi row (it is the current MTSZ
   data), so a pre-2014 stamp there cannot be recorded today.
-- Other changes the MTSZ makes, seen on its pages: a stamp split into two locations at one place (Encs, 2022: `_1` and
-  `_2`, handled by spec 0004), a new imprint (Bodó-rét), and "stamp in a new place" notices on the
+- Other changes the MTSZ makes, seen on its pages: stamps with two locations at one place (Encs, 2022: `_1` and
+  `_2`, handled by spec 0004; whether Encs was a new place or an older one is to be verified), a new imprint (Bodó-rét), and "stamp in a new place" notices on the
   [warnings page](https://www.kektura.hu/figyelmeztetesek) (2026-09-30 Virágos-nyereg, 2026-09-24 Nyírkarász; which trail
   each belongs to is not checked). The Zalakomár (2019) and Jakab-hegy (2022) replacements are on the Dél-dunántúli trail.
 - Today a move already reaches users once the seed is regenerated: `build-data.mjs` upserts by `code` and rewrites
@@ -275,10 +276,11 @@ re-check against the source, when entering it):
 | AC-4, AC-5, AC-6, AC-7, AC-8 | planned: `src/lib/progress.test.ts` (a waived place between stamped neighbours, before and after the date, a stamp added later, the sum of the months) |
 | AC-9, AC-10, AC-11 | planned: `tests/trail-data.test.ts` (a seed with an inserted place keeps ids and stamps), `tests/labels.test.ts`; the E2E counts follow the data |
 | AC-12 | planned: `tests/friends-migration.test.ts` (the function returns only waived keys, only for accepted sharing friends), `src/lib/friends.test.ts` |
-| AC-13 | review; `specs/0004-trail-data.md` updated when built |
+| AC-13 | manual (a procedure, not behaviour): follow the recipe once for a real MTSZ file and tick its checklist. Last checked: never recorded. |
 | AC-14, AC-15, AC-16, AC-17 | planned: `src/components/StageSection.test.tsx`, `e2e/stamping.spec.ts` (375 px), `tests/messages.test.ts` |
 | AC-18, AC-19, AC-20 | planned: `tests/trail-data.test.ts` (retired rows kept, stamps kept after a regeneration) and a migration check in `tests/*-migration.test.ts` |
-| AC-21, AC-22, AC-24 | planned: `src/lib/progress.test.ts` |
+| AC-21, AC-24 (the rules) | planned: `src/lib/progress.test.ts` |
+| AC-22, AC-24 (the toggle, its memory, the count and the mark) | planned: `src/components/StageControls.test.tsx`, `src/components/StageSection.test.tsx` |
 | AC-23 | planned: `src/app/[locale]/dashboard/actions.test.ts`, `src/lib/stamp-date.test.ts` |
 | AC-25, AC-26, AC-27 | planned: `src/components/StageSection.test.tsx`, `src/lib/friends.test.ts`, `e2e/stamping.spec.ts` (375 px) |
 | AC-28, AC-29, AC-30 | planned: `tests/trail-data.test.ts` (a moved coordinate keeps ids and stamps; the distance to the line within the limit), `src/lib/map-popups.test.ts` |

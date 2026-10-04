@@ -2,7 +2,7 @@
 
 Status: Open
 Specs: [0042](../specs/0042-stamp-lifecycle.md) AC-1 to AC-17 (added), [0001](../specs/0001-progress.md) AC-3 (changed: waived
-places), [0004](../specs/0004-trail-data.md) (the dates file and the recipe for adding a stamp), [0024](../specs/0024-friends-sharing.md)
+places), [0004](../specs/0004-trail-data.md) (the dates file and the recipe for adding a stamp), [0003](../specs/0003-map-route-planner.md) (the popup note), [0015](../specs/0015-about-page.md) (facts stay true), [0024](../specs/0024-friends-sharing.md)
 AC-7, AC-8, AC-12 (changed or relied on: a friend's figures equal the owner's, and the friend functions return more)
 
 ## Goal

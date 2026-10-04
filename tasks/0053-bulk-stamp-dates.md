@@ -2,7 +2,8 @@
 
 Status: Open
 Specs: [0044](../specs/0044-bulk-stamp-dates.md) AC-1 to AC-11 (added), [0016](../specs/0016-stamp-dates.md) (relied on; its out-of-scope
-note changes), [0041](../specs/0041-stats-page.md) AC-7 (relied on: the chart follows the dates)
+note changes), [0041](../specs/0041-stats-page.md) AC-7 (relied on: the chart follows the dates), [0042](../specs/0042-stamp-lifecycle.md)
+AC-23 (relied on: a retired stamp's latest date, once that is built)
 
 ## Goal
 

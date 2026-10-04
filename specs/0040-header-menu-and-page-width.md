@@ -5,9 +5,10 @@ Owner code: `src/components/AccountMenu.tsx`, `src/components/PageShell.tsx` (ne
 `src/app/[locale]/dashboard/page.tsx`, every page's `<main>`, `src/components/Footer.tsx`, `messages/*.json`
 (`accountMenu.*`)
 
-Amends, when built: [0014](0014-pages-and-settings.md) AC-14 (the header link becomes the menu) and, if the page is
-renamed (see Open questions), AC-15 and AC-18 (title, `h1`, About text). Shares the header strip with
-[0029](0029-site-logo-link.md).
+Amends, when built: [0014](0014-pages-and-settings.md) Goal and AC-7, AC-14 (the dashboard header's account link becomes the
+menu) and, if the page is renamed (see Open questions), AC-15 and AC-18 (title, `h1`, About text); [0024](0024-friends-sharing.md)
+AC-15 (the Friends link is the menu entry); [0029](0029-site-logo-link.md) AC-7 and its out-of-scope line about a navigation
+menu (the header strip is shared with the logo).
 
 ## Goal
 
@@ -84,9 +85,10 @@ switcher into the menu; a new visual design; a sidebar; a "sign out" entry in th
   The owner asked for "settings" in the menu. Keep the entry "Settings" and rename the page, its title and the About text
   to match (amending 0014 AC-15 and AC-18), or label the entry "Account"? This draft assumes the first, with one word
   everywhere.
-- **Static pages.** About, changelog, links, feedback and the landing page are statically generated today. A menu that
-  needs the session in the layout would make them render per request. Proposal: on those pages the menu is a client
-  island that asks for the session after load (a signed-out visitor sees nothing, as now), so the pages stay static.
+- **Static pages.** About, changelog, links, feedback and the landing page are statically generated today. The menu needs
+  the session and the runtime `friends` flag (`connection()`, the gotcha in `CLAUDE.md`), so a menu in the layout makes
+  every page render per request. Proposal: accept that (the pages are small); the alternative is a client island that
+  fetches the session and the flag from a small endpoint after load, which keeps those pages static but adds an endpoint.
 - **The label.** The button says "Account" rather than the user's display name, because the display name is editable only
   on the Friends page, which is behind a flag.
 - **How wide.** `max-w-6xl` (1152 px) is a guess; `max-w-5xl` is safer for text, `max-w-7xl` suits a big map. A look at
@@ -102,7 +104,8 @@ switcher into the menu; a new visual design; a sidebar; a "sign out" entry in th
 - Today the dashboard, account, about, changelog, feedback, links and friend pages use `mx-auto max-w-3xl px-6 py-8`,
   the friends list `max-w-xl p-4`, the invite `max-w-md`, and `Footer` `max-w-3xl`. The friends link is
   `friendsEnabled()` in the dashboard header: the menu renders its entries on the server so the flag is read at
-  request time (the runtime-flag gotcha in `CLAUDE.md`); a client component is needed only for focus handling.
+  request time (the runtime-flag gotcha in `CLAUDE.md`); a client component is needed only for focus handling (see the open
+  question on static pages).
 - Tailwind 4: define the width as a CSS variable (`--page-width`).
 
 ## Coverage
