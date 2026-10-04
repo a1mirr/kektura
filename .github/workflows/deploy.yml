@@ -1,6 +1,7 @@
-# Spec 0026. After a merge to main whose CI passed: apply the missing migrations to production, push the code to
-# the server (its post-receive hook builds and reloads it), then check that the site answers. Merges that change
-# only documentation, specs, tests or repository tooling are skipped (AC-12).
+# Spec 0026. After a merge to main whose CI passed: apply the missing migrations to production (after a backup of the
+# user data, when one is missing, AC-14), push the code to the server (its post-receive hook builds and reloads it),
+# then check that the site answers. Merges that change only documentation, specs, tests or repository tooling are
+# skipped (AC-12).
 #
 # Needs the repository secrets DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS and SUPABASE_DB_URL (setup: deploy/README.md);
 # TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are optional (a failure message). Without the first three the run ends
@@ -125,6 +126,7 @@ jobs:
           # pushed all have to be the same, not the tip of main when that is newer (its CI may not have passed).
           git checkout --detach "$sha"
           echo "TARGET_SHA=$sha" >> "$GITHUB_ENV"
+          echo "TARGET_SHA7=${sha:0:7}" >> "$GITHUB_ENV" # for the name of the backup artifact (expressions can't cut a string)
           echo "Deploying ${sha:0:7}, the newest commit of main whose CI passed."
 
       - name: Set up the deploy key
@@ -162,6 +164,42 @@ jobs:
         id: plan
         if: env.CONFIGURED == 'true'
         run: node scripts/deploy-plan.mjs "$TARGET_SHA" production
+
+      # Whether a migration is missing is decided by the migration script's own dry run, so one place knows (AC-14).
+      # Its summary section is left out here (`env -u`): the step that applies the migrations writes the real one.
+      - name: Find out whether a migration is missing
+        id: missing
+        if: env.CONFIGURED == 'true' && (steps.plan.outputs.deploy == 'true' || env.BASELINE != '')
+        timeout-minutes: 5
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          args=(--dry-run)
+          if [ -n "$BASELINE" ]; then args+=(--baseline "$BASELINE"); fi
+          env -u GITHUB_STEP_SUMMARY node scripts/migrate-production.mjs "${args[@]}"
+
+      # A migration runs against production data with no way back, so the user data is dumped first, and a dump
+      # that fails or does not pass its check stops the deploy before any migration runs (AC-14). The step has no
+      # `continue-on-error`, and the migration step below has no status function, so it runs only after this passed.
+      - name: Back up the user data before migrating
+        id: backup
+        if: env.CONFIGURED == 'true' && steps.missing.outputs.missing == 'true' && env.DRY_RUN != 'true'
+        timeout-minutes: 10
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        uses: ./.github/actions/dump-user-data
+        with:
+          db-url: ${{ env.SUPABASE_DB_URL }}
+          artifact-name: pre-migration-${{ env.TARGET_SHA7 }}
+          retention-days: 30
+
+      - name: Say that a backup would be taken
+        if: env.CONFIGURED == 'true' && steps.missing.outputs.missing == 'true' && env.DRY_RUN == 'true'
+        run: |
+          echo "::notice title=Dry run::A backup of the user data would be taken before the migrations are applied."
+          echo "### Backup (dry run)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- A migration is missing, so the user data would be dumped first (artifact pre-migration-${TARGET_SHA7}, 30 days). Nothing was dumped." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Apply the missing migrations
         id: migrate
@@ -213,6 +251,8 @@ jobs:
           PICK_OUTCOME: ${{ steps.pick.outcome }}
           CI_OUTCOME: ${{ steps.ci.outcome }}
           PLAN_OUTCOME: ${{ steps.plan.outcome }}
+          MISSING_OUTCOME: ${{ steps.missing.outcome }}
+          BACKUP_OUTCOME: ${{ steps.backup.outcome }}
           MIGRATE_OUTCOME: ${{ steps.migrate.outcome }}
           PUSH_OUTCOME: ${{ steps.push.outcome }}
           SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
@@ -221,6 +261,7 @@ jobs:
             echo "### The deploy failed"
             echo "- Nothing was rolled back by itself."
             echo "- Migrations that were applied stay applied (each ran in its own transaction); one that failed left nothing behind."
+            echo "- Before the first missing migration the user data was dumped to the artifact pre-migration-<sha7> (30 days) of this run, unless the run failed before that step; restore: specs/0012-backups.md. A failed backup stops the deploy before any migration."
             echo "- Roll back the code: revert the pull request on main and merge the revert; in an emergency, see deploy/README.md ('When something is wrong')."
             echo "- If the push went through but the build on the server failed, production's main already points at this commit, so a re-run skips it: merge a fix, or rebuild on the server by hand (deploy/README.md, 'When something is wrong')."
           } >> "$GITHUB_STEP_SUMMARY"

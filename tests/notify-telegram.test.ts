@@ -49,6 +49,8 @@ describe("spec 0026 AC-9: the failure message", () => {
     [{ pick: "failure" }, "choosing the commit to deploy"],
     [{ ci: "failure" }, "checking that CI passed"],
     [{ plan: "failure" }, "reaching production"],
+    [{ plan: "success", missing: "failure" }, "checking which migrations are missing"],
+    [{ plan: "success", missing: "success", backup: "failure", migrate: "skipped" }, "backing up the user data before the migrations (no migration was applied)"],
     [{ plan: "success", migrate: "success", push: "failure" }, "pushing the code to production"],
     [{ plan: "success", migrate: "success", push: "success", smoke: "failure" }, "the smoke test"],
     [{}, "an unknown step"],

@@ -1,17 +1,26 @@
-// Spec 0012 AC-1 to AC-3: the properties of the backup workflow, so a later edit can't remove them unnoticed.
-// The workflow only runs on GitHub (and needs the production secret); the restore drill is AC-4.
+// Spec 0012 AC-1 to AC-3 and AC-5: the properties of the backup workflow and of the dump action it shares with the
+// deploy, so a later edit can't remove them unnoticed. The workflow only runs on GitHub (and needs the production
+// secret); the restore drill is AC-4.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 
-const workflow = fs.readFileSync(new URL("../.github/workflows/backup.yml", import.meta.url), "utf8");
+const read = (file: string) => fs.readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
+const workflow = read(".github/workflows/backup.yml");
+const deploy = read(".github/workflows/deploy.yml");
+const action = read(".github/actions/dump-user-data/action.yml");
 const lines = workflow.split("\n");
 
-function step(name: string) {
-  const start = lines.findIndex((line) => line.includes(`- name: ${name}`));
+// The text of one step, from its `- name:` line to the next step of the same indent.
+function stepOf(text: string, name: string) {
+  const all = text.split("\n");
+  const start = all.findIndex((line) => line.includes(`- name: ${name}`));
   expect(start, `a step named "${name}"`).toBeGreaterThan(-1);
-  const end = lines.findIndex((line, i) => i > start && /^ {6}- /.test(line));
-  return lines.slice(start, end === -1 ? undefined : end).join("\n");
+  const indent = all[start].indexOf("-");
+  const next = new RegExp(`^ {${indent}}- `);
+  const end = all.findIndex((line, i) => i > start && next.test(line));
+  return all.slice(start, end === -1 ? undefined : end).join("\n");
 }
+const step = (name: string) => stepOf(workflow, name);
 
 describe("spec 0012: the backup workflow", () => {
   it("AC-1: runs weekly and by hand", () => {
@@ -20,7 +29,7 @@ describe("spec 0012: the backup workflow", () => {
   });
 
   it("AC-1: dumps only data, of the auth and public schemas, with the pinned CLI, minus an exclude list", () => {
-    const dump = step("Dump user data");
+    const dump = stepOf(action, "Dump user data");
     expect(dump).toMatch(/npx supabase db dump --db-url "\$SUPABASE_DB_URL" --data-only --schema auth,public/);
     expect(dump).toContain('"${exclude[@]}"');
     expect(dump).toContain("--file");
@@ -35,10 +44,12 @@ describe("spec 0012: the backup workflow", () => {
   });
 
   it("AC-1: a check step fails the run and deletes the dump when a table other than the six turns up", () => {
-    const check = step("Check the dump");
+    const check = stepOf(action, "Check the dump");
+    expect(check).toContain("PostgreSQL database dump complete");
     expect(check).toContain("auth\\.(users|identities)|public\\.(user_stamps|user_extra_stamps|profiles|friendships)");
     expect(check).toContain("rm -rf backup");
     expect(check).toContain("exit 1");
+    expect(check).toContain(".github/actions/dump-user-data/action.yml"); // the error says where the exclude list is
   });
 
   it("AC-1: every table the migrations create in public is dumped (and checked for) or excluded", () => {
@@ -48,17 +59,20 @@ describe("spec 0012: the backup workflow", () => {
       .flatMap((file) => [...fs.readFileSync(new URL(file, migrations), "utf8").matchAll(/create table (?:if not exists )?public\.([a-z_]+)/gi)])
       .map((m) => `public.${m[1]}`);
     expect(created.length).toBeGreaterThan(5);
-    const dump = step("Dump user data");
-    const wanted = /public\\\.\(([^)]+)\)/.exec(step("Check the dump"))![1].split("|").map((t) => `public.${t}`);
+    const dump = stepOf(action, "Dump user data");
+    const wanted = /public\\\.\(([^)]+)\)/.exec(stepOf(action, "Check the dump"))![1].split("|").map((t) => `public.${t}`);
     const excluded = created.filter((table) => new RegExp(`${table.replace(".", "\\.")}(\\s|\\\\|$)`).test(dump));
     const neither = created.filter((table) => !wanted.includes(table) && !excluded.includes(table));
-    expect(neither, "put a new table on the exclude list in backup.yml, or add it to the wanted tables of the check step").toEqual([]);
+    expect(neither, "put a new table on the exclude list in the dump action, or add it to the wanted tables of its check step").toEqual([]);
     expect(wanted.filter((table) => excluded.includes(table))).toEqual([]);
   });
 
-  it("AC-1: the dump is stored as an artifact for 90 days, and a missing file is an error", () => {
-    const upload = workflow.slice(workflow.indexOf("actions/upload-artifact"));
-    expect(upload).toContain("retention-days: 90");
+  it("AC-1: the weekly dump is stored as an artifact for 90 days, and a missing file is an error", () => {
+    const dump = step("Dump and store the user data");
+    expect(dump).toContain("artifact-name: user-data-backup");
+    expect(dump).toContain("retention-days: 90");
+    const upload = action.slice(action.indexOf("actions/upload-artifact"));
+    expect(upload).toContain("retention-days: ${{ inputs.retention-days }}");
     expect(upload).toContain("if-no-files-found: error");
   });
 
@@ -66,7 +80,7 @@ describe("spec 0012: the backup workflow", () => {
     expect(workflow).toMatch(/CONFIGURED: \$\{\{ secrets\.SUPABASE_DB_URL != '' \}\}/);
     expect(step("Notice when the secret is missing")).toMatch(/if: env\.CONFIGURED != 'true'\s*\n\s+run: echo "::notice[^"]*SUPABASE_DB_URL/);
     const real = lines.filter((line) => /^ {6}(- name:|- uses:|- run:)/.test(line));
-    expect(real.length).toBeGreaterThan(4);
+    expect(real.length).toBeGreaterThan(3);
     // every step after the notice carries the condition
     const afterNotice = workflow.slice(workflow.indexOf("- uses: actions/checkout"));
     const steps = afterNotice.split(/\n(?= {6}- )/);
@@ -74,12 +88,65 @@ describe("spec 0012: the backup workflow", () => {
   });
 
   it("AC-3: the secret is only passed through env, never echoed, and there is no set -x", () => {
-    const code = lines.filter((line) => !line.trim().startsWith("#")); // the header comment says "no set -x"
-    expect(code.join("\n")).not.toMatch(/\bset\s+-\w*x/);
+    for (const [file, text] of [
+      ["backup.yml", workflow],
+      ["the dump action", action],
+    ]) {
+      const code = text.split("\n").filter((line) => !line.trim().startsWith("#")); // the header comments say "no set -x"
+      expect(code.join("\n"), file).not.toMatch(/\bset\s+-\w*x/);
+      expect(code.join("\n"), file).not.toMatch(/echo[^\n]*(\$\{?SUPABASE_DB_URL|\$\{\{)/); // a notice names the secret, never expands it
+    }
+    const code = lines.filter((line) => !line.trim().startsWith("#"));
     const secretUses = code.filter((line) => line.includes("secrets.SUPABASE_DB_URL"));
     expect(secretUses.length).toBe(2); // the CONFIGURED flag and the dump step's env
     expect(workflow).toMatch(/env:\s*\n\s+SUPABASE_DB_URL: \$\{\{ secrets\.SUPABASE_DB_URL \}\}/);
-    expect(code.join("\n")).not.toMatch(/echo[^\n]*(\$\{?SUPABASE_DB_URL|\$\{\{)/); // the notice names the secret, never expands it
     expect(workflow).not.toMatch(/permissions:[\s\S]*write/);
+  });
+});
+
+describe("spec 0012 AC-5: one dump action for every workflow that takes a dump", () => {
+  it("AC-5: is a composite action under .github/actions that takes the connection string, the artifact name and the retention", () => {
+    expect(action).toMatch(/^runs:\n {2}using: composite/m);
+    for (const input of ["db-url", "artifact-name", "retention-days"]) {
+      expect(action, input).toMatch(new RegExp(`^ {2}${input}:\\n {4}description: .*\\n {4}required: true`, "m"));
+    }
+    // the string reaches the one step that dumps through its `env`, and nowhere else
+    const code = action.split("\n").filter((line) => !line.trim().startsWith("#"));
+    expect(code.filter((line) => line.includes("inputs.db-url"))).toEqual(["        SUPABASE_DB_URL: ${{ inputs.db-url }}"]);
+    expect(stepOf(action, "Dump user data")).toMatch(/env:\s*\n\s+SUPABASE_DB_URL: \$\{\{ inputs\.db-url \}\}/);
+    for (const line of code.filter((l) => /\bSUPABASE_DB_URL\b/.test(l) && !l.includes("inputs.db-url"))) expect(line, line).toContain('--db-url "$SUPABASE_DB_URL"');
+  });
+
+  it("AC-5: the table list, the exclude list and the check exist once: only the action has them", () => {
+    for (const [file, text] of [
+      ["backup.yml", workflow],
+      ["deploy.yml", deploy],
+    ]) {
+      expect(text, file).not.toContain("supabase db dump");
+      expect(text, file).not.toContain("auth.audit_log_entries");
+      expect(text, file).not.toContain("PostgreSQL database dump complete");
+      expect(text, file).toContain("uses: ./.github/actions/dump-user-data");
+    }
+    expect(action.match(/supabase db dump/g)).toHaveLength(1);
+  });
+
+  it("AC-5: the weekly run and the pre-migration dump differ only in the artifact's name and retention", () => {
+    const inputs = (text: string, name: string) =>
+      /uses: \.\/\.github\/actions\/dump-user-data\n\s+with:\n((?:\s+[a-z-]+: .*\n?)+)/
+        .exec(stepOf(text, name))![1]
+        .trim()
+        .split("\n")
+        .map((l) => l.trim().split(": ")[0]);
+    expect(inputs(workflow, "Dump and store the user data")).toEqual(["db-url", "artifact-name", "retention-days"]);
+    expect(inputs(deploy, "Back up the user data before migrating")).toEqual(["db-url", "artifact-name", "retention-days"]);
+    // the connection string comes from the caller's env, which holds the secret
+    for (const [text, name] of [
+      [workflow, "Dump and store the user data"],
+      [deploy, "Back up the user data before migrating"],
+    ]) {
+      const block = stepOf(text, name);
+      expect(block, name).toMatch(/env:\s*\n\s+SUPABASE_DB_URL: \$\{\{ secrets\.SUPABASE_DB_URL \}\}/);
+      expect(block, name).toContain("db-url: ${{ env.SUPABASE_DB_URL }}");
+    }
   });
 });

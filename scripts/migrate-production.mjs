@@ -4,7 +4,8 @@
 //
 // Needs psql and SUPABASE_DB_URL (the session pooler connection string). What is applied is recorded by file name
 // in public.applied_migrations, in the same transaction as the file, so a file is never applied twice and a failing
-// one leaves nothing behind. The connection string and the password never reach the output.
+// one leaves nothing behind. The connection string and the password never reach the output. When $GITHUB_OUTPUT
+// is set it also writes `missing=true|false`: whether a file was missing when the run started.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -118,18 +119,25 @@ function parseArgs(argv) {
   return options;
 }
 
-function main() {
-  const url = process.env.SUPABASE_DB_URL?.trim();
+/**
+ * What the command line does. `env` and `psql` are injected for the tests.
+ * @param {{ argv: string[], env: Record<string, string | undefined>, psql?: (args: string[]) => PsqlResult, print?: (line: string) => void }} options
+ */
+export function cli({ argv, env, psql, print = console.log }) {
+  const url = env.SUPABASE_DB_URL?.trim();
   if (!url) throw new Problem("SUPABASE_DB_URL is not set.");
-  const options = parseArgs(process.argv.slice(2));
-  const summary = process.env.GITHUB_STEP_SUMMARY;
+  const options = parseArgs(argv);
+  const summary = env.GITHUB_STEP_SUMMARY;
   const lines = [];
   const log = (line) => {
-    console.log(line);
+    print(line);
     lines.push(`- ${line}`);
   };
   try {
-    migrate({ psql: createPsql(url), dir: options.dir, names: fs.readdirSync(options.dir), baseline: options.baseline, dryRun: options.dryRun, url, log });
+    const { pending } = migrate({ psql: psql ?? createPsql(url), dir: options.dir, names: fs.readdirSync(options.dir), baseline: options.baseline, dryRun: options.dryRun, url, log });
+    // The deploy workflow takes its backup only when this says true (spec 0026 AC-14): the script's own dry run
+    // is the one place that knows whether a migration is missing.
+    if (env.GITHUB_OUTPUT) fs.appendFileSync(env.GITHUB_OUTPUT, `missing=${pending.length > 0}\n`);
   } finally {
     if (summary && lines.length) fs.appendFileSync(summary, `### Migrations${options.dryRun ? " (dry run)" : ""}\n${lines.join("\n")}\n`);
   }
@@ -137,7 +145,7 @@ function main() {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
-    main();
+    cli({ argv: process.argv.slice(2), env: process.env });
   } catch (error) {
     if (error instanceof Problem) {
       console.error(error.message);

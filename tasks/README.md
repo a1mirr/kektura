@@ -52,7 +52,7 @@ A finished task stays as history and is not updated when behaviour changes later
 | [0056](0056-specs-describe-built-behaviour-only.md) | Specs describe only behaviour that is built | Done |
 | [0057](0057-worktrees-and-tidy.md) | Work only in worktrees from a fresh origin/main, and tidy after a merge (spec 0021) | Done |
 | [0058](0058-review-recorded-check.md) | A CI check that a review was recorded (spec 0022) | Done |
-| [0059](0059-backup-before-migration.md) | A backup before every migration (specs 0012, 0026) | Open |
+| [0059](0059-backup-before-migration.md) | A backup before every migration (specs 0012, 0026) | Done |
 | [0060](0060-production-monitoring.md) | Know when production is broken | Open |
 | [0061](0061-mobile-and-accessibility-e2e.md) | End-to-end tests at phone width, and accessibility checks (spec 0006) | Open |
 | [0062](0062-security-checks-in-ci.md) | Free security checks in CI (spec 0007) | Open |

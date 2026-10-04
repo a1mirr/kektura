@@ -1,0 +1,77 @@
+# Specs 0012 and 0026. Dumps the data users entered (accounts and stamps) from the production database, checks
+# the dump and stores it as a workflow artifact. Used by backup.yml (weekly) and deploy.yml (right before the first
+# missing migration is applied); the two differ only in the artifact's name and retention, which they pass in.
+# This is the one place that knows the table list, the exclude list and the check.
+#
+# The caller has checked out the repository and set up Node, and passes the connection string from its own `env`
+# (a secret is only ever referenced there). The string is only read in a step's `env` below, never printed:
+# no `set -x`.
+name: Dump user data
+description: Dump the user data of the production database, check the dump and upload it as a workflow artifact.
+
+inputs:
+  db-url:
+    description: The Supabase session pooler connection string (percent-encoded), taken from the caller's env.
+    required: true
+  artifact-name:
+    description: Name of the workflow artifact.
+    required: true
+  retention-days:
+    description: How many days the artifact is kept.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install the pinned Supabase CLI
+      shell: bash
+      run: npm ci
+
+    # The CLI (version pinned in package-lock.json) can't pick tables, only schemas plus an exclude list
+    # of schema.table names (no wildcards). So: everything in auth and public except the tables
+    # below, and the next step fails if a table outside the wanted six still turns up.
+    - name: Dump user data
+      shell: bash
+      env:
+        SUPABASE_DB_URL: ${{ inputs.db-url }}
+      run: |
+        set -euo pipefail
+        exclude=()
+        for table in \
+          auth.audit_log_entries auth.custom_oauth_providers auth.flow_state auth.instances \
+          auth.mfa_amr_claims auth.mfa_challenges auth.mfa_factors auth.mfa_recovery_code_sets \
+          auth.mfa_recovery_codes auth.oauth_authorizations auth.oauth_client_states \
+          auth.oauth_clients auth.oauth_consents auth.one_time_tokens auth.refresh_tokens \
+          auth.saml_providers auth.saml_relay_states auth.scim_tokens auth.scim_users \
+          auth.sessions auth.sso_domains auth.sso_providers auth.webauthn_challenges \
+          auth.webauthn_credentials public.checkpoints public.extra_stamps public.applied_migrations public.user_feedback
+        do
+          exclude+=(-x "$table")
+        done
+        mkdir backup
+        npx supabase db dump --db-url "$SUPABASE_DB_URL" --data-only --schema auth,public \
+          "${exclude[@]}" --file "backup/user-data-$(date -u +%F).sql"
+
+    - name: Check the dump
+      shell: bash
+      run: |
+        set -euo pipefail
+        dump=(backup/*.sql)
+        grep -q 'PostgreSQL database dump complete' "${dump[0]}"
+        found=$(sed -nE 's/^INSERT INTO "([^"]+)"\."([^"]+)".*/\1.\2/p' "${dump[0]}" | sort -u)
+        echo "Tables in the dump:"
+        echo "$found"
+        unexpected=$(echo "$found" | grep -vxE 'auth\.(users|identities)|public\.(user_stamps|user_extra_stamps|profiles|friendships)' || true)
+        if [ -n "$unexpected" ]; then
+          rm -rf backup
+          echo "::error title=Unexpected tables in the dump::Add these to the exclude list in .github/actions/dump-user-data/action.yml: $unexpected"
+          exit 1
+        fi
+
+    - name: Store the dump as an artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: backup/
+        retention-days: ${{ inputs.retention-days }}
+        if-no-files-found: error
