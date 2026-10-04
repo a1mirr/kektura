@@ -50,7 +50,7 @@ Running the database tests in the first job (it needs Docker and 15 more minutes
 
 ## Open questions
 
-- **Other places that might set `REQUIRE_LOCAL_DB`.** This draft says only `.github/workflows/ci.yml` does, not the Stop
+- **Other places that might set `REQUIRE_LOCAL_DB`.** This task says only `.github/workflows/ci.yml` does, not the Stop
   hook or the pre-push hook (no Docker on the author's machine).
 
 ## Tests to write

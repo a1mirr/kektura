@@ -57,20 +57,20 @@ What the product must do when this is built, as the owner asked for it. They are
 
 Comparing with more than one friend at once; a leaderboard; who walked what first (it would need to share dates); sending
 a message or a challenge; the friend's extra stamps unless spec 0024 already shares them; exporting the comparison; live
-updates when another user changes something; optimistic updates of the list.
+updates when another user changes something.
 
 ## Open questions
 
 - **Waivers and dates.** Once tasks 0048 to 0050 is built, which places are waived for a friend tells the other side that they walked there
   before a date (tasks 0048 to 0050's open question). Then R-8's "never dates" is only true in the strict sense: settle that
   question first.
-- **Dates.** "Who got there first" or a monthly race needs dates, which friends do not share. Leave them out (this draft)
+- **Dates.** "Who got there first" or a monthly race needs dates, which friends do not share. Leave them out (this task)
   or add an opt-in later?
-- **Where the comparison lives.** A section on the friend's page (this draft) or a page of its own,
+- **Where the comparison lives.** A section on the friend's page (this task) or a page of its own,
   `/friends/<id>/compare`?
 - **Wording.** Is "only me / only them" right, or "I'm ahead / they're ahead" (a value judgement on what may be a shared
   hike)?
-- **Extra stamps.** Do they count in the gaps? This draft says no: the official places only.
+- **Extra stamps.** Do they count in the gaps? This task says no: the official places only.
 
 ## Tests to write
 
@@ -94,4 +94,4 @@ the comparison cannot say who walked what first.
   the user; `summarizeFriend` is the template for the pure part. The map needs a third line style and two sets of ranges:
   look at `src/lib/map-layers.ts` (spec 0003) before deciding between extending the layers and a second component.
 
-Code the work touches: `src/lib/compare.ts` (new, pure functions), `src/app/[locale]/(pages)/friends/page.tsx`, `src/app/[locale]/(pages)/friends/[id]/page.tsx`, `src/components/FriendActionButton.tsx` (new), `src/components/TrailMap.tsx` / `src/components/trail-map/*`, `src/lib/friends.ts`
+Code the work touches: `src/lib/compare.ts` (new, pure functions), `src/app/[locale]/(pages)/friends/[id]/page.tsx`, `src/components/TrailMap.tsx` and `src/components/trail-map/*`, `src/lib/friends.ts`

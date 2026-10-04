@@ -86,12 +86,12 @@ cumulative line; exporting the data.
   stamp of both pairs. (Had B been stamped in July, A-B would count in July and B-C in August.) Is that the intended
   outcome?
 - **A mistyped year.** Stamp dates run from 1938 (spec 0016 AC-2), so one wrong year gives a chart of a hundred empty
-  months. This draft shows every month of the span; the alternative is to show empty months only inside the last 60 and
+  months. This task shows every month of the span; the alternative is to show empty months only inside the last 60 and
   fold older ones into a per-year bar.
 - **Stage numbers or names?** The tooltip lists the official stage numbers (1 to 27). The start and end towns would
   make it too long; leave them out?
 - **The toggle.** Is a Stamps/Km toggle wanted, or are km only in the tooltip? It is an addition to what was asked.
-- **Retired and moved stamps** (tasks 0048 to 0050) do not change this: retired stamps are left out of the counts.
+- **Retired and moved stamps** (tasks 0048 to 0050) do not change this: retired stamps are left out of the counts here unless the owner decides otherwise in task 0049's open question.
 
 ## Tests to write
 

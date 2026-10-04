@@ -82,15 +82,15 @@ switcher into the menu; a new visual design; a sidebar; a "sign out" entry in th
 ## Open questions
 
 - **Sign out in the menu.** One-click sign-out is common in such menus, and a plain form POST can live in a menu
-  without script. This draft keeps it on the settings page; should it be in the menu too?
+  without script. This task keeps it on the settings page; should it be in the menu too?
 - **One header strip.** task 0029 puts a logo top-left and this puts the menu top-right: do they share one header strip
   on every page (and the language switcher with them, see task 0029's open question)?
-- **A page for "My stats".** This draft assumes a page (task 0047), because the chart needs room and the dashboard is
+- **A page for "My stats".** This task assumes a page (task 0047), because the chart needs room and the dashboard is
   long. The alternative is a section of the dashboard.
-- **The name of the settings page.** Spec 0025 renamed "Settings" to "Account" because the page holds no real settings.
-  The owner asked for "settings" in the menu, so this draft renames the page back to "Settings" (one word everywhere,
+- **The name of the settings page.** Task 0025 renamed "Settings" to "Account" because the page holds no real settings.
+  The owner asked for "settings" in the menu, so this task renames the page back to "Settings" (one word everywhere,
   R-3). That changes tests that pin the old name: `tests/messages.test.ts` (no message key named `settings`, spec 0014
-  R-18), `e2e/account.spec.ts` (no "Settings" link) and `e2e/footer.spec.ts`. Confirm the rename, or label the entry
+  AC-18), `e2e/account.spec.ts` (no "Settings" link) and `e2e/footer.spec.ts`. Confirm the rename, or label the entry
   "Account" instead.
 - **Static pages.** Changelog, links and feedback are statically generated today (About already renders per request, because it
   reads the `friends` flag; the landing page reads the session and the search parameters). The feedback page would turn

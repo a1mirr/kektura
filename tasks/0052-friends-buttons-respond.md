@@ -53,19 +53,18 @@ whose server action ends with a redirect, so between the click and the reload no
 
 ## Out of scope
 
-Comparing with more than one friend at once; a leaderboard; who walked what first (it would need to share dates); sending
-a message or a challenge; the friend's extra stamps unless spec 0024 already shares them; exporting the comparison; live
-updates when another user changes something; optimistic updates of the list.
+New friend features; live updates when another user changes something; optimistic updates of the list (the page reloads on
+success, as today); messages on pages other than Friends (the stamp buttons have their own feedback, spec 0002 AC-10).
 
 ## Open questions
 
 - **The cause of "buttons work but do not respond".** The first guess is the missing pending state above. If an action
   also sometimes fails to apply (the data does not change on reload), that is a separate defect and needs the failing
   case.
-- **Mechanism.** The pending state needs `useFormStatus` or `useActionState`, which are client-only. This draft wraps each
+- **Mechanism.** The pending state needs `useFormStatus` or `useActionState`, which are client-only. This task wraps each
   button in a small client component and keeps the server actions and the Server Component page; the alternative moves the
   whole list to a client component.
-- **Where the success message shows.** At the top of the page, announced and scrolled into view on mobile (this draft), or
+- **Where the success message shows.** At the top of the page, announced and scrolled into view on mobile (this task), or
   next to the row.
 
 ## Tests to write
@@ -92,4 +91,4 @@ not from reproducing it.
   success needs an `?ok=<code>` value (a whitelist like `ERRORS` there, never shown raw) so the message survives it.
   Confirmation can be a `<dialog>` or an inline "Are you sure? Yes / No" whose second step is a submit.
 
-Code the work touches: `src/lib/compare.ts` (new, pure functions), `src/app/[locale]/(pages)/friends/page.tsx`, `src/app/[locale]/(pages)/friends/[id]/page.tsx`, `src/components/FriendActionButton.tsx` (new), `src/components/TrailMap.tsx` / `src/components/trail-map/*`, `src/lib/friends.ts`
+Code the work touches: `src/app/[locale]/(pages)/friends/page.tsx`, `src/app/[locale]/(pages)/friends/actions.ts`, `src/app/[locale]/(pages)/friends/invite/[token]/page.tsx`, `src/components/FriendActionButton.tsx` (new)

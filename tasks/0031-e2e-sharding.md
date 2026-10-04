@@ -29,7 +29,7 @@ What the product must do when this is built, as the owner asked for it. They are
   pull request one E2E result to read, keeps the job names `CLAUDE.md` step 7 names ("Typecheck, lint, unit tests"
   and "End-to-end tests") true, and means a branch protection rule turned on later needs no change. The shard jobs
   themselves have other names (`E2E shard 1/2`, `E2E shard 2/2`).
-- [ ] **R-3**: The checks that need the database but not the tests (`types:check`, the friends-migration rule tests
+- [ ] **R-3**: The checks that need the database but not the tests (`types:check`, the database rule tests (`friends-migration`, `database-rules`, `seed-cleanup`)
   of spec 0024) run once, in shard 1 only (`if: matrix.shard == 1`), not in both.
 - [ ] **R-4**: Each shard saves its own Playwright report and JSON report under a name that includes the shard number
   (the report is uploaded when the shard fails), and prints its own slowest-tests table to its job summary
@@ -74,8 +74,8 @@ Numbers from task 0030 (single job, 2-core runner): whole job 4 m 00 s to 4 m 52
 Two shards would give about 60 s of tests plus the same setup, so roughly 3 minutes, if the split is even.
 
 Specs that say "the `e2e` job" and become wrong when this lands, and are reworded in the same change as the workflow:
-`0007-ci.md` R-2, R-3, R-6 and R-7 (one job runs `npm run e2e` and `types:check`; one job, one JSON report, one
-summary) and the pointer in `0006-test-server.md` R-6; `CLAUDE.md` step 7 only if the
+`0007-ci.md` AC-2, AC-3, AC-6 and AC-7 (one job runs `npm run e2e` and `types:check`; one job, one JSON report, one
+summary) and the pointer in `0006-test-server.md` AC-6; `CLAUDE.md` step 7 only if the
 check's name changes.
 
 `main` has no branch protection (the repository is private on the free plan, where GitHub offers neither protection

@@ -91,8 +91,8 @@ app shows (`19.6`, from the stage table's order) and the trail order shift for t
 
 - [ ] **R-14**: In the stage list, a place with a `required_from` shows it ("Stamp required from 8 May 2025", localized)
   next to its name; where the user's dates waive it, "not required for your walk". The map's popup says the same.
-- [ ] **R-15**: Every place that has a `required_from` shows a hint (a short text in the row and a tooltip or popover on the
-  date, reachable by tap and by keyboard, not by hover only) shows a tooltip or popover that explains the date without repeating it: "This stamp became
+- [ ] **R-15**: Every place that has a `required_from` shows a hint (a short text in the row) and a tooltip or popover on the
+  date, reachable by tap and by keyboard, not by hover only, that explains the date without repeating it: "This stamp became
   required on that day; a hiker who walked earlier is not missing it." For entries flagged `tolerance_note` it adds: "The MTSZ
   allows a one-month tolerance after the date when a booklet is inspected." The hint states the MTSZ's rule; the stats do not
   apply the tolerance (R-4 uses the date itself), so a stretch walked inside the month shows as unverified and the
@@ -126,7 +126,7 @@ letting a user declare their own waivers.
   stamp, by the official date (2014-11-21), because a hiker on the old route never passed Vércverés. Should Vércverés
   also carry a note "before 2014 the stamp was at the Nyírjesi forester's house, about 5 km away"?
 - **The Vércverés date.** The official list says 2014-11-21; a hikers' forum (not official) dates the move 2014-10-05.
-  This draft uses the official date.
+  This task uses the official date.
 - **Stamp codes change.** The Lokó-pihenő case above shows the MTSZ renumbering codes, so a code is not a permanent identity
   for the dates file or for users' stamps. Spec 0004 AC-9 covers a dropped code only when the place key stays. Does a
   renumbering need its own rule (a mapping from old to new code kept in the data)?

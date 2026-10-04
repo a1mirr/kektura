@@ -48,7 +48,7 @@ their record. Example: Vércverés replaced Nyírjesi-erdészház on 2014-11-21.
   preferences), shows every retired stamp, for a user who walked the old route without stamping neighbours first.
 - [ ] **R-23**: A retired stamp has no "today" default (spec 0016 AC-1 would date it after `retired_on`): ticking it opens its
   date field and the stamp is created with the date the user enters, which must be before `retired_on` (and obey spec 0016
-  R-2). Editing the date (`setStampDate`) or changing it in bulk (task 0053) follows the same rule. Unlike spec 0016 AC-3
+  AC-2). Editing the date (`setStampDate`) or changing it in bulk (task 0053) follows the same rule. Unlike spec 0016 AC-3
   (an out-of-range date on creation is ignored and the default applies), a date on or after `retired_on`, or no date at all (the database default would be today), is refused as `failed`, without a write:
   the action reads `retired_on` first, as it already reads `checkpoints` for the ids. A request that mixes a retired stamp with
   others is refused as a whole. The field's `max` is the day before.
@@ -82,7 +82,7 @@ letting a user declare their own waivers.
   booklet?
 - **Per-month chart.** R-24 leaves retired stamps out; a stamp collected in June 2013 is still a stamp that month.
   Include it in the month's stamp count of task 0047, with km untouched?
-- **Retired stamps in the chart** is asked here and in task 0047; settle it once, in the stats spec.
+- **Retired stamps in the chart** is asked here and in task 0047; settle it once, in task 0047.
 
 ## Tests to write
 
