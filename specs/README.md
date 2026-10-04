@@ -94,3 +94,9 @@ hook doesn't run them: CI's "End-to-end tests" job is the authority and must be 
 | [0031](0031-e2e-sharding.md) | Sharded end-to-end tests: two parallel CI jobs | Draft |
 | [0033](0033-translated-stamp-descriptions.md) | Stamp descriptions translated into ru and en | Done |
 | [0034](0034-specs-and-tasks.md) | Specs and tasks: how work is written down | Done |
+| [0040](0040-header-menu-and-page-width.md) | Header, account menu and page width | Draft |
+| [0041](0041-stats-page.md) | My stats: a page, and the stamps-per-month chart | Draft |
+| [0042](0042-stamp-lifecycle.md) | Stamp lifecycle: new, retired and moved stamps | Draft |
+| [0043](0043-friends-comparison-and-feedback.md) | Friends: comparing progress, and buttons that respond | Draft |
+| [0044](0044-bulk-stamp-dates.md) | Stamp dates in bulk | Draft |
+| [0045](0045-ci-once-per-change.md) | CI runs once per change, and its database tests cannot skip | Draft |

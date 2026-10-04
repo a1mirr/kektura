@@ -31,3 +31,13 @@ A finished task stays as history and is not updated when behaviour changes later
 | [0037](0037-regenerate-seeds.md) | Regenerate the seeds with the current generator | Done |
 | [0038](0038-deploy-gh-retry.md) | Retry the GitHub API calls of the deploy workflow | Done |
 | [0039](0039-manual-coverage-rows.md) | Audit the manual coverage rows | Done |
+| [0046](0046-header-menu-and-page-width.md) | Account menu and one wide page layout (spec 0040) | Open |
+| [0047](0047-stats-page-and-monthly-chart.md) | My stats page and a monthly chart that names every month (spec 0041) | Open |
+| [0048](0048-new-stamps-required-from-date.md) | New stamps are required only from their official date (spec 0042) | Open |
+| [0049](0049-retired-stamps.md) | Keep retired stamps and show them to the people who could have collected them (spec 0042) | Open |
+| [0050](0050-relocated-stamps-on-the-map.md) | Relocated stamps: the latest location on the map, with a note (spec 0042) | Open |
+| [0051](0051-friends-comparison.md) | Compare progress with a friend (spec 0043) | Open |
+| [0052](0052-friends-buttons-respond.md) | Friends page buttons respond (spec 0043) | Open |
+| [0053](0053-bulk-stamp-dates.md) | Change the date of many stamps at once (spec 0044) | Open |
+| [0054](0054-ci-runs-once-per-change.md) | CI runs once per change (spec 0045) | Open |
+| [0055](0055-database-tests-fail-in-ci.md) | Database tests fail in CI instead of skipping (spec 0045) | Open |
