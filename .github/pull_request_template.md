@@ -16,7 +16,7 @@ Reviewed commit: `<short sha>`
 
 <!-- CI's "Review recorded" job reads the line above: a sha (7 to 40 hex digits) of the head or of an ancestor with only
      Markdown changed after it. Change any other file after the review and the sha has to move to a new review. After
-     editing this description, re-run that job: gh run rerun <run-id> --job <job-id> -->
+     editing this description, re-run that job of the newest run: gh run rerun <run-id> --job <job-id> -->
 
 <!-- What the fresh-context reviewer found and what was done about each one ("fixed in abc1234",
      "not an issue because …"). Write "No findings" if there were none. -->

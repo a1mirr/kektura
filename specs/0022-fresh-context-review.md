@@ -69,9 +69,11 @@ author's context, and wants that to be part of how work is done here, not someth
   hex digits that exists, is the head of the pull request or an ancestor of it, and, when it is an ancestor, nothing
   but Markdown (`*.md`) changed after it. Any other changed file (wording fixes in code or messages included) needs a
   new review and a new sha in the description. The job reads the description through the API when it runs, so
-  after editing it the job is re-run by hand (`gh run rerun <run-id> --job <job-id>`); a push runs it again by itself.
+  after editing it the job is re-run by hand (`gh run rerun <run-id> --job <job-id>`, of the newest run: an older run
+  checks the head it started with); a push runs it again by itself.
   `CLAUDE.md` step 7 names it among the jobs that must be green before a merge. It is a tripwire: it shows that a review
-  was recorded at a commit, not that it was good or that the sha was ever reviewed.
+  was recorded at a commit, not that it was good or that the sha was ever reviewed (a pull request that changes only
+  Markdown can name any older commit, one already on `main` included).
 
 ## Out of scope
 
@@ -118,5 +120,5 @@ author's context, and wants that to be part of how work is done here, not someth
 | --- | --- |
 | AC-1, AC-2, AC-3, AC-4 | `tests/review-process.test.ts` (AC-4's wording about the end-to-end job is asserted under spec 0007 AC-8 in the same file; the rule is in `CLAUDE.md` and `specs/README.md`; the agent file exists, is read-only and names what it checks; the pull request template has the checklist and the findings section) |
 | AC-5 | `tests/review-recorded.test.ts` (reading the description; every decision: no line, unknown sha, head, ancestor with only Markdown or nothing after it, ancestor with code after it; the git side against a real temporary repository; the job's name, trigger, Dependabot skip and permissions; the job named in `CLAUDE.md` and the template) |
-| AC-5 (the job itself, on GitHub) | manual (only a real pull request exercises the `pull_request` event, the full clone and `gh api`): read the job's result on a pull request with and without a recorded review. Last checked: never (the pull request that adds it is its first run; whoever checks it replaces this with the date) |
+| AC-5 (the job itself, on GitHub) | manual (only a real pull request exercises the `pull_request` event, the full clone and `gh api`): read the job's result on a pull request with and without a recorded review. Last checked: never recorded (the pull request that adds it is its first run; whoever checks it replaces this with the date) |
 | AC-3 (quality of the reviews) | manual (judgement): the owner reads the findings in each pull request. Last checked: every pull request. |
