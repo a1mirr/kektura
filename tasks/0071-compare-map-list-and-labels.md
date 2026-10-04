@@ -15,7 +15,7 @@ in the list below into view, as "Show in list" does on the dashboard's map.
 - [x] Every requirement below holds and has a test (or, where no test can, a `manual (reason)` row in the owning spec); the owning specs are edited as the behaviour is built
 - [x] No changelog entry: friends are behind `FF_FRIENDS` (spec 0024 AC-16)
 - [x] The specs listed above mirror the code as built (spec 0034 AC-6)
-- [x] Fresh-context review done (reviewed commit f94d1ca)
+- [x] Fresh-context review done (reviewed commit 8df92a7)
 
 ## Requirements
 
