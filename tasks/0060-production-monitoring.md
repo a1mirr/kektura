@@ -1,7 +1,7 @@
 # 0060: Know when production is broken
 
-Status: Open
-Specs: none yet (the requirements and open questions below are settled with the owner here; the spec text is written once the behaviour is built)
+Status: Done
+Specs: none
 
 ## Goal
 
@@ -12,25 +12,32 @@ failures already arrive.
 
 ## Done when
 
-- [ ] The requirements below written down and their open questions settled with the owner
-- [ ] The decisions below are made and built
-- [ ] The specs listed above mirror the code as built (spec 0034 AC-6)
+- [x] The decision is made (owner, 2026-10-04): option 4, an external uptime service
+- [x] The external monitor is written up for the owner in `deploy/README.md` ("Watching the site from outside"); the owner creates the account and the monitor
+- [x] Option 1 struck with its reason, option 2 moved to its own task (0066)
+- [x] No spec states a rule this task changes (see Spec changes)
+- [x] Fresh-context review done
 
-## Options to decide between
+## Options
 
-1. **Uptime check from GitHub Actions**: a scheduled workflow runs the existing `scripts/smoke-test.mjs` against
-   the public site every 15 minutes and tells the owner through the existing `scripts/notify-telegram.mjs` when it
-   fails twice in a row. No new account and no new secret. GitHub's cron is best-effort (runs can be delayed by
-   minutes) and an idle repository's schedules are disabled after 60 days without activity.
-2. **Failed actions to Telegram**: `src/lib/log.ts` is the one place a failure passes through; it could send one
-   rate-limited message per kind of failure. It must keep the logging rules (no emails, ids, tokens, input,
-   Supabase `details`/`hint`), and the Telegram token must never reach a log (CLAUDE.md gotcha).
-3. **Sentry (or similar) free tier**: richer (stack traces, grouping) but needs an account, a DSN, and a look at
-   what personal data a stack trace can carry; adds a dependency to a 1 GB server.
-4. **An external uptime service** (UptimeRobot and similar, free): checks every 5 minutes from outside, no code.
-
-Recommendation: 1 and 2 first (no new accounts, built on what exists); 3 only if 2 turns out too thin.
+1. ~~**Uptime check from GitHub Actions**: a scheduled workflow runs the existing `scripts/smoke-test.mjs` against
+   the public site every 15 minutes and tells the owner through `scripts/notify-telegram.mjs`.~~ Dropped: a 15-minute
+   cron is about 2,880 billed minutes a month, and the Free plan has 2,000 for private repositories, so it would stop
+   CI and deploys. (It was built on this branch first and removed.)
+2. ~~**Failed actions to Telegram** from `src/lib/log.ts`.~~ Moved to task [0066](0066-telegram-for-failed-actions.md).
+3. ~~**Sentry (or similar) free tier**~~ Not chosen: needs an account, a DSN, a look at what personal data a stack
+   trace can carry, and adds a dependency to a 1 GB server.
+4. **An external uptime service** (UptimeRobot, Better Stack and similar, free): checks every 5 minutes from
+   outside, no code. **Chosen**; written up in `deploy/README.md`, "Watching the site from outside". No service is
+   required by the repository; free-tier limits change, so the owner checks them.
 
 ## Spec changes
 
-Filled in when built.
+None. The change is a section of `deploy/README.md` and no spec states a rule it changes (spec 0026 owns the deploy's
+smoke test, which is untouched).
+
+## Notes
+
+- The service, its account and its Telegram link are the owner's: nothing about them is in the repository, and no
+  secret is needed here.
+- This task is Done when the setup is written down; the monitor itself is the owner's step, and until the owner has created it a site outage is still noticed by a user first.

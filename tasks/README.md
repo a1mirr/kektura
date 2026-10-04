@@ -53,9 +53,10 @@ A finished task stays as history and is not updated when behaviour changes later
 | [0057](0057-worktrees-and-tidy.md) | Work only in worktrees from a fresh origin/main, and tidy after a merge (spec 0021) | Done |
 | [0058](0058-review-recorded-check.md) | A CI check that a review was recorded (spec 0022) | Done |
 | [0059](0059-backup-before-migration.md) | A backup before every migration (specs 0012, 0026) | Done |
-| [0060](0060-production-monitoring.md) | Know when production is broken | Open |
+| [0060](0060-production-monitoring.md) | Know when production is broken: an external uptime service (written up in deploy/README.md; the owner creates the monitor) | Done |
 | [0061](0061-mobile-and-accessibility-e2e.md) | End-to-end tests at phone width, and accessibility checks (spec 0006) | Open |
 | [0062](0062-security-checks-in-ci.md) | Free security checks in CI (spec 0007) | Open |
 | [0063](0063-stop-hook-changelog-nudge.md) | The Stop hook also asks about the changelog (spec 0034) | Open |
 | [0064](0064-ci-is-the-e2e-authority.md) | CI is the authority for the end-to-end tests (specs 0007, 0022) | Done |
 | [0065](0065-worktree-base-ref-fresh.md) | Claude Code's own worktrees start from the remote's default branch (spec 0021) | Done |
+| [0066](0066-telegram-for-failed-actions.md) | Failed server actions reach Telegram (spec 0008) | Open |

@@ -130,6 +130,24 @@ rm -rf ~/kektura_app/.next/cache/fetch-cache
 pm2 restart kektura
 ```
 
+## Watching the site from outside
+
+(Task 0060.) The deploy's smoke test runs once, after a deploy; between deploys an external uptime service watches
+the site. It is not part of the repository and is set up by the owner in the service's own account: no service is
+required (UptimeRobot and Better Stack are examples), and the free tiers of such services change, so check what a
+free account allows before relying on it. A GitHub Actions cron was tried and dropped: every 15 minutes is about
+2,880 billed minutes a month against 2,000 on the Free plan for private repositories, which would stop CI and deploys.
+
+- **What to monitor**: a plain HTTP check of the site's main pages, `https://kektura-tracker.com/en` and
+  `https://kektura-tracker.com/ru`, expecting a 200 answer. Nothing deeper is needed: the smoke test's other checks
+  (an unknown page is a 404, the dummy login is absent) belong to the deploy.
+- **Interval**: 5 minutes.
+- **Alerts**: to Telegram, through the service's own Telegram contact or integration (the owner links it to their
+  own chat there). It does not use the repository's bot or its `TELEGRAM_*` secrets.
+- **Secrets**: none go into the repository, the workflows or the server: the account, its API keys and the Telegram
+  link live in the service.
+- Failed server actions are not seen by this: they only leave a log line (`pm2 logs kektura`, below).
+
 ## When something is wrong
 
 - Logs: `pm2 logs kektura` (stamp and feedback failures are `[stamp-action]`, `[feedback]`,
