@@ -1,21 +1,22 @@
 import { expect, test } from "@playwright/test";
+import { LOCALE_NAMES } from "../src/i18n/locale-names";
+import { routing } from "../src/i18n/routing";
 import { signInAsNewUser } from "./helpers";
-
-const NAMES = ["Magyar", "English", "Deutsch", "Русский"];
 
 test.describe("spec 0005: the default language", () => {
   test.describe("a browser in a language we don't have", () => {
     test.use({ locale: "fr-FR" });
-    test("AC-9: the address without a language opens Hungarian", async ({ page }) => {
+    test("AC-9: the address without a language opens the default language", async ({ page }) => {
       await page.goto("/");
-      await expect(page).toHaveURL(/\/hu$/);
-      await expect(page.locator("html")).toHaveAttribute("lang", "hu");
+      await expect(page).toHaveURL(new RegExp(`/${routing.defaultLocale}$`));
+      await expect(page.locator("html")).toHaveAttribute("lang", routing.defaultLocale);
     });
   });
 
-  for (const [browser, locale] of [["de-DE", "de"], ["ru-RU", "ru"], ["en-GB", "en"], ["hu-HU", "hu"]]) {
-    test.describe(`a browser in ${browser}`, () => {
-      test.use({ locale: browser });
+  // The one test that runs over every language: a browser in that language gets it.
+  for (const locale of routing.locales) {
+    test.describe(`a browser in ${locale}`, () => {
+      test.use({ locale });
       test(`AC-9: the address without a language opens ${locale}`, async ({ page }) => {
         await page.goto("/");
         await expect(page).toHaveURL(new RegExp(`/${locale}$`));
@@ -24,7 +25,7 @@ test.describe("spec 0005: the default language", () => {
   }
 
   test("AC-9: the addresses of every language keep answering, and an unknown language is a 404", async ({ request }) => {
-    for (const locale of ["hu", "en", "de", "ru"]) {
+    for (const locale of routing.locales) {
       expect((await request.get(`/${locale}`)).status(), locale).toBe(200);
       expect((await request.get(`/${locale}/about`)).status(), locale).toBe(200);
     }
@@ -33,14 +34,17 @@ test.describe("spec 0005: the default language", () => {
 });
 
 test.describe("spec 0005: the language dropdown", () => {
-  test("AC-10: the landing page has one dropdown with the four languages by their own names, Hungarian first", async ({ page }) => {
+  test("AC-10: the landing page has one dropdown with every language by its own name, the default first", async ({ page }) => {
     await page.goto("/en");
     const select = page.getByRole("combobox", { name: "Language" });
     await expect(select).toHaveCount(1);
     await expect(select).toHaveValue("en");
-    await expect(select.locator("option")).toHaveText(NAMES);
-    expect(await select.locator("option").evaluateAll((options) => options.map((o) => (o as HTMLOptionElement).value))).toEqual(["hu", "en", "de", "ru"]);
-    await expect(page.getByRole("button", { name: /^(HU|EN|DE|RU)$/ })).toHaveCount(0); // no row of buttons any more
+    await expect(select.locator("option")).toHaveText(routing.locales.map((locale) => LOCALE_NAMES[locale]));
+    expect(await select.locator("option").evaluateAll((options) => options.map((o) => (o as HTMLOptionElement).value))).toEqual([
+      ...routing.locales,
+    ]);
+    const codes = new RegExp(`^(${routing.locales.map((locale) => locale.toUpperCase()).join("|")})$`);
+    await expect(page.getByRole("button", { name: codes })).toHaveCount(0); // no row of buttons any more
   });
 
   test("AC-10: choosing a language opens the same page in it, and the dropdown follows", async ({ page }) => {

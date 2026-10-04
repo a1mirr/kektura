@@ -179,9 +179,9 @@ route plan.
 | AC-15 | `src/lib/friends.test.ts` (flag), `actions.test.ts` (`disabled`); the start-up value, not the build, decides: manual (it needs two builds): build once without `FF_FRIENDS`, start with `FF_FRIENDS=1` (and the other way round): the dashboard link, `/friends`, `/friends/invite/<token>` and the About paragraph follow the start-up value (the E2E server runs with the flag on). Last checked: never recorded. |
 | AC-16 | `tests/messages.test.ts`, `e2e/friends.spec.ts` (About paragraph); `src/content/changelog.ts` (the friends entries; the rule: spec 0018 AC-7) |
 | AC-17 | `src/components/FriendActionButton.test.tsx` (pending, no second press, the row), `e2e/friends.spec.ts` (a slow server) |
-| AC-18 | `src/lib/friends.test.ts` (the path, a message per notice in three languages), `src/components/FriendActionButton.test.tsx` (status and alert), `e2e/friends.spec.ts` (each action, three languages, unknown values) |
+| AC-18 | `src/lib/friends.test.ts` (the path, a message per notice in every language), `src/components/FriendActionButton.test.tsx` (status and alert), `e2e/friends.spec.ts` (each action, the default language and Russian, unknown values) |
 | AC-19 | `src/components/FriendActionButton.test.tsx` (closed first, Cancel, Escape), `e2e/friends.spec.ts` (remove and regenerate ask first) |
-| AC-20 | `src/components/FriendActionButton.test.tsx` (the classes), `e2e/friends.spec.ts` (target size and no sideways scroll at 375 and 320 px in three languages; the colour under the pointer and while pressed) |
+| AC-20 | `src/components/FriendActionButton.test.tsx` (the classes), `e2e/friends.spec.ts` (target size and no sideways scroll at 375 and 320 px in the default language and Russian; the colour under the pointer and while pressed) |
 | AC-21 | `e2e/friends.spec.ts` (JavaScript off) |
-| AC-22 | `src/lib/friends-compare.test.ts` (what is read), `e2e/friends-compare.spec.ts` (figures, stage list, 404s, 375 and 320 px in every language) |
+| AC-22 | `src/lib/friends-compare.test.ts` (what is read), `e2e/friends-compare.spec.ts` (figures, stage list, 404s, 375 and 320 px in the default language and German) |
 | AC-23, AC-24 | `src/lib/compare.test.ts` |

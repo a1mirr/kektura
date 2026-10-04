@@ -109,17 +109,17 @@ email on the page.
 
 | AC | Test |
 | --- | --- |
-| AC-1 | `e2e/footer.spec.ts` (four links on a public page and on the dashboard, in ru/hu/de, none for the account page; landing page and footer fit one phone screen) |
+| AC-1 | `e2e/footer.spec.ts` (four links on a public page and on the dashboard, none for the account page; the link texts of every language: `e2e/languages.spec.ts`; landing page and footer fit one phone screen) |
 | AC-2 | spec 0015 |
 | AC-3, AC-4 | specs 0018, 0019 |
 | AC-5, AC-6 | spec 0017 |
-| AC-7, AC-14, AC-15 | `e2e/account.spec.ts` (redirect when signed out; header link and no sign-out control; title and heading; `/settings` redirects to `/account` in each language) |
+| AC-7, AC-14, AC-15 | `e2e/account.spec.ts` (redirect when signed out; header link and no sign-out control; title and heading; `/settings` redirects to `/account`; in each language: `e2e/languages.spec.ts`) |
 | AC-8 | `e2e/account.spec.ts` (`/account` shows the chart heading, the dashboard doesn't) |
 | AC-9, AC-10 | `e2e/account.spec.ts` (cancel; delete: account, stamps and extra stamps gone, feedback kept and unlinked, signed out, signing in again gives an empty account), `src/app/[locale]/account/DeleteAccountButton.test.tsx` |
 | AC-11 | `DeleteAccountButton.test.tsx`, `e2e/account.spec.ts` (server action answering 500) |
 | AC-12 | `e2e/feedback.spec.ts` (anonymous caller refused); migration 0008 |
 | AC-13 | `src/app/[locale]/account/actions.test.ts`, `src/lib/log.test.ts` |
-| AC-16 | `e2e/account.spec.ts` (the button sits next to the heading; sign out from the account page in each language, then dashboard and account redirect), `e2e/auth.spec.ts` |
+| AC-16 | `e2e/account.spec.ts` (the button sits next to the heading; sign out from the account page, then dashboard and account redirect; in each language: `e2e/languages.spec.ts`), `e2e/auth.spec.ts` |
 | AC-17 | `e2e/account.spec.ts` (with JavaScript disabled) |
-| AC-19 | `tests/site-logo.test.ts` (one component, drawn only by the locale layout and the 404 page, which also covers the error page: the layout wraps its boundary; the SVG is local; empty `alt`; translated names; no back-link keys left), `e2e/site-logo.spec.ts` (every public and signed-in page: link, address, accessible name, 44 px target, top-left, no overflow at 320 and 375 px, focus ring, banner above it, hu/en/de/ru, the 404 page) |
-| AC-18 | `tests/messages.test.ts` (the header link, the page title and the About page's link text use the same name in each language, and no key is still called settings), `e2e/account.spec.ts` (`ru`, `hu` and `de`), `e2e/about.spec.ts` (link) |
+| AC-19 | `tests/site-logo.test.ts` (one component, drawn only by the locale layout and the 404 page, which also covers the error page: the layout wraps its boundary; the SVG is local; empty `alt`; translated names; no back-link keys left), `e2e/site-logo.spec.ts` (every public and signed-in page: link, address, accessible name, 44 px target, top-left, no overflow at 320 and 375 px, focus ring, banner above it, every language, the 404 page) |
+| AC-18 | `tests/messages.test.ts` (the header link, the page title and the About page's link text use the same name in each language, and no key is still called settings), `e2e/languages.spec.ts` (the account link, the page title and the sign-out button in every language), `e2e/about.spec.ts` (link) |

@@ -1,20 +1,24 @@
+import fs from "node:fs";
+import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { routing } from "../src/i18n/routing";
 import { signInAsNewUser } from "./helpers";
 
-const NAMES = {
-  en: { link: "Kéktúra tracker: home", text: "Kéktúra tracker" },
-  ru: { link: "Трекер Kéktúra: на главную", text: "Трекер Kéktúra" },
-  hu: { link: "Kéktúra követő: kezdőlap", text: "Kéktúra követő" },
-  de: { link: "Kéktúra-Tracker: Startseite", text: "Kéktúra-Tracker" },
-} as const;
+// The name and the link's accessible name come from the language's own messages file, so every language is
+// covered without a fixture here.
+type Locale = (typeof routing.locales)[number];
+const names = (locale: Locale) => {
+  const { app } = JSON.parse(fs.readFileSync(path.join(process.cwd(), "messages", `${locale}.json`), "utf8"));
+  return { link: app.home as string, text: app.name as string };
+};
 
-const logo = (page: Page, locale: keyof typeof NAMES) => page.getByRole("link", { name: NAMES[locale].link });
+const logo = (page: Page, locale: Locale) => page.getByRole("link", { name: names(locale).link });
 
-async function expectLogo(page: Page, locale: keyof typeof NAMES) {
+async function expectLogo(page: Page, locale: Locale) {
   const link = logo(page, locale);
   await expect(link).toHaveCount(1);
   await expect(link).toHaveAttribute("href", `/${locale}`);
-  await expect(link).toContainText(NAMES[locale].text);
+  await expect(link).toContainText(names(locale).text);
   await expect(link.getByRole("img")).toHaveCount(0); // the mark is decorative: empty alt
   const box = await link.boundingBox();
   expect(box!.width).toBeGreaterThanOrEqual(44);
@@ -33,7 +37,7 @@ async function expectNoOverflow(page: Page, width: number) {
 }
 
 test.describe("spec 0014: site logo", () => {
-  for (const locale of ["hu", "en", "de", "ru"] as const) {
+  for (const locale of routing.locales) {
     test(`AC-19: the landing page and the About page carry it in ${locale}; a click leads to the landing page`, async ({ page }) => {
       await page.goto(`/${locale}/about`);
       await expectLogo(page, locale);

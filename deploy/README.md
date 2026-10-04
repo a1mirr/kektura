@@ -61,7 +61,7 @@ Server-only values (`SITE_URL`, `FF_FRIENDS`, `TELEGRAM_*`) take effect with `pm
 3. applies the **migrations** production is missing (`scripts/migrate-production.mjs`, name order, each file in
    its own transaction, recorded in `public.applied_migrations`);
 4. **pushes** the commit to the `production` remote, so the hook below builds it and reloads the app;
-5. runs a **smoke test** (`scripts/smoke-test.mjs`: `/hu`, `/en`, `/de` and `/ru` answer 200, an unknown page 404, and a POST to the test server's dummy login `/auth/test-login`
+5. runs a **smoke test** (`scripts/smoke-test.mjs`: every language's page answers 200, an unknown page 404, and a POST to the test server's dummy login `/auth/test-login`
    404, retried for two minutes);
 6. on any failure stops, writes in the job summary what state things are in, and sends a Telegram message when the
    bot secrets exist. Nothing rolls back by itself.

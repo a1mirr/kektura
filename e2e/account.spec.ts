@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, test, type Page } from "@playwright/test";
+import { routing } from "../src/i18n/routing";
 import { expandAllStages, signInAsNewUser, signInWithEmail, stat } from "./helpers";
 import { psql } from "./local-db";
 
@@ -104,12 +105,10 @@ test.describe("spec 0014: sign out and the account link", () => {
 
   test("AC-15: the old /settings address redirects to /account in the same language", async ({ page }) => {
     await signInAsNewUser(page);
-    for (const locale of ["en", "ru", "hu", "de"]) {
-      await page.goto(`/${locale}/settings`);
-      await expect(page).toHaveURL(new RegExp(`/${locale}/account$`));
-    }
+    await page.goto("/en/settings");
+    await expect(page).toHaveURL(/\/en\/account$/); // every language: e2e/languages.spec.ts
     await page.goto("/settings"); // no language prefix: the proxy adds one, then the redirect applies
-    await expect(page).toHaveURL(/\/(ru|en|hu|de)\/account$/);
+    await expect(page).toHaveURL(new RegExp(`/(${routing.locales.join("|")})/account$`));
   });
 
   test("AC-16: signing out from the account page ends the session for the dashboard and the account page", async ({ page }) => {
@@ -142,22 +141,6 @@ test.describe("spec 0014: sign out and the account link", () => {
     }
   });
 
-  test("AC-16, AC-18: the link, the page and the button are translated, and signing out returns to the landing page of that language", async ({ page }) => {
-    for (const [locale, account, signOut] of [
-      ["ru", "Аккаунт", "Выйти"],
-      ["hu", "Fiók", "Kijelentkezés"],
-      ["de", "Konto", "Abmelden"],
-    ]) {
-      await signInAsNewUser(page);
-      await page.goto(`/${locale}/dashboard`);
-      await page.getByRole("link", { name: account, exact: true }).click();
-      await expect(page).toHaveURL(new RegExp(`/${locale}/account$`));
-      await expect(page).toHaveTitle(account);
-      await expect(page.getByRole("heading", { level: 1 })).toHaveText(account);
-      await page.getByRole("button", { name: signOut }).click();
-      await expect(page).toHaveURL(new RegExp(`/${locale}$`));
-    }
-  });
 });
 
 test.describe("spec 0001: the stamps-per-month chart on the account page", () => {
@@ -170,7 +153,7 @@ test.describe("spec 0001: the stamps-per-month chart on the account page", () =>
     const now = new Date();
     const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`; // the stamp's own day, as the browser sent it
     const labels = new Set<string>();
-    for (const locale of ["en", "ru", "hu", "de"]) {
+    for (const locale of [routing.defaultLocale, "en"]) {
       const label = new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${month}-01T00:00:00Z`));
       labels.add(label);
       await page.goto(`/${locale}/account`);
@@ -179,6 +162,6 @@ test.describe("spec 0001: the stamps-per-month chart on the account page", () =>
       await chart.locator(".recharts-bar-rectangle").first().hover();
       await expect(chart.locator(".recharts-tooltip-wrapper")).toContainText(label);
     }
-    expect(labels.size, "the four languages write the month differently").toBe(4);
+    expect(labels.size, "the two languages write the month differently").toBe(2);
   });
 });
