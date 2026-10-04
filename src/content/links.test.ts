@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import de from "../../messages/de.json";
 import en from "../../messages/en.json";
 import hu from "../../messages/hu.json";
 import ru from "../../messages/ru.json";
@@ -21,8 +22,8 @@ describe("spec 0019: useful links data", () => {
     }
   });
 
-  it("AC-2, AC-4: every link and group has a title or description in all three languages", () => {
-    for (const messages of [en, ru, hu]) {
+  it("AC-2, AC-4: every link and group has a title or description in all four languages", () => {
+    for (const messages of [en, ru, hu, de]) {
       for (const link of all) expect(messages.links.items[link.id].trim(), link.id).not.toBe("");
       for (const group of LINK_GROUPS) expect(messages.links.groups[group.id].trim(), group.id).not.toBe("");
     }

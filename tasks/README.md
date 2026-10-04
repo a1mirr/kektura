@@ -60,3 +60,4 @@ A finished task stays as history and is not updated when behaviour changes later
 | [0064](0064-ci-is-the-e2e-authority.md) | CI is the authority for the end-to-end tests (specs 0007, 0022) | Done |
 | [0065](0065-worktree-base-ref-fresh.md) | Claude Code's own worktrees start from the remote's default branch (spec 0021) | Done |
 | [0066](0066-telegram-for-failed-actions.md) | Failed server actions reach Telegram (spec 0008) | Open |
+| [0067](0067-hungarian-default-and-german.md) | Hungarian is the default language, German is added, the language is chosen from a dropdown | Open |

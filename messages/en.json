@@ -1,7 +1,8 @@
 {
   "app": {
     "title": "Kektura — my progress",
-    "testBanner": "Test server: local data and a dummy login. Not production."
+    "testBanner": "Test server: local data and a dummy login. Not production.",
+    "language": "Language"
   },
   "home": {
     "headline": "Hike the Országos Kéktúra — one stamp at a time",

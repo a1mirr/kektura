@@ -1,27 +1,30 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import { LOCALE_NAMES } from "@/i18n/locale-names";
 
+// A native dropdown (spec 0005 AC-9): keyboard and screen readers work for free, and it stays one control
+// however many languages there are.
 export default function LocaleSwitcher() {
   const locale = useLocale();
+  const t = useTranslations("app");
   const pathname = usePathname();
   const router = useRouter();
 
   return (
-    <div className="flex gap-1 text-sm">
+    <select
+      aria-label={t("language")}
+      value={locale}
+      onChange={(event) => router.replace(pathname, { locale: event.target.value as typeof locale })}
+      className="min-h-11 rounded-lg border border-stone-300 bg-white px-2 text-sm text-stone-900"
+    >
       {routing.locales.map((l) => (
-        <button
-          key={l}
-          onClick={() => router.replace(pathname, { locale: l })}
-          className={`rounded px-2 py-1 uppercase ${
-            l === locale ? "bg-blue-600 text-white" : "hover:bg-stone-200"
-          }`}
-        >
-          {l}
-        </button>
+        <option key={l} value={l} lang={l}>
+          {LOCALE_NAMES[l]}
+        </option>
       ))}
-    </div>
+    </select>
   );
 }

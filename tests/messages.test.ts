@@ -2,6 +2,7 @@
 // new string to all three files").
 import { describe, expect, it } from "vitest";
 import en from "../messages/en.json";
+import de from "../messages/de.json";
 import hu from "../messages/hu.json";
 import ru from "../messages/ru.json";
 
@@ -19,7 +20,7 @@ function flatten(messages: Messages, prefix = ""): Map<string, string> {
 const placeholders = (s: string) => [...s.matchAll(/\{(\w+)|<(\w+)>/g)].map((m) => m[1] ?? `<${m[2]}>`).sort();
 
 const reference = flatten(en);
-const locales = { ru: flatten(ru), hu: flatten(hu) };
+const locales = { ru: flatten(ru), hu: flatten(hu), de: flatten(de) };
 
 describe("spec 0005: translations", () => {
   it.each(Object.entries(locales))("AC-5: %s has exactly the English keys", (_, messages) => {
@@ -40,7 +41,7 @@ describe("spec 0005: translations", () => {
 describe("spec 0015: about page text", () => {
   // The repository is private and the app has no manifest or service worker, so neither claim is
   // true. Whoever makes one true edits spec 0015 AC-6 and this test.
-  const claims = /open[- ]source|progressive|\bPWA\b|открыт[а-яё]* исходн|nyílt forrás/i; // (\w doesn't match Cyrillic)
+  const claims = /open[- ]source|progressive|\bPWA\b|открыт[а-яё]* исходн|nyílt forrás|quelloffen/i; // (\w doesn't match Cyrillic)
 
   it.each(Object.entries({ en: reference, ...locales }))("AC-6: %s makes no open-source or PWA claim", (_, messages) => {
     for (const [key, text] of messages) {
@@ -56,17 +57,17 @@ describe("spec 0015: about page text", () => {
 });
 
 describe("spec 0014: the account page has one name in every language", () => {
-  const expected = { en: "Account", ru: "Аккаунт", hu: "Fiók" };
+  const expected = { en: "Account", ru: "Аккаунт", hu: "Fiók", de: "Konto" };
 
   it.each(Object.entries(expected))("AC-18: %s: the header link, the page title and the About page's link text say %s", (locale, name) => {
-    const messages = { en, ru, hu }[locale as keyof typeof expected];
+    const messages = { en, ru, hu, de }[locale as keyof typeof expected];
     expect(messages.dashboard.account).toBe(name);
     expect(messages.account.title).toBe(name);
     expect(messages.about.data3).toContain(`<account>${name}</account>`);
   });
 
   it.each(Object.entries(expected))("AC-18: %s: nothing is still called settings", (locale) => {
-    const messages = flatten({ en, ru, hu }[locale as keyof typeof expected]);
+    const messages = flatten({ en, ru, hu, de }[locale as keyof typeof expected]);
     expect([...messages.keys()].filter((key) => /(^|\.)settings(\.|$)|signOut/.test(key) && key !== "account.signOut")).toEqual([]);
   });
 });

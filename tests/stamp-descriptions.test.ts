@@ -1,4 +1,4 @@
-// Spec 0033: every stamp in the seeds has an English and a Russian description, and a translation keeps
+// Spec 0033: every stamp in the seeds has an English, a Russian and a German description, and a translation keeps
 // the technical marker codes of the Hungarian original. Like trail-data.test.ts it reads the generated seeds,
 // so regenerating the trail data (spec 0004) with a new stamp fails here until it is translated.
 import fs from "node:fs";
@@ -17,7 +17,7 @@ const extras = [
   ...read("supabase/seed_extra.sql").matchAll(new RegExp(String.raw`^ {2}\(${STR}, ${STR}, (?:null|${STR}),`, "gm")),
 ].map((m) => ({ code: sql(m[1]), original: m[3] === undefined ? null : sql(m[3]) }));
 const stamps = [...places, ...extras];
-const table = translations as Record<string, { en?: string; ru?: string }>;
+const table = translations as Record<string, { en?: string; ru?: string; de?: string }>;
 
 // A description that is only a street address ("József Attila u. 5.") reads the same in every language.
 const addressOnly = (s: string) => /^\S+(?: \S+)* (?:u\.|út|utca) \d+\.?$/.test(s);
@@ -34,8 +34,10 @@ describe("spec 0033: translated stamp descriptions", () => {
     expect(stamps.filter((s) => s.original).length).toBeGreaterThan(280); // descriptions were read, not just codes
   });
 
-  it("AC-3: every stamp code of the seeds has an en and a ru translation", () => {
-    const missing = stamps.filter((s) => s.original && !(table[s.code]?.en?.trim() && table[s.code]?.ru?.trim())).map((s) => s.code);
+  it("AC-3: every stamp code of the seeds has an en, a ru and a de translation", () => {
+    const missing = stamps
+      .filter((s) => s.original && !(table[s.code]?.en?.trim() && table[s.code]?.ru?.trim() && table[s.code]?.de?.trim()))
+      .map((s) => s.code);
     expect(missing).toEqual([]);
   });
 
@@ -50,6 +52,7 @@ describe("spec 0033: translated stamp descriptions", () => {
       const t = table[s.code];
       expect(t.en, `${s.code} en`).not.toBe(s.original);
       expect(t.ru, `${s.code} ru`).not.toBe(s.original);
+      expect(t.de, `${s.code} de`).not.toBe(s.original);
       expect(t.ru, `${s.code} ru`).toMatch(/[А-Яа-яЁё]/);
     }
   });
@@ -59,6 +62,7 @@ describe("spec 0033: translated stamp descriptions", () => {
       if (!s.original) continue;
       expect(markers(table[s.code].en!), `${s.code} en`).toEqual(markers(s.original));
       expect(markers(table[s.code].ru!), `${s.code} ru`).toEqual(markers(s.original));
+      expect(markers(table[s.code].de!), `${s.code} de`).toEqual(markers(s.original));
     }
   });
 
@@ -68,6 +72,7 @@ describe("spec 0033: translated stamp descriptions", () => {
       expect(code, p.code).toBeTruthy();
       expect(table[p.code].en!.endsWith(code!), `${p.code} en`).toBe(true);
       expect(table[p.code].ru!.endsWith(code!), `${p.code} ru`).toBe(true);
+      expect(table[p.code].de!.endsWith(code!), `${p.code} de`).toBe(true);
     }
   });
 

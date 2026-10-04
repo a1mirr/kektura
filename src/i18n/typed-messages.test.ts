@@ -23,7 +23,7 @@ function useTypedHooks() {
   root("dashboard.stampp");
 
   // `useLocale` returns the routing locales, not a plain string.
-  const locale: "ru" | "en" | "hu" = useLocale();
+  const locale: "hu" | "en" | "de" | "ru" = useLocale();
   return locale;
 }
 
@@ -45,9 +45,9 @@ async function typedServerApi() {
 }
 
 function typedLocale() {
-  const supported: Locale = "hu";
+  const supported: Locale = "de";
   // @ts-expect-error not one of the routing locales
-  const unsupported: Locale = "de";
+  const unsupported: Locale = "fr";
   return [supported, unsupported];
 }
 
@@ -60,7 +60,7 @@ describe("spec 0005: typed translations", () => {
 
   it("AC-8: the locale type is the routing locales", () => {
     const locales: Locale[] = [...routing.locales];
-    expect(locales).toEqual(["ru", "en", "hu"]);
+    expect(locales).toEqual(["hu", "en", "de", "ru"]);
     expect(typeof typedLocale).toBe("function");
   });
 });

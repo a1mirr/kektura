@@ -1,7 +1,8 @@
 {
   "app": {
     "title": "Kéktúra — haladásom",
-    "testBanner": "Tesztszerver: helyi adatok és tesztbelépés. Nem éles környezet."
+    "testBanner": "Tesztszerver: helyi adatok és tesztbelépés. Nem éles környezet.",
+    "language": "Nyelv"
   },
   "home": {
     "headline": "Járd végig az Országos Kéktúrát — bélyegről bélyegre",
