@@ -1,7 +1,7 @@
 # 0056: Specs describe only behaviour that is built
 
 Status: Done
-Specs: [0034](../specs/0034-specs-and-tasks.md) AC-2, AC-3, AC-4, AC-6, AC-8 (changed), [0022](../specs/0022-fresh-context-review.md) AC-4 (the pull request checklist)
+Specs: [0034](../specs/0034-specs-and-tasks.md) AC-2, AC-3, AC-4, AC-6, AC-8 (changed), [0022](../specs/0022-fresh-context-review.md) AC-3 (what the reviewer looks for) and AC-4 (the pull request checklist)
 
 ## Goal
 
@@ -30,7 +30,7 @@ changes the rules and the files that state them.
 - [x] The changes are made after the open pull request that edits the same files (spec 0034, both READMEs, `CLAUDE.md`,
       spec 0022, the pull request template and `tests/review-process.test.ts`) has merged, so they are made once, on top of it
 - [x] The specs listed above mirror the code as built (spec 0034 AC-6)
-- [ ] Fresh-context review done
+- [x] Fresh-context review done
 
 ## Spec changes
 
@@ -58,5 +58,5 @@ updating existing ones after task completed? specs should show actual behaviour"
 and reworked afterwards: the eleven unbuilt specs became tasks, with their requirements as `R-n` checklist items and their
 open questions kept. The rules were left for this task because the files that state them were being edited elsewhere.
 
-Until this task is done, spec 0034 and the READMEs still describe the old way (Draft specs for planned work). The tasks
-that were converted follow the new way: they carry a "Requirements" section and list the existing specs they will edit.
+The tasks that were converted before this one follow the new way: they carry a "Requirements" section and list the
+existing specs they will edit.
