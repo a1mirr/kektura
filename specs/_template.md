@@ -1,6 +1,6 @@
 # NNNN: Area name
 
-Status: Draft | Accepted | Done
+Status: Done
 Owner code: `path/to/module.ts`, `path/to/Component.tsx`
 
 ## Goal
@@ -9,7 +9,7 @@ What this area is for and for whom, in two or three sentences. Describe the area
 
 ## Behaviour
 
-Numbered acceptance criteria, true now. Each one observable and testable; group them under subheadings if
+Numbered acceptance criteria, true now: a spec describes built behaviour only (planned behaviour is in a task's requirements). Each one observable and testable; group them under subheadings if
 there are many.
 
 - **AC-1**: Given ..., when ..., then ...
@@ -18,10 +18,6 @@ there are many.
 ## Out of scope
 
 What this area deliberately does not do.
-
-## Open questions
-
-Decisions still needed before `Accepted` (delete the section once empty).
 
 ## Notes
 

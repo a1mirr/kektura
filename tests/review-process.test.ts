@@ -116,6 +116,12 @@ describe("spec 0022: fresh-context review", () => {
       }
     });
 
+    it("checks that every requirement of the task holds and that no spec describes unbuilt behaviour", () => {
+      expect(body).toMatch(/A requirement of the task that the built change does not satisfy/);
+      expect(body).toMatch(/describes behaviour that is\s+not built/);
+      expect(read("specs/0022-fresh-context-review.md")).toMatch(/requirements of the task that do not hold/);
+    });
+
     it("reports findings most severe first with file:line and a failing scenario, what was fine, and allows 'No findings'", () => {
       expect(body).toMatch(/most severe first/);
       expect(body).toContain("`file:line`");
@@ -127,8 +133,8 @@ describe("spec 0022: fresh-context review", () => {
 
   it("AC-4: the pull request template has the checklist, the reviewed commit and a place for the findings", () => {
     const template = read(".github/pull_request_template.md");
-    expect(template).toMatch(/^- \[ \] .*spec came first.*needs no spec/m);
-    expect(template).toMatch(/^- \[ \] .*specs this change touches mirror the code as built.*Spec changes/m);
+    expect(template).toMatch(/^- \[ \] .*task came first.*every requirement holds.*needs no task/m);
+    expect(template).toMatch(/^- \[ \] .*specs this change touches mirror the code as built and describe nothing that is not built.*Spec changes/m);
     expect(template).toMatch(/^- \[ \] .*npm run check.*npm run e2e/m);
     expect(template).toMatch(/^- \[ \] .*fresh-context agent.*fresh-reviewer.*at the commit named below.*later commits only fix wording/m);
     expect(template).toMatch(/^## Review findings/m);

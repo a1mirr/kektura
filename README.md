@@ -14,7 +14,7 @@
 ## Development
 Specs describe how each area behaves now, as numbered acceptance criteria in `specs/` (see
 [`specs/README.md`](specs/README.md)), and tests cite those criteria; the work on them is in `tasks/` (see
-[`tasks/README.md`](tasks/README.md)). A behaviour change edits the spec first and leaves it true afterwards.
+[`tasks/README.md`](tasks/README.md)). A behaviour change starts as a task, and its spec is edited as the behaviour is built, so that it is true afterwards.
 
 - `npm test`: unit and regression tests (Vitest); `npm run test:watch` while working.
 - `npm run check`: typecheck + lint + tests. Claude Code runs the same gate automatically before

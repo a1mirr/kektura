@@ -5,29 +5,32 @@ A spec is the contract of one **area**, a part of the product or of how the proj
 proven, and after every change the spec is edited until it mirrors the code again.
 Specs are always written in English.
 
-The work that changes an area is a **task** ([`tasks/`](../tasks/README.md)): why, which specs it touches, what is
-done when. A task is history and never says how the product behaves; a spec never tells the story of a change.
+The work that changes an area is a **task** ([`tasks/`](../tasks/README.md)): why, which specs it touches, the
+requirements of planned behaviour and what is done when. A task is history and never says how the product behaves; a
+spec never tells the story of a change, and never describes behaviour that is not built yet (its status is always
+`Done`).
 Both folders share one number sequence (next number = the highest in `specs/` and `tasks/` plus one). Details:
 [0034](0034-specs-and-tasks.md). A quick test for where a sentence belongs: will it still be true in a year if
 nobody touches it? Yes: spec. No: task.
 
 ## Workflow
 
-1. **Write or edit the spec.** A new area: copy [`_template.md`](_template.md) to `specs/NNNN-short-slug.md`,
-   status `Draft`. A change to an existing area: edit the spec that owns it (add, change or remove ACs). Fill in
-   the goal, the behaviour as numbered acceptance criteria (`AC-1`, `AC-2`, ...), what is out of scope and open
-   questions. Each AC is one observable, testable statement: "given X, when Y, then Z". Then open the task
-   (`tasks/NNNN-slug.md`) that lists the spec; a refactor or a CI change is only a task, a trivial fix needs
-   neither.
-2. **Agree on it.** Resolve the open questions and set status `Accepted` before implementing.
-3. **Write the tests from the ACs.** `describe("spec NNNN: <area>")`, and every test title starts
+1. **Open a task.** A feature or a behaviour change starts as `tasks/NNNN-slug.md` (copy
+   [`../tasks/_template.md`](../tasks/_template.md)): the goal, the specs it will touch, the requirements as a
+   checklist of outcomes and the open questions. No spec is written or changed yet. A refactor or a CI change is only
+   a task without requirements, a trivial fix needs neither.
+2. **Agree on it.** Resolve the open questions with the owner before implementing.
+3. **Write the ACs and the tests as you build.** Edit the spec that owns the area (add, change or remove ACs); a new
+   area: copy [`_template.md`](_template.md) to `specs/NNNN-short-slug.md`, status `Done`. Turn each requirement
+   into numbered acceptance criteria (`AC-1`, `AC-2`, ...), each one observable, testable statement: "given X, when
+   Y, then Z". Then the tests: `describe("spec NNNN: <area>")`, and every test title starts
    with the AC it covers (`it("AC-3: ...")`). An AC that can't be automated yet is listed as
    `manual` in the spec's coverage table: `manual (why it can't be automated): how to check it. Last checked: <date>`
    (spec 0034 AC-11). Prefer a test; a manual row is the exception, and its date is written by whoever did the check.
 4. **Implement** until `npm run check` (typecheck + lint + tests) is green.
 5. **Make the spec true.** Reread every spec the task touches against the code as built and edit it to mirror
    reality: an AC for behaviour that exists and no AC states, `Removed` for an AC that was dropped, status `Done`,
-   the coverage table, the index below. Where code and spec disagree, decide which is right and fix that one.
+   the coverage table, the index below; every requirement of the task is built or struck with the reason. Where code and spec disagree, decide which is right and fix that one.
    Write what changed in the task's "Spec changes" section and set the task `Done`.
 6. **Review with a fresh agent** before the pull request is merged ([0022](0022-fresh-context-review.md)):
    spawn the `fresh-reviewer` agent with only the task number (the spec number for a change that is only a spec,
