@@ -67,8 +67,9 @@ leftovers of a merged change are cleaned up.
   merge commit of `origin/main` brought the branch's tip in, so a new branch that has no commit of its own yet, which
   is an ancestor of `origin/main` too, is never taken for finished work (another session may be about to use it). It
   keeps, and says why: the primary checkout, the worktree it runs in (so a worktree is removed by a run from another
-  checkout, for instance the next session's), a worktree with a modified or untracked file, a worktree or branch no
-  merge commit contains, a branch checked out in a kept worktree, `main`, and worktrees outside `.claude/worktrees`
+  checkout, for instance the next session's), a worktree with a modified or untracked file, a branch, or a worktree
+  on a branch, that no merge commit contains (a detached worktree has no branch to protect: it only has to point at
+  something that is in `origin/main`, which is what the clean-up recipe of `CLAUDE.md` step 7 leaves behind), a branch checked out in a kept worktree, `main`, and worktrees outside `.claude/worktrees`
   (another tool's). Before it removes a worktree it unlinks a `node_modules` junction, so the real one is never
   reached; a branch whose worktree could not be removed (locked, say) is kept; a branch is deleted only at the sha it
   has just checked against `origin/main`, never with `-D`. `--remote` also deletes merged branches on `origin`, with a lease on the sha it checked, so a commit
@@ -80,7 +81,8 @@ leftovers of a merged change are cleaned up.
   branch is deleted even when another tool made it (its worktree outside `.claude/worktrees` is kept), and
   `--remote` does not check for an open pull request based on the branch (CLAUDE.md step 7 retargets it first).
 - **AC-9**: New work starts from the real `origin/main`, never from a stale local `main` or another branch. The
-  `worktree-guard` hook enforces it for the way work is started (`git worktree add`); a branch made later inside a
+  `worktree-guard` hook enforces it for the way work is started (`git worktree add`, with `-b`/`-B` or with a path
+  alone, which makes a branch from HEAD; `--detach` and an existing branch are left alone); a branch made later inside a
   worktree (`git switch -c`) is not recognised. The hook refuses a `git worktree add` that creates a branch (`-b` or `-B`) unless its base is
   exactly `origin/main` and the `origin/main` of the checkout is the commit GitHub reports for `main` right now
   (`git ls-remote`): the message says to `git fetch origin` first. The fetch has to be its own call, because the

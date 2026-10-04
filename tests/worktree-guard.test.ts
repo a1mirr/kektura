@@ -275,6 +275,12 @@ describe("spec 0021: AC-9 a new branch starts from a fresh origin/main", () => {
     expect(create("git worktree add .claude/worktrees/x -btopic origin/main")).toBe("");
   });
 
+  it("`git worktree add <path>` alone makes a branch from HEAD, so it is a new branch with no base and is refused; --detach is not", () => {
+    expect(create("git worktree add .claude/worktrees/x")).toMatch(/starts from origin\/main/);
+    expect(create("git worktree add --detach .claude/worktrees/x origin/main")).toBe("");
+    expect(create("git worktree add --detach .claude/worktrees/x")).toBe("");
+  });
+
   it("checking out an existing branch (no -b) is not a new branch and is allowed", () => {
     expect(create("git worktree add .claude/worktrees/x existing")).toBe("");
   });

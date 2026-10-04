@@ -109,7 +109,10 @@ export function newBranchBase(invocation) {
     else if (word === "--reason") i++;
     else if (!word.startsWith("-")) positional.push(unquote(word));
   }
-  return creates ? { base: positional[1] ?? "" } : null;
+  if (creates) return { base: positional[1] ?? "" };
+  // `git worktree add <path>` alone makes a branch named after the folder, from wherever HEAD is.
+  if (positional.length === 1 && !invocation.rest.includes("--detach")) return { base: "" };
+  return null;
 }
 
 /** The refusal for a new branch that does not start from the current origin/main, or "". */

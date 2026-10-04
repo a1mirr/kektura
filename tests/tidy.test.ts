@@ -139,6 +139,8 @@ describe("spec 0021: tidy after a merge", () => {
       git(wtDir("done"), "push", "-q", "origin", "done");
       git(primary, "merge", "-q", "--no-ff", "-m", "Merge done", "done");
       git(primary, "push", "-q", "origin", "main");
+      // What CLAUDE.md step 7 leaves behind: a worktree detached at origin/main (its branch was deleted).
+      git(primary, "worktree", "add", "-q", "--detach", wtDir("det"), "origin/main");
       // Started after that merge, and another merge has moved origin/main on since: its tip is an ancestor of origin/main.
       git(primary, "worktree", "add", "-q", "-b", "fresh", wtDir("fresh"), "origin/main");
       fs.writeFileSync(path.join(primary, "next.txt"), "n\n");
@@ -168,6 +170,7 @@ describe("spec 0021: tidy after a merge", () => {
       const run = tidy(wtDir("me"), "--apply");
       expect(run.status, run.stderr).toBe(0);
       expect(fs.existsSync(wtDir("done"))).toBe(false);
+      expect(fs.existsSync(wtDir("det"))).toBe(false); // detached at origin/main: nothing to protect
       expect(git(primary, "branch", "--list", "done")).toBe("");
       for (const kept of ["dirty", "open", "me"]) expect(fs.existsSync(wtDir(kept)), kept).toBe(true);
       expect(git(primary, "branch", "--list", "open")).not.toBe("");

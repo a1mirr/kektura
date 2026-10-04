@@ -118,7 +118,10 @@ export function gatherState(cwd) {
     if (!wt || !head) continue;
     const branch = lines.find((l) => l.startsWith("branch "))?.slice(7).replace("refs/heads/", "") ?? null;
     const dirty = git(wt, ["status", "--porcelain"]);
-    worktrees.push({ path: wt, branch, merged: merged(head), clean: dirty.status === 0 && dirty.stdout === "" });
+    // A detached worktree has no branch to protect: what it points at only has to be in origin/main (the clean-up
+    // recipe of CLAUDE.md step 7 leaves a worktree detached at origin/main).
+    const contained = git(cwd, ["merge-base", "--is-ancestor", head, "origin/main"]).status === 0;
+    worktrees.push({ path: wt, branch, merged: branch ? merged(head) : contained, clean: dirty.status === 0 && dirty.stdout === "" });
   }
   const names = (ns) => git(cwd, ["for-each-ref", "--format=%(refname:short)", ns]).stdout.split(/\r?\n/).filter(Boolean);
   const branches = names("refs/heads").map((name) => ({ name, merged: merged(name) }));

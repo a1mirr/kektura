@@ -35,13 +35,16 @@ AC-4) and the open tasks 0057 to 0062, which change no spec until they are built
 - A hook can refuse, not move the session: the refusal text says how to make a worktree. The hook is a guard
   against the usual mistake, not a sandbox (a shell redirect or `sed -i` is not recognised); the pre-push guard,
   CI and the review stand behind it.
-- Four fresh reviews shaped it. Fixed: Git Bash paths (`/c/...`), `FOO=1 git`, `command git`, `git.exe` and quoted env
+- Several fresh reviews shaped it. Fixed: Git Bash paths (`/c/...`), `FOO=1 git`, `command git`, `git.exe` and quoted env
   values slipping past the hook; the PowerShell tool unguarded; `-bNAME`; `tidy` treating a new branch with no commit
   as merged (it asks for a merge commit now), a branch deleted although its worktree could not be removed, a
   `node_modules` unlink that threw on Linux and left no link behind when the removal failed; `--remote` without a
   lease or a test. Left as documented limits (spec 0021): a `git switch -c` inside a worktree is not checked against
   `origin/main`, stacking a branch on another one is refused, `git branch -f`, a quoted `;` inside a commit message,
   and `tidy` removing a clean merged worktree that another session idles in.
+- Tasks 0057 to 0062 keep the requirements of the spec change they will make in a "Requirements" section, as the owner
+  asked (planned behaviour does not go into specs until it is built). Spec 0034 AC-3 still says a task describes no
+  behaviour; amending it is the owner's separate change and is not made here.
 - `worktree.baseRef` in `.claude/settings.json` is `head`: a worktree made by the `EnterWorktree` tool starts from the
   shared checkout's HEAD, which can be stale. Not changed here; it is the owner's call (spec 0021 Notes).
 - The hook takes effect in a checkout once this change is merged and the checkout has the new `.claude/settings.json`.

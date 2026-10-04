@@ -8,8 +8,6 @@ A finished task stays as history and is not updated when behaviour changes later
 - Copy [`_template.md`](_template.md) to `tasks/NNNN-short-slug.md`. The number is the next one after the
   highest in `specs/` **and** `tasks/` (one sequence over both folders), status `Open`. Written in English.
 - A task has no acceptance criteria. If you are writing "given X, when Y, then Z", it belongs in a spec.
-  An open task may list the requirements of the spec change it will make (and the open questions about them); they
-  move into the owning spec as acceptance criteria when the task is built, and the task keeps only a pointer.
 - A feature or behaviour change edits or drafts the spec first, then gets its task. A refactor, CI or deploy
   change or data update is only a task. A trivial fix needs no task.
 - Statuses: `Open`, `In progress`, `Done`, `Dropped` (say why in Notes).
@@ -25,24 +23,30 @@ A finished task stays as history and is not updated when behaviour changes later
 | [0010](0010-typed-translations.md) | Typed translation keys (now spec 0005) | Done |
 | [0011](0011-trailmap-split.md) | Split TrailMap, map E2E safety net (now spec 0003) | Done |
 | [0013](0013-extra-stamps-stages.md) | Extra stamps linked to stages (now spec 0001) | Done |
+| [0023](0023-feature-flags.md) | Feature flags: per-user flags without a redeploy | Open |
 | [0025](0025-account-page.md) | Account page: sign out moves in, "Settings" becomes "Account" (now spec 0014) | Done |
+| [0027](0027-feature-flags-via-telegram.md) | Switch feature flags from the Telegram bot | Open |
+| [0028](0028-landing-screenshots.md) | Screenshots on the landing page | Open |
+| [0029](0029-site-logo-link.md) | A logo that leads home, on every page | Open |
 | [0030](0030-faster-e2e.md) | Faster end-to-end tests (now specs 0006 and 0007) | Done |
+| [0031](0031-e2e-sharding.md) | Sharded end-to-end tests: two parallel CI jobs | Open |
 | [0032](0032-iso-date-input.md) | Stamp dates as yyyy-mm-dd (now spec 0016) | Done |
 | [0035](0035-specs-and-tasks.md) | Introduce tasks next to specs | Done |
 | [0036](0036-reshape-specs.md) | Turn the existing specs into area specs and tasks | Done |
 | [0037](0037-regenerate-seeds.md) | Regenerate the seeds with the current generator | Done |
 | [0038](0038-deploy-gh-retry.md) | Retry the GitHub API calls of the deploy workflow | Done |
 | [0039](0039-manual-coverage-rows.md) | Audit the manual coverage rows | Done |
-| [0046](0046-header-menu-and-page-width.md) | Account menu and one wide page layout (spec 0040) | Open |
-| [0047](0047-stats-page-and-monthly-chart.md) | My stats page and a monthly chart that names every month (spec 0041) | Open |
-| [0048](0048-new-stamps-required-from-date.md) | New stamps are required only from their official date (spec 0042) | Open |
-| [0049](0049-retired-stamps.md) | Keep retired stamps and show them to the people who could have collected them (spec 0042) | Open |
-| [0050](0050-relocated-stamps-on-the-map.md) | Relocated stamps: the latest location on the map, with a note (spec 0042) | Open |
-| [0051](0051-friends-comparison.md) | Compare progress with a friend (spec 0043) | Open |
-| [0052](0052-friends-buttons-respond.md) | Friends page buttons respond (spec 0043) | Open |
-| [0053](0053-bulk-stamp-dates.md) | Change the date of many stamps at once (spec 0044) | Open |
-| [0054](0054-ci-runs-once-per-change.md) | CI runs once per change (spec 0045) | Open |
-| [0055](0055-database-tests-fail-in-ci.md) | Database tests fail in CI instead of skipping (spec 0045) | Open |
+| [0046](0046-header-menu-and-page-width.md) | Account menu and one wide page layout | Open |
+| [0047](0047-stats-page-and-monthly-chart.md) | My stats page and a monthly chart that names every month | Open |
+| [0048](0048-new-stamps-required-from-date.md) | New stamps are required only from their official date | Open |
+| [0049](0049-retired-stamps.md) | Keep retired stamps and show them to the people who could have collected them | Open |
+| [0050](0050-relocated-stamps-on-the-map.md) | Relocated stamps: the latest location on the map, with a note | Open |
+| [0051](0051-friends-comparison.md) | Compare progress with a friend | Open |
+| [0052](0052-friends-buttons-respond.md) | Friends page buttons respond | Open |
+| [0053](0053-bulk-stamp-dates.md) | Change the date of many stamps at once | Open |
+| [0054](0054-ci-runs-once-per-change.md) | CI runs once per change | Open |
+| [0055](0055-database-tests-fail-in-ci.md) | Database tests fail in CI instead of skipping | Open |
+| [0056](0056-specs-describe-built-behaviour-only.md) | Specs describe only behaviour that is built | Open |
 | [0056](0056-worktrees-and-tidy.md) | Work only in worktrees from a fresh origin/main, and tidy after a merge (spec 0021) | Done |
 | [0057](0057-review-recorded-check.md) | A CI check that a review was recorded (spec 0022) | Open |
 | [0058](0058-backup-before-migration.md) | A backup before every migration (specs 0012, 0026) | Open |
