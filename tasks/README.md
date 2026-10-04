@@ -30,7 +30,7 @@ A finished task stays as history and is not updated when behaviour changes later
 | [0025](0025-account-page.md) | Account page: sign out moves in, "Settings" becomes "Account" (now spec 0014) | Done |
 | [0027](0027-feature-flags-via-telegram.md) | Switch feature flags from the Telegram bot | Open |
 | [0028](0028-landing-screenshots.md) | Screenshots on the landing page | Open |
-| [0029](0029-site-logo-link.md) | A logo that leads home, on every page | Open |
+| [0029](0029-site-logo-link.md) | A logo that leads home, on every page (now spec 0014) | Done |
 | [0030](0030-faster-e2e.md) | Faster end-to-end tests (now specs 0006 and 0007) | Done |
 | [0031](0031-e2e-sharding.md) | Sharded end-to-end tests: two parallel CI jobs | Open |
 | [0032](0032-iso-date-input.md) | Stamp dates as yyyy-mm-dd (now spec 0016) | Done |
@@ -60,4 +60,4 @@ A finished task stays as history and is not updated when behaviour changes later
 | [0064](0064-ci-is-the-e2e-authority.md) | CI is the authority for the end-to-end tests (specs 0007, 0022) | Done |
 | [0065](0065-worktree-base-ref-fresh.md) | Claude Code's own worktrees start from the remote's default branch (spec 0021) | Done |
 | [0066](0066-telegram-for-failed-actions.md) | Failed server actions reach Telegram (spec 0008) | Open |
-| [0067](0067-hungarian-default-and-german.md) | Hungarian is the default language, German is added, the language is chosen from a dropdown | Open |
+| [0067](0067-hungarian-default-and-german.md) | Hungarian is the default language, German is added, the language is chosen from a dropdown (now specs 0005, 0033) | Done |

@@ -76,12 +76,12 @@ hook doesn't run them: CI's "End-to-end tests" job is the authority and must be 
 | [0002](0002-stamping.md) | Stamping: server actions, stamp buttons, cached reference data | Done |
 | [0003](0003-map-route-planner.md) | Map lines, the route planner and how the map code is structured | Done |
 | [0004](0004-trail-data.md) | Generated trail data and seeds | Done |
-| [0005](0005-auth-routing-i18n.md) | Sign-in, routing, translations, typed message keys | Done |
+| [0005](0005-auth-routing-i18n.md) | Sign-in, routing, languages (Hungarian default, German), the language dropdown, typed message keys | Done |
 | [0006](0006-test-server.md) | Test server with dummy login, E2E tests and how they sign in | Done |
 | [0007](0007-ci.md) | CI once per change (Markdown-only pull requests skip E2E), E2E caches and timing report, generated-types check, Dependabot | Done |
 | [0008](0008-action-logging.md) | Server-side logging of failed actions | Done |
 | [0012](0012-backups.md) | Weekly backup of production user data | Done |
-| [0014](0014-pages-and-settings.md) | Footer pages, account page (sign out, chart, account deletion) | Done |
+| [0014](0014-pages-and-settings.md) | Footer pages, site logo, account page (sign out, chart, account deletion) | Done |
 | [0016](0016-stamp-dates.md) | Stamp dates: validation, own time zone, safe editing, the yyyy-mm-dd field | Done |
 | [0017](0017-feedback.md) | Feedback form with Telegram notifications | Done |
 | [0018](0018-changelog.md) | Changelog page | Done |
@@ -92,5 +92,5 @@ hook doesn't run them: CI's "End-to-end tests" job is the authority and must be 
 | [0022](0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Done |
 | [0024](0024-friends-sharing.md) | Sharing progress with friends | Done |
 | [0026](0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Done |
-| [0033](0033-translated-stamp-descriptions.md) | Stamp descriptions translated into ru and en | Done |
+| [0033](0033-translated-stamp-descriptions.md) | Stamp descriptions translated into ru, en and de | Done |
 | [0034](0034-specs-and-tasks.md) | Specs and tasks: how work is written down | Done |

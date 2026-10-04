@@ -62,13 +62,12 @@ not only the ACs the diff mentions.
   or rename of something the running code uses takes two merges, the second after the first has deployed: spec
   0026 AC-5), one that is not named `NNNN_slug.sql` after the task that adds it, or a schema change without
   regenerated types (`npm run types:gen`). A merge deploys by itself, so nobody else will look at this.
-- A change users can see (texts, names, pages, behaviour) with no entry in `src/content/changelog.ts` in all
-  three languages (spec 0018 AC-7), or an entry that says something untrue about the app as shipped.
-- Leftovers of anything renamed, moved or removed: code, routes and links, message keys and texts in all three
-  languages (`messages/ru.json`, `en.json`, `hu.json`), the About page and the changelog, `README.md`,
+- A change users can see (texts, names, pages, behaviour) with no entry in `src/content/changelog.ts` in
+  every language (spec 0018 AC-7), or an entry that says something untrue about the app as shipped.
+- Leftovers of anything renamed, moved or removed: code, routes and links, message keys and texts in every language (`messages/*.json`), the About page and the changelog, `README.md`,
   `CLAUDE.md`, other specs, test names.
 - The gotchas listed in `CLAUDE.md` that apply to the files touched (typed locale narrowing, translations in
-  all three languages, actions that never throw, no URLs or message text in logs, redirects built with
+  every language, actions that never throw, no URLs or message text in logs, redirects built with
   `requestOrigin`, the proxy matcher, and so on).
 - Regressions for signed-out visitors, for each locale, on a 375 px wide screen and with JavaScript off or not
   yet hydrated (the sign-out and dummy-login forms are plain POSTs on purpose).

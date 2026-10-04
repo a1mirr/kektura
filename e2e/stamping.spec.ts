@@ -61,6 +61,7 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
       // a place (Piliscsaba) and the first extra stamp (Velem, 3.8 km)
       en: ["Piliscsaba - At the junction of Wesselényi, Árpád vezér and Kálmán király streets, on an electricity pole. (OKTPH_66)", "At the Szent Vid chapel."],
       ru: ["Piliscsaba - На пересечении улиц Wesselényi, Árpád vezér и Kálmán király, на электрическом столбе. (OKTPH_66)", "У часовни Szent Vid."],
+      de: ["Piliscsaba - An der Kreuzung der Wesselényi-, Árpád-vezér- und Kálmán-király-Straße, an einem Strommast. (OKTPH_66)", "An der Kapelle Szent Vid."],
       hu: ["Piliscsaba - A Wesselényi-, Árpád vezér- és Kálmán király utca találkozásánál, egy villanyoszlopon. (OKTPH_66)", "A Szent Vid-kápolnánál."],
     };
     for (const [locale, [placeText, extraText]] of Object.entries(expected)) {
@@ -75,7 +76,7 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
   }) => {
     await page.setViewportSize({ width: 375, height: 800 });
     await signInAsNewUser(page);
-    const locales = ["en", "hu", "ru"];
+    const locales = ["en", "hu", "ru", "de"];
     const widths = () =>
       page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, viewport: window.innerWidth }));
     const expectFits = async (label: string, stagesOpen: boolean) => {

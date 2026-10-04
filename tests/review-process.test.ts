@@ -107,7 +107,7 @@ describe("spec 0022: fresh-context review", () => {
         /no test/,
         /no acceptance criterion describes/,
         /Leftovers/,
-        /all three\s+languages/,
+        /every language/,
         /gotchas/,
         /signed-out visitors, for each locale, on a 375 px wide screen and with JavaScript off/,
         /Security and privacy/,
@@ -145,10 +145,10 @@ describe("spec 0022: fresh-context review", () => {
 // Spec 0018 AC-7: what users can see always reaches the changelog page. Whether an entry exists for a given
 // change can't be computed, so the rule is written where authors and reviewers look; the review checks it.
 describe("spec 0018: the changelog rule", () => {
-  it("AC-7: CLAUDE.md asks for an entry, in three languages, in the same pull request", () => {
+  it("AC-7: CLAUDE.md asks for an entry, in every language, in the same pull request", () => {
     const claude = read("CLAUDE.md");
     expect(claude).toMatch(/\*\*Changelog\*\* \(spec 0018 AC-7\)/);
-    expect(claude).toMatch(/adds or extends an entry in `src\/content\/changelog\.ts` in the same pull request, in all three languages/);
+    expect(claude).toMatch(/adds or extends an entry in `src\/content\/changelog\.ts` in the same pull request, in every language/);
     expect(claude).toMatch(/process, test, refactor and deploy-file changes add none/);
     expect(claude).toMatch(/joins that entry/);
   });

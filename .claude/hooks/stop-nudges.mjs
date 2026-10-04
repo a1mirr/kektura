@@ -40,7 +40,7 @@ export function nudgeMessage(changed) {
   if (userVisible.length) {
     parts.push(
       `files users can see changed without a changelog entry:\n  ${userVisible.join("\n  ")}\n\n` +
-        "If users can see the change: add or extend an entry in src/content/changelog.ts in all three languages (specs/0018 AC-7). " +
+        "If users can see the change: add or extend an entry in src/content/changelog.ts in every language (specs/0018 AC-7). " +
         "If not (internal), say so in one line and finish.",
     );
   }

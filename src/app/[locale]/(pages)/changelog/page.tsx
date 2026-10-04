@@ -53,7 +53,7 @@ export default async function ChangelogPage({ params }: Props) {
                     >
                       {t(`kind.${change.kind}`)}
                     </span>
-                    <span>{change.text[locale]}</span>
+                    <span className="min-w-0 [overflow-wrap:anywhere]">{change.text[locale]}</span>
                   </li>
                 ))}
               </ul>

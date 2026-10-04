@@ -12,7 +12,7 @@ Everything it says is true of the app today.
 ## Behaviour
 
 - **AC-1**: `/about` is public (no sign-in) in `ru`, `en` and `hu`, reachable from the footer. It has its
-  own document title and description, a "back to the tracker" link to `/`, and a single `h1` followed by
+  own document title and description, and a single `h1` followed by
   one `h2` per section below (the four sections of AC-2 to AC-5, then AC-8's).
 - **AC-2**: "The trail in numbers" shows the number of stages, of official stamping places and the total
   length in km (one decimal), computed from `scripts/data/okt-stages.json` (the MTSZ stage table), never
@@ -43,9 +43,9 @@ Everything it says is true of the app today.
 - **AC-6**: The page makes no claim that isn't true today. In particular it doesn't call the app open
   source (the repository is private) or a progressive web app (no manifest or service worker). Whoever
   makes either true edits this AC and its test.
-- **AC-7**: The page text has the same keys in all three locales (`tests/messages.test.ts`); each
+- **AC-7**: The page text has the same keys in every locale (`tests/messages.test.ts`); each
   locale reads naturally and uses the app's own terms (`ru`: печати, этап, участок; `hu`: bélyegzőhely,
-  szakasz).
+  szakasz; `de`: Stempelstelle, Etappe).
 - **AC-8**: The page ends with a "Questions or ideas?" section (`h2`) that links to `/feedback`.
 
 ## Out of scope
@@ -66,7 +66,7 @@ document).
 
 | AC | Test |
 | --- | --- |
-| AC-1 | `e2e/about.spec.ts` (footer link, title, back link, headings; signed out) |
+| AC-1 | `e2e/about.spec.ts` (footer link, title, headings; signed out) |
 | AC-2 | `src/lib/trail-facts.test.ts` (function and the real data file), `tests/trail-data.test.ts` (matches the seed), `e2e/about.spec.ts` (shown) |
 | AC-3 | `e2e/about.spec.ts` (four points, the rule's wording); the content against specs 0001 and 0002: manual (judgement): read the four points next to those specs. Last checked: never recorded. |
 | AC-5 | `e2e/about.spec.ts` (links), `e2e/friends.spec.ts` (friends paragraph, flag on); the wording against spec 0014 and migration 0008: manual (judgement): read it next to them. Last checked: never recorded. |

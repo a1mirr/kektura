@@ -22,7 +22,7 @@ describe("spec 0018: changelog data", () => {
     }
   });
 
-  it("AC-3: translations are really translated (the three languages differ)", () => {
+  it("AC-3: translations are really translated (the languages differ)", () => {
     for (const { where, text } of texts()) {
       expect(new Set(Object.values(text)).size, where).toBe(routing.locales.length);
     }

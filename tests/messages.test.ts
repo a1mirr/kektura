@@ -1,5 +1,5 @@
-// Every UI string exists in all three locales with the same ICU placeholders (CLAUDE.md: "Add every
-// new string to all three files").
+// Every UI string exists in every locale with the same ICU placeholders (CLAUDE.md: "Add every
+// new string to every file").
 import { describe, expect, it } from "vitest";
 import en from "../messages/en.json";
 import de from "../messages/de.json";

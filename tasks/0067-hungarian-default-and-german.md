@@ -1,7 +1,7 @@
 # 0067: Hungarian is the default language, German is added, and the language is chosen from a dropdown
 
-Status: Open
-Specs: [0005](../specs/0005-auth-routing-i18n.md) AC-5, AC-8 and a new AC for the switcher (locales, default, typing), [0014](../specs/0014-pages-and-settings.md) AC-14 (the header's language switcher), [0033](../specs/0033-translated-stamp-descriptions.md) AC-1 to AC-3 (a German description for every stamp), [0018](../specs/0018-changelog.md) AC-3 and AC-7 (a German text for every changelog entry), [0019](../specs/0019-useful-links.md) AC-4 and [0015](../specs/0015-about-page.md) AC-7 (German text), [0026](../specs/0026-automatic-deploy.md) AC-8 (the smoke test's language paths); to be confirmed when the work starts
+Status: Done
+Specs: [0005](../specs/0005-auth-routing-i18n.md) (AC-5, AC-8 changed; AC-9, AC-10, AC-11 added), [0014](../specs/0014-pages-and-settings.md) AC-14, AC-16, AC-18, AC-19 (the dropdown and German names), [0033](../specs/0033-translated-stamp-descriptions.md) (a German description for every stamp), [0018](../specs/0018-changelog.md) AC-3, [0015](../specs/0015-about-page.md) AC-7, [0026](../specs/0026-automatic-deploy.md) AC-8 (the smoke test's language paths); wording only in 0019, 0022, 0034
 
 ## Goal
 
@@ -12,32 +12,32 @@ language is chosen from a dropdown instead.
 
 ## Done when
 
-- [ ] The open questions below are settled with the owner before any code is written
-- [ ] Every requirement below holds and has a test (or, where no test can, a `manual (reason)` row in the owning spec); the owning specs are edited as the behaviour is built
+- [x] The open questions below are settled with the owner before any code is written
+- [x] Every requirement below holds and has a test (or, where no test can, a `manual (reason)` row in the owning spec); the owning specs are edited as the behaviour is built
 - [ ] The specs listed above mirror the code as built (spec 0034 AC-6); fresh-context review done
 
 ## Requirements
 
 What the product must do when this is built. They are written into the owning specs as the behaviour is built; until then they live here.
 
-- [ ] **R-1**: The default language is Hungarian (`hu`). A visitor whose address has no language, whose browser
+- [x] **R-1**: The default language is Hungarian (`hu`). A visitor whose address has no language, whose browser
   language is none of ours, or whose language cookie names an unknown language, gets Hungarian. The places that
   fall back to the default today follow: the 404 page and its logo link (task 0029), the OAuth callback and
   sign-out redirects (spec 0005 AC-4, AC-6), the request config.
-- [ ] **R-2**: German (`de`, "Deutsch") is a fourth language of the site: `/de` and `/de/...` work like the other
+- [x] **R-2**: German (`de`, "Deutsch") is a fourth language of the site: `/de` and `/de/...` work like the other
   languages, and `Locale` becomes `hu | en | ru | de` (spec 0005 AC-8: `"de"` is a `Locale`; the test that says it
   is not is rewritten). Every place that lists the languages (the proxy tests, the smoke test) includes it.
-- [ ] **R-3**: Every user-visible string exists in German: `messages/de.json` has exactly the keys of
+- [x] **R-3**: Every user-visible string exists in German: `messages/de.json` has exactly the keys of
   `messages/en.json` and the same placeholders (spec 0005 AC-5); the changelog (every entry, spec 0018 AC-3), the
   useful links, the About page and the stamp descriptions (all 292 codes, spec 0033 AC-3) have German text. A
   German visitor never sees English or Russian text by accident.
-- [ ] **R-4**: The language is chosen from a dropdown, not a row of buttons. It shows the current language and
-  lists all four in the order Magyar, English, Deutsch, Русский, each by its own name, not a code, and choosing one
+- [x] **R-4**: The language is chosen from a dropdown, not a row of buttons. It shows the current language and
+  lists all four in the order Magyar, English, Deutsch and Russian (in its own script), each by its own name, not a code, and choosing one
   opens the same page in that language (as today). It is keyboard operable, has an accessible name ("Language",
   translated), a touch target of at least 44 px, and fits a 320 px header.
-- [ ] **R-5**: Existing links and bookmarks keep working: `/ru`, `/en`, `/hu` and everything under them are
+- [x] **R-5**: Existing links and bookmarks keep working: `/ru`, `/en`, `/hu` and everything under them are
   unchanged. Only the address without a language (`/`) and unknown languages are affected by the new default.
-- [ ] **R-6**: The deploy smoke test, the E2E tests that name a language, and the changelog check cover German,
+- [x] **R-6**: The deploy smoke test, the E2E tests that name a language, and the changelog check cover German,
   and a changelog entry tells hikers about the new language and the new default.
 
 ## Out of scope
@@ -71,7 +71,11 @@ Settled with the owner on 2026-10-04:
 
 ## Spec changes
 
-Filled in when the task is built.
+- Spec 0005: the Goal and Owner code name the languages (Hungarian default, `en`, `de`, `ru`), `routing.ts`, `locale-names.ts` and the switcher; AC-5 says "every message file"; AC-8's `Locale` is `hu | en | de | ru`; new AC-9 (the default language and the browser's language), AC-10 (the dropdown) and AC-11 (German is a full language), with coverage rows; the typing row now says `"fr"` is not a `Locale`.
+- Spec 0014: AC-14 names the dropdown, AC-14/16/18 add the German words, the coverage rows add `de`.
+- Spec 0033: Goal, AC-1 and AC-3 and the Notes cover `de`; the coverage row names the four languages.
+- Spec 0018: AC-3 lists the four languages. Spec 0015: AC-7 adds German terms. Spec 0026: AC-8's smoke test requests `/hu`, `/en`, `/de` and `/ru`.
+- Specs 0019, 0022, 0034 and `CLAUDE.md`, the PR template, the reviewer's brief and the Stop hook's message: "all three languages" became "every language" so the next language needs no sweep.
 
 ## Notes
 

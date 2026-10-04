@@ -56,8 +56,9 @@ test.describe("spec 0006 + 0005: signing in and out on the test server", () => {
     };
     expect(await go("code=not-a-real-code&locale=en")).toBe(`${baseURL}/en?error=auth`);
     expect(await go("code=not-a-real-code&locale=hu")).toBe(`${baseURL}/hu?error=auth`);
-    expect(await go("code=not-a-real-code&locale=xx")).toBe(`${baseURL}/ru?error=auth`); // unknown: the default locale
-    expect(await go("code=not-a-real-code&locale=../evil.example")).toBe(`${baseURL}/ru?error=auth`);
+    expect(await go("code=not-a-real-code&locale=de")).toBe(`${baseURL}/de?error=auth`);
+    expect(await go("code=not-a-real-code&locale=xx")).toBe(`${baseURL}/hu?error=auth`); // unknown: the default locale
+    expect(await go("code=not-a-real-code&locale=../evil.example")).toBe(`${baseURL}/hu?error=auth`);
     expect(await go("locale=en")).toBe(`${baseURL}/en?error=auth`); // no code at all
     // an `x-forwarded-host` the proxy would set is honoured, a malformed one is not (spec 0020 AC-1, AC-2)
     const forwarded = await page.request.get("/auth/callback?code=x&locale=en", {

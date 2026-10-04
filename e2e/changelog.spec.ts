@@ -34,7 +34,7 @@ test.describe("spec 0018: changelog page", () => {
     await expect(page.getByRole("article").last().getByText("Sign in with Google.")).toBeVisible();
   });
 
-  test("AC-3: Russian and Hungarian show their own text, dates and labels", async ({ page }) => {
+  test("AC-3: Russian, Hungarian and German show their own text, dates and labels", async ({ page }) => {
     await page.goto("/ru/changelog");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("История изменений");
     await expect(page.getByRole("heading", { level: 2 }).first()).toHaveText(newest.title.ru);
@@ -46,11 +46,17 @@ test.describe("spec 0018: changelog page", () => {
     await expect(page.getByRole("heading", { level: 2 }).first()).toHaveText(newest.title.hu);
     await expect(page.locator("time").first()).toHaveText(longDate("hu", newest.date));
     await expect(page.getByText("Javítás", { exact: true }).first()).toBeVisible();
+
+    await page.goto("/de/changelog");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Änderungen");
+    await expect(page.getByRole("heading", { level: 2 }).first()).toHaveText(newest.title.de);
+    await expect(page.locator("time").first()).toHaveText(longDate("de", newest.date));
+    await expect(page.getByText("Behoben", { exact: true }).first()).toBeVisible();
   });
 
   test("AC-1: fits a phone screen without horizontal scrolling", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    for (const locale of ["hu", "ru"]) {
+    for (const locale of ["hu", "ru", "de"]) {
       await page.goto(`/${locale}/changelog`);
       expect(await noHorizontalScroll(page), locale).toBeLessThanOrEqual(0);
     }

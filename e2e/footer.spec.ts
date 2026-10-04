@@ -33,6 +33,13 @@ test.describe("spec 0014: footer", () => {
       "Hasznos linkek",
       "Visszajelzés",
     ]);
+    await page.goto("/de/about");
+    await expect(page.getByRole("contentinfo").getByRole("link")).toHaveText([
+      "Über das Projekt",
+      "Änderungen",
+      "Nützliche Links",
+      "Feedback",
+    ]);
   });
 
   test("AC-1: on a phone the landing page and its footer fit one screen, without scrolling", async ({ page }) => {

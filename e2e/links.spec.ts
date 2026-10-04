@@ -43,7 +43,7 @@ test.describe("spec 0019: useful links page", () => {
 
   test("AC-1: fits a phone screen without horizontal scrolling", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    for (const locale of ["hu", "ru", "en"]) {
+    for (const locale of ["hu", "ru", "en", "de"]) {
       await page.goto(`/${locale}/links`);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow, locale).toBeLessThanOrEqual(0);

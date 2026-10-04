@@ -2,6 +2,8 @@
   "app": {
     "title": "Kektura — mein Fortschritt",
     "testBanner": "Testserver: lokale Daten und eine Test-Anmeldung. Nicht die Produktivumgebung.",
+    "name": "Kéktúra-Tracker",
+    "home": "Kéktúra-Tracker: Startseite",
     "language": "Sprache"
   },
   "home": {
@@ -87,7 +89,6 @@
   "about": {
     "title": "Über den Kéktúra-Tracker",
     "description": "Ein persönlicher Tracker für den Országos Kéktúra, den Nationalen Blauen Weg Ungarns: Markiere die Stempel, die du gesammelt hast, und sieh, wie viel des Wegs du schon gewandert bist.",
-    "back": "← Zurück zum Tracker",
     "factsTitle": "Der Weg in Zahlen",
     "factsStages": "Etappen",
     "factsPlaces": "Offizielle Stempelstellen",
@@ -197,7 +198,6 @@
     "error_unauthorized": "Bitte melde dich zuerst an.",
     "friendNotSharing": "Teilt nichts mit dir",
     "error_incoming_pending": "Diese Person hat dich bereits um eine Verbindung gebeten: nimm die Anfrage unten an.",
-    "requestSent": "Anfrage gesendet. Du siehst die Person hier, sobald sie sie annimmt.",
-    "back": "← Zurück zum Tracker"
+    "requestSent": "Anfrage gesendet. Du siehst die Person hier, sobald sie sie annimmt."
   }
 }

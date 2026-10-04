@@ -1,6 +1,6 @@
 // The changelog page (spec 0018): what changed, written for hikers. Newest entry first.
 //
-// To add an entry, put it at the top with all three languages and run `npm test`: the tests say what is
+// To add an entry, put it at the top with every language and run `npm test`: the tests say what is
 // missing. If the newest entry has today's date, add the change to that entry instead: dates can't repeat.
 // Keep it short and only list what users see. Dates are plain YYYY-MM-DD (shown in UTC).
 import type { Locale } from "next-intl";
@@ -11,6 +11,53 @@ export type Change = { kind: ChangeKind; text: Localized };
 export type ChangelogEntry = { date: string; title: Localized; changes: Change[] };
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    date: "2026-10-04",
+    title: {
+      en: "German, Hungarian by default, a language menu and a logo",
+      ru: "Немецкий язык, венгерский по умолчанию, меню языков и логотип",
+      hu: "Német nyelv, alapértelmezett magyar, nyelvválasztó menü és logó",
+      de: "Deutsch, Ungarisch als Standard, ein Sprachmenü und ein Logo",
+    },
+    changes: [
+      {
+        kind: "new",
+        text: {
+          en: "The whole site is now also in German, stamp descriptions included. The German text was not proofread: tell us about mistakes through the feedback form.",
+          ru: "Весь сайт теперь есть и на немецком, включая описания печатей. Немецкий текст не вычитывался: об ошибках можно сообщить через форму обратной связи.",
+          hu: "Az egész oldal már németül is elérhető, a bélyegzőleírásokkal együtt. A német szöveget nem lektorálták: a hibákat a visszajelzési űrlapon jelezheted.",
+          de: "Die ganze Website gibt es jetzt auch auf Deutsch, einschließlich der Stempelbeschreibungen. Der deutsche Text wurde nicht Korrektur gelesen: Sag uns über das Feedback-Formular Bescheid, wenn du Fehler findest.",
+        },
+      },
+      {
+        kind: "improved",
+        text: {
+          en: "The language is chosen from a dropdown menu instead of a row of buttons.",
+          ru: "Язык выбирается в выпадающем меню, а не рядом кнопок.",
+          hu: "A nyelvet mostantól legördülő menüből választhatod gombsor helyett.",
+          de: "Die Sprache wählst du jetzt aus einem Dropdown-Menü statt über eine Reihe von Schaltflächen.",
+        },
+      },
+      {
+        kind: "improved",
+        text: {
+          en: "Hungarian is now the default language: a visitor whose browser language is none of ours sees the site in Hungarian.",
+          ru: "Теперь по умолчанию используется венгерский: посетитель, язык браузера которого не входит в наш список, увидит сайт на венгерском.",
+          hu: "Az alapértelmezett nyelv mostantól a magyar: aki böngészőjének nyelve egyik nyelvünk sem, magyarul látja az oldalt.",
+          de: "Ungarisch ist jetzt die Standardsprache: Wer einen Browser in einer Sprache hat, die wir nicht anbieten, sieht die Website auf Ungarisch.",
+        },
+      },
+      {
+        kind: "new",
+        text: {
+          en: "Every page now shows the Kéktúra tracker logo in the top-left corner; one tap takes you to the main page, or to your dashboard when you are signed in.",
+          ru: "На каждой странице в левом верхнем углу теперь логотип трекера Kéktúra: одно нажатие ведёт на главную страницу, а если вы вошли, то на ваш дашборд.",
+          hu: "Minden oldal bal felső sarkában ott van a Kéktúra követő logója: egy koppintás a főoldalra vezet, bejelentkezve pedig az áttekintő oldaladra.",
+          de: "Jede Seite zeigt jetzt oben links das Logo des Kéktúra-Trackers; ein Tipp bringt dich zur Startseite, angemeldet zu deinem Dashboard.",
+        },
+      },
+    ],
+  },
   {
     date: "2026-10-03",
     title: {
