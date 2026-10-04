@@ -1,6 +1,6 @@
 # 0006: Test server with dummy login, and end-to-end tests
 
-Status: Accepted
+Status: Done
 Owner code: `supabase/config.toml`, `scripts/test-env.mjs`, `scripts/lib/test-server-env.mjs`, `src/lib/test-login.ts`,
 `src/app/auth/test-login/route.ts`, `src/components/TestLoginForm.tsx`, `src/components/TestBanner.tsx`,
 `playwright.config.ts`, `e2e/`
@@ -49,19 +49,6 @@ Google account and without touching real data. Production keeps Google sign-in o
   user" button) and ends on the dashboard, so the form and its hydration-free POST stay covered
   (`signInThroughForm` in `e2e/helpers.ts`, used by `e2e/auth.spec.ts`).
 
-### Phone width and accessibility
-
-- **AC-10**: The suite also runs at a phone's width. A second Playwright project, `mobile` (Chromium, 375 × 812,
-  touch, `isMobile`), runs the tests tagged `@mobile` (the tag keeps it cheap): the landing page and the dummy
-  sign-in, stamping a place on the dashboard, the stage list, the map page, the friends page and the account page.
-  Each asserts that the page does not scroll sideways (`document.documentElement.scrollWidth <=
-  window.innerWidth`) and that the page's main action is visible and can be clicked.
-- **AC-11**: The pages are checked for accessibility with axe (`@axe-core/playwright`): the landing page in all
-  three locales, the dashboard, the account, friends and changelog pages, at the desktop width and at the phone
-  width of AC-10. A page with a `serious` or `critical` violation fails its test. A violation that exists today is
-  listed in one allow-list with the rule, the page and the reason; the list can only shrink: a test fails when an
-  allow-listed rule no longer fires, so it is removed.
-
 ## Notes
 
 - The route needs no browser: Playwright's `page.request` shares cookies with the page's context, so a POST with
@@ -81,7 +68,6 @@ an explicit allowance for that project's URL). Tests of the map canvas (WebGL cl
 
 | AC | Test |
 | --- | --- |
-| AC-10, AC-11 | Not built yet (task 0044): the phone-width and accessibility specs under e2e/ (and `tests/ci-workflow.test.ts` for the project's configuration and the allow-list that only shrinks) |
 | AC-1 | `tests/database-rules.test.ts` (the migrations and both seeds leave 220 checkpoints, 161 places and 72 extra stamps); CI's `e2e` job starts the stack with `supabase start` and every E2E run uses it |
 | AC-2 | manual (it starts a dev server): `npm run testdb:start`, `npm run dev:test`, open http://localhost:3001. Last checked: never recorded. |
 | AC-3 | `e2e/auth.spec.ts` |

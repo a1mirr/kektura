@@ -1,7 +1,7 @@
-# 0040: Work only in worktrees from a fresh origin/main, and tidy after a merge
+# 0056: Work only in worktrees from a fresh origin/main, and tidy after a merge
 
 Status: Done
-Specs: [0021](../specs/0021-pull-requests-only.md) AC-7, AC-8, AC-9 (added)
+Specs: [0021](../specs/0021-pull-requests-only.md) AC-7, AC-8, AC-9, AC-10 (added)
 
 ## Goal
 
@@ -13,7 +13,7 @@ branches were found). Make the right way the only way that works, and clean up a
 
 ## Done when
 
-- [x] A `PreToolUse` hook refuses file edits and mutating git commands in the primary checkout and on `main`
+- [x] A `PreToolUse` hook refuses file edits and mutating git commands (Bash and PowerShell) in the primary checkout and on `main`
 - [x] The same hook refuses a new branch that does not start from an `origin/main` equal to GitHub's `main`
 - [x] `npm run tidy` removes merged worktrees and branches (and moves a stale local `main` up), dry run by default
 - [x] `CLAUDE.md` says to work in a worktree from a fresh `origin/main`, to run `npm run tidy` after a merge, and what to do when the auto-mode classifier denies a call
@@ -23,28 +23,29 @@ branches were found). Make the right way the only way that works, and clean up a
 ## Spec changes
 
 Spec 0021: AC-7 (the hook), AC-8 (`tidy`), AC-9 (a fresh `origin/main` as the base) and AC-10 (a denied call is not
-a place to stop) added, with their coverage rows and owner code. The same change also drafts the acceptance criteria
-of tasks 0041 to 0046 in the specs they belong to (0006, 0007, 0012, 0022, 0026, 0034: each is `Accepted` with a
-"Not built yet" coverage row) and rewords 0007 AC-10 and 0022 AC-4 (task 0047); the Goal says that where the work is done and the clean-up are part of the area. Status stays
-`Done`: every AC holds and has a test, and the one check that needs a live Claude Code session is a `manual` row.
+a place to stop) added, with their coverage rows and owner code; the Goal says that where the work is done and the
+clean-up are part of the area. Status stays `Done`: every AC holds and has a test, and the one check that needs a
+live Claude Code session is a `manual` row. The same pull request also carries task 0063 (spec 0007 AC-10, spec 0022
+AC-4) and the open tasks 0057 to 0062, which change no spec until they are built.
 
 ## Notes
 
 - A hook can refuse, not move the session: the refusal text says how to make a worktree. The hook is a guard
   against the usual mistake, not a sandbox (a shell redirect or `sed -i` is not recognised); the pre-push guard,
   CI and the review stand behind it.
-- The fresh review found, and this task fixed: Git Bash paths (`/c/...`) and `FOO=1 git` slipping past the hook,
-  `tidy` treating a new branch with no commit as merged (it now asks for a merge commit), a branch deleted although
-  its worktree could not be removed, and an unproven claim for spec 0007 AC-10. Left as documented limits: a
-  `git switch -c` inside a worktree is not checked against `origin/main`, and the numbers 0040 to 0047 collide
-  with drafts that sit on other unmerged local branches (see the pull request).
-- The second fresh review found, and this task fixed: `unlinkNodeModules` threw on Linux (CI), where a junction is an
-  ordinary symlink, and does not leave a worktree without its link when the removal fails; the PowerShell tool was not
-  guarded; the pre-push message and the spec notes still advised `git switch`; `--remote` had no test and no lease; the
-  attached `-bNAME` form and a quoted env value slipped past. Left as documented limits: `worktree.baseRef` (see
-  spec 0021 Notes: for the owner to decide), `git branch -f`, and a quoted `;` inside a commit message.
+- Four fresh reviews shaped it. Fixed: Git Bash paths (`/c/...`), `FOO=1 git`, `command git`, `git.exe` and quoted env
+  values slipping past the hook; the PowerShell tool unguarded; `-bNAME`; `tidy` treating a new branch with no commit
+  as merged (it asks for a merge commit now), a branch deleted although its worktree could not be removed, a
+  `node_modules` unlink that threw on Linux and left no link behind when the removal failed; `--remote` without a
+  lease or a test. Left as documented limits (spec 0021): a `git switch -c` inside a worktree is not checked against
+  `origin/main`, stacking a branch on another one is refused, `git branch -f`, a quoted `;` inside a commit message,
+  and `tidy` removing a clean merged worktree that another session idles in.
+- `worktree.baseRef` in `.claude/settings.json` is `head`: a worktree made by the `EnterWorktree` tool starts from the
+  shared checkout's HEAD, which can be stale. Not changed here; it is the owner's call (spec 0021 Notes).
 - The hook takes effect in a checkout once this change is merged and the checkout has the new `.claude/settings.json`.
 - `git branch -d` tests "merged into HEAD", so `tidy` tests "merged into origin/main" itself and deletes the ref at the
   sha it checked (never `-D`).
 - GitHub's setting "Automatically delete head branches" would remove the remote half of the clean-up for good. It is a
   repository setting for the owner to switch on: `gh api -X PATCH repos/a1mirr/kektura -f delete_branch_on_merge=true`.
+- The task numbers were 0040 to 0047 until `origin/main` took them for the backlog (tasks 0046 to 0055); they were
+  renumbered to 0056 to 0063.

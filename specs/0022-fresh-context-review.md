@@ -1,6 +1,6 @@
 # 0022: A fresh-context review before every merge
 
-Status: Accepted
+Status: Done
 Owner code: `.claude/agents/fresh-reviewer.md`, `.github/pull_request_template.md`, `CLAUDE.md` (Workflow),
 `specs/README.md` (Workflow)
 
@@ -63,16 +63,6 @@ author's context, and wants that to be part of how work is done here, not someth
   request, with only wording fixes after it) and a section to record the reviewed commit, the review's
   findings and what was done about each.
 
-- **AC-5**: Every pull request shows, as a CI result, whether a review was recorded at the commit it is about to
-  merge. A job named `Review recorded` (pull requests only; skipped for Dependabot's) fails unless the pull
-  request description has a `Reviewed commit:` line with a sha that exists, is the head of the pull request or an
-  ancestor of it, and, when it is an ancestor, none of the files changed after it is anything but Markdown (`*.md`).
-  A later change to any other file needs a new review and a new sha in the description (wording fixes in code
-  or messages count: the author who made only a wording fix moves the sha, which is the point of having to write
-  it). It proves that a review was recorded at a commit, not that it was good or that the sha was ever reviewed:
-  the owner's look at the pull request stays the final gate. The job's name is one of those that `CLAUDE.md`
-  step 7 asks to be green before a merge.
-
 ## Out of scope
 
 - Enforcing it mechanically. GitHub can't tell whether an agent ran, so the gate is the written rule, the
@@ -116,5 +106,4 @@ author's context, and wants that to be part of how work is done here, not someth
 | AC | Test |
 | --- | --- |
 | AC-1, AC-2, AC-3, AC-4 | `tests/review-process.test.ts` (the rule is in `CLAUDE.md` and `specs/README.md`; the agent file exists, is read-only and names what it checks; the pull request template has the checklist and the findings section) |
-| AC-5 | Not built yet (task 0041): a unit test of the check's decision (missing line, unknown sha, head, ancestor with only Markdown after it, ancestor with code after it, Dependabot) and a test that the workflow names the job and runs only on pull requests |
 | AC-3 (quality of the reviews) | manual (judgement): the owner reads the findings in each pull request. Last checked: every pull request. |

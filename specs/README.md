@@ -72,10 +72,10 @@ hook doesn't run them: CI's "End-to-end tests" job is the authority and must be 
 | [0003](0003-map-route-planner.md) | Map lines, the route planner and how the map code is structured | Done |
 | [0004](0004-trail-data.md) | Generated trail data and seeds | Done |
 | [0005](0005-auth-routing-i18n.md) | Sign-in, routing, translations, typed message keys | Done |
-| [0006](0006-test-server.md) | Test server with dummy login, E2E tests and how they sign in | Accepted |
-| [0007](0007-ci.md) | CI, E2E caches and timing report, generated-types check, Dependabot | Accepted |
+| [0006](0006-test-server.md) | Test server with dummy login, E2E tests and how they sign in | Done |
+| [0007](0007-ci.md) | CI, E2E caches and timing report, generated-types check, Dependabot | Done |
 | [0008](0008-action-logging.md) | Server-side logging of failed actions | Done |
-| [0012](0012-backups.md) | Weekly backup of production user data | Accepted |
+| [0012](0012-backups.md) | Weekly backup of production user data | Done |
 | [0014](0014-pages-and-settings.md) | Footer pages, account page (sign out, chart, account deletion) | Done |
 | [0016](0016-stamp-dates.md) | Stamp dates: validation, own time zone, safe editing, the yyyy-mm-dd field | Done |
 | [0017](0017-feedback.md) | Feedback form with Telegram notifications | Done |
@@ -84,13 +84,13 @@ hook doesn't run them: CI's "End-to-end tests" job is the authority and must be 
 | [0020](0020-origin-and-deploy.md) | Request origin behind the proxy; deploy files | Done |
 | [0015](0015-about-page.md) | About page | Done |
 | [0021](0021-pull-requests-only.md) | main only changes through pull requests (local pre-push guard; opening, merging and cleaning up after them with gh) | Done |
-| [0022](0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Accepted |
+| [0022](0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Done |
 | [0023](0023-feature-flags.md) | Feature flags | Draft |
 | [0024](0024-friends-sharing.md) | Sharing progress with friends | Done |
-| [0026](0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Accepted |
+| [0026](0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Done |
 | [0027](0027-feature-flags-via-telegram.md) | Switching feature flags from the Telegram bot | Draft |
 | [0028](0028-landing-screenshots.md) | Screenshots on the landing page | Draft |
 | [0029](0029-site-logo-link.md) | A logo that leads home, on every page | Draft |
 | [0031](0031-e2e-sharding.md) | Sharded end-to-end tests: two parallel CI jobs | Draft |
 | [0033](0033-translated-stamp-descriptions.md) | Stamp descriptions translated into ru and en | Done |
-| [0034](0034-specs-and-tasks.md) | Specs and tasks: how work is written down | Accepted |
+| [0034](0034-specs-and-tasks.md) | Specs and tasks: how work is written down | Done |

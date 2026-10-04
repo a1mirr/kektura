@@ -1,6 +1,6 @@
 # 0012: Weekly backup of production user data
 
-Status: Accepted
+Status: Done
 Owner code: `.github/workflows/backup.yml`
 
 ## Goal
@@ -26,11 +26,6 @@ our own.
   `set -x`.
 - **AC-4**: Restore steps are documented under Notes below and tested once against the local test
   database: migrations + seeds, then the dump.
-
-- **AC-5**: The dump is one piece of the repository used by every workflow that takes one, a composite action
-  (under .github/actions/), so the table list, the exclude list and the check step exist once. The weekly
-  run (AC-1) and the dump before a migration (spec 0026 AC-14) differ only in the artifact's name and retention,
-  which they pass in. The action is given the connection string as an input from the caller's `env`, never printed.
 
 ## Out of scope
 
@@ -109,4 +104,3 @@ no-secret path ends green with the notice (it can't be run without removing the 
 | --- | --- |
 | AC-1 ... AC-3 | `tests/backup-workflow.test.ts` (schedule and dispatch, the dump command and its exclude list, the check step, retention, the no-secret path, the secret handling, and that every table the migrations create is dumped or excluded). That the real run works against production is not asserted: see "Not verified" in Notes |
 | AC-4 | manual (it restores into a database): the restore drill in Notes. Last checked: 2026-10-04. |
-| AC-5 | Not built yet (task 0042): `tests/backup-workflow.test.ts` reads the action and both workflows (the table lists live in the action only, both workflows use it, the secret is passed through `env`) |

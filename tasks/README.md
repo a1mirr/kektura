@@ -31,11 +31,3 @@ A finished task stays as history and is not updated when behaviour changes later
 | [0037](0037-regenerate-seeds.md) | Regenerate the seeds with the current generator | Done |
 | [0038](0038-deploy-gh-retry.md) | Retry the GitHub API calls of the deploy workflow | Done |
 | [0039](0039-manual-coverage-rows.md) | Audit the manual coverage rows | Done |
-| [0040](0040-worktrees-and-tidy.md) | Work only in worktrees from a fresh origin/main, and tidy after a merge (spec 0021) | Done |
-| [0041](0041-review-recorded-check.md) | A CI check that a review was recorded (spec 0022) | Open |
-| [0042](0042-backup-before-migration.md) | A backup before every migration (specs 0012, 0026) | Open |
-| [0043](0043-production-monitoring.md) | Know when production is broken | Open |
-| [0044](0044-mobile-and-accessibility-e2e.md) | End-to-end tests at phone width, and accessibility checks (spec 0006) | Open |
-| [0045](0045-security-checks-in-ci.md) | Free security checks in CI (spec 0007) | Open |
-| [0046](0046-stop-hook-changelog-nudge.md) | The Stop hook also asks about the changelog (spec 0034) | Open |
-| [0047](0047-ci-is-the-e2e-authority.md) | CI is the authority for the end-to-end tests (specs 0007, 0022) | Done |
