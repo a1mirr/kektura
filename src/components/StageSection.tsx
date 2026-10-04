@@ -79,7 +79,7 @@ export default function StageSection({
           </span>
           <span className="min-w-0 flex-1">
             <span className="font-semibold">{title}</span>
-            <span className="ml-2 text-sm text-stone-500">
+            <span className="ml-2 text-sm text-stone-500 [overflow-wrap:anywhere]">
               {route} · {kmText}
             </span>
             <span className="mt-1 block h-1.5 w-full max-w-48 overflow-hidden rounded bg-stone-100">

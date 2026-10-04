@@ -211,5 +211,28 @@
     "removeYes": "Да, удалить",
     "regenerateConfirm": "Создать новую ссылку-приглашение? Старая сразу перестанет работать у всех, у кого она есть.",
     "regenerateYes": "Да, создать новую ссылку"
+  },
+  "compare": {
+    "title": "Сравнение прогресса",
+    "who_both": "Оба",
+    "who_me": "Только я",
+    "who_them": "Только друг",
+    "who_neither": "Никто",
+    "stamps": "{count, plural, one {# печать} few {# печати} many {# печатей} other {# печати}}",
+    "stagesTitle": "Этапы",
+    "stageCounts": "Я {me}/{total} · Друг {them}/{total}",
+    "stage_both": "Оба прошли",
+    "stage_me": "Только я",
+    "stage_them": "Только друг",
+    "stage_neither": "Никто не начал",
+    "stage_partly": "Частично",
+    "viewLabel": "Вид карты",
+    "view_both": "Оба",
+    "view_mine": "Мой",
+    "view_theirs": "Друга",
+    "walked": "Пройдено",
+    "notWalked": "Не пройдено",
+    "mapLabel": "Карта маршрута: кто прошёл какой участок",
+    "legend": "Легенда"
   }
 }

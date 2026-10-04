@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { DETAIL_ZOOM, EXTRAS_LAYER, RESTAURANTS_LAYER, SOURCE_IDS, STAMPS_LAYER, trailLayers } from "./map-layers";
+import {
+  COMPARE_SOURCE_IDS,
+  compareLayers,
+  DETAIL_ZOOM,
+  EXTRAS_LAYER,
+  RESTAURANTS_LAYER,
+  SOURCE_IDS,
+  STAMPS_LAYER,
+  trailLayers,
+} from "./map-layers";
 
 const all = { stamps: true, extras: false, restaurants: false };
 
@@ -44,5 +53,44 @@ describe("spec 0003: map layer definitions", () => {
 
   it("AC-9, AC-17: the detailed route takes over at zoom 9", () => {
     expect(DETAIL_ZOOM).toBe(9);
+  });
+});
+
+describe("spec 0003: comparison map layers", () => {
+  const layers = compareLayers();
+  const paint = (id: string) => layers.find((l) => l.id === id)?.paint as Record<string, unknown>;
+
+  it("AC-18: layers are listed bottom to top: casing, faint, dashed todo, dotted, dashed, solid, points", () => {
+    expect(layers.map((l) => l.id)).toEqual([
+      "compare-casing",
+      "compare-faint",
+      "compare-todo",
+      "compare-dotted",
+      "compare-dashed",
+      "compare-solid",
+      "compare-dots",
+    ]);
+  });
+
+  it("AC-18: every layer reads from a declared source and every source is drawn", () => {
+    const used = layers.map((l) => ("source" in l ? l.source : undefined));
+    for (const source of used) expect(COMPARE_SOURCE_IDS).toContain(source);
+    for (const source of COMPARE_SOURCE_IDS) expect(used).toContain(source);
+  });
+
+  it("AC-18: the four states differ in more than colour: solid, dashed, dotted and a thin faint line", () => {
+    expect(paint("compare-solid")["line-dasharray"]).toBeUndefined();
+    expect(paint("compare-dashed")["line-dasharray"]).toBeDefined();
+    expect(paint("compare-dotted")["line-dasharray"]).toBeDefined();
+    expect(paint("compare-dashed")["line-dasharray"]).not.toEqual(paint("compare-dotted")["line-dasharray"]);
+    expect(paint("compare-faint")["line-width"]).toBeLessThan(paint("compare-solid")["line-width"] as number);
+  });
+
+  it("AC-18: each line layer takes only the features of its style, and the colour comes from the feature", () => {
+    for (const [id, style] of [["compare-faint", "faint"], ["compare-todo", "todo"], ["compare-dotted", "dotted"], ["compare-dashed", "dashed"], ["compare-solid", "solid"]]) {
+      const layer = layers.find((l) => l.id === id) as { filter: unknown; paint: Record<string, unknown> };
+      expect(layer.filter).toEqual(["==", ["get", "style"], style]);
+      expect(layer.paint["line-color"]).toEqual(["get", "color"]);
+    }
   });
 });

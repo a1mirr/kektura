@@ -1,10 +1,13 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
+import { compareProgress } from "./compare";
+import type { ComparePoint } from "./compare-map";
 import { getReferenceData } from "./dashboard-data";
 import {
   buildPlaces,
   buildStages,
   progressSummary,
+  placeKeyOf,
   stampedPlaceKeys,
   walkedRanges,
   type Checkpoint,
@@ -63,4 +66,22 @@ export function summarizeFriend(checkpoints: Checkpoint[], checkpointIds: number
 export async function getFriendProgress(friend: Friend) {
   const { checkpoints } = await getReferenceData();
   return summarizeFriend(checkpoints, friend.stampIds, stagesData.stages);
+}
+
+// Spec 0024 AC-22: the friend's progress next to the signed-in user's own. The only database read besides the friend's
+// shared stamps (already in `friend`) is the user's own `user_stamps`, under RLS: nothing else of the friend is asked for.
+export async function compareWithFriend(supabase: SupabaseClient<Database>, friend: Friend) {
+  const [progress, { data: stamps }] = await Promise.all([
+    getFriendProgress(friend),
+    supabase.from("user_stamps").select("checkpoint_id, stamped_on"),
+  ]);
+  const mine = stampedPlaceKeys(progress.places, stamps ?? []);
+  const comparison = compareProgress(progress.places, mine, progress.stampedKeys, progress.stages);
+  // One point per variant of a place with coordinates, like the dashboard's map.
+  const points: ComparePoint[] = progress.places.flatMap((p) =>
+    p.variants
+      .filter((v) => v.lat != null && v.lng != null)
+      .map((v) => ({ placeKey: placeKeyOf(v), name: v.name, lat: Number(v.lat), lng: Number(v.lng), who: comparison.placeWho.get(p.key)! })),
+  );
+  return { progress, comparison, points };
 }

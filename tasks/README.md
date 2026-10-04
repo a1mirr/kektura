@@ -44,7 +44,7 @@ A finished task stays as history and is not updated when behaviour changes later
 | [0048](0048-new-stamps-required-from-date.md) | New stamps are required only from their official date | Open |
 | [0049](0049-retired-stamps.md) | Keep retired stamps and show them to the people who could have collected them | Open |
 | [0050](0050-relocated-stamps-on-the-map.md) | Relocated stamps: the latest location on the map, with a note | Open |
-| [0051](0051-friends-comparison.md) | Compare progress with a friend | Open |
+| [0051](0051-friends-comparison.md) | Compare progress with a friend | Done |
 | [0052](0052-friends-buttons-respond.md) | Friends page buttons respond | Done |
 | [0053](0053-bulk-stamp-dates.md) | Change the date of many stamps at once | Open |
 | [0054](0054-ci-runs-once-per-change.md) | CI runs once per change; a Markdown-only pull request skips E2E (now spec 0007) | Done |

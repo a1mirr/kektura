@@ -2,6 +2,7 @@ import { useEffect, type RefObject } from "react";
 import type { Restaurant } from "@/lib/map-data";
 import type { Route } from "@/lib/route-geometry";
 import { addTrailLayers } from "./addTrailLayers";
+import { createTrailMap } from "./createMap";
 import { listenForFocus } from "./listenForFocus";
 import { attachRestaurantPopups } from "./restaurantPopups";
 import { attachStampPopups } from "./stampPopups";
@@ -42,28 +43,7 @@ export function useMapInstance({
       const element = container.current;
       if (cancelled || !element) return;
 
-      maplibregl.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
-      const bounds = new maplibregl.LngLatBounds();
-      overview.points.forEach((p) => bounds.extend([p[0], p[1]]));
-
-      const m = new maplibregl.Map({
-        container: element,
-        style: {
-          version: 8,
-          sources: {
-            osm: {
-              type: "raster",
-              tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-              tileSize: 256,
-              maxzoom: 19,
-              attribution: ctx.current.t("mapAttribution"),
-            },
-          },
-          layers: [{ id: "osm", type: "raster", source: "osm" }],
-        },
-        bounds,
-        fitBoundsOptions: { padding: 30 },
-      });
+      const m = createTrailMap(maplibregl, element, overview, ctx.current.t("mapAttribution"));
       const route: RouteState = {
         overview,
         detail: null,
@@ -71,7 +51,6 @@ export function useMapInstance({
       };
       h.map = m;
       h.route = route;
-      m.addControl(new maplibregl.NavigationControl({ showCompass: false }));
 
       m.on("load", () => {
         if (cancelled) return;
