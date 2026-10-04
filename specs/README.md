@@ -85,18 +85,7 @@ hook doesn't run them: CI's "End-to-end tests" job is the authority and must be 
 | [0015](0015-about-page.md) | About page | Done |
 | [0021](0021-pull-requests-only.md) | main only changes through pull requests (pre-push guard; opening, merging and cleaning up with gh); work happens in worktrees from a fresh origin/main (worktree guard hook, tidy) | Done |
 | [0022](0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Done |
-| [0023](0023-feature-flags.md) | Feature flags | Draft |
 | [0024](0024-friends-sharing.md) | Sharing progress with friends | Done |
 | [0026](0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Done |
-| [0027](0027-feature-flags-via-telegram.md) | Switching feature flags from the Telegram bot | Draft |
-| [0028](0028-landing-screenshots.md) | Screenshots on the landing page | Draft |
-| [0029](0029-site-logo-link.md) | A logo that leads home, on every page | Draft |
-| [0031](0031-e2e-sharding.md) | Sharded end-to-end tests: two parallel CI jobs | Draft |
 | [0033](0033-translated-stamp-descriptions.md) | Stamp descriptions translated into ru and en | Done |
 | [0034](0034-specs-and-tasks.md) | Specs and tasks: how work is written down | Done |
-| [0040](0040-header-menu-and-page-width.md) | Header, account menu and page width | Draft |
-| [0041](0041-stats-page.md) | My stats: a page, and the stamps-per-month chart | Draft |
-| [0042](0042-stamp-lifecycle.md) | Stamp lifecycle: new, retired and moved stamps | Draft |
-| [0043](0043-friends-comparison-and-feedback.md) | Friends: comparing progress, and buttons that respond | Draft |
-| [0044](0044-bulk-stamp-dates.md) | Stamp dates in bulk | Draft |
-| [0045](0045-ci-once-per-change.md) | CI runs once per change, and its database tests cannot skip | Draft |
