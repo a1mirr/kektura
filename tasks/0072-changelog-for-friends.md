@@ -33,6 +33,6 @@ Spec 0018 AC-7: the flag rule and the hook's wider reach. Spec 0034 AC-12: the n
 
 Reported by the owner on 2026-10-04: "why I can't see update of friends page in changelog? how did we miss that user-visible update should be on the changelog page, and it's mandatory?". The causes: spec 0024 AC-16 said the entry would come "when the flag goes on for everyone" and `CLAUDE.md` said the flag was "off in production until switched on"; nobody checked, and the flag had been switched on. All three review rounds of tasks 0051, 0052 and 0071 accepted the exception because the task and the spec stated it.
 
-- Also here: `tests/review-recorded.test.ts` raises its test and hook timeouts (30 s and 60 s): its git tests missed the default 5 s and 10 s under the load of a full run, in the reviewers' runs and in ours, while passing alone in about a second.
+- Also here: `tests/review-recorded.test.ts` and `tests/ci-changes.test.ts` raise their test and hook timeouts (30 s and 60 s): its git tests missed the default 5 s and 10 s under the load of a full run, in the reviewers' runs and in ours, while passing alone in about a second.
 
 Code the work touches: `.claude/hooks/stop-check.mjs`, `.claude/hooks/stop-nudges.mjs`, `src/content/changelog.ts`, `CLAUDE.md`, `.claude/agents/fresh-reviewer.md`, `.github/pull_request_template.md`

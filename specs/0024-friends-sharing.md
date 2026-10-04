@@ -144,7 +144,7 @@ page's "Send request" is a plain form that posts to a server action ending in a 
 - **AC-16**: Every user-visible string exists in every language of the site. The About page (spec 0015) tells
   what friends can see and how to stop it (only while the flag is on: with it off the page must not mention
   a page that answers 404), and the changelog describes the friends page and each visible change to it like any
-  other (spec 0018 AC-7): the flag is on in production, so no change to it is hidden from users.
+  other (spec 0018 AC-7); the feature flag does not exempt it.
 
 ## Out of scope
 

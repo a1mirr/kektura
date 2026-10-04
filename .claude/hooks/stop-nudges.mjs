@@ -52,3 +52,12 @@ export function nudgeMessage(changed) {
   }
   return parts.length ? `Checks pass, but ${parts.join("\n\nAnd ")}` : "";
 }
+
+/**
+ * What to ask at this turn end: the nudge for the changed paths, unless it is the very message asked last time
+ * (`lastAsked`) or there is nothing to ask. The same question is not repeated every turn.
+ */
+export function nudgeToAsk(changed, committed, lastAsked) {
+  const message = nudgeMessage(changedForNudge(changed, committed));
+  return message && message !== lastAsked ? message : "";
+}

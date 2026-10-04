@@ -9,7 +9,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { changedForNudge, nudgeMessage } from "./stop-nudges.mjs";
+import { nudgeToAsk } from "./stop-nudges.mjs";
 
 const MAX_ATTEMPTS = 3;
 const WATCHED = [
@@ -84,11 +84,9 @@ if (!changed.length && !committed.length) process.exit(0);
 // a changelog entry (specs/0018 AC-7), counting the working tree and the branch's commits. Both questions go in one
 // message; the decision is in stop-nudges.mjs.
 function askOnce() {
-  const message = nudgeMessage(changedForNudge(changed, committed));
-  if (!message || input.stop_hook_active) return;
-  const id = createHash("sha1").update(message).digest("hex");
-  if (state.nudged === id) return;
-  state.nudged = id;
+  const message = input.stop_hook_active ? "" : nudgeToAsk(changed, committed, state.nudged);
+  if (!message) return;
+  state.nudged = message;
   save();
   console.error(message);
   process.exit(2);

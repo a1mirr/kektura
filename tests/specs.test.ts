@@ -190,8 +190,8 @@ describe("spec 0034: the rules are written where authors and the reviewer look",
   it("AC-10: the Stop hook watches tasks/ and asks when app code changed without a spec change", () => {
     const hook = readRoot(".claude/hooks/stop-check.mjs");
     expect(hook).toMatch(/WATCHED = \[\s*"specs",\s*"tasks",/);
-    expect(hook).toMatch(/import \{ changedForNudge, nudgeMessage \} from "\.\/stop-nudges\.mjs"/);
-    expect(hook).toMatch(/nudgeMessage\(changedForNudge\(changed, committed\)\)/);
+    expect(hook).toMatch(/import \{ nudgeToAsk \} from "\.\/stop-nudges\.mjs"/);
+    expect(hook).toMatch(/nudgeToAsk\(changed, committed, state\.nudged\)/);
     expect(readRoot(".claude/hooks/stop-nudges.mjs")).toMatch(/app code changed without a spec change/);
   });
 });

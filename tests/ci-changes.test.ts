@@ -5,8 +5,12 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { changedFiles, codeChanged } from "../scripts/ci-changes.mjs";
+
+// Its git tests spawn several processes each, and the unit tests run in dozens of workers at once: the default 5 s and 10 s
+// (a test and a hook) were missed under load, while the same file passes alone in about a second.
+vi.setConfig({ testTimeout: 30_000, hookTimeout: 60_000 });
 
 const script = new URL("../scripts/ci-changes.mjs", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1");
 const pr = (files: string[] | null) => codeChanged({ eventName: "pull_request", files });
