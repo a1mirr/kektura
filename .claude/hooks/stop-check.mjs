@@ -15,7 +15,6 @@ import { nudgeKey, nudgeToAsk } from "./stop-nudges.mjs";
 const MAX_ATTEMPTS = 3;
 const WATCHED = [
   "specs",
-  "tasks",
   "src",
   "tests",
   "e2e",

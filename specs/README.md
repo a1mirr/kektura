@@ -5,19 +5,19 @@ A spec is the contract of one **area**, a part of the product or of how the proj
 proven, and after every change the spec is edited until it mirrors the code again.
 Specs are always written in English.
 
-The work that changes an area is a **task** ([`tasks/`](../tasks/README.md)): why, which specs it touches, the
-requirements of planned behaviour and what is done when. A task is history and never says how the product behaves; a
-spec never tells the story of a change, and never describes behaviour that is not built yet (its status is always
-`Done`).
-Both folders share one number sequence (next number = the highest in `specs/` and `tasks/` plus one). Details:
-[0034](0034-specs-and-tasks.md). A quick test for where a sentence belongs: will it still be true in a year if
-nobody touches it? Yes: spec. No: task.
+The work that changes an area is a **task**, a GitHub issue labelled `task` (`gh issue list --label task`): why, which
+specs it touches, the requirements of planned behaviour and what is done when. A task is history and never says how the
+product behaves; a spec never tells the story of a change, and never describes behaviour that is not built yet (its
+status is always `Done`).
+Spec numbers are their own sequence (next number = the highest in `specs/` plus one); a task's number is its issue
+number. Details: [0034](0034-specs-and-tasks.md). A quick test for where a sentence belongs: will it still be true in
+a year if nobody touches it? Yes: spec. No: task.
 
 ## Workflow
 
-1. **Open a task.** A feature or a behaviour change starts as `tasks/NNNN-slug.md` (copy
-   [`../tasks/_template.md`](../tasks/_template.md)): the goal, the specs it will touch, the requirements as a
-   checklist of outcomes and the open questions. No spec is written or changed yet. A refactor or a CI change is only
+1. **Open a task.** A feature or a behaviour change starts as an issue (`gh issue create`, from the template
+   [`../.github/ISSUE_TEMPLATE/task.md`](../.github/ISSUE_TEMPLATE/task.md)): the goal, the specs it will touch, the
+   requirements as a checklist of outcomes and the open questions. No spec is written or changed yet. A refactor or a CI change is only
    a task without requirements, a trivial fix needs neither.
 2. **Agree on it.** Resolve the open questions with the owner before implementing.
 3. **Write the ACs and the tests as you build.** Edit the spec that owns the area (add, change or remove ACs); a new
@@ -31,16 +31,16 @@ nobody touches it? Yes: spec. No: task.
 5. **Make the spec true.** Reread every spec the task touches against the code as built and edit it to mirror
    reality: an AC for behaviour that exists and no AC states, `Removed` for an AC that was dropped, status `Done`,
    the coverage table, the index below; every requirement of the task is built or struck with the reason. Where code and spec disagree, decide which is right and fix that one.
-   Write what changed in the task's "Spec changes" section and set the task `Done`.
+   Write what changed in the pull request description's "Spec changes" section; the merge closes the task issue (`Closes #N`).
 6. **Review with a fresh agent** before the pull request is merged ([0022](0022-fresh-context-review.md)):
-   spawn the `fresh-reviewer` agent with only the task number (the spec number for a change that is only a spec,
+   spawn the `fresh-reviewer` agent with only the task's issue number (the spec number for a change that is only a spec,
    `none` for a small change with neither) and the base branch. It has none of your context and reads the specs
    and the diff like a stranger would, in both directions. Fix its valid findings, answer the rest in the pull
    request, and review again after fixes that change code, tests or behaviour.
 
 Never delete an AC number: mark it `Removed` so old references stay meaningful. `git grep "AC-3" -- '*0001*'
 'src' 'tests'` finds a criterion's spec and tests. A spec found to disagree with the code at any other time is a
-defect: correct it at once when that is small, otherwise open a task.
+defect: correct it at once when that is small, otherwise open a task issue.
 
 ## Where tests live
 

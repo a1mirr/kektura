@@ -1,68 +1,63 @@
-// specs/README.md and tasks/README.md rules (spec 0034): the indexes list every spec and task with its real status,
-// numbers are unique across both folders, both are written in English, and the rules are written down where
-// authors, the reviewer and the hook look.
+// specs/README.md rules (spec 0034): the index lists every spec with its real status, spec numbers are unique, specs
+// are written in English, tasks are GitHub issues (the repository has no tasks/ folder), and the rules are written
+// down where authors, the reviewer and the hook look.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const specsDir = new URL("../specs/", import.meta.url);
-const tasksDir = new URL("../tasks/", import.meta.url);
 const files = (dir: URL) => fs.readdirSync(dir).filter((name) => /^\d{4}-.+\.md$/.test(name));
 const read = (dir: URL, name: string) => fs.readFileSync(new URL(name, dir), "utf8");
 const readRoot = (path: string) => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
 const specFiles = files(specsDir);
-const taskFiles = files(tasksDir);
 
 const indexOf = (readme: string) =>
   new Map(
     [...readme.matchAll(/^\| \[(\d{4})\]\(([^)]+)\) \|.*\| ([^|]+?) \|\r?$/gm)].map((m) => [m[2], { number: m[1], status: m[3] }]),
   );
 
-describe("spec 0034: specs/README.md and tasks/README.md", () => {
-  describe.each([
-    { kind: "spec", dir: specsDir, names: specFiles, statuses: /^Done$/ },
-    { kind: "task", dir: tasksDir, names: taskFiles, statuses: /^(Open|In progress|Done|Dropped)$/ },
-  ])("$kind index", ({ kind, dir, names, statuses }) => {
-    const indexed = indexOf(read(dir, "README.md"));
+describe("spec 0034: specs/README.md", () => {
+  const indexed = indexOf(read(specsDir, "README.md"));
 
-    it(`AC-9: lists every ${kind} once, and nothing else`, () => {
-      expect([...indexed.keys()].sort()).toEqual([...names].sort());
-    });
-
-    it(`AC-9: gives each ${kind} the status written in its own file, a status that exists for a ${kind}`, () => {
-      for (const name of names) {
-        const own = /^Status: (.+?)\s*$/m.exec(read(dir, name))?.[1];
-        expect(own, `${name} has a "Status:" line`).toMatch(statuses);
-        expect(indexed.get(name)?.status, name).toBe(own);
-        expect(indexed.get(name)?.number, name).toBe(name.slice(0, 4));
-      }
-    });
+  it("AC-9: lists every spec once, and nothing else", () => {
+    expect([...indexed.keys()].sort()).toEqual([...specFiles].sort());
   });
 
-  it("AC-1: every file in specs/ and tasks/ is NNNN-slug.md, README.md or _template.md", () => {
-    for (const dir of [specsDir, tasksDir]) {
-      for (const name of fs.readdirSync(dir)) {
-        expect(name, `${dir.pathname}${name}`).toMatch(/^(\d{4}-[a-z0-9-]+\.md|README\.md|_template\.md)$/);
-      }
+  it("AC-9: gives each spec the status written in its own file, and a spec's status is Done", () => {
+    for (const name of specFiles) {
+      const own = /^Status: (.+?)\s*$/m.exec(read(specsDir, name))?.[1];
+      expect(own, `${name} has a "Status:" line`).toMatch(/^Done$/);
+      expect(indexed.get(name)?.status, name).toBe(own);
+      expect(indexed.get(name)?.number, name).toBe(name.slice(0, 4));
     }
   });
 
-  it("AC-1: no number is used twice across specs/ and tasks/", () => {
-    const numbers = [...specFiles, ...taskFiles].map((name) => name.slice(0, 4));
+  it("AC-1: every file in specs/ is NNNN-slug.md, README.md or _template.md", () => {
+    for (const name of fs.readdirSync(specsDir)) {
+      expect(name, name).toMatch(/^(\d{4}-[a-z0-9-]+\.md|README\.md|_template\.md)$/);
+    }
+  });
+
+  it("AC-1: no spec number is used twice", () => {
+    const numbers = specFiles.map((name) => name.slice(0, 4));
     expect(numbers.filter((n, i) => numbers.indexOf(n) !== i)).toEqual([]);
+  });
+
+  it("AC-1, AC-9: the repository has no tasks/ folder: tasks are GitHub issues", () => {
+    expect(fs.existsSync(new URL("../tasks/", import.meta.url))).toBe(false);
   });
 
   it("AC-1: says specs and tasks are written in English", () => {
     expect(read(specsDir, "README.md")).toMatch(/Specs are always written in English/);
-    expect(read(tasksDir, "README.md")).toMatch(/Written in English/);
+    expect(readRoot(".github/ISSUE_TEMPLATE/task.md")).toMatch(/Written in English/);
     expect(readRoot("CLAUDE.md")).toMatch(/Specs and tasks are always written in English/);
   });
 
-  it("AC-9: has English-only specs and tasks (Cyrillic only where a line quotes the app's `ru` texts)", () => {
+  it("AC-9: has English-only specs and issue template (Cyrillic only where a line quotes the app's `ru` texts)", () => {
     const cyrillic = /[Ѐ-ӿ]/;
     const all = [
       ...[...specFiles, "README.md", "_template.md"].map((name) => ({ dir: specsDir, name })),
-      ...[...taskFiles, "README.md", "_template.md"].map((name) => ({ dir: tasksDir, name })),
+      { dir: new URL("../.github/ISSUE_TEMPLATE/", import.meta.url), name: "task.md" },
     ];
     for (const { dir, name } of all) {
       const offending = read(dir, name)
@@ -72,21 +67,12 @@ describe("spec 0034: specs/README.md and tasks/README.md", () => {
     }
   });
 
-  it("AC-1: every task file has a status and a Specs line, and the task template shows the sections", () => {
-    for (const name of taskFiles) {
-      const text = read(tasksDir, name);
-      expect(text, name).toMatch(/^Specs: .+/m);
-      expect(text, name).toMatch(/^## Goal$/m);
-    }
-    const template = read(tasksDir, "_template.md");
-    for (const section of ["## Goal", "## Done when", "## Requirements", "## Open questions", "## Spec changes", "## Notes"]) {
+  it("AC-1, AC-3: the task template is an issue template with the label `task` and the sections", () => {
+    const template = readRoot(".github/ISSUE_TEMPLATE/task.md");
+    expect(template).toMatch(/^labels: task$/m);
+    for (const section of ["## Specs", "## Goal", "## Done when", "## Requirements", "## Open questions", "## Notes"]) {
       expect(template).toContain(section);
     }
-    expect(template).toMatch(/^Status: Open \| In progress \| Done \| Dropped$/m);
-  });
-
-  it("AC-3: a task has no acceptance criteria", () => {
-    for (const name of taskFiles) expect(read(tasksDir, name), name).not.toMatch(/^\s*- \*\*AC-\d+\*\*/m);
   });
 
   it("AC-2: a spec describes built behaviour only: its status is Done and the template has no open questions", () => {
@@ -97,19 +83,16 @@ describe("spec 0034: specs/README.md and tasks/README.md", () => {
   });
 
   it("AC-3: a task that plans behaviour lists requirements, not acceptance criteria, and keeps its open questions", () => {
-    const template = read(tasksDir, "_template.md");
+    const template = readRoot(".github/ISSUE_TEMPLATE/task.md");
     expect(template).toMatch(/^- \[ \] \*\*R-1\*\*/m);
     expect(template).toMatch(/no numbered acceptance criteria/);
     expect(template).toMatch(/Decisions still needed from the owner before coding/);
   });
 
-  it("AC-3: a Done task says what changed in the specs", () => {
-    for (const name of taskFiles) {
-      const text = read(tasksDir, name);
-      if (!/^Status: Done\s*$/m.test(text)) continue;
-      const section = /^## Spec changes\r?\n([\s\S]*?)(?=^## |$(?![\s\S]))/m.exec(text)?.[1].trim();
-      expect(section, `${name} has a filled "Spec changes" section`).toBeTruthy();
-    }
+  it("AC-3: the pull request template closes the task and has a \"Spec changes\" section", () => {
+    const template = readRoot(".github/pull_request_template.md");
+    expect(template).toMatch(/^Closes #/m);
+    expect(template).toMatch(/^## Spec changes$/m);
   });
 });
 
@@ -117,12 +100,13 @@ describe("spec 0034: the rules are written where authors and the reviewer look",
   const claude = readRoot("CLAUDE.md");
   const readme = read(specsDir, "README.md");
 
-  it("AC-2, AC-4: the specs README says what a spec and a task are and how to tell them apart", () => {
+  it("AC-1, AC-2, AC-4: the specs README says what a spec and a task are and how to tell them apart", () => {
     expect(readme).toMatch(/A spec is the contract of one \*\*area\*\*/);
     expect(readme).toMatch(/written as it behaves\s+\*\*now\*\*/);
-    expect(readme).toMatch(/A task is history and never says how the product behaves/);
-    expect(readme).toMatch(/will it still be true in a year if\s+nobody touches it/);
-    expect(readme).toMatch(/one number sequence/);
+    expect(readme).toMatch(/A task is history and never says how the\s+product behaves/);
+    expect(readme).toMatch(/will it still be true in\s+a year if\s+nobody touches it/);
+    expect(readme).toMatch(/Spec numbers are their own sequence/);
+    expect(readme).toMatch(/a task's number is its issue\s+number/);
   });
 
   it("AC-2, AC-3, AC-4: the workflow starts as a task and writes the spec while building, never before", () => {
@@ -133,12 +117,12 @@ describe("spec 0034: the rules are written where authors and the reviewer look",
     expect(steps).toMatch(/\*\*Write the ACs and the tests as you build\.\*\*/);
     expect(steps).toMatch(/status `Done`/);
     expect(readme).toMatch(/never describes behaviour that is not built yet/);
-    expect(read(tasksDir, "README.md")).toMatch(/A feature or behaviour change starts as a task; the spec is edited while it is built, never drafted beforehand/);
-    expect(read(tasksDir, "README.md")).toMatch(/\*\*Requirements\*\* checklist of outcomes/);
+    expect(claude).toMatch(/A feature or behaviour change starts as a task/);
+    expect(readRoot(".github/ISSUE_TEMPLATE/task.md")).toMatch(/written into the owning specs as the behaviour is built/);
   });
 
   it("AC-2, AC-4: nothing tells the author to draft or accept a spec before the code is built", () => {
-    for (const file of ["CLAUDE.md", "README.md", "specs/README.md", "specs/_template.md", "tasks/README.md", "tasks/_template.md", ".claude/agents/fresh-reviewer.md", ".github/pull_request_template.md", ".claude/hooks/stop-check.mjs"]) {
+    for (const file of ["CLAUDE.md", "README.md", "specs/README.md", "specs/_template.md", ".github/ISSUE_TEMPLATE/task.md", ".claude/agents/fresh-reviewer.md", ".github/pull_request_template.md", ".claude/hooks/stop-check.mjs"]) {
       const text = readRoot(file);
       expect(text, file).not.toMatch(/drafts? the (owning )?spec|edits the spec first|edits or drafts|The spec came first|status `(Draft|Accepted)`|Spec and task first/);
     }
@@ -153,18 +137,19 @@ describe("spec 0034: the rules are written where authors and the reviewer look",
     expect(review).toBeGreaterThan(mirror);
     expect(steps).toMatch(/Where code and spec disagree, decide which is right and fix that one/);
     expect(steps).toMatch(/"Spec changes" section/);
+    expect(steps).toMatch(/Closes #N/);
     expect(readme).toMatch(/A spec found to disagree with the code at any other time is a\s+defect/);
   });
 
   it("AC-4, AC-5, AC-6: CLAUDE.md states the split, the migration naming and the close-out", () => {
     expect(claude).toMatch(/\*\*Task first\*\* \(spec 0034\)/);
-    expect(claude).toMatch(/starts as a task, `tasks\/NNNN-slug\.md`/);
+    expect(claude).toMatch(/starts as a task, an issue opened with `gh issue create`/);
     expect(claude).toMatch(/No spec is drafted beforehand: a spec describes only behaviour that is built/);
     expect(claude).toMatch(/check off every requirement of the task or strike it with the reason/);
     expect(claude).toMatch(/will the sentence still be true in a year/);
-    expect(claude).toMatch(/One number sequence runs over both folders/);
+    expect(claude).toMatch(/Spec numbers are their own sequence/);
     expect(claude).toMatch(/Tests cite specs, never tasks/);
-    expect(claude).toMatch(/named `NNNN_slug\.sql` after the number of the task that adds it/);
+    expect(claude).toMatch(/named `NNNN_slug\.sql` after the number of the task issue that adds it/);
     expect(claude).toMatch(/\*\*Build, then make the specs true\.\*\*/);
     expect(claude).toMatch(/reread every spec the task touches against the code \*as built\*/);
     expect(claude).toMatch(/where code and spec disagree, decide which is right and fix that one/);
@@ -172,24 +157,24 @@ describe("spec 0034: the rules are written where authors and the reviewer look",
     expect(claude).toMatch(/how the two work: 0034/);
   });
 
-  it("AC-8: the reviewer checks the specs in both directions and the tasks' Spec changes", () => {
+  it("AC-8: the reviewer checks the specs in both directions and the pull request's Spec changes", () => {
     expect(claude).toMatch(/specs true in both directions, not only where the diff touches them/);
-    expect(claude).toMatch(/a task whose "Spec changes" section is empty or untrue/);
+    expect(claude).toMatch(/a pull request whose "Spec changes" section is empty or untrue/);
     expect(claude).toMatch(/requirements of the task that do not hold/);
     expect(claude).toMatch(/no spec describing behaviour that is not built/);
     const body = readRoot(".claude/agents/fresh-reviewer.md");
-    expect(body).toMatch(/You are told a task number/);
+    expect(body).toMatch(/You are told a task's issue number/);
     expect(body).toContain("specs/0034-specs-and-tasks.md");
     expect(body).toMatch(/in both directions and beyond the lines the diff touches/);
     expect(body).toMatch(/Goal or Notes tell the story of a change/);
-    expect(body).toMatch(/a task marked `Done` whose "Spec changes" section is empty/);
+    expect(body).toMatch(/a pull request whose "Spec changes" section is empty/);
     expect(body).toMatch(/A requirement of the task that the built change does not satisfy/);
     expect(body).toMatch(/describes behaviour that is\s+not built/);
   });
 
-  it("AC-10: the Stop hook watches tasks/ and asks when app code changed without a spec change", () => {
+  it("AC-10: the Stop hook watches specs/ and asks when app code changed without a spec change", () => {
     const hook = readRoot(".claude/hooks/stop-check.mjs");
-    expect(hook).toMatch(/WATCHED = \[\s*"specs",\s*"tasks",/);
+    expect(hook).toMatch(/WATCHED = \[\s*"specs",\s*"src",/);
     expect(hook).toMatch(/import \{ nudgeKey, nudgeToAsk \} from "\.\/stop-nudges\.mjs"/);
     expect(hook).toMatch(/nudgeToAsk\(changed, committed, state\.nudged, scope\)/);
     expect(readRoot(".claude/hooks/stop-nudges.mjs")).toMatch(/app code changed without a spec change/);
@@ -235,7 +220,7 @@ describe("spec 0034: specs and the repository agree", () => {
   });
 
   it("AC-9: repository files named in backticks by a spec exist", () => {
-    const rooted = /^(src|scripts|e2e|tests|supabase|deploy|public|messages|specs|tasks|\.github|\.githooks)\//;
+    const rooted = /^(src|scripts|e2e|tests|supabase|deploy|public|messages|specs|\.github|\.githooks)\//;
     const loose = new Set(["playwright.config.ts", "next.config.ts", "package.json", "tsconfig.json", "CLAUDE.md", "README.md"]);
     const missing: string[] = [];
     for (const name of specFiles) {

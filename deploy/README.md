@@ -132,7 +132,7 @@ pm2 restart kektura
 
 ## Watching the site from outside
 
-(Task 0060.) The deploy's smoke test runs once, after a deploy; between deploys an external uptime service watches
+(Issue #87, "0060".) The deploy's smoke test runs once, after a deploy; between deploys an external uptime service watches
 the site. It is not part of the repository and is set up by the owner in the service's own account: no service is
 required (UptimeRobot and Better Stack are examples), and the free tiers of such services change, so check what a
 free account allows before relying on it. A GitHub Actions cron was tried and dropped: every 15 minutes is about

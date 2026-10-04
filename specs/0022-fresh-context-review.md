@@ -16,7 +16,7 @@ author's context, and wants that to be part of how work is done here, not someth
 - **AC-1**: `CLAUDE.md` (Workflow) states the rule: before a pull request is merged, an agent with no
   context of the work reviews the committed change; every valid finding is fixed and the rest answered in
   the pull request, with the commit that was reviewed; a pull request is not handed over as ready to merge
-  before that. It names the agent (`fresh-reviewer`), says what the author tells it (the task number, the spec
+  before that. It names the agent (`fresh-reviewer`), says what the author tells it (the task's issue number, the spec
   number for a change that is only a spec, or `none` for a small change with neither, and the base branch,
   nothing else), that fixes which change
   code, tests or behaviour get another fresh review (a review of an earlier state doesn't count) and
@@ -31,7 +31,7 @@ author's context, and wants that to be part of how work is done here, not someth
     anything not committed yet,
     and starts its report with the commit it reviewed and whether the working tree was clean, so a review of
     uncommitted work can't pass for a review of the final state;
-  - it starts from `CLAUDE.md`, `specs/0034-specs-and-tasks.md` and the task it is given and the specs that
+  - it starts from `CLAUDE.md`, `specs/0034-specs-and-tasks.md` and the task issue it is given (`gh issue view`) and the specs that
     task lists (with a spec number, that spec; with `none`, the specs that own the behaviour the diff touches,
     saying whether the change needed a spec or a task of its own), and does not trust the spec's status or its
     coverage table: it checks each AC of the touched specs against the code and the tests, and the behaviour of
@@ -57,7 +57,7 @@ author's context, and wants that to be part of how work is done here, not someth
     either changed while it worked;
   - it reports findings most severe first, each with `file:line`, what is wrong and a concrete failing
     scenario, then what it checked and found fine; "no findings" is a valid answer.
-- **AC-4**: `.github/pull_request_template.md` gives every pull request the checklist (the task came first and its requirements hold, or a small
+- **AC-4**: `.github/pull_request_template.md` gives every pull request the checklist (the task came first as an issue and its requirements hold, or a small
   change that needs no task; the touched specs mirror the code as built and describe nothing unbuilt; `npm run check` green and CI's end-to-end job passing (spec 0007 AC-8); everything users can see is in the changelog; fresh-context
   review done at the commit named in the pull
   request, with only wording fixes after it) and a section to record the reviewed commit, the review's
@@ -90,7 +90,7 @@ author's context, and wants that to be part of how work is done here, not someth
 ## Notes
 
 - Why "no context": a reviewer that is told what the change is for, and why it was done this way, tends to
-  confirm it. The author passes only the task number and the base branch; the agent works out the rest from
+  confirm it. The author passes only the task's issue number and the base branch; the agent works out the rest from
   the task, the specs and the diff. If the specs can't explain the change to a stranger, that is itself a finding.
 - Project agents are loaded when a Claude Code session starts. In the session that creates or edits
   `.claude/agents/fresh-reviewer.md`, spawn a general-purpose agent and give it the same brief (the body of
