@@ -85,13 +85,13 @@ behaviour would be spread over files that disagree with the code.
   says `manual` has a reason and a `Last checked` (the way to check it is for the reviewer, AC-8).
 - **AC-10**: The Stop hook watches `tasks/` as well as `specs/`, and once the checks pass it asks, once per turn
   end, when app code changed and no spec did: has behaviour changed (then the spec and its tests are updated), or
-  not (then say so in one line). The question is not asked again for the same files (AC-12).
+  not (then say so in one line). The question is not asked again for the same state of the branch (AC-12).
 - **AC-12**: In the same turn-end nudge as AC-10, once the checks pass, when a file that users can see changed,
   in the working tree or in a commit the branch has made since it left `origin/main`
   (`messages/*.json`, a `page.tsx` or `layout.tsx` under `src/app`, a `.ts` or `.tsx` file under `src/components`
   that is not a test or a `.types.ts` file) and `src/content/changelog.ts` did not, the hook asks whether the change
   belongs in the changelog (then the entry is added in every language, spec 0018 AC-7) or not (then say so in one
-  line). The nudge, with both questions, is not repeated for the same message. Both questions come in one message, so there is no second round trip. The decision is a pure function of
+  line). The nudge, with both questions, is not repeated for the same commit and working tree and message (a new commit or other files ask again). Both questions come in one message, so there is no second round trip. The decision is a pure function of
   the changed paths (`.claude/hooks/stop-nudges.mjs`).
 
 ## Out of scope

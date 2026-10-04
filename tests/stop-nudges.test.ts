@@ -2,7 +2,7 @@
 // (.claude/hooks/stop-nudges.mjs); the hook itself (a Claude Code session) is the manual row of the spec.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
-import { changedForNudge, isUserVisible, nudgeMessage, nudgeTargets, nudgeToAsk } from "../.claude/hooks/stop-nudges.mjs";
+import { changedForNudge, isUserVisible, nudgeMessage, nudgeKey, nudgeTargets, nudgeToAsk } from "../.claude/hooks/stop-nudges.mjs";
 
 const readRoot = (path: string) => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -69,7 +69,8 @@ describe("spec 0034: the Stop hook's turn-end nudge", () => {
 
   it("AC-10, AC-12: the hook asks through this module, once per turn end", () => {
     const hook = readRoot(".claude/hooks/stop-check.mjs");
-    expect(hook).toMatch(/input\.stop_hook_active \? "" : nudgeToAsk\(changed, committed, state\.nudged\)/);
+    expect(hook).toMatch(/input\.stop_hook_active \? "" : nudgeToAsk\(changed, committed, state\.nudged, scope\)/);
+    expect(hook).toMatch(/scope = `\$\{head\}:\$\{fingerprint\}`/); // the commit and the working tree
     expect(hook).toMatch(/"merge-base", "HEAD", "origin\/main"/); // work committed on the branch counts
     expect(hook).toMatch(/WATCHED = \[[^\]]*"messages",/);
   });
@@ -83,13 +84,17 @@ describe("spec 0034: the Stop hook's turn-end nudge", () => {
     expect(nudgeMessage(changedForNudge([], [...committed, "src/content/changelog.ts"]))).not.toMatch(/changelog entry/);
   });
 
-  it("AC-12: the same message is not asked twice in a row, a different one is, and nothing to ask stays quiet", () => {
+  it("AC-12: the same message is not asked twice about the same state; a new commit, other files or a clean state ask again", () => {
     const committed = ["src/components/FriendActionButton.tsx"];
-    const first = nudgeToAsk([], committed, undefined);
+    const first = nudgeToAsk([], committed, undefined, "abc:1");
     expect(first).toMatch(/files users can see changed without a changelog entry/);
-    expect(nudgeToAsk([], committed, first)).toBe(""); // the same files, already asked
-    expect(nudgeToAsk([], [...committed, "src/components/CompareMap.tsx"], first)).not.toBe(""); // more files: asked again
-    expect(nudgeToAsk([], [], first)).toBe("");
-    expect(nudgeToAsk([], [...committed, "src/content/changelog.ts", "specs/0003-map-route-planner.md"], undefined)).toBe(""); // the entry and the spec are there
+    const asked = nudgeKey("abc:1", first);
+    expect(nudgeToAsk([], committed, asked, "abc:1")).toBe(""); // the same state, already asked
+    // The same file names in another task (another commit, or another working tree) are asked about again.
+    expect(nudgeToAsk([], committed, asked, "def:1")).toBe(first);
+    expect(nudgeToAsk([], committed, asked, "abc:2")).toBe(first);
+    expect(nudgeToAsk([], [...committed, "src/components/CompareMap.tsx"], asked, "abc:1")).not.toBe(""); // more files
+    expect(nudgeToAsk([], [], asked, "abc:1")).toBe("");
+    expect(nudgeToAsk([], [...committed, "src/content/changelog.ts", "specs/0003-map-route-planner.md"], undefined, "abc:1")).toBe(""); // the entry and the spec are there
   });
 });

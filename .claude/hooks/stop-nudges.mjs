@@ -53,11 +53,15 @@ export function nudgeMessage(changed) {
   return parts.length ? `Checks pass, but ${parts.join("\n\nAnd ")}` : "";
 }
 
+/** What a nudge is remembered by: the state it was asked about (`scope`: the commit and the working tree) and its text. */
+export const nudgeKey = (scope, message) => `${scope}\n${message}`;
+
 /**
- * What to ask at this turn end: the nudge for the changed paths, unless it is the very message asked last time
- * (`lastAsked`) or there is nothing to ask. The same question is not repeated every turn.
+ * What to ask at this turn end: the nudge for the changed paths, unless it was already asked about this very state
+ * (`lastAsked`, a `nudgeKey`) or there is nothing to ask. The same question is not repeated every turn, but a new commit
+ * or a changed working tree is a new state: the same file names in another task are asked about again.
  */
-export function nudgeToAsk(changed, committed, lastAsked) {
+export function nudgeToAsk(changed, committed, lastAsked, scope) {
   const message = nudgeMessage(changedForNudge(changed, committed));
-  return message && message !== lastAsked ? message : "";
+  return message && nudgeKey(scope, message) !== lastAsked ? message : "";
 }

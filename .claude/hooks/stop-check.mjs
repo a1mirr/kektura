@@ -1,6 +1,7 @@
 // Claude Code Stop hook: the regression gate of the spec-driven workflow (specs/README.md).
 //
-// When Claude is about to finish and source files differ from the last green run, run typecheck,
+// When Claude is about to finish and source files differ from the last green run (uncommitted ones: a clean working
+// tree runs no checks, only the nudge below, which also counts the branch's commits), run typecheck,
 // lint and unit tests in parallel (E2E needs Docker and is left to CI, which is the authority; `npm run e2e` only to reproduce a failure). On failure exit 2: stderr goes back to Claude, which keeps working.
 // After MAX_ATTEMPTS failed attempts in a row it lets the turn end and tells the user instead of
 // looping. Once checks pass, app code changed without a spec change, or user-visible files changed without a
@@ -9,7 +10,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { nudgeToAsk } from "./stop-nudges.mjs";
+import { nudgeKey, nudgeToAsk } from "./stop-nudges.mjs";
 
 const MAX_ATTEMPTS = 3;
 const WATCHED = [
@@ -84,9 +85,11 @@ if (!changed.length && !committed.length) process.exit(0);
 // a changelog entry (specs/0018 AC-7), counting the working tree and the branch's commits. Both questions go in one
 // message; the decision is in stop-nudges.mjs.
 function askOnce() {
-  const message = input.stop_hook_active ? "" : nudgeToAsk(changed, committed, state.nudged);
+  const head = spawnSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).stdout.trim();
+  const scope = `${head}:${fingerprint}`; // this commit and this working tree: a new state is asked about again
+  const message = input.stop_hook_active ? "" : nudgeToAsk(changed, committed, state.nudged, scope);
   if (!message) return;
-  state.nudged = message;
+  state.nudged = nudgeKey(scope, message);
   save();
   console.error(message);
   process.exit(2);
