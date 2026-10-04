@@ -204,6 +204,26 @@ describe("spec 0022: Review recorded", () => {
       expect(checkReviewRecorded({ description: body(reviewed), head: afterResolution, reviewed: inspectCommit(git, reviewed, afterResolution, "main") }).ok).toBe(false);
     });
 
+    it("with the base, a file that both sides edited in different places and that merged cleanly does not count", () => {
+      const list = (edits: Record<number, string> = {}) =>
+        Array.from({ length: 40 }, (_, i) => edits[i + 1] ?? String(i + 1)).join("\n") + "\n";
+      git("switch", "-q", "main");
+      commit("shared/list.txt", list(), "main adds a file");
+      git("switch", "-q", "topic");
+      git(...ident, "merge", "--no-edit", "main");
+      const reviewedHere = commit("shared/list.txt", list({ 2: "topic edit" }), "topic edits near the top");
+      git("switch", "-q", "main");
+      commit("shared/list.txt", list({ 38: "main edit" }), "main edits near the bottom");
+      git("switch", "-q", "topic");
+      git(...ident, "merge", "--no-edit", "main"); // merges cleanly: the two edits are far apart
+      const merged = git("rev-parse", "HEAD").trim();
+      // the file differs from the reviewed commit and `--cc` would list it, but nobody changed it by hand
+      expect(inspectCommit(git, reviewedHere, merged)?.changedAfter).toEqual(["shared/list.txt"]);
+      expect(inspectCommit(git, reviewedHere, merged, "main")).toEqual({ sha: reviewedHere, changedAfter: [] });
+      const result = checkReviewRecorded({ description: body(reviewedHere), head: merged, reviewed: inspectCommit(git, reviewedHere, merged, "main") });
+      expect(result.ok).toBe(true);
+    });
+
     it("main's own files never show up when the branch merges main again, with nothing else changed", () => {
       expect(inspectCommit(git, afterResolution, afterResolution, "main")).toEqual({ sha: afterResolution, changedAfter: [] });
     });

@@ -70,8 +70,10 @@ export function inspectCommit(git, sha, head, base = null) {
   }
   // --no-renames: a Markdown file renamed to code lists both paths, so the code path shows.
   if (base) {
-    // --cc lists a merge commit's files only where it differs from every parent (a conflict resolution)
-    const own = git("-c", "core.quotepath=false", "log", "--format=", "--name-only", "--no-renames", "--cc", `${full}..${head}`, `^${base}`);
+    // --remerge-diff (git 2.36 or later) shows a merge commit only where it differs from a fresh automatic merge of
+    // its parents: a conflict resolved by hand or an edit made in the merge. Unlike --cc it does not list a file that
+    // both sides edited in different places and that merged cleanly. Other commits show their usual diff.
+    const own = git("-c", "core.quotepath=false", "log", "--format=", "--name-only", "--no-renames", "--remerge-diff", `${full}..${head}`, `^${base}`);
     return { sha: full, changedAfter: [...new Set(own.split("\n").filter(Boolean))] };
   }
   const changedAfter = git("-c", "core.quotepath=false", "diff", "--name-only", "--no-renames", full, head).split("\n").filter(Boolean);
