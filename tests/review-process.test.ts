@@ -157,3 +157,23 @@ describe("spec 0018: the changelog rule", () => {
     expect(body).toContain("spec 0018 AC-7");
   });
 });
+
+describe("spec 0007: CI is the authority for the end-to-end tests", () => {
+  it("AC-10: CLAUDE.md, specs/README.md, the pull request template and the Stop hook say that CI's job decides and a local run is for failures", () => {
+    const claude = read("CLAUDE.md");
+    expect(claude).toMatch(/CI's "End-to-end tests" job is the authority for the end-to-end tests \(spec 0007 AC-10\)/);
+    expect(claude).toMatch(/run `npm run e2e` locally only to reproduce a failure/);
+    expect(claude).toMatch(/CI's end-to-end job is looked at before the merge/);
+    expect(read("specs/README.md")).toMatch(/CI's "End-to-end tests" job is the authority and must be green on the pull request/);
+    expect(read("specs/README.md")).toMatch(/run `npm run e2e` locally only to reproduce a failure/);
+    expect(read(".github/pull_request_template.md")).toMatch(/^- \[ \] .*CI's end-to-end job is green \(`npm run e2e` locally only to reproduce a failure\)/m);
+    expect(read(".claude/hooks/stop-check.mjs")).toMatch(/left to CI, which is the authority; `npm run e2e` only to reproduce a failure/);
+  });
+
+  it("AC-10: nothing still tells the author to run the end-to-end tests before committing", () => {
+    for (const file of ["CLAUDE.md", "specs/README.md", ".github/pull_request_template.md", ".claude/hooks/stop-check.mjs"]) {
+      expect(read(file), file).not.toMatch(/run `npm run e2e` (yourself )?before committing/);
+      expect(read(file), file).not.toMatch(/`npm run e2e` was run for/);
+    }
+  });
+});

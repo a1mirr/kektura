@@ -48,11 +48,11 @@ describe("spec 0021: tidy after a merge", () => {
       expect(plan.keep.find((k) => k.what.includes("dirty"))?.why).toMatch(/modified or untracked/);
     });
 
-    it("keeps a worktree and a branch with commits that origin/main does not have", () => {
+    it("keeps a worktree and a branch that no merge commit of origin/main contains (unmerged work, or a new branch with no commit yet)", () => {
       const plan = planTidy(state({ worktrees: [wt("me"), wt("open", { merged: false })], branches: [{ name: "open", merged: false }, { name: "lone", merged: false }] }));
       expect(plan.removeWorktrees).toEqual([]);
       expect(plan.deleteBranches).toEqual([]);
-      expect(plan.keep.map((k) => k.why).filter((w) => /commits that origin\/main does not have/.test(w))).toHaveLength(3);
+      expect(plan.keep.map((k) => k.why).filter((w) => /no merge commit of origin\/main contains it/.test(w))).toHaveLength(3);
     });
 
     it("removes a detached merged worktree and keeps a merged branch that a kept worktree has checked out", () => {
@@ -133,6 +133,12 @@ describe("spec 0021: tidy after a merge", () => {
       git(wtDir("done"), "commit", "-q", "-m", "done work");
       git(primary, "merge", "-q", "--no-ff", "-m", "Merge done", "done");
       git(primary, "push", "-q", "origin", "main");
+      // Started after that merge, and another merge has moved origin/main on since: its tip is an ancestor of origin/main.
+      git(primary, "worktree", "add", "-q", "-b", "fresh", wtDir("fresh"), "origin/main");
+      fs.writeFileSync(path.join(primary, "next.txt"), "n\n");
+      git(primary, "add", ".");
+      git(primary, "commit", "-q", "-m", "a later change on main");
+      git(primary, "push", "-q", "origin", "main");
       fs.writeFileSync(path.join(wtDir("dirty"), "scratch.txt"), "wip\n");
       fs.writeFileSync(path.join(wtDir("open"), "o.txt"), "o\n");
       git(wtDir("open"), "add", ".");
@@ -160,8 +166,28 @@ describe("spec 0021: tidy after a merge", () => {
       for (const kept of ["dirty", "open", "me"]) expect(fs.existsSync(wtDir(kept)), kept).toBe(true);
       expect(git(primary, "branch", "--list", "open")).not.toBe("");
       expect(run.stdout).toMatch(/Keeping worktree dirty .*modified or untracked/);
-      expect(run.stdout).toMatch(/Keeping worktree open .*commits that origin\/main does not have/);
+      expect(run.stdout).toMatch(/Keeping worktree open .*no merge commit of origin\/main contains it/);
+      // A new branch with no commit of its own is an ancestor of origin/main, but it is not finished work.
+      expect(fs.existsSync(wtDir("fresh"))).toBe(true);
+      expect(git(primary, "branch", "--list", "fresh")).not.toBe("");
+      expect(run.stdout).toMatch(/Keeping worktree fresh .*no commit yet/);
       expect(run.stdout).toMatch(/Keeping worktree me .*this runs in/);
+    });
+
+    it("AC-8: a merged worktree that will not be removed (locked) keeps its branch, and the run reports the failure", () => {
+      git(primary, "worktree", "add", "-q", "-b", "stuck", wtDir("stuck"), "origin/main");
+      fs.writeFileSync(path.join(wtDir("stuck"), "s.txt"), "s\n");
+      git(wtDir("stuck"), "add", ".");
+      git(wtDir("stuck"), "commit", "-q", "-m", "stuck work");
+      git(primary, "merge", "-q", "--no-ff", "-m", "Merge stuck", "stuck");
+      git(primary, "push", "-q", "origin", "main");
+      git(primary, "worktree", "lock", wtDir("stuck"));
+      const run = tidy(wtDir("me"), "--apply");
+      expect(run.status).toBe(1);
+      expect(run.stdout).toMatch(/Keeping branch stuck: its worktree could not be removed/);
+      expect(fs.existsSync(wtDir("stuck"))).toBe(true);
+      expect(git(primary, "branch", "--list", "stuck")).not.toBe("");
+      git(primary, "worktree", "unlock", wtDir("stuck"));
     });
 
     it("AC-9: a stale local main is fast-forwarded when no worktree has it", () => {

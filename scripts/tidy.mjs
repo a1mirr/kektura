@@ -5,14 +5,18 @@
 //
 //   node scripts/tidy.mjs [--apply] [--remote]
 //
-// Nothing is removed that could hold work: a worktree with a modified or untracked file, a branch with a commit
-// that origin/main does not have, the primary checkout, the worktree this runs in, a branch checked out anywhere
-// else, `main`. Worktrees outside .claude/worktrees (other tools') are only ever listed as kept.
+// "Merged" means a merge commit of origin/main brought the commit in (the repository merges pull requests with merge
+// commits). A new branch that has no commit of its own yet is an ancestor of origin/main too, and must not be taken for
+// finished work: another session may be about to start on it. Nothing is removed that could hold work: a worktree with a
+// modified or untracked file, a branch that no merge commit contains, the primary checkout, the worktree this runs in
+// (run it from another checkout to remove that one), a branch checked out anywhere else, `main`. Worktrees outside
+// .claude/worktrees (other tools') are only ever listed as kept.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
+const NOT_MERGED = "no merge commit of origin/main contains it (unmerged work, or a new branch with no commit yet)";
 const norm = (p) => path.resolve(p).replace(/\\/g, "/").toLowerCase();
 
 /**
@@ -34,7 +38,7 @@ export function planTidy({ primary, current, worktrees, branches, remotes, local
     else if (where === norm(current)) why = "the worktree this runs in";
     else if (!where.startsWith(root)) why = "outside .claude/worktrees (another tool's)";
     else if (!wt.clean) why = "has modified or untracked files";
-    else if (!wt.merged) why = "has commits that origin/main does not have";
+    else if (!wt.merged) why = NOT_MERGED;
     if (why) keep.push({ what: `worktree ${label} (${wt.path})`, why });
     else {
       removeWorktrees.push({ path: wt.path, branch: wt.branch });
@@ -47,7 +51,7 @@ export function planTidy({ primary, current, worktrees, branches, remotes, local
   for (const branch of branches) {
     if (protectedBranches.includes(branch.name)) continue;
     const holder = heldBy(branch.name);
-    if (!branch.merged) keep.push({ what: `branch ${branch.name}`, why: "has commits that origin/main does not have" });
+    if (!branch.merged) keep.push({ what: `branch ${branch.name}`, why: NOT_MERGED });
     else if (holder) keep.push({ what: `branch ${branch.name}`, why: `checked out in ${holder.path}` });
     else deleteBranches.push(branch.name);
   }
@@ -56,13 +60,13 @@ export function planTidy({ primary, current, worktrees, branches, remotes, local
   for (const remote of remotes) {
     if (protectedBranches.includes(remote.name)) continue;
     if (remote.merged) deleteRemote.push(remote.name);
-    else keep.push({ what: `origin/${remote.name}`, why: "has commits that origin/main does not have" });
+    else keep.push({ what: `origin/${remote.name}`, why: NOT_MERGED });
   }
   // A local main that is only behind is moved up, unless a worktree has it checked out (it is theirs to update).
   let advanceMain = false;
   if (localMain?.behind) {
     const holder = worktrees.find((wt) => wt.branch === "main");
-    if (holder) keep.push({ what: "branch main (behind origin/main)", why: `checked out in ${holder.path}: update it there` });
+    if (holder) keep.push({ what: "branch main (behind origin/main)", why: `checked out in ${holder.path}: update it there with git merge --ff-only origin/main` });
     else advanceMain = true;
   }
   return { removeWorktrees, deleteBranches, deleteRemote, advanceMain, keep };
@@ -90,7 +94,11 @@ const git = (cwd, args) => {
 export function gatherState(cwd) {
   const top = git(cwd, ["rev-parse", "--path-format=absolute", "--show-toplevel", "--git-common-dir"]).stdout.split(/\r?\n/);
   const primary = path.dirname(top[1]); // <primary>/.git
-  const merged = (ref) => git(cwd, ["merge-base", "--is-ancestor", ref, "origin/main"]).status === 0;
+  // Commits that came in through a merge commit: in origin/main, but not on its first-parent line.
+  const lines = (args) => git(cwd, args).stdout.split(/\r?\n/).filter(Boolean);
+  const firstParent = new Set(lines(["rev-list", "--first-parent", "origin/main"]));
+  const viaMerge = new Set(lines(["rev-list", "origin/main"]).filter((sha) => !firstParent.has(sha)));
+  const merged = (ref) => viaMerge.has(git(cwd, ["rev-parse", "--verify", "-q", `${ref}^{commit}`]).stdout);
 
   const worktrees = [];
   for (const block of git(cwd, ["worktree", "list", "--porcelain"]).stdout.split(/\r?\n\r?\n/)) {
@@ -109,7 +117,7 @@ export function gatherState(cwd) {
     .map((n) => n.replace(/^origin\//, ""))
     .map((name) => ({ name, merged: merged(`origin/${name}`) }));
   const mainSha = git(cwd, ["rev-parse", "--verify", "-q", "refs/heads/main"]).stdout;
-  const behind = Boolean(mainSha) && mainSha !== git(cwd, ["rev-parse", "origin/main"]).stdout && merged("refs/heads/main");
+  const behind = Boolean(mainSha) && mainSha !== git(cwd, ["rev-parse", "origin/main"]).stdout && git(cwd, ["merge-base", "--is-ancestor", mainSha, "origin/main"]).status === 0;
   return { primary, current: top[0], worktrees, branches, remotes, localMain: mainSha ? { behind } : null };
 }
 
@@ -143,9 +151,12 @@ function main() {
       console.log(`Failed ${what}: ${result.stderr}`);
     }
   };
+  const stuck = new Set(); // branches whose worktree would not go (locked, say): they stay, or the worktree would be left on a deleted branch
   for (const wt of plan.removeWorktrees) {
     unlinkNodeModules(wt.path);
-    run(`removing ${wt.path}`, git(cwd, ["worktree", "remove", wt.path]));
+    const result = git(cwd, ["worktree", "remove", wt.path]);
+    run(`removing ${wt.path}`, result);
+    if (result.status !== 0 && wt.branch) stuck.add(wt.branch);
   }
   git(cwd, ["worktree", "prune"]);
   if (plan.advanceMain) {
@@ -156,6 +167,10 @@ function main() {
   // `git branch -d` would test "merged into HEAD", which depends on where this runs; what matters is origin/main, so
   // the check is repeated here and the ref is deleted only at the sha that was checked (never `-D`).
   for (const name of plan.deleteBranches) {
+    if (stuck.has(name)) {
+      console.log(`Keeping branch ${name}: its worktree could not be removed`);
+      continue;
+    }
     const sha = git(cwd, ["rev-parse", "--verify", `refs/heads/${name}`]).stdout;
     if (!sha || git(cwd, ["merge-base", "--is-ancestor", sha, "origin/main"]).status !== 0) {
       run(`deleting ${name}`, { status: 1, stderr: "it is no longer contained in origin/main" });

@@ -31,6 +31,11 @@ rows and owner code; the Goal says that where the work is done and the clean-up 
 - A hook can refuse, not move the session: the refusal text says how to make a worktree. The hook is a guard
   against the usual mistake, not a sandbox (a shell redirect or `sed -i` is not recognised); the pre-push guard,
   CI and the review stand behind it.
+- The fresh review found, and this task fixed: Git Bash paths (`/c/...`) and `FOO=1 git` slipping past the hook,
+  `tidy` treating a new branch with no commit as merged (it now asks for a merge commit), a branch deleted although
+  its worktree could not be removed, and an unproven claim for spec 0007 AC-10. Left as documented limits: a
+  `git switch -c` inside a worktree is not checked against `origin/main`, and the numbers 0040 to 0047 collide
+  with drafts that sit on other unmerged local branches (see the pull request).
 - The hook takes effect in a checkout once this change is merged and the checkout has the new `.claude/settings.json`.
 - `git branch -d` tests "merged into HEAD", so `tidy` tests "merged into origin/main" itself and deletes the ref at the
   sha it checked (never `-D`).

@@ -8,6 +8,7 @@
 // pre-push guard, CI and the review still stand behind it).
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -68,14 +69,26 @@ function simpleCommands(line) {
 const unquote = (s) => s.replace(/^["']|["']$/g, "");
 const words = (command) => [...command.matchAll(/"[^"]*"|'[^']*'|\S+/g)].map((m) => m[0]);
 
+/** Git Bash and WSL write C:\x as /c/x or /mnt/c/x, and ~ is the home directory; Node on Windows reads neither the way the shell meant it. */
+export function toNative(p, platform = process.platform) {
+  if (p === "~" || p.startsWith("~/")) return path.join(os.homedir(), p.slice(1));
+  if (platform !== "win32") return p;
+  const m = /^\/(?:mnt\/)?([a-zA-Z])(?:\/(.*))?$/.exec(p);
+  return m ? `${m[1].toUpperCase()}:\\${(m[2] ?? "").replace(/\//g, "\\")}` : p;
+}
+const resolveFrom = (dir, p) => path.resolve(dir, toNative(unquote(p)));
+
 /** The git subcommand of a simple command and the directory it runs in (`git -C dir`), or null when it is not a git command. */
 export function gitInvocation(command, dir) {
+  // `FOO=1 git ...`, `command git ...` and `git.exe` are git too.
   const parts = words(command);
-  if (parts[0] !== "git") return null;
+  while (parts.length && (/^[A-Za-z_][A-Za-z0-9_]*=/.test(parts[0]) || parts[0] === "command")) parts.shift();
+  if (!/^(?:.*[\\/])?git(?:\.exe)?$/i.test(unquote(parts[0] ?? ""))) return null;
+  parts[0] = "git";
   let where = dir;
   let i = 1;
   while (i < parts.length && parts[i].startsWith("-")) {
-    if (parts[i] === "-C" && parts[i + 1]) where = path.resolve(where, unquote(parts[i + 1]));
+    if (parts[i] === "-C" && parts[i + 1]) where = resolveFrom(where, parts[i + 1]);
     i += parts[i] === "-C" || parts[i] === "-c" ? 2 : 1;
   }
   return { subcommand: parts[i] ?? "", where, rest: parts.slice(i + 1) };
@@ -125,7 +138,7 @@ export function decide(input, { project = input.cwd ?? process.cwd(), git = real
   if (FILE_TOOLS.has(input.tool_name ?? "")) {
     const target = String(input.tool_input?.file_path ?? input.tool_input?.notebook_path ?? "");
     if (!target) return "";
-    const file = path.resolve(cwd, target);
+    const file = resolveFrom(cwd, target);
     const dir = nearestExisting(file);
     const where = dir && inspect(dir, git);
     if (!where || where.commonDir !== mine.commonDir) return ""; // another repository, or outside any
@@ -140,7 +153,7 @@ export function decide(input, { project = input.cwd ?? process.cwd(), git = real
     for (const command of simpleCommands(String(input.tool_input?.command ?? ""))) {
       const cd = /^cd\s+(.+)$/.exec(command);
       if (cd) {
-        dir = path.resolve(dir, unquote(cd[1].trim()));
+        dir = resolveFrom(dir, cd[1].trim());
         continue;
       }
       const invocation = gitInvocation(command, dir);
@@ -154,6 +167,8 @@ export function decide(input, { project = input.cwd ?? process.cwd(), git = real
         continue;
       }
       if (!MUTATING.has(invocation.subcommand)) continue;
+      // Bringing a checkout that is on main up to date, forward only, is upkeep and not a change of work.
+      if ((invocation.subcommand === "pull" || invocation.subcommand === "merge") && invocation.rest.includes("--ff-only") && where.branch === "main") continue;
       const reason = refusal(where);
       if (reason) return refuse(`\`git ${invocation.subcommand}\``, reason);
     }

@@ -54,27 +54,36 @@ leftovers of a merged change are cleaned up.
     `apply`, `checkout`, `cherry-pick`, `clean`, `commit`, `merge`, `mv`, `pull`, `rebase`, `reset`, `restore`,
     `revert`, `rm`, `stash`, `switch`) there; `git -C <dir>` and a leading `cd <dir> &&` say which checkout is meant.
 
-  Reading (`status`, `log`, `diff`, `fetch`), `git worktree`, `git branch -r` and pushing are never refused (the
-  pre-push guard owns pushing). The refusal tells Claude how to make a worktree. A path outside the repository, a
-  different repository, a payload the hook cannot read and a directory that is not a git checkout are let through.
-  It stops the usual mistake; it is not a sandbox (a shell redirect or `sed -i` is not recognised).
+  Reading (`status`, `log`, `diff`, `fetch`), `git worktree` (except creating a branch from a stale or wrong
+  base, AC-9), `git branch -r`, pushing (the pre-push guard owns that) and a forward-only update of a checkout that
+  is on `main` (`git merge --ff-only`, `git pull --ff-only`: upkeep, not work) are never refused. The refusal tells
+  Claude how to make a worktree. `FOO=1 git ...`, `command git ...`, `git.exe`, and Git Bash or WSL paths in `cd` and
+  `git -C` (`/c/Personal/x`, `/mnt/c/x`, `~/x`) are read as the command and directory they mean. A path outside the
+  repository, a different repository, a payload the hook cannot read and a directory that is not a git checkout are
+  let through. It stops the usual mistake; it is not a sandbox (a shell redirect, `sed -i` or a script that writes
+  files is not recognised).
 - **AC-8**: `npm run tidy` (`scripts/tidy.mjs`) lists what a merge leaves behind and, with `--apply`, removes it:
-  worktrees under `.claude/worktrees` and local branches whose commits are all in `origin/main`. It keeps, and says
-  why: the primary checkout, the worktree it runs in, a worktree with a modified or untracked file or a commit that
-  `origin/main` lacks, a branch with such a commit or one checked out in a kept worktree, `main`, and worktrees
-  outside `.claude/worktrees` (another tool's). Before it removes a worktree it unlinks a `node_modules` junction, so
-  the real one is never reached; it deletes a branch only at the sha it has just checked against `origin/main`, never
-  with `-D`. `--remote` also deletes merged branches on `origin`. Without `--apply` nothing changes. The author runs
-  it after every merge (`CLAUDE.md`, workflow step 7).
+  worktrees under `.claude/worktrees` and local branches whose work a pull request has merged: "merged" means a
+  merge commit of `origin/main` brought the branch's tip in, so a new branch that has no commit of its own yet, which
+  is an ancestor of `origin/main` too, is never taken for finished work (another session may be about to use it). It
+  keeps, and says why: the primary checkout, the worktree it runs in (so a worktree is removed by a run from another
+  checkout, for instance the next session's), a worktree with a modified or untracked file, a worktree or branch no
+  merge commit contains, a branch checked out in a kept worktree, `main`, and worktrees outside `.claude/worktrees`
+  (another tool's). Before it removes a worktree it unlinks a `node_modules` junction, so the real one is never
+  reached; a branch whose worktree could not be removed (locked, say) is kept; a branch is deleted only at the sha it
+  has just checked against `origin/main`, never with `-D`. `--remote` also deletes merged branches on `origin`.
+  Without `--apply` nothing changes. The author runs it after every merge (`CLAUDE.md`, workflow step 7).
 
-- **AC-9**: New work always starts from the real `origin/main`, never from a stale local `main` or another branch.
-  The `worktree-guard` hook refuses a `git worktree add` that creates a branch (`-b` or `-B`) unless its base is
+- **AC-9**: New work starts from the real `origin/main`, never from a stale local `main` or another branch. The
+  `worktree-guard` hook enforces it for the way work is started (`git worktree add`); a branch made later inside a
+  worktree (`git switch -c`) is not recognised. The hook refuses a `git worktree add` that creates a branch (`-b` or `-B`) unless its base is
   exactly `origin/main` and the `origin/main` of the checkout is the commit GitHub reports for `main` right now
   (`git ls-remote`): the message says to `git fetch origin` first. The fetch has to be its own call, because the
   command is judged before it runs. Checking out an existing branch (no `-b`) is not a new branch and is left
   alone; with no reachable origin there is nothing to compare, so the base rule alone applies. `npm run tidy
   --apply` also moves a local `main` that is only behind up to `origin/main` (forward only, at the sha it checked),
-  unless a worktree has `main` checked out, so `git switch main` is never a stale start either.
+  unless a worktree has `main` checked out (it says to update that one with `git merge --ff-only origin/main`, which
+  the hook allows), so `git switch main` is never a stale start either.
 
 ## Out of scope
 
@@ -99,10 +108,10 @@ leftovers of a merged change are cleaned up.
 
 | AC | Test |
 | --- | --- |
-| AC-7 | `tests/worktree-guard.test.ts` (`decide` against a real primary checkout and linked worktrees: every file tool, a new file in a new directory, a worktree on `main`, ignored files, other repositories, `git -C` and `cd`, mutating and reading git commands, the settings wiring, the hook run as a process: exit codes and message) |
+| AC-7 | `tests/worktree-guard.test.ts` (`decide` against a real primary checkout and linked worktrees: every file tool, a new file in a new directory, a worktree on `main`, ignored files, other repositories, `git -C` and `cd` (also Git Bash paths), `FOO=1 git`, `command git`, `git.exe`, forward-only updates of `main`, mutating and reading git commands, the settings wiring, the hook run as a process: exit codes and message) |
 | AC-7 (the hook inside Claude Code) | manual (it needs a Claude Code session): in the primary checkout ask Claude to edit a tracked file and see the refusal with the `git worktree add` line. Last checked: never recorded. |
 | AC-9 | `tests/worktree-guard.test.ts` (against a bare origin and a clone: `origin/main` as base allowed, a local main, another branch or no base refused, a stale `origin/main` refused until fetched, an existing branch allowed, a chained fetch refused, no origin allowed); `tests/tidy.test.ts` (a stale local main is fast-forwarded and left alone when a worktree has it) |
-| AC-8 | `tests/tidy.test.ts` (`planTidy` for every keep and remove reason, the junction left alone, the script against a bare origin and a clone: dry run, `--apply`, unknown argument) |
+| AC-8 | `tests/tidy.test.ts` (`planTidy` for every keep and remove reason, the junction left alone, the script against a bare origin and a clone: dry run, `--apply`, a new branch with no commit kept, a locked worktree keeps its branch, unknown argument) |
 | AC-1, AC-2, AC-3 | `tests/git-hooks.test.ts` (`checkPush` for the three URL forms, every spelling of a push to `main`, topic branches, deleting a topic branch, tags, the deploy remote, a look-alike host; the guard run as a process: exit codes and message) |
 | AC-4 | `tests/git-hooks.test.ts` (hook script calls the guard, `hooks:install` sets `core.hooksPath`, no `prepare`/`postinstall`/`preinstall` script) |
 | AC-4 (the refusal in a clone) | manual (it needs a clone with the hook installed and a GitHub remote): `git push origin HEAD:main --dry-run` is refused. Last checked: never recorded. |

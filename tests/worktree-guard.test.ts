@@ -9,7 +9,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 // Real git repositories: slow when the whole suite runs in parallel.
 vi.setConfig({ testTimeout: 60_000, hookTimeout: 60_000 });
-import { decide, gitInvocation } from "../.claude/hooks/worktree-guard.mjs";
+import { decide, gitInvocation, toNative } from "../.claude/hooks/worktree-guard.mjs";
 
 const read = (file: string) => fs.readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 const git = (cwd: string, ...args: string[]) => {
@@ -126,6 +126,39 @@ describe("spec 0021: work happens in a linked worktree", () => {
 
     it("another tool is never refused", () => {
       expect(decide({ tool_name: "Read", tool_input: { file_path: path.join(primary, "a.txt") }, cwd: primary }, { project: topic })).toBe("");
+    });
+  });
+
+  describe("AC-7: spellings of the same command", () => {
+    it("toNative turns Git Bash and WSL drive paths into Windows paths and leaves the rest alone", () => {
+      expect(toNative("/c/Personal/kektura", "win32")).toBe("C:\\Personal\\kektura");
+      expect(toNative("/mnt/d/x/y", "win32")).toBe("D:\\x\\y");
+      expect(toNative("/c", "win32")).toBe("C:\\");
+      expect(toNative("/usr/bin", "win32")).toBe("/usr/bin");
+      expect(toNative("/c/Personal", "linux")).toBe("/c/Personal");
+      expect(toNative("~/x")).toBe(path.join(os.homedir(), "x"));
+    });
+
+    it.runIf(process.platform === "win32")("a Git Bash path in `cd` or `git -C` still points at the primary checkout", () => {
+      const posix = primary.replace(/\\/g, "/").replace(/^([A-Za-z]):/, (_m, d: string) => `/${d.toLowerCase()}`);
+      expect(decide(bash(`cd ${posix} && git commit -m x`, topic), { project: topic })).toMatch(/primary checkout/);
+      expect(decide(bash(`git -C ${posix} checkout -b y`, topic), { project: topic })).toMatch(/primary checkout/);
+    });
+
+    it.each(["FOO=1 git commit -m x", "GIT_AUTHOR_NAME=a GIT_AUTHOR_EMAIL=b git commit -m x", "command git commit -m x", "git.exe commit -m x", '"git" commit -m x'])(
+      "`%s` is git too",
+      (command) => {
+        expect(decide(bash(command, primary), { project: topic })).toMatch(/primary checkout/);
+      },
+    );
+
+    it("a forward-only update of a checkout that is on main is upkeep and is allowed; any other merge or pull there is not", () => {
+      for (const command of ["git merge --ff-only origin/main", "git pull --ff-only origin main", "git pull --ff-only"]) {
+        expect(decide(bash(command, onMain), { project: topic }), command).toBe("");
+      }
+      expect(decide(bash("git merge origin/main", onMain), { project: topic })).toMatch(/is on main/);
+      expect(decide(bash("git pull", onMain), { project: topic })).toMatch(/is on main/);
+      expect(decide(bash("git merge --ff-only origin/main", primary), { project: topic })).toMatch(/primary checkout/); // primary is on a topic here
     });
   });
 
