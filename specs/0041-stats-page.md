@@ -5,8 +5,8 @@ Owner code: `src/lib/progress.ts` (`stampsPerMonth`, or a new `monthlyProgress`)
 `src/app/[locale]/stats/page.tsx` (new), `src/app/[locale]/account/page.tsx`
 
 Amends, when built: [0001](0001-progress.md) AC-5 (per-month counting: the months are now all shown, and carry stages
-and km) and [0014](0014-pages-and-settings.md) AC-8, its Notes line about the chart's place and its coverage row (the chart leaves
-`/account`, replaced by AC-1 here).
+and km) and [0014](0014-pages-and-settings.md) Goal, AC-8, its Notes line about the chart's place, its coverage row and its index row
+in `specs/README.md` (the chart leaves `/account`, replaced by AC-1 here).
 
 ## Goal
 
@@ -38,7 +38,8 @@ It works on desktop and on a phone.
 - **AC-6**: A month's **km** are the kilometres that became walked in it. A stretch between two neighbouring places
   (spec 0001 AC-3) is walked when the second of the two is stamped, and its km belong to the month of the **later** of
   its two stamp dates. So a stamp placed next to a stamp of an earlier month adds that whole stretch to *this*
-  month, and the km of all months add up to the walked km of the dashboard (spec 0001 AC-4, rounded to 0.1). A
+  month, and the km of all months add up to the walked km of the dashboard (spec 0001 AC-4): the months are summed unrounded and
+  rounded to 0.1 only for display, so the sum matches the dashboard's figure. A
   stretch is never counted twice and never lost. Once spec 0042 is built, a stretch that runs across a place it waives (no
   stamp, so no date) is one stretch between the stamped places on either side of it, dated by the later of their two
   dates.

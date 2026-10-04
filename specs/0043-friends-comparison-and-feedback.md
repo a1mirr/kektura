@@ -21,7 +21,8 @@ cannot be pressed twice, and the page says what happened.
 - **AC-1**: From the user's stamped places and a friend's, with the trail's places in order, the comparison yields:
   places stamped by both, only by me, only by the friend, by neither; and, using the walked stretches of spec 0001 AC-3,
   the km walked by both (the intersection of the two sets of ranges), only by me, only by the friend, and by neither. The
-  four km figures add up to the total km (rounded to 0.1 as in spec 0001 AC-4).
+  four km figures add up to the total km exactly: three are rounded to 0.1 as in spec 0001 AC-4 and the fourth is the total
+  minus those three.
 - **AC-2**: The "gaps" are the places and stretches that exactly one of the two lacks. For each stage the comparison
   lists the number of places each has, and classifies it, in this order, from my count `a`, the friend's `b` and the stage's
   total `n`: "both complete" (`a = n` and `b = n`), "only me" (`a = n`, `b < n`), "only them" (`b = n`, `a < n`), "neither
@@ -56,7 +57,8 @@ whose server action ends with a redirect, so between the click and the reload no
   is replaced by or joined with a spinner or "…", and it keeps its size so the layout does not jump. The pressed button
   shows this, not the whole page.
 - **AC-12**: While a request runs, a second press of the same button sends nothing more, and the other buttons that act on
-  the same row (approve and ignore of one request) are disabled too.
+  the same row (approve and ignore of one request) are disabled too. The buttons of a row share one pending state (one
+  client wrapper per row), because `useFormStatus` only knows its own form.
 - **AC-13**: When the request is done the page says what happened: a success message that names it ("Friend request
   approved", "Link regenerated", "Name saved", "Sharing stopped", "Removed"), announced to screen readers
   (`role="status"`, `aria-live="polite"`), through the same mechanism as the existing "request sent" message (`?sent=1`):
@@ -115,7 +117,7 @@ updates when another user changes something; optimistic updates of the list.
 | AC-5, AC-9, AC-10 | planned: `e2e/friends-compare.spec.ts` (two users, one shares: figures and stage list; not sharing gives 404; 375 px) |
 | AC-6, AC-7 | planned: `src/lib/map-layers.test.ts` (the layers for the four states), `e2e/friends-compare.spec.ts` (toggle) |
 | AC-8 | planned: `src/lib/friends.test.ts`; review of the page's queries |
-| AC-11, AC-12 | planned: `src/components/FriendActionButton.test.tsx` (pending disables, keeps size, ignores a second press) |
+| AC-11, AC-12 | planned: `src/components/FriendActionButton.test.tsx` (pending disables, keeps size, ignores a second press; the other button of the row is disabled while one runs) |
 | AC-13, AC-14 | planned: `e2e/friends.spec.ts` (success message per action in three languages; confirmation steps) |
 | AC-15 | planned: `e2e/friends.spec.ts` (JavaScript off: the buttons still act) |
 | AC-16 | planned: `e2e/friends.spec.ts` (375 and 320 px: target size, no overflow) |

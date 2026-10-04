@@ -6,7 +6,8 @@ Owner code: `src/components/AccountMenu.tsx`, `src/components/PageShell.tsx` (ne
 (`accountMenu.*`)
 
 Amends, when built: [0014](0014-pages-and-settings.md) Goal and AC-7, AC-14 (the dashboard header's account link becomes the
-menu) and, if the page is renamed (see Open questions), AC-15 and AC-18 (title, `h1`, About text); [0024](0024-friends-sharing.md)
+menu), AC-15 and AC-18 (the page is named "Settings" again: title, `h1`, About text, one name); [0015](0015-about-page.md) (the
+About page's name for it); [0024](0024-friends-sharing.md)
 AC-15 (the Friends link is the menu entry); [0029](0029-site-logo-link.md) AC-7 and its out-of-scope line about a navigation
 menu (the header strip is shared with the logo).
 
@@ -31,8 +32,9 @@ row of links, and every page uses the same, wider content column. Both work on d
 - **AC-3**: **My stats** leads to `/stats` (spec 0041). **Settings** leads to `/account`, which keeps sign out and
   account deletion (spec 0014). The menu entry, the page's document title and `h1`, and the About page's text name that
   page with one word (spec 0014 AC-18).
-- **AC-4**: The menu is a disclosure, not an application menu: the button has `aria-expanded` and an accessible name,
-  and the open list is a plain list of links (no `role="menu"`). It opens and closes with a click or tap and with Enter and
+- **AC-4**: The menu is a disclosure, not an application menu: a `<details>` with a `<summary>` that has an accessible
+  name (which exposes its open state natively; with JavaScript the summary also carries `aria-expanded`), and the open list
+  is a plain list of links (no `role="menu"`). It opens and closes with a click or tap and with Enter and
   Space; with JavaScript, Escape closes it and returns focus to the button, a click or tap outside closes it, and
   following a link closes it. Tab moves through the entries in order.
 - **AC-5**: The entry of the current page is marked (`aria-current="page"` and visibly).
@@ -82,9 +84,10 @@ switcher into the menu; a new visual design; a sidebar; a "sign out" entry in th
 - **A page for "My stats".** This draft assumes a page (spec 0041), because the chart needs room and the dashboard is
   long. The alternative is a section of the dashboard.
 - **The name of the settings page.** Spec 0025 renamed "Settings" to "Account" because the page holds no real settings.
-  The owner asked for "settings" in the menu. Keep the entry "Settings" and rename the page, its title and the About text
-  to match (amending 0014 AC-15 and AC-18), or label the entry "Account"? This draft assumes the first, with one word
-  everywhere.
+  The owner asked for "settings" in the menu, so this draft renames the page back to "Settings" (one word everywhere,
+  AC-3). That changes tests that pin the old name: `tests/messages.test.ts` (no message key named `settings`, spec 0014
+  AC-18), `e2e/account.spec.ts` (no "Settings" link) and `e2e/footer.spec.ts`. Confirm the rename, or label the entry
+  "Account" instead.
 - **Static pages.** About, changelog, links, feedback and the landing page are statically generated today. The menu needs
   the session and the runtime `friends` flag (`connection()`, the gotcha in `CLAUDE.md`), so a menu in the layout makes
   every page render per request. Proposal: accept that (the pages are small); the alternative is a client island that
@@ -118,4 +121,5 @@ switcher into the menu; a new visual design; a sidebar; a "sign out" entry in th
 | AC-7 | planned: `e2e/account-menu.spec.ts` (375 and 320 px: list inside the viewport, target sizes) |
 | AC-9 | `tests/messages.test.ts` |
 | AC-10 | planned: `tests/page-shell.test.ts` (no page file has a container of its own with `mx-auto max-w-`, whether `<main>` or `<div>`; each page imports `PageShell`, except the hero pages and the invite card named in AC-10) |
-| AC-11, AC-12, AC-13, AC-14, AC-15, AC-16, AC-17 | planned: `e2e/layout.spec.ts` (content width and no overflow at 320, 375, 768, 1024 and 1440 px on each page; fullscreen map; footer on the first screen) |
+| AC-11, AC-12 | planned: `e2e/layout.spec.ts` (content width and no overflow at 320, 375, 768, 1024 and 1440 px on each page) |
+| AC-13, AC-14, AC-15, AC-16, AC-17 | planned: `e2e/layout.spec.ts` (the text column's computed width stays within 65 characters; the map's height is at most 70 % of the viewport at 1440 px and the stat cards share one row; footer, logo and menu edges line up with the shell; the map resizes with the viewport; fullscreen map; footer on the first screen) |

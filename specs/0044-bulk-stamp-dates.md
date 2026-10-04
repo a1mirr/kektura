@@ -25,9 +25,9 @@ step instead of editing fourteen fields. It works on desktop and on a phone.
 
 ### Setting the date
 
-- **AC-4**: A sticky bar (bottom on mobile, top on desktop, never over the keyboard) shows the number selected, a date
-  field and an "Apply" button. The field has the rules of spec 0016 AC-2 and AC-5 (`min` 1938-01-01, `max` tomorrow in UTC,
-  a real date). Apply is disabled for an empty, invalid or out-of-range date and when nothing is selected.
+- **AC-4**: A sticky bar (bottom on mobile, kept inside the visible area while the on-screen keyboard is open; top on desktop) shows the number selected, a date
+  field and an "Apply" button. The field is the `yyyy-mm-dd` text field of spec 0016 AC-5 with its calendar button (AC-9),
+  and the same limits (a real date, `min` 1938-01-01, `max` tomorrow in UTC, spec 0016 AC-2). Apply is disabled for an empty, invalid or out-of-range date and when nothing is selected.
 - **AC-5**: Nothing is sent until Apply (spec 0016 AC-6: never save on `change`). While saving, the bar shows a pending
   state and a second press sends nothing.
 - **AC-6**: `setStampDates(placeKeys, extraIds, date)` is one server action: it only **updates** `stamped_on` of the
@@ -69,7 +69,8 @@ row; undo after Apply; a "same day for a whole stage" shortcut beyond AC-2's sel
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-2, AC-3, AC-4, AC-5 | planned: `src/components/BulkDateBar.test.tsx` |
+| AC-1, AC-2, AC-3 | planned: `src/components/StageSection.test.tsx`, `src/components/StageControls.test.tsx` (checkboxes on stamped rows only, select all per stage and overall, shift ranges in trail order) |
+| AC-4, AC-5 | planned: `src/components/BulkDateBar.test.tsx` (the field, Apply disabled states, nothing sent before Apply, pending); manual (a real phone keyboard): the bar stays visible. Last checked: never recorded. |
 | AC-6 | planned: `src/app/[locale]/dashboard/actions.test.ts`, plus a database test for the function if one is added |
 | AC-7, AC-8, AC-9, AC-10 | planned: `e2e/stamp-dates.spec.ts` (select, apply, the new month in the chart, 375 px, keyboard) |
 | AC-11 | `tests/messages.test.ts` |

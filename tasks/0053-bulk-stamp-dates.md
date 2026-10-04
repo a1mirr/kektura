@@ -12,7 +12,7 @@ phone.
 
 ## Done when
 
-- [ ] The open questions (the 200 limit, a per-stage shortcut, a mode versus visible checkboxes) are settled and the spec is
+- [ ] The open questions (the 500 limit, a per-stage shortcut, a mode versus visible checkboxes) are settled and the spec is
       `Accepted`
 - [ ] The selection mode, the bar, the server action and (if needed) the migration `0053_bulk_stamp_dates.sql`, local first, are
       built with the tests of the coverage table

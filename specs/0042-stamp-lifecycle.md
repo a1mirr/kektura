@@ -5,11 +5,13 @@ Owner code: `scripts/data/okt-stamp-dates.json` (new), `scripts/data/okt-retired
 `scripts/build-data.mjs`, `src/lib/progress.ts`, `src/lib/map-popups.ts`, `src/components/trail-map/*`,
 `src/components/StageSection.tsx`, `src/app/[locale]/dashboard/actions.ts`, `supabase/migrations/` (one per task)
 
-Amends, when built: [0001](0001-progress.md) AC-3 (walked stretches: waived places) and AC-7 (stage stamping skips retired
-rows); [0003](0003-map-route-planner.md) (popups and markers: required-from and moved notes, no retired rows); [0004](0004-trail-data.md) AC-9
-(retired rows are kept) and its regeneration steps; [0016](0016-stamp-dates.md) AC-2 and AC-4 (a retired stamp's latest date); [0001](0001-progress.md) AC-1 (the row count changes with retired rows); [0015](0015-about-page.md) (the trail facts and the freshness line stay true);
-[0017](0017-feedback.md) (the form accepts a prefilled stamp code); [0024](0024-friends-sharing.md) AC-7 and AC-12 (what a
-friend's functions return).
+Amends, when built: [0001](0001-progress.md) AC-1 (the row count changes with retired rows), AC-3 (walked stretches: waived
+places) and AC-7 (stage stamping skips retired rows); [0003](0003-map-route-planner.md) (popups and markers: required-from and
+moved notes, no retired rows); [0004](0004-trail-data.md) AC-1 to AC-3 (the order, the 161 places and the labels are checked on
+current rows only), AC-9 (retired rows are kept) and its regeneration steps; [0015](0015-about-page.md) (the trail facts and the
+freshness line stay true); [0016](0016-stamp-dates.md) AC-1 to AC-4 (a retired stamp is stamped with a chosen past date and
+edited under the same limit); [0017](0017-feedback.md) (the form accepts a stamp code from the link); [0024](0024-friends-sharing.md)
+AC-7 and AC-12 (what a friend's functions return).
 
 ## Goal
 
@@ -24,15 +26,15 @@ a rule they could not have known. It works on desktop and on a phone.
 ### Dates and sources
 
 - **AC-1**: A checkpoint has an optional `required_from` date (`YYYY-MM-DD`, nullable). Null means "required from the
-  beginning", which is every place that has no entry in the dates file. A place's `required_from` is the earliest of
+  beginning": the place has no entry in the dates file, or its entry has no `required_from` (a moved stamp that is not new). A place's `required_from` is the earliest of
   its variants' (spec 0001 AC-1).
 - **AC-2**: Dates come **only from official publications** of the MTSZ (kektura.hu, mtsz.org), never from guesses or
-  third parties. They live in one data file, `scripts/data/okt-stamp-dates.json`: one entry per stamp code with the
-  date, the URL of the publication that gives it and, only where that publication says so, a `tolerance_note` flag
-  (AC-15) and, for a moved stamp, `moved_on` (AC-31). `build-data.mjs` reads it (spec 0004: outputs are never edited by hand). Entries are added by hand when the MTSZ
+  third parties. They live in one data file, `scripts/data/okt-stamp-dates.json`: one entry per stamp code with any of the
+  optional dates `required_from` and `moved_on` (AC-31), the URL of the publication that gives each, and, only where that
+  publication says so, a `tolerance_note` flag (AC-15). `build-data.mjs` reads it (spec 0004: outputs are never edited by hand). Entries are added by hand when the MTSZ
   announces a change, like the stage table. The code is the **current** code in the seed: the MTSZ renames codes (see
   Notes), so an entry for an older code is entered under the code the seed has now.
-- **AC-3**: A test checks every entry: the code exists in the seed, the date is a real date, the source is an
+- **AC-3**: A test checks every entry: the code exists in the seed, every date present is a real date, the source is an
   `https://www.kektura.hu/...` or `https://www.mtsz.org/...` address, `tolerance_note` is a boolean when present, no code
   appears twice.
 
@@ -47,7 +49,7 @@ in the book, or the stretch is not verified; one who passed earlier is not missi
   stretch. If it is **on or after** `required_from`, the stamp is required and the place blocks the stretch like an
   unstamped place does today (spec 0001 AC-3: not verified).
 - **AC-5**: A user with stamps on both sides of a place whose `required_from` is later than both dates has the stretch
-  counted as walked although the place has no stamp. If they stamp it later (on any date) nothing is lost. Changing a
+  counted as walked although the place has no stamp. If they stamp it later (on any date) nothing is lost (the km then move to the later of the months, spec 0041 AC-6). Changing a
   neighbour's date (spec 0016, bulk: 0044) can make a stretch verified or unverified; the stage list says why (AC-14).
 - **AC-6**: Walked km, the stats of spec 0001 AC-4 and the monthly figures (spec 0041) all follow AC-4 and AC-5 and
   stay consistent: the months add up to the walked km. A stretch across a waived place is one stretch between the stamped
@@ -105,9 +107,12 @@ their record. Example: Vércverés replaced Nyírjesi-erdészház on 2014-11-21.
 - **AC-18**: A retired stamp is a checkpoint row that is **kept**: it has a `retired_on` date (the first day it is no
   longer valid), optionally the place that replaced it (`replaced_by`, a place key) and where it sat
   (`after_place_key`, the current place it followed in trail order, so it has a position in its stage). Current stamps
-  have `retired_on` null.
+  have `retired_on` null. A retired row is outside the 161 places and the trail order: its `seq` is above every current
+  row's, its `stage_seq` is null (its place in the list comes from `after_place_key`), its `km_from_start` is that of the
+  place it follows (not measured), and `buildPlaces` and the checks of spec 0004 AC-1 to AC-3 look at current rows only.
 - **AC-19**: Retired stamps come from `scripts/data/okt-retired-stamps.json`: code, name, stage, `after_place_key`,
-  `retired_on`, `replaced_by` and the official URL, under the rules of AC-2 and AC-3. `build-data.mjs` writes them as
+  `retired_on`, `replaced_by`, optional `lat` and `lng` (from an official source; without them the stamp is on no map) and
+  the official URL, under the rules of AC-2 and AC-3. `build-data.mjs` writes them as
   rows with `retired_on` set and never deletes one (this amends spec 0004 AC-9: rows the source no longer has are
   deleted, except retired ones).
 - **AC-20**: A user's stamps are never lost when a stamp is retired: regenerating the seed for a stamp that becomes
@@ -118,9 +123,11 @@ their record. Example: Vércverés replaced Nyírjesi-erdészház on 2014-11-21.
   retirement. With no stamped neighbour and no stamp of its own it is not shown.
 - **AC-22**: A toggle on the stage controls, "Show retired stamps" (off by default, remembered like the other stage-list
   preferences), shows every retired stamp, for a user who walked the old route without stamping neighbours first.
-- **AC-23**: A retired stamp can be stamped, and its date edited (`setStampDate`, spec 0016) or changed in bulk (spec
-  0044), only with a date before `retired_on`, plus the rules of spec 0016 AC-2. A later date is refused as `failed` without
-  database access and the date field's `max` is the day before.
+- **AC-23**: A retired stamp has no "today" default (spec 0016 AC-1 would date it after `retired_on`): ticking it opens its
+  date field and the stamp is created with the date the user enters, which must be before `retired_on` (and obey spec 0016
+  AC-2). Editing the date (`setStampDate`) or changing it in bulk (spec 0044) follows the same rule. Unlike spec 0016 AC-3
+  (an out-of-range date on creation is ignored and the default applies), a date on or after `retired_on` is refused as
+  `failed` without database access, and the field's `max` is the day before.
 - **AC-24**: Retired stamps never count towards "N / 161", the walked km, the stage's "complete" state or the monthly
   counts (spec 0041). They show on their own: "Retired stamps collected: n" under the stage list and a separate mark
   in the stage row. (The old route is not in the data, so no stretch can be drawn or measured.) A retired stamp never
@@ -162,8 +169,10 @@ that anyone who relies on the site's map finds it.
   code. This is the recipe of AC-13.
 - **AC-33**: The site says how fresh its trail data is: "Trail data: MTSZ file of 15 Apr 2026" (the date of the GPX
   file used, written into the generated data by `build-data.mjs`), on the About page and under the map.
-- **AC-34**: A stamp's popup has a "Report a wrong location" link to the feedback form (spec 0017), prefilled with the
-  stamp's code and name (public data; nothing about the user), using the existing form, rate limit and honeypot.
+- **AC-34**: A stamp's popup has a "Report a wrong location" link to the feedback form (spec 0017), `?stamp=<code>`: only a
+  stamp code travels in the URL, it is checked against the seed, and the stamp's name is looked up on the server; the link
+  carries no free text, so nobody can craft a link that puts words into a visitor's form. The form uses its existing rate
+  limit and honeypot.
 - **AC-35**: The notes, ring and link work on the dashboard map and, where a friend's map exists (spec 0043), on it, at
   320 and 375 px and on desktop; the link has a touch target of at least 44 x 44 px.
 
@@ -264,7 +273,7 @@ re-check against the source, when entering it):
 - Today a move already reaches users once the seed is regenerated: `build-data.mjs` upserts by `code` and rewrites
   `lat`, `lng`, `description` and `km_from_start`. What is missing is the routine (AC-32), the freshness (AC-33), the
   note (AC-31) and the report link (AC-34). The map data is the generated JSON in `public/data/` plus the database rows,
-  both from one run of the build script (a test compares them).
+  both from one run of the build script; a test that they agree on every stamp's coordinates is planned (AC-29).
 - `buildPlaces` and `walkedRanges` take stamps without dates today: the rule needs the dates in them (and in the
   friends' summary, `summarizeFriend`).
 
@@ -283,8 +292,8 @@ re-check against the source, when entering it):
 | AC-22, AC-24 (the toggle, its memory, the count and the mark) | planned: `src/components/StageControls.test.tsx`, `src/components/StageSection.test.tsx` |
 | AC-23 | planned: `src/app/[locale]/dashboard/actions.test.ts`, `src/lib/stamp-date.test.ts` |
 | AC-25, AC-26, AC-27 | planned: `src/components/StageSection.test.tsx`, `src/lib/friends.test.ts`, `e2e/stamping.spec.ts` (375 px) |
-| AC-28, AC-29, AC-30 | planned: `tests/trail-data.test.ts` (a moved coordinate keeps ids and stamps; the distance to the line within the limit), `src/lib/map-popups.test.ts` |
+| AC-28, AC-29, AC-30 | planned: `tests/trail-data.test.ts` (a moved coordinate keeps ids and stamps; the distance to the line within the limit; the JSON and the seed agree on every stamp's coordinates), `src/lib/map-popups.test.ts` |
 | AC-31 | planned: `src/lib/stamp-moves.test.ts` (the 100 m threshold, the 180-day window), `src/lib/map-layers.test.ts` (the ring) |
 | AC-32 | manual (a real deploy and production data): follow the checklist of spec 0004 and run the read-only query on production. Last checked: never recorded. |
 | AC-33 | planned: `tests/trail-data.test.ts` (the generated data carries the file date), `e2e/about.spec.ts` |
-| AC-34, AC-35 | planned: `e2e/map.spec.ts` (the link and its prefill; 375 px) |
+| AC-34, AC-35 | planned: `e2e/map.spec.ts` (the link; 375 px), `src/lib/feedback.test.ts` (only a known stamp code is accepted, nothing else from the URL reaches the form) |
