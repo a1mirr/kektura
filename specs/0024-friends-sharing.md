@@ -96,7 +96,7 @@ page's "Send request" is a plain form that posts to a server action ending in a 
 - **AC-17**: Pressing one of these buttons changes it at once, before the server answers: it is disabled and busy
   (`aria-busy`), a spinner replaces its label, and the label stays in the layout and for screen readers (transparent), so the button keeps its size and its name.
   A second press sends nothing more. The buttons of one row (approve and ignore of one request, sharing and remove of one
-  friend, regenerate) share one busy state: while one runs, the others of the row are disabled too, and the buttons of other
+  friend, regenerate) share one busy state: while one runs, the other buttons of the row are disabled too (opening a confirmation question, which runs nothing, stays possible), and the buttons of other
   rows are not.
 - **AC-18**: When an action is done the page says what happened, at the top and in the page's language: a success
   ("Name saved", "Link regenerated", "Friend request approved" or "ignored", "Friend removed", "Sharing stopped" or "started",

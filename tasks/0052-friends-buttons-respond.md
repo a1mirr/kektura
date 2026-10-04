@@ -84,6 +84,7 @@ success, as today); messages on pages other than Friends (the stamp buttons have
 | R-16 | `e2e/friends.spec.ts` (375 and 320 px, three languages: target size, no sideways scroll) |
 | R-17 | `src/app/[locale]/(pages)/friends/actions.test.ts` is unchanged and green |
 | R-18 | `src/components/FriendActionButton.test.tsx` (the classes: jsdom has no hover), `e2e/friends.spec.ts` (the colour changes under the pointer and while pressed) |
+
 ## Spec changes
 
 Spec 0024 (Sharing progress with friends): new section "The Friends page responds" with AC-17 (pending state, no second press, the
