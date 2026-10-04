@@ -5,8 +5,9 @@ Owner code: `src/components/AccountMenu.tsx`, `src/components/PageShell.tsx` (ne
 `src/app/[locale]/dashboard/page.tsx`, every page's `<main>`, `src/components/Footer.tsx`, `messages/*.json`
 (`accountMenu.*`)
 
-Folds into [0014](0014-pages-and-settings.md) (AC-14, the header link to the account page) and, with
-[0029](0029-site-logo-link.md), into one description of the page frame when it is built.
+Amends, when built: [0014](0014-pages-and-settings.md) AC-14 (the header link becomes the menu) and, if the page is
+renamed (see Open questions), AC-15 and AC-18 (title, `h1`, About text). Shares the header strip with
+[0029](0029-site-logo-link.md).
 
 ## Goal
 
@@ -18,22 +19,24 @@ row of links, and every page uses the same, wider content column. Both work on d
 
 ### The account menu
 
-- **AC-1**: Every page a signed-in user sees shows one account button in the top-right corner of the page header,
-  with the user's display name (spec 0024 AC-1) or, while there is none, the word "Account". It is the only account
-  entry of the header: there are no separate "Friends" and "Account" links.
+- **AC-1**: Every page a signed-in user sees shows one account button in the top-right corner of the header strip that
+  sits above the page content (a strip shared with the logo of spec 0029; the locale layout renders it, so a page does
+  not draw its own). The button is labelled "Account" (`ru`: Аккаунт, `hu`: Fiók). It is the only account entry of the
+  header: there are no separate "Friends" and "Account" links. The 404 page, which has no session, shows no menu.
 - **AC-2**: Activating the button opens a dropdown with three entries, in this order: **My stats**, **Friends** (only
   while the `friends` flag is on, spec 0023) and **Settings**. Each entry is a link to its page in the current language.
   `ru`: Моя статистика, Друзья, Настройки. `hu`: Statisztikáim, Barátok, Beállítások. "Sign out" is not an entry: it stays
-  on the settings page (spec 0014 AC-16).
+  on the page that Settings leads to (spec 0014 AC-16).
 - **AC-3**: **My stats** leads to `/stats` (spec 0041). **Settings** leads to `/account`, which keeps sign out and
-  account deletion (spec 0014).
-- **AC-4**: The menu follows the usual menu behaviour. It opens and closes with a click or tap on the button, with
-  Enter and Space; Escape closes it and returns focus to the button; a click or tap outside closes it; following a
-  link closes it. Arrow keys move between entries. The button has `aria-haspopup`, `aria-expanded` and an accessible
-  name; the open list is `role="menu"` with `role="menuitem"` entries.
+  account deletion (spec 0014). The menu entry, the page's document title and `h1`, and the About page's text name that
+  page with one word (spec 0014 AC-18).
+- **AC-4**: The menu is a disclosure, not an application menu: the button has `aria-expanded` and an accessible name,
+  and the open list is a plain list of links (no `role="menu"`). It opens and closes with a click or tap and with Enter and
+  Space; with JavaScript, Escape closes it and returns focus to the button, a click or tap outside closes it, and
+  following a link closes it. Tab moves through the entries in order.
 - **AC-5**: The entry of the current page is marked (`aria-current="page"` and visibly).
 - **AC-6**: Without JavaScript, or before hydration, the entries are still reachable: the menu is a
-  `<details>`/`<summary>` or an equivalent that opens without script.
+  `<details>`/`<summary>` whose open state does not need script; the behaviour of AC-4 beyond opening is an enhancement.
 - **AC-7**: Desktop: the list is anchored under the button, at least 200 px wide, never wider than the viewport.
   Mobile (375 px and 320 px): the list stays inside the viewport (right-aligned to the button, no horizontal scroll),
   and the button and every entry have a touch target of at least 44 x 44 px.
@@ -77,8 +80,15 @@ switcher into the menu; a new visual design; a sidebar; a "sign out" entry in th
   on every page (and the language switcher with them, see 0029's open question)?
 - **A page for "My stats".** This draft assumes a page (spec 0041), because the chart needs room and the dashboard is
   long. The alternative is a section of the dashboard.
-- **A long display name** on the button: this draft truncates to one line with an ellipsis and shows the full name at
-  the top of the dropdown.
+- **The name of the settings page.** Spec 0025 renamed "Settings" to "Account" because the page holds no real settings.
+  The owner asked for "settings" in the menu. Keep the entry "Settings" and rename the page, its title and the About text
+  to match (amending 0014 AC-15 and AC-18), or label the entry "Account"? This draft assumes the first, with one word
+  everywhere.
+- **Static pages.** About, changelog, links, feedback and the landing page are statically generated today. A menu that
+  needs the session in the layout would make them render per request. Proposal: on those pages the menu is a client
+  island that asks for the session after load (a signed-out visitor sees nothing, as now), so the pages stay static.
+- **The label.** The button says "Account" rather than the user's display name, because the display name is editable only
+  on the Friends page, which is behind a flag.
 - **How wide.** `max-w-6xl` (1152 px) is a guess; `max-w-5xl` is safer for text, `max-w-7xl` suits a big map. A look at
   the dashboard at 1440 px at each of these settles it.
 - **Two columns for the stage list** on desktop: stage sections can be tall when open and may leave a gap on one side.
@@ -86,6 +96,9 @@ switcher into the menu; a new visual design; a sidebar; a "sign out" entry in th
 
 ## Notes
 
+- There is no shared header today: the dashboard, account and friend pages draw their own `<header>`, the about,
+  changelog, links and feedback pages have none, and the language switcher exists only on the landing page and the
+  dashboard. The menu therefore needs the shared strip of spec 0029 (or one built here) in the locale layout.
 - Today the dashboard, account, about, changelog, feedback, links and friend pages use `mx-auto max-w-3xl px-6 py-8`,
   the friends list `max-w-xl p-4`, the invite `max-w-md`, and `Footer` `max-w-3xl`. The friends link is
   `friendsEnabled()` in the dashboard header: the menu renders its entries on the server so the flag is read at
@@ -97,9 +110,9 @@ switcher into the menu; a new visual design; a sidebar; a "sign out" entry in th
 | AC | Test |
 | --- | --- |
 | AC-1, AC-2, AC-3, AC-5, AC-8 | planned: `e2e/account-menu.spec.ts` (signed in: entries, order, flag off hides Friends; signed out: no menu) |
-| AC-4 | planned: `src/components/AccountMenu.test.tsx` (open and close, Escape, outside click, arrow keys, ARIA) |
+| AC-4 | planned: `src/components/AccountMenu.test.tsx` (open and close, Escape, outside click, focus return, ARIA) |
 | AC-6 | planned: `e2e/account-menu.spec.ts` (JavaScript disabled: the entries open and navigate) |
 | AC-7 | planned: `e2e/account-menu.spec.ts` (375 and 320 px: list inside the viewport, target sizes) |
 | AC-9 | `tests/messages.test.ts` |
-| AC-10 | planned: `tests/page-shell.test.ts` (no page file has its own `max-w-` main; each imports `PageShell`) |
+| AC-10 | planned: `tests/page-shell.test.ts` (no page file has a container of its own with `mx-auto max-w-`, whether `<main>` or `<div>`; each page imports `PageShell`, except the hero pages and the invite card named in AC-10) |
 | AC-11, AC-12, AC-13, AC-14, AC-15, AC-16, AC-17 | planned: `e2e/layout.spec.ts` (content width and no overflow at 320, 375, 768, 1024 and 1440 px on each page; fullscreen map; footer on the first screen) |

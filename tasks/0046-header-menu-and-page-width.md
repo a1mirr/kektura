@@ -2,7 +2,7 @@
 
 Status: Open
 Specs: [0040](../specs/0040-header-menu-and-page-width.md) AC-1 to AC-17 (added), [0014](../specs/0014-pages-and-settings.md) AC-14
-(changed: the header link becomes the menu), [0029](../specs/0029-site-logo-link.md) (the header strip, to be settled together)
+(changed: the header link becomes the menu) and AC-15, AC-18 if the page is renamed, [0029](../specs/0029-site-logo-link.md) (the header strip, to be settled together)
 
 ## Goal
 

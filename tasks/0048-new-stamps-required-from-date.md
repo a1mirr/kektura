@@ -3,7 +3,7 @@
 Status: Open
 Specs: [0042](../specs/0042-stamp-lifecycle.md) AC-1 to AC-17 (added), [0001](../specs/0001-progress.md) AC-3 (changed: waived
 places), [0004](../specs/0004-trail-data.md) (the dates file and the recipe for adding a stamp), [0024](../specs/0024-friends-sharing.md)
-AC-8 (relied on: a friend's figures equal the owner's)
+AC-7, AC-8, AC-12 (changed or relied on: a friend's figures equal the owner's, and the friend functions return more)
 
 ## Goal
 
@@ -15,8 +15,8 @@ progress.
 
 - [ ] The open questions of spec 0042 for new stamps are settled (which neighbour date, honest dates, the tolerance, friends'
       waivers) and the part of the spec is `Accepted`
-- [ ] `scripts/data/okt-stamp-dates.json` holds the fourteen entries of spec 0042's notes, each re-checked against its
-      source and against the seed (including `OKTPH_85_2`), and the migration `0048_checkpoint_required_from.sql` is applied
+- [ ] `scripts/data/okt-stamp-dates.json` holds the fifteen codes (fourteen places) of spec 0042's notes, each re-checked against
+      its source and entered under the seed's current code (Lokó-pihenő is `OKTPH_84_B` there), and the migration `0048_checkpoint_required_from.sql` is applied
       locally first
 - [ ] The rule, the numbering safeguards (ids kept, labels display-only, counts from data) and the interface (date, hint, waived
       state) are built with the tests of the coverage table

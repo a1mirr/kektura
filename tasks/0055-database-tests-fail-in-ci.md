@@ -11,8 +11,9 @@ tests green without running them.
 
 ## Done when
 
-- [ ] One helper in `e2e/local-db.ts` decides skip or fail from `REQUIRE_LOCAL_DB`, and every database test file uses it (today
-      `tests/friends-migration.test.ts`; the others when they land)
+- [ ] One helper in `e2e/local-db.ts` decides skip or fail from `REQUIRE_LOCAL_DB`, and all three database test files use it:
+      `tests/friends-migration.test.ts`, `tests/database-rules.test.ts` and `tests/seed-cleanup.test.ts` (which has its own
+      `hasDatabase()` today)
 - [ ] The E2E job's database step sets the variable and fails when no test ran or one was skipped
 - [ ] The helper's own test and the repository test over the database test files exist
 - [ ] The specs listed above mirror the code as built (spec 0034 AC-6); fresh-context review done
@@ -24,4 +25,4 @@ Filled in when the task is built.
 ## Notes
 
 From a fresh-context review finding on 2026-10-04: the database tests skip silently when Docker cannot be reached; all database
-test files share that behaviour, and it was offered as a follow-up ("Fail DB tests in CI instead of skipping").
+test files share that behaviour (seed-cleanup through its own check), and it was offered as a follow-up ("Fail DB tests in CI instead of skipping").

@@ -5,7 +5,7 @@ Owner code: `src/lib/compare.ts` (new, pure functions), `src/app/[locale]/(pages
 `src/app/[locale]/(pages)/friends/[id]/page.tsx`, `src/components/FriendActionButton.tsx` (new),
 `src/components/TrailMap.tsx` / `src/components/trail-map/*`, `src/lib/friends.ts`
 
-Folds into [0024](0024-friends-sharing.md) (AC-7, AC-8, AC-14) when it is built.
+Amends, when built: [0024](0024-friends-sharing.md) AC-7 and AC-8 (a friend's page gains the comparison and a map; its "Out of scope" excluded a friend's map) and AC-14 (the actions' feedback; their rules are unchanged).
 
 ## Goal
 
@@ -38,7 +38,8 @@ cannot be pressed twice, and the page says what happened.
 - **AC-7**: A toggle switches the map between "both" (default) and each person's own map (mine, theirs); "mine" and
   "theirs" show the view the owner sees on their dashboard (the blue walked line, spec 0003).
 - **AC-8**: Nothing the friend did not already share is shown: which places they stamped, never dates (friends do not see
-  each other's dates). The page adds no database read of the friend's data beyond `getFriendProgress`.
+  each other's dates). The page adds no database read of the friend's data beyond `getFriendProgress` and, once spec 0042
+  is built, the waivers function of its AC-12.
 - **AC-9**: A friend who is not sharing, a pending friend or an unknown id still ends on the 404 of spec 0024; no
   comparison is computed.
 - **AC-10**: The section works at 375 px and 320 px (cards in two columns, the map full width at a usable height, the
@@ -60,7 +61,9 @@ whose server action ends with a redirect, so between the click and the reload no
   (`role="status"`, `aria-live="polite"`); a failure shows the existing error text with `role="alert"`. A message goes away
   on the next action.
 - **AC-14**: Remove-friend and regenerate-link ask for confirmation first, in the page (not `window.confirm`), and the
-  regenerate step says that the old link stops working. Cancel and Escape dismiss it.
+  regenerate step says that the old link stops working. The confirmation is itself a plain form (a `<details>` that reveals
+  a confirming button), so it also works without JavaScript and nothing destructive runs on the first press; Cancel
+  closes it, and Escape does too with JavaScript.
 - **AC-15**: The buttons keep working without JavaScript and before hydration (they stay plain forms posting to the page):
   the pending state is an enhancement. With JavaScript off, behaviour is that of spec 0024 (a reload, `?error=` on
   failure).

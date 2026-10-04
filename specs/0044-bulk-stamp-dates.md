@@ -4,7 +4,7 @@ Status: Draft
 Owner code: `src/lib/stamp-date.ts`, `src/app/[locale]/dashboard/actions.ts`, `src/components/BulkDateBar.tsx` (new),
 `src/components/StageSection.tsx`, `src/components/StageControls.tsx`
 
-Folds into [0016](0016-stamp-dates.md) (it lists editing many dates at once as out of scope) when it is built.
+Amends, when built: [0016](0016-stamp-dates.md) (its out-of-scope line about editing many dates; AC-4 gains a bulk sibling).
 
 ## Goal
 

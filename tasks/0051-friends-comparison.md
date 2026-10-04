@@ -2,7 +2,7 @@
 
 Status: Open
 Specs: [0043](../specs/0043-friends-comparison-and-feedback.md) AC-1 to AC-10 (added), [0024](../specs/0024-friends-sharing.md) AC-7, AC-8
-(relied on), [0003](../specs/0003-map-route-planner.md) (map layers)
+(changed: the page gains the comparison and a friend's map), [0003](../specs/0003-map-route-planner.md) (map layers)
 
 ## Goal
 

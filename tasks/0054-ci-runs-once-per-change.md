@@ -12,7 +12,8 @@ Stop every commit pushed to an open pull request from running both CI jobs twice
 ## Done when
 
 - [ ] `ci.yml` has the new trigger and a concurrency group, and `tests/ci-workflow.test.ts` checks them
-- [ ] `CLAUDE.md` (the line saying CI runs on every push) and spec 0007 AC-1 say pull request updates and `main`
+- [ ] Everything that says CI runs "on every push" says pull request updates and `main` instead: `CLAUDE.md` (workflow intro),
+      `README.md` (the `npm run check` bullet), spec 0007 (its Goal and AC-1) and the test that matches the trigger
 - [ ] After the first merge, a run on `main` exists (the manual row of the spec is dated)
 - [ ] The specs listed above mirror the code as built (spec 0034 AC-6); fresh-context review done
 

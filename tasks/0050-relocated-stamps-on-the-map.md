@@ -2,7 +2,7 @@
 
 Status: Open
 Specs: [0042](../specs/0042-stamp-lifecycle.md) AC-28 to AC-35 (added), [0004](../specs/0004-trail-data.md) (the regeneration
-recipe), [0003](../specs/0003-map-route-planner.md) (popups and markers), [0017](../specs/0017-feedback.md) (the report link)
+recipe), [0003](../specs/0003-map-route-planner.md) (popups and markers), [0017](../specs/0017-feedback.md) (the report link: the form accepts a prefilled stamp code)
 
 ## Goal
 

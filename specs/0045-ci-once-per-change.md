@@ -1,18 +1,17 @@
 # 0045: CI runs once per change, and its database tests cannot skip
 
 Status: Draft
-Owner code: `.github/workflows/ci.yml`, `e2e/local-db.ts`, every `tests/*-migration.test.ts` (today
-`tests/friends-migration.test.ts`)
+Owner code: `.github/workflows/ci.yml`, `e2e/local-db.ts`, `tests/friends-migration.test.ts`, `tests/database-rules.test.ts`,
+`tests/seed-cleanup.test.ts`
 
-Folds into [0007](0007-ci.md) (AC-1, the triggers; and the E2E job's steps) when it is built.
+Amends, when built: [0007](0007-ci.md) AC-1 (the triggers) and AC-2 (the database step of the E2E job).
 
 ## Goal
 
-CI should cost one run per change and should never go green having tested nothing. Today `ci.yml` triggers on both `push`
-and `pull_request`, so a commit pushed to an open pull request runs both jobs twice (typecheck, lint and unit tests; and the
-heavy end-to-end job with its Docker Supabase). And the database rule tests skip themselves when the local Supabase cannot
-be reached (`if (!local) return ctx.skip()`): right on a laptop without Docker, wrong in CI, where a failed `supabase start`
-would end the job green with every security test skipped.
+CI costs one run per change and never goes green having tested nothing. A change is tested once per pull request update
+(the merge result), and once on `main` after a merge, not twice for the same commit. The database rule tests skip when
+there is no local Supabase, which is right on a laptop without Docker and wrong in CI, where an unreachable database must
+fail the job instead of letting every security test pass unrun.
 
 ## Behaviour
 
@@ -26,10 +25,12 @@ would end the job green with every security test skipped.
   on.
 - **AC-3**: The job names stay "Typecheck, lint, unit tests" and "End-to-end tests"; the merge step in `CLAUDE.md` and any
   required status checks refer to them by name.
-- **AC-4**: A topic branch without a pull request is not tested by CI. `npm run check` and the Stop hook run the same
-  checks locally, and a pull request is the workflow's next step.
-- **AC-5**: A `concurrency` group per ref cancels the earlier run of a pull request when a new push arrives
-  (`cancel-in-progress` for `pull_request`, not for `main`).
+- **AC-4**: A topic branch without a pull request is not tested by CI, and neither is a pull request that has a merge
+  conflict (GitHub starts no `pull_request` run for it). `npm run check` and the Stop hook run the same checks locally,
+  and a pull request is the workflow's next step.
+- **AC-5**: A `concurrency` group per pull request cancels the earlier run when a new push arrives
+  (`cancel-in-progress` for `pull_request`). Runs on `main` are grouped by commit (`github.sha`), never cancelled and never
+  replaced by a later merge, so every merge commit is tested.
 
 ### Database tests that cannot skip
 
@@ -44,8 +45,11 @@ would end the job green with every security test skipped.
   database step fails when the number of tests that ran is 0 or any of those files' tests was skipped, so a future file that
   forgets the helper cannot hide.
 - **AC-9**: A test of the helper (pure, with the environment passed in) covers: not required and unreachable gives a skip;
-  required and unreachable gives a failure with the message; reachable gives neither. A repository test fails when a file
-  that imports `../e2e/local-db` lacks the helper or has a `ctx.skip()` of its own.
+  required and unreachable gives a failure with the message; reachable gives neither. All three database test files on
+  `main` use it: `tests/friends-migration.test.ts`, `tests/database-rules.test.ts` (both import `e2e/local-db` and call
+  `ctx.skip()` themselves today) and `tests/seed-cleanup.test.ts` (which has its own `hasDatabase()` and does not import
+  the helper). A repository test fails when a file under `tests/` that touches the database (imports `e2e/local-db`, or
+  defines its own reachability check) has a `ctx.skip()` or a `hasDatabase()` of its own instead of the helper.
 
 ## Out of scope
 
@@ -62,8 +66,8 @@ Running the database tests in the first job (it needs Docker and 15 more minutes
 ## Notes
 
 - The proposed trigger: `on: { push: { branches: [main] }, pull_request: }`. `backup.yml` has its own schedule.
-- A review finding led to the second half: three database test files share the skip; only
-  `tests/friends-migration.test.ts` is on `main` today, and the helper must cover the others when they land.
+- The three files named in AC-9 are the ones CI's "Database rule tests" step runs (spec 0007 AC-2). Two skip through
+  `local-db`'s `localSupabase()`, one through its own `hasDatabase()`.
 - In vitest the pattern is `it("…", (ctx) => { if (!local) return ctx.skip(); … })`: a helper such as `requireDb(ctx)` that
   skips or throws replaces each of those lines.
 
@@ -75,4 +79,4 @@ Running the database tests in the first job (it needs Docker and 15 more minutes
 | AC-2 | manual (a real GitHub Actions run): after the first merge, check that a run on `main` exists. Last checked: never recorded. |
 | AC-4 | manual (a real GitHub Actions run): push a branch without a pull request and check that no run starts. Last checked: never recorded. |
 | AC-6, AC-7, AC-9 | planned: `tests/local-db-helper.test.ts` and a repository test over the database test files |
-| AC-8 | planned: the CI step in `ci.yml`; checked by CI itself (a deliberately broken run is the check) |
+| AC-8 | manual (a real GitHub Actions run): stop the local Supabase step on a throwaway pull request and check that the database step fails. Last checked: never recorded. |

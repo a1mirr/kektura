@@ -5,8 +5,11 @@ Owner code: `scripts/data/okt-stamp-dates.json` (new), `scripts/data/okt-retired
 `scripts/build-data.mjs`, `src/lib/progress.ts`, `src/lib/map-popups.ts`, `src/components/trail-map/*`,
 `src/components/StageSection.tsx`, `src/app/[locale]/dashboard/actions.ts`, `supabase/migrations/` (one per task)
 
-Folds into [0001](0001-progress.md) (the walked-stretch rule, AC-3) and [0004](0004-trail-data.md) (the data and its
-regeneration, AC-9) when it is built.
+Amends, when built: [0001](0001-progress.md) AC-3 (walked stretches: waived places) and AC-7 (stage stamping skips retired
+rows); [0003](0003-map-route-planner.md) (popups and markers: moved notes, no retired rows); [0004](0004-trail-data.md) AC-9
+(retired rows are kept) and its regeneration steps; [0016](0016-stamp-dates.md) AC-2 (a retired stamp's latest date);
+[0017](0017-feedback.md) (the form accepts a prefilled stamp code); [0024](0024-friends-sharing.md) AC-7 and AC-12 (what a
+friend's functions return).
 
 ## Goal
 
@@ -25,10 +28,13 @@ a rule they could not have known. It works on desktop and on a phone.
   its variants' (spec 0001 AC-1).
 - **AC-2**: Dates come **only from official publications** of the MTSZ (kektura.hu, mtsz.org), never from guesses or
   third parties. They live in one data file, `scripts/data/okt-stamp-dates.json`: one entry per stamp code with the
-  date and the URL of the publication that gives it. `build-data.mjs` reads it (spec 0004: outputs are never
-  edited by hand). Entries are added by hand when the MTSZ announces a change, like the stage table.
+  date, the URL of the publication that gives it and, only where that publication says so, a `tolerance_note` flag
+  (AC-15). `build-data.mjs` reads it (spec 0004: outputs are never edited by hand). Entries are added by hand when the MTSZ
+  announces a change, like the stage table. The code is the **current** code in the seed: the MTSZ renames codes (see
+  Notes), so an entry for an older code is entered under the code the seed has now.
 - **AC-3**: A test checks every entry: the code exists in the seed, the date is a real date, the source is an
-  `https://www.kektura.hu/...` or `https://www.mtsz.org/...` address, no code appears twice.
+  `https://www.kektura.hu/...` or `https://www.mtsz.org/...` address, `tolerance_note` is a boolean when present, no code
+  appears twice.
 
 ### New stamps: the rule
 
@@ -44,7 +50,9 @@ in the book, or the stretch is not verified; one who passed earlier is not missi
   counted as walked although the place has no stamp. If they stamp it later (on any date) nothing is lost. Changing a
   neighbour's date (spec 0016, bulk: 0044) can make a stretch verified or unverified; the stage list says why (AC-14).
 - **AC-6**: Walked km, the stats of spec 0001 AC-4 and the monthly figures (spec 0041) all follow AC-4 and AC-5 and
-  stay consistent: the months add up to the walked km. A place without a date behaves exactly as before.
+  stay consistent: the months add up to the walked km. A stretch across a waived place is one stretch between the stamped
+  places on either side of it, dated by the later of their two dates (spec 0041 AC-6). A place without a date behaves
+  exactly as before.
 - **AC-7**: The count "N / 161" keeps its denominator when a place is waived: the waiver concerns stretches. A waived
   place is shown as "not required for your walk" and is not counted as missing in its stage.
 - **AC-8**: A new place inside a stretch a user had already walked does not reduce that user's progress when they
@@ -69,7 +77,8 @@ app shows (`19.6`, from the stage table's order) and the trail order shift for t
   progress) come from the data, never from a constant, so a new place changes them in the same change as the seed.
 - **AC-12**: A friend's figures equal the friend's own dashboard (spec 0024 AC-8), waived places included. Friends'
   dates are not shared, so the waivers are decided on the server from the friend's own stamp dates and only their result
-  (which places are waived) is shared, never the dates.
+  is shared, never the dates. (Open question: the set of waived places itself tells a friend that the other walked there
+  before a date.) This changes what spec 0024 AC-12 says the friend functions return (only the friend's id and place ids).
 - **AC-13**: Adding a stamp is one recipe in the repository (spec 0004, "Regenerating"): the new GPX and stage table, a
   dates entry, the seed, the checks of AC-9 to AC-11, and the changelog line where users can see the change.
 
@@ -109,12 +118,14 @@ their record. Example: Vércverés replaced Nyírjesi-erdészház on 2014-11-21.
   retirement. With no stamped neighbour and no stamp of its own it is not shown.
 - **AC-22**: A toggle on the stage controls, "Show retired stamps" (off by default, remembered like the other stage-list
   preferences), shows every retired stamp, for a user who walked the old route without stamping neighbours first.
-- **AC-23**: A retired stamp can be stamped (a date set) only with a date before `retired_on`, plus the rules of spec
-  0016 AC-2. A later date is refused as `failed` without database access and the date field's `max` is the day before.
+- **AC-23**: A retired stamp can be stamped, and its date edited (`setStampDate`, spec 0016) or changed in bulk (spec
+  0044), only with a date before `retired_on`, plus the rules of spec 0016 AC-2. A later date is refused as `failed` without
+  database access and the date field's `max` is the day before.
 - **AC-24**: Retired stamps never count towards "N / 161", the walked km, the stage's "complete" state or the monthly
   counts (spec 0041). They show on their own: "Retired stamps collected: n" under the stage list and a separate mark
   in the stage row. (The old route is not in the data, so no stretch can be drawn or measured.) A retired stamp never
-  blocks a stretch: it is a record, not a requirement.
+  blocks a stretch: it is a record, not a requirement. It is also left out of "Stamp stage" (spec 0001 AC-7), the map's
+  markers, the route planner and the hops, although its row has coordinates.
 - **AC-25**: A retired stamp's row carries a short note, visible without a hover, in three languages: "Retired stamp:
   valid until 20 Nov 2014. Replaced by Vércverés." The replacement is a link to its row when there is one. The row is
   muted with a "retired" badge (not by colour alone) and its checkbox's accessible name includes "retired". The
@@ -145,15 +156,15 @@ that anyone who relies on the site's map finds it.
   is now by the lookout. If you use an older map or booklet, check the new place." It says only what the data holds
   (the date and the new description), not how far or which way. Its marker on the map has a ring (not colour alone).
 - **AC-32**: A move reaches the site as one routine: the new MTSZ file, `node scripts/build-data.mjs ...`, the checks,
-  the seed applied to production, the reference-data cache expired (spec 0009: otherwise the old place is served for up
-  to 24 hours) and the deploy, ending with a read-only check that production serves the new coordinates for the moved
+  the seed applied to production, the reference-data cache expired (spec 0002 AC-15: otherwise the old place is served for
+  up to 24 hours) and the deploy, ending with a read-only check that production serves the new coordinates for the moved
   code. This is the recipe of AC-13.
 - **AC-33**: The site says how fresh its trail data is: "Trail data: MTSZ file of 15 Apr 2026" (the date of the GPX
   file used, written into the generated data by `build-data.mjs`), on the About page and under the map.
 - **AC-34**: A stamp's popup has a "Report a wrong location" link to the feedback form (spec 0017), prefilled with the
   stamp's code and name (public data; nothing about the user), using the existing form, rate limit and honeypot.
-- **AC-35**: The notes, ring and link work on the dashboard map and a friend's map, at 320 and 375 px and on desktop;
-  the link has a touch target of at least 44 x 44 px.
+- **AC-35**: The notes, ring and link work on the dashboard map and, where a friend's map exists (spec 0043), on it, at
+  320 and 375 px and on desktop; the link has a touch target of at least 44 x 44 px.
 
 ## Out of scope
 
@@ -187,10 +198,15 @@ letting a user declare their own waivers.
   booklet?
 - **Per-month chart.** AC-24 leaves retired stamps out; a stamp collected in June 2013 is still a stamp that month.
   Include it in the month's stamp count of spec 0041, with km untouched?
+- **Stamp codes change.** The Lokó-pihenő case above shows the MTSZ renumbering codes, so a code is not a permanent identity
+  for the dates file or for users' stamps. Spec 0004 AC-9 covers a dropped code only when the place key stays. Does a
+  renumbering need its own rule (a mapping from old to new code kept in the data)?
 - **Detecting changes.** Nothing notices a change on the MTSZ site; the dates, the files and the seed are entered by hand.
   A scheduled check of the MTSZ news and GPX file that opens an issue would close the gap. Wanted, as a task of its own?
 - **Friends and waivers.** AC-12 proposes a `security definer` function that returns only the waived place keys for an
-  accepted, sharing friend. Acceptable?
+  accepted, sharing friend. But a waived place is an unstamped place walked before a date, so the set discloses a coarse
+  walk date, against spec 0024's promise that friends see no dates. Acceptable, or should a friend's page instead show
+  numbers that may differ from their own dashboard (with a note), or only totals computed on the server?
 
 ## Notes
 
@@ -200,7 +216,7 @@ re-check against the source, when entering it):
 | Code | Place | Required from | Source |
 | --- | --- | --- | --- |
 | `OKTPH_103` | Vércverés (replaced Nyírjesi-erdészház) | 2014-11-21 | [list of new stamps](https://www.kektura.hu/hir/az-elmult-evek-uj-kektura-belyegzohelyeinek-listaja) |
-| `OKTPH_85_2` | Lokó-pihenő | 2017-05-26 | same list |
+| `OKTPH_84_B` | Lokó-pihenő (listed by the MTSZ as `OKTPH_85_2`) | 2017-05-26 | same list |
 | `OKTPH_142` | Nagy-nyugodó | 2017-06-11 | same list |
 | `OKTPH_31_B` | Csobánc | 2017-10-27 | same list |
 | `OKTPH_132_B_1`, `_2` | Encs | 2022-05-01 | same list |
@@ -215,8 +231,9 @@ re-check against the source, when entering it):
 | `OKTPH_126_B` | Martonyi kolostorrom | 2026-06-11 | same (printed there as `OKTHP_126_B`, a typo; the seed has `OKTPH_126_B`) |
 
 - Not a new place: Bodó-rét (`OKTPH_148`) got a new imprint in 2025. The new stamps of the Alföldi and Dél-dunántúli trails
-  are not part of this app. Lokó-pihenő `OKTPH_85_2` was not found among the seed's codes on a quick look (`OKTPH_85`,
-  Magyarkút, is): check the code before entering it.
+  are not part of this app. The 2017 list calls Lokó-pihenő `OKTPH_85_2`; the seed has it as `OKTPH_84_B` (stage 18, place 1;
+  `OKTPH_85` is Magyarkút), so the MTSZ has renumbered codes since: enter dates by the seed's code, and match an old
+  announcement to its place by name and position, not by the code printed in it.
 - The 2025 announcement states the rule of AC-4: a hiker who completed a section before the date need not go back for
   the stamp; one who completes it after must have it. The current stamp tables are PDFs on kektura.hu's
   "okt-szakaszok" page; they list the stamps now valid, not when each was introduced, so the news posts remain the

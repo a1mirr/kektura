@@ -2,7 +2,9 @@
 
 Status: Open
 Specs: [0042](../specs/0042-stamp-lifecycle.md) AC-18 to AC-27 (added), [0004](../specs/0004-trail-data.md) AC-9 (changed: retired
-rows are kept), [0016](../specs/0016-stamp-dates.md) AC-2 (relied on: date rules)
+rows are kept), [0016](../specs/0016-stamp-dates.md) AC-2 and AC-4 (changed: a retired stamp's latest date), [0001](../specs/0001-progress.md) AC-7
+(changed: stage stamping skips retired rows), [0003](../specs/0003-map-route-planner.md) (no retired markers), [0024](../specs/0024-friends-sharing.md)
+AC-12 (changed: the friend functions skip them)
 
 ## Goal
 

@@ -4,8 +4,8 @@ Status: Draft
 Owner code: `src/lib/progress.ts` (`stampsPerMonth`, or a new `monthlyProgress`), `src/components/StampsChart.tsx`,
 `src/app/[locale]/stats/page.tsx` (new), `src/app/[locale]/account/page.tsx`
 
-Folds into [0001](0001-progress.md) (AC-5, the per-month counting) and [0014](0014-pages-and-settings.md) (AC-8, where
-the chart is shown) when it is built.
+Amends, when built: [0001](0001-progress.md) AC-5 (per-month counting: the months are now all shown, and carry stages
+and km) and [0014](0014-pages-and-settings.md) AC-8 (the chart leaves `/account`, replaced by AC-1 here).
 
 ## Goal
 
@@ -37,7 +37,9 @@ It works on desktop and on a phone.
   (spec 0001 AC-3) is walked when the second of the two is stamped, and its km belong to the month of the **later** of
   its two stamp dates. So a stamp placed next to a stamp of an earlier month adds that whole stretch to *this*
   month, and the km of all months add up to the walked km of the dashboard (spec 0001 AC-4, rounded to 0.1). A
-  stretch is never counted twice and never lost.
+  stretch is never counted twice and never lost. A stretch that runs across a place waived under spec 0042 (it has no
+  stamp and so no date) is one stretch between the stamped places on either side of it, dated by the later of their two
+  dates.
 - **AC-7**: Changing a stamp's date (spec 0016, bulk: spec 0044) moves the stamp and the km that depend on it to the
   new month; removing a stamp removes the stretches it made walked, from the month they were in.
 - **AC-8**: These are pure functions of the stamps and the places; nothing is read or computed in the component. They
@@ -47,8 +49,9 @@ It works on desktop and on a phone.
 
 - **AC-9**: Hovering (desktop) or tapping (mobile) a bar opens a tooltip with the month's full name and year
   (localized), the number of stamps, the km (rounded to 0.1, with the unit) and the stages ("Stages 3, 4, 5", runs
-  abbreviated as "Stages 3-7", one line at most). A month of 0 says "No stamps this month". Tapping toggles the
-  tooltip, it needs no hover, and keyboard focus on a bar shows it too.
+  abbreviated as "Stages 3-7", one line at most). A month with no place and no extra stamp says "No stamps this
+  month"; a month with only extra stamps names how many. Tapping toggles the tooltip, it needs no hover, and keyboard
+  focus on a bar shows it too.
 - **AC-10**: The month axis labels every month, as short as it takes: a three-letter month, with the year under
   January and under the first bar, so months stay unambiguous without hiding any. When twelve labels do not fit at 320
   or 375 px, the chart scrolls horizontally inside its own frame (not the page) with a minimum bar width, instead of
@@ -68,9 +71,13 @@ cumulative line; exporting the data.
 
 ## Open questions
 
-- **Which month does a stretch belong to?** AC-6 uses the later of the two stamps. Stamps A (June), C (August), then B
-  (July) between them: A-B and B-C are both walked in July, because B is the later stamp of both pairs. Is that the
-  intended outcome?
+- **Which month does a stretch belong to?** AC-6 uses the later of the two stamps. Example: A is stamped in June and C in
+  August; B, between them, is stamped last, in September. A-B and B-C are both walked in September, because B is the later
+  stamp of both pairs. (Had B been stamped in July, A-B would count in July and B-C in August.) Is that the intended
+  outcome?
+- **A mistyped year.** Stamp dates run from 1938 (spec 0016 AC-2), so one wrong year gives a chart of a hundred empty
+  months. This draft shows every month of the span; the alternative is to show empty months only inside the last 60 and
+  fold older ones into a per-year bar.
 - **Stage numbers or names?** The tooltip lists the official stage numbers (1 to 27). The start and end towns would
   make it too long; leave them out?
 - **The toggle.** Is a Stamps/Km toggle wanted, or are km only in the tooltip? It is an addition to what was asked.
