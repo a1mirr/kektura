@@ -23,10 +23,13 @@ async function expectLogo(page: Page, locale: keyof typeof NAMES) {
   expect(box!.y).toBeLessThan(80); // below the test banner, above any page content
 }
 
+// Polled: after the viewport shrinks, a chart that measures its container (the account page's) takes a frame to follow,
+// and reading the width at once sees the old one.
 async function expectNoOverflow(page: Page, width: number) {
   await page.setViewportSize({ width, height: 800 });
-  const extra = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-  expect(extra).toBeLessThanOrEqual(0);
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth), { message: `sideways scroll at ${width} px` })
+    .toBeLessThanOrEqual(0);
 }
 
 test.describe("spec 0014: site logo", () => {
