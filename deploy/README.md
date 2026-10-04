@@ -50,12 +50,20 @@ Server-only values (`SITE_URL`, `FF_FRIENDS`, `TELEGRAM_*`) take effect with `pm
 
 1. compares the commit with the one production runs and **skips** it when only docs, specs, tests and repository
    tooling changed (`specs/`, `tests/`, `e2e/`, `.github/`, `.claude/`, `.githooks/`, `*.md`);
-2. applies the **migrations** production is missing (`scripts/migrate-production.mjs`, name order, each file in
+2. when a migration is missing (the migration script's own dry run says so), **backs up the user data first**: the
+   six tables of the weekly backup (spec 0012) are dumped by the same action
+   (`.github/actions/dump-user-data`) into the workflow artifact `pre-migration-<sha7>` of that run, kept 30 days
+   and not encrypted; a dump that fails or does not pass its check stops the deploy before any migration runs. A
+   deploy with no migration takes no dump. To restore after a bad migration see specs/0012-backups.md ("After a bad
+   migration"). It needs no new secret (`SUPABASE_DB_URL` is the one the weekly backup uses). The upload never
+   overwrites, so re-running the failed jobs of a run that already stored its backup fails at the upload: start a new
+   run by hand instead (Deploy, Run workflow, `dry_run` unticked);
+3. applies the **migrations** production is missing (`scripts/migrate-production.mjs`, name order, each file in
    its own transaction, recorded in `public.applied_migrations`);
-3. **pushes** the commit to the `production` remote, so the hook below builds it and reloads the app;
-4. runs a **smoke test** (`scripts/smoke-test.mjs`: `/en` and `/ru` answer 200, an unknown page 404, and a POST to the test server's dummy login `/auth/test-login`
+4. **pushes** the commit to the `production` remote, so the hook below builds it and reloads the app;
+5. runs a **smoke test** (`scripts/smoke-test.mjs`: `/en` and `/ru` answer 200, an unknown page 404, and a POST to the test server's dummy login `/auth/test-login`
    404, retried for two minutes);
-5. on any failure stops, writes in the job summary what state things are in, and sends a Telegram message when the
+6. on any failure stops, writes in the job summary what state things are in, and sends a Telegram message when the
    bot secrets exist. Nothing rolls back by itself.
 
 Run it by hand from the Actions tab (Deploy, Run workflow): with `dry_run` ticked (the default) it only says what it

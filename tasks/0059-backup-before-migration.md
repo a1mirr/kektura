@@ -1,7 +1,7 @@
 # 0059: A backup before every migration
 
-Status: Open
-Specs: [0012](../specs/0012-backups.md) and [0026](../specs/0026-automatic-deploy.md) (an AC each is added when this is built)
+Status: Done
+Specs: [0012](../specs/0012-backups.md) AC-5 (added), [0026](../specs/0026-automatic-deploy.md) AC-14 (added)
 
 ## Goal
 
@@ -42,15 +42,24 @@ secret if the artifacts should be encrypted.
 
 ## Done when
 
-- [ ] The composite action (the dump and its check, moved out of `backup.yml`), used by `backup.yml` and `deploy.yml`
-- [ ] A step in `deploy.yml` between the plan and the migration: dry run, then the dump when something is missing; a failing dump stops the chain and reaches the failure message
-- [ ] `tests/backup-workflow.test.ts` and `tests/deploy-workflow.test.ts` cover the requirements (the table lists live in the action only; the dump step comes after the plan and before the migration step; it runs only when a migration is missing; a failing dump stops the chain; the artifact name and retention; the dry run takes none; the secret goes through `env`)
-- [ ] The first deploy that has a migration is watched once (a `manual` row says when it was last checked)
-- [ ] The requirements are written into specs 0012 and 0026 as ACs, with their coverage rows (spec 0034 AC-6)
+- [x] The composite action (the dump and its check, moved out of `backup.yml`), used by `backup.yml` and `deploy.yml`
+- [x] A step in `deploy.yml` between the plan and the migration: dry run, then the dump when something is missing; a failing dump stops the chain and reaches the failure message
+- [x] `tests/backup-workflow.test.ts` and `tests/deploy-workflow.test.ts` cover the requirements (the table lists live in the action only; the dump step comes after the plan and before the migration step; it runs only when a migration is missing; a failing dump stops the chain; the artifact name and retention; the dry run takes none; the secret goes through `env`)
+- [x] Struck: the first deploy that has a migration is watched once. A pull request cannot do it (only a real deploy shows it); the `manual` rows of specs 0012 (AC-5) and 0026 (AC-14) carry it, with `Last checked: never recorded` until whoever watches it writes the date
+- [x] The requirements are written into specs 0012 and 0026 as ACs, with their coverage rows (spec 0034 AC-6)
 
 ## Spec changes
 
-Filled in when built.
+Spec 0012: AC-5 added (the dump, its check and the upload are one composite action, `.github/actions/dump-user-data`,
+used by the weekly backup and the deploy; inputs; the connection string only in the dump step's `env`); Owner code
+names the action; AC-1's wording points at it; Notes: the dump command lives in the action, restore from a
+`pre-migration-<sha7>` artifact ("After a bad migration"), the dump is not encrypted and why; the coverage table has
+a test row and a `manual` row (`Last checked: never recorded`) for AC-5. Spec 0026: AC-14 added (a dump before the first
+missing migration, decided by the migration script's dry run, none when nothing is missing or in a dry run, a failing
+dump stops the deploy and is reported); AC-9 names the backup among the failing steps; Decisions and Notes record
+the choices (artifact, 30 days, unencrypted, six tables, only when a migration is missing, no overwrite and what that
+means for a re-run); the coverage table has a test row and a `manual` row (`Last checked: never recorded`).
+`specs/README.md` needs no change (no spec added, statuses unchanged).
 
 ## Notes
 

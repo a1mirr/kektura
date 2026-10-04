@@ -1,9 +1,10 @@
 // Spec 0026 AC-4, AC-6, AC-13: the migration script, against a fake psql that behaves like the record table.
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { baselineFiles, migrationFiles, pendingMigrations, redact } from "../scripts/lib/deploy.mjs";
-import { createPsql, migrate, Problem } from "../scripts/migrate-production.mjs";
+import { cli, createPsql, migrate, Problem } from "../scripts/migrate-production.mjs";
 
 const URL_WITH_SECRET = "postgresql://postgres.abcd:p%40ss%2Fword@aws-0-eu.pooler.supabase.com:5432/postgres";
 
@@ -178,6 +179,52 @@ describe("spec 0026: migrations", () => {
       expect(log[0]).toMatch(/3 files up to 0008_pages\.sql would be recorded/);
       expect(db.table).toBe(false);
       expect(writes(calls)).toEqual([]);
+    });
+  });
+
+  describe("AC-14: the dry run says whether a migration is missing, for the backup step of the deploy", () => {
+    const sql = migrationFiles(fs.readdirSync("supabase/migrations"));
+    const call = (psql: Parameters<typeof migrate>[0]["psql"], argv: string[], extra: Record<string, string> = {}) => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), "cli-"));
+      const output = path.join(dir, "output");
+      const summary = path.join(dir, "summary");
+      const printed: string[] = [];
+      cli({ argv, env: { SUPABASE_DB_URL: URL_WITH_SECRET, GITHUB_OUTPUT: output, GITHUB_STEP_SUMMARY: summary, ...extra }, psql, print: (line: string) => printed.push(line) });
+      const read = (file: string) => (fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "");
+      return { output: read(output), summary: read(summary), printed };
+    };
+
+    it("AC-14: writes missing=true to $GITHUB_OUTPUT when a file is missing, and applies nothing in a dry run", () => {
+      const { calls, psql } = fakeDb({ applied: sql.slice(0, -1) });
+      const { output, printed } = call(psql, ["--dry-run"]);
+      expect(output).toBe("missing=true\n");
+      expect(printed.some((line) => line.startsWith("Would apply "))).toBe(true);
+      expect(writes(calls)).toEqual([]);
+    });
+
+    it("AC-14: writes missing=false when every file is recorded", () => {
+      const { psql } = fakeDb({ applied: sql });
+      expect(call(psql, ["--dry-run"]).output).toBe("missing=false\n");
+    });
+
+    it("AC-14: with a baseline on an empty record table, only the files after the baseline count as missing", () => {
+      const last = sql.at(-1)!;
+      expect(call(fakeDb({ table: false }).psql, ["--dry-run", "--baseline", last]).output).toBe("missing=false\n");
+      expect(call(fakeDb({ table: false }).psql, ["--dry-run", "--baseline", sql[0]]).output).toBe("missing=true\n");
+    });
+
+    it("AC-14: a run that fails (no record table, no baseline) throws and writes no output; the summary section is written", () => {
+      const { psql } = fakeDb({ table: false });
+      expect(() => call(psql, ["--dry-run"])).toThrow(Problem);
+      const { summary } = call(fakeDb({ applied: sql }).psql, ["--dry-run"]);
+      expect(summary).toContain("### Migrations (dry run)");
+    });
+
+    it("AC-14: without $GITHUB_OUTPUT it just runs", () => {
+      const { psql } = fakeDb({ applied: sql });
+      const printed: string[] = [];
+      cli({ argv: ["--dry-run"], env: { SUPABASE_DB_URL: URL_WITH_SECRET }, psql, print: (line: string) => printed.push(line) });
+      expect(printed).toEqual(["No migration is missing."]);
     });
   });
 

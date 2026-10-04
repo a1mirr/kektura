@@ -23,7 +23,8 @@ Specs describe how each area behaves now, as numbered acceptance criteria in `sp
 - `npm run types:gen`: regenerates `src/lib/supabase/database.types.ts` from the local test database
   after a migration change (`npm run types:check` fails in CI when the file is stale).
 - A weekly workflow (`.github/workflows/backup.yml`, spec 0012) dumps users and their stamps from
-  production into a workflow artifact; it needs the `SUPABASE_DB_URL` repository secret.
+  production into a workflow artifact (the dump is `.github/actions/dump-user-data`, which the deploy also uses to
+  back up the same data right before it applies a migration); it needs the `SUPABASE_DB_URL` repository secret.
 - `.github/workflows/deploy.yml` (spec 0026) applies the missing migrations, deploys and smoke-tests production
   after a merge to `main` whose CI passed; it needs the `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS` and `SUPABASE_DB_URL`
   repository secrets (setup in `deploy/README.md`, done on 2026-10-03) and does nothing without them.

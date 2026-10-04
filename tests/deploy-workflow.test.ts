@@ -269,13 +269,13 @@ describe("spec 0026: the deploy workflow", () => {
       expect(failure).toContain("GITHUB_STEP_SUMMARY");
       expect(failure).toMatch(/Nothing was rolled back by itself/);
       expect(failure).toMatch(/revert the pull request on main and merge the revert/);
-      for (const id of ["pick", "ci", "plan", "migrate", "push", "smoke"]) expect(failure).toContain(`steps.${id}.outcome`);
+      for (const id of ["pick", "ci", "plan", "missing", "backup", "migrate", "push", "smoke"]) expect(failure).toContain(`steps.${id}.outcome`);
       expect(failure).toContain("DEPLOY_SHA: ${{ env.TARGET_SHA ||");
       expect(failure).toMatch(/rebuild on the server by hand/); // a push whose build failed can't be re-run
     });
 
     it("names the steps the failure message refers to", () => {
-      for (const id of ["pick", "ci", "plan", "migrate", "push", "smoke"]) expect(workflow).toContain(`id: ${id}`);
+      for (const id of ["pick", "ci", "plan", "missing", "backup", "migrate", "push", "smoke"]) expect(workflow).toContain(`id: ${id}`);
     });
   });
 
@@ -317,8 +317,82 @@ describe("spec 0026: the deploy workflow", () => {
     });
   });
 
+  describe("AC-14: the user data is backed up right before the first missing migration, and a failed backup stops the deploy", () => {
+    const code = lines.filter((line) => !line.trim().startsWith("#")).join("\n");
+
+    it("AC-14: finds out whether a migration is missing with the migration script's own dry run, after the plan and before anything is applied", () => {
+      const missing = step("Find out whether a migration is missing");
+      expect(missing).toContain("id: missing");
+      expect(missing).toContain("args=(--dry-run)");
+      expect(missing).toContain('if [ -n "$BASELINE" ]; then args+=(--baseline "$BASELINE"); fi'); // a first run with a baseline would be refused without it
+      expect(missing).toContain('node scripts/migrate-production.mjs "${args[@]}"');
+      expect(missing).toContain("env -u GITHUB_STEP_SUMMARY"); // the step that applies writes the summary section
+      expect(missing).toContain("SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}");
+      expect(missing).toContain("env.CONFIGURED == 'true' && (steps.plan.outputs.deploy == 'true' || env.BASELINE != '')"); // when the migrations step runs
+      expect(missing).not.toContain("DRY_RUN"); // a dry run of the deploy asks too, to say whether a dump would be taken
+      expect(missing).toMatch(/timeout-minutes: \d+/);
+    });
+
+    it("AC-14: the dump step comes after the plan and before the migration step", () => {
+      const order = ["Reach production and decide what to deploy", "Find out whether a migration is missing", "Back up the user data before migrating", "Apply the missing migrations", "Push the code to production"].map((name) =>
+        workflow.indexOf(`- name: ${name}`),
+      );
+      expect(order.every((position) => position > -1)).toBe(true);
+      expect([...order].sort((a, b) => a - b)).toEqual(order);
+    });
+
+    it("AC-14: the dump runs only when a migration is missing, never in a dry run, and is stored as pre-migration-<sha7> for 30 days", () => {
+      const backup = step("Back up the user data before migrating");
+      expect(backup).toContain("id: backup");
+      expect(backup).toContain("if: env.CONFIGURED == 'true' && steps.missing.outputs.missing == 'true' && env.DRY_RUN != 'true'");
+      expect(backup).toContain("uses: ./.github/actions/dump-user-data");
+      expect(backup).toContain("artifact-name: pre-migration-${{ env.TARGET_SHA7 }}");
+      expect(backup).toContain("retention-days: 30");
+      expect(backup).toMatch(/timeout-minutes: \d+/); // a hang fails the step, which still reaches the failure message
+      // the short sha is set where the commit is picked, from the same commit
+      expect(step("Pick the commit to deploy")).toContain('echo "TARGET_SHA7=${sha:0:7}" >> "$GITHUB_ENV"');
+    });
+
+    it("AC-14: the connection string reaches the dump through the step's env, and the only secrets the workflow gives to steps stay in env lines", () => {
+      const backup = step("Back up the user data before migrating");
+      expect(backup).toMatch(/env:\s*\n\s+SUPABASE_DB_URL: \$\{\{ secrets\.SUPABASE_DB_URL \}\}/);
+      expect(backup).toContain("db-url: ${{ env.SUPABASE_DB_URL }}");
+      expect(backup).not.toMatch(/echo|run:/);
+    });
+
+    it("AC-14: a dry run says that a dump would be taken and takes none", () => {
+      const say = step("Say that a backup would be taken");
+      expect(say).toContain("steps.missing.outputs.missing == 'true' && env.DRY_RUN == 'true'");
+      expect(say).toContain("would be taken");
+      expect(say).not.toContain("uses:");
+      expect(say).not.toContain("secrets.");
+      expect(workflow.match(/uses: \.\/\.github\/actions\/dump-user-data/g)).toHaveLength(1); // the only dump, and it needs DRY_RUN != 'true'
+    });
+
+    it("AC-14: a dump that fails stops the chain: nothing makes the backup step optional, and no later step runs after a failure except the message", () => {
+      expect(code).not.toContain("continue-on-error");
+      // the migration step keeps the default `success()`: it has no status function of its own
+      const migrateIf = step("Apply the missing migrations")
+        .split("\n")
+        .filter((line) => /^ {8}if: /.test(line));
+      expect(migrateIf).toHaveLength(1);
+      expect(migrateIf[0]).not.toMatch(/\b(always|failure|cancelled)\(\)/);
+      // only the failure message runs after a failed step
+      const conditions = lines.filter((line) => /^ {8}if: /.test(line) && /\b(always|failure|cancelled)\(\)/.test(line));
+      expect(conditions).toEqual(["        if: failure()"]);
+      expect(step("Tell the developer, and say how to roll back")).toContain("BACKUP_OUTCOME: ${{ steps.backup.outcome }}"); // the failure is reported like any failed step (AC-9)
+      expect(step("Tell the developer, and say how to roll back")).toContain("MISSING_OUTCOME: ${{ steps.missing.outcome }}");
+    });
+
+    it("AC-14: no dump runs when no migration is missing: the backup step reads the output of the dry run and nothing else decides", () => {
+      const ifs = lines.filter((line) => line.includes("steps.missing.outputs.missing"));
+      expect(ifs).toHaveLength(2); // the dump and the dry-run notice
+      expect(step("Find out whether a migration is missing")).toContain("--dry-run");
+    });
+  });
+
   it("AC-4: the weekly backup leaves the record table out (it is not user data, and the dump check fails on any unexpected table)", () => {
-    const backup = read(".github/workflows/backup.yml");
+    const backup = read(".github/actions/dump-user-data/action.yml"); // the dump lives in the action, shared with the weekly run
     expect(backup).toMatch(/public\.extra_stamps public\.applied_migrations( |\n)/);
     expect(read("specs/0012-backups.md")).toContain("`public.applied_migrations`");
   });

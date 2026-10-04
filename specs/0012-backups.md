@@ -1,13 +1,13 @@
 # 0012: Weekly backup of production user data
 
 Status: Done
-Owner code: `.github/workflows/backup.yml`
+Owner code: `.github/workflows/backup.yml`, `.github/actions/dump-user-data/action.yml`
 
 ## Goal
 
 The only irreplaceable data is what users entered: their accounts and stamps. Everything else can
 be rebuilt from migrations and seeds. The free Supabase plan gives no downloadable backups, so take
-our own.
+our own: every week, and once more before a deploy applies a migration (AC-5).
 
 ## Behaviour
 
@@ -18,7 +18,7 @@ our own.
   (`supabase db dump --data-only`, using the CLI version pinned in `package.json`). The CLI can only
   select schemas, not tables, so the workflow dumps `auth` and `public` minus an explicit exclude list
   (every other table), and a check step fails the run, deleting the dump, if any table other than the
-  six shows up in it. Every table the migrations create in `public` is either one of the six or on the exclude
+  six shows up in it (the dump, the exclude list and the check are the action of AC-5). Every table the migrations create in `public` is either one of the six or on the exclude
   list (reference data, the deploy record, `user_feedback`, whose messages also reach the developer's Telegram). The dump is stored as a workflow artifact with 90-day retention.
 - **AC-2**: Without the secret, the workflow ends successfully with a notice saying what to configure;
   it never fails the repository's checks.
@@ -26,6 +26,13 @@ our own.
   `set -x`.
 - **AC-4**: Restore steps are documented under Notes below and tested once against the local test
   database: migrations + seeds, then the dump.
+- **AC-5**: The dump, its check and the upload of the artifact are one composite action under `.github/actions/`
+  (`dump-user-data`), used by every workflow that takes a dump: the weekly backup (artifact `user-data-backup`, 90 days)
+  and the deploy, which takes one right before the first missing migration (artifact `pre-migration-<sha7>`, 30 days,
+  spec 0026 AC-14). The table list, the exclude list and the check step exist only in the action; the two callers
+  differ only in the artifact's name and retention, which they pass in. The action gets the connection string as an
+  input, which the caller takes from its own `env` (where the secret is); it reads it only in the dump step's `env`
+  and never prints it.
 
 ## Out of scope
 
@@ -40,7 +47,7 @@ percent-encoded, so encode special characters in the password. GitHub artifacts 
 everyone with access to the repository: keep it private. The dump holds the users' Google profile
 data (`raw_user_meta_data`, email) and, for password users, password hashes.
 
-**The dump.** `.github/workflows/backup.yml` runs
+**The dump.** `.github/actions/dump-user-data/action.yml` (called by `backup.yml`) runs
 
 ```
 npx supabase db dump --db-url "$SUPABASE_DB_URL" --data-only --schema auth,public \
@@ -63,8 +70,8 @@ tables empty (loading into populated tables fails on duplicate keys).
 
 1. Fresh target: locally `npm run testdb:reset`; for a new Supabase project run the migrations and
    both seeds as in the README's Setup.
-2. Download the artifact (GitHub → Actions → the Backup run → `user-data-backup`), unzip it to get
-   `user-data-<date>.sql`.
+2. Download the artifact (GitHub → Actions → the Backup run → `user-data-backup`, or, after a bad migration, the
+   Deploy run's `pre-migration-<sha7>`), unzip it to get `user-data-<date>.sql`.
 3. Load it as the `postgres` user, stopping at the first error:
    - local, from Git Bash: `docker exec -i supabase_db_kektura psql -U postgres -d postgres -v ON_ERROR_STOP=1 < user-data-<date>.sql`
      (PowerShell has no `<`: use `cmd /c "docker exec -i ... < user-data-<date>.sql"`);
@@ -72,8 +79,15 @@ tables empty (loading into populated tables fails on duplicate keys).
 4. Check: row counts of `auth.users`, `auth.identities`, `public.user_stamps`,
    `public.user_extra_stamps`, `public.profiles` and `public.friendships` match the numbers you expect, and a user signs in and sees their stamps.
 
+**After a bad migration.** The dump of a Deploy run (`pre-migration-<sha7>`, kept 30 days, taken just before the
+first missing migration was applied) holds the user data as it was. The schema and the reference data come back from
+git: check out the commit before the merge, apply its migrations and seeds to an empty database, then load the dump
+as above. The dump is not encrypted: artifacts are readable by everyone with access to the repository, which is
+private with one owner, and the dump holds emails and Google profile data. Revisit when either changes (encrypting
+needs one new secret and one `gpg` step in the action).
+
 **Restore drill** (AC-4), last done on 2026-10-04 on the local test stack (E2E test users and their data), with the
-very `run:` scripts of the "Dump user data" and "Check the dump" steps (extracted from the YAML) pointed at the local
+very `run:` scripts of the "Dump user data" and "Check the dump" steps of the dump action (extracted from the YAML) pointed at the local
 database (`postgresql://postgres:postgres@127.0.0.1:54322/postgres`): dump, `npm run testdb:reset`, restore with
 `ON_ERROR_STOP=1` (exit 0), compare. An md5 over every row (`string_agg(row::text, '|' order by row::text)`) was
 identical before and after for all six tables:
@@ -102,5 +116,7 @@ no-secret path ends green with the notice (it can't be run without removing the 
 
 | AC | Test |
 | --- | --- |
-| AC-1 ... AC-3 | `tests/backup-workflow.test.ts` (schedule and dispatch, the dump command and its exclude list, the check step, retention, the no-secret path, the secret handling, and that every table the migrations create is dumped or excluded). That the real run works against production is not asserted: see "Not verified" in Notes |
+| AC-1 ... AC-3 | `tests/backup-workflow.test.ts` (schedule and dispatch, the dump command and its exclude list and the check step (both in the action), the weekly artifact and its retention, the no-secret path, the secret handling, and that every table the migrations create is dumped or excluded). That the real run works against production is not asserted: see "Not verified" in Notes |
 | AC-4 | manual (it restores into a database): the restore drill in Notes. Last checked: 2026-10-04. |
+| AC-5 | `tests/backup-workflow.test.ts` (the action is composite with the three inputs, the connection string is read only in the dump step's `env`, the dump and its lists exist only in the action, both callers pass only the connection string, the artifact name and the retention) |
+| AC-5 (on GitHub) | manual (it needs a real run): the Backup workflow, run by hand, still stores `user-data-backup` now that the dump is in the action, and a Deploy run that applies a migration stores `pre-migration-<sha7>` (both callers hand the connection string over as `db-url: ${{ env.SUPABASE_DB_URL }}`, which only a real run shows to work). Last checked: never recorded. |
