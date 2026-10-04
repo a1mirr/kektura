@@ -16,7 +16,7 @@ failures already arrive.
 - [x] The external monitor is written up for the owner in `deploy/README.md` ("Watching the site from outside"); the owner creates the account and the monitor
 - [x] Option 1 struck with its reason, option 2 moved to its own task (0066)
 - [x] No spec states a rule this task changes (see Spec changes)
-- [ ] Fresh-context review done
+- [x] Fresh-context review done
 
 ## Options
 
@@ -40,4 +40,4 @@ smoke test, which is untouched).
 
 - The service, its account and its Telegram link are the owner's: nothing about them is in the repository, and no
   secret is needed here.
-- Until the monitor exists, a site outage is still noticed by a user first.
+- This task is Done when the setup is written down; the monitor itself is the owner's step, and until the owner has created it a site outage is still noticed by a user first.
