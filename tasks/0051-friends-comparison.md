@@ -16,7 +16,7 @@ and on a phone.
 - [x] `npm run e2e` (the whole suite, locally, before the pull request); checked at 320 and 375 px in every language (e2e)
 - [x] No changelog entry: friends are behind `FF_FRIENDS` and spec 0024 AC-16 holds the entry back until the flag goes on for everyone
 - [x] The specs listed above mirror the code as built (spec 0034 AC-6)
-- [ ] Fresh-context review done
+- [x] Fresh-context review done (three rounds, commits reviewed up to 28f36b8)
 
 ## Requirements
 

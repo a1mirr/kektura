@@ -108,7 +108,7 @@ Routing off the trail; replacing MapLibre.
 | AC-4 ... AC-8 | `src/lib/route-stats.test.ts` |
 | Table totals | `tests/trail-data.test.ts` (0004 AC-6) |
 | AC-9, AC-10, AC-11, AC-13, AC-16 | `e2e/map.spec.ts` (the detailed route is requested once on first need and again after a failed load on the next zoom change; toggles and their persistence; fullscreen; 📍 on a place and on an extra stamp, which switches that layer on; stamping from the list keeps the stamp's label where it was on the map) |
-| AC-18, AC-19 | `src/lib/compare-map.test.ts` (the lines and points of each view), `src/lib/map-layers.test.ts` (the layers: a style per state), `e2e/friends-compare.spec.ts` (the switch and the legend) |
+| AC-18, AC-19, AC-20 | `src/lib/compare-map.test.ts` (the lines and points of each view), `src/lib/map-layers.test.ts` (the layers: a style per state), `e2e/friends-compare.spec.ts` (the switch and the legend; a click on the map opens no popup) |
 | AC-18, AC-19, AC-20 (colours and line styles on the canvas, hover, the detailed route) | manual (the map is WebGL pixels that E2E cannot read): see the checklist below. Last checked: never recorded. |
 | AC-17 | `src/lib/map-storage.test.ts`, `map-data.test.ts`, `map-layers.test.ts`, `map-popups.test.ts`, `map-reveal.test.ts` (the pure helpers); `tests/map-structure.test.ts` (no file of the map code is over 300 lines) |
 | AC-4, AC-8, AC-12 (route from / to, mark and unmark) | `e2e/map.spec.ts`: two stamps picked through their popups show the stretch's numbers; a failed save keeps the popup open, the next save marks the stamp, and the popup of a marked stamp unmarks it |
