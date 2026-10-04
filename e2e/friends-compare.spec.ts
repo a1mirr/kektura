@@ -94,7 +94,7 @@ test.describe("spec 0024: comparing with a friend", () => {
         const boxes = await Promise.all(["both", "me", "them", "neither"].map((w) => card(bobPage, w).boundingBox()));
         expect(boxes[0]!.y, `${width} ${locale}: two columns`).toBe(boxes[1]!.y);
         expect(boxes[2]!.y, `${width} ${locale}: second row`).toBeGreaterThan(boxes[0]!.y);
-        const map = (await bobPage.locator("[role=img]").boundingBox())!;
+        const map = (await bobPage.locator(".maplibregl-map").boundingBox())!;
         expect(map.width, `${width} ${locale}: map width`).toBeGreaterThan(width - 60);
         expect(map.height, `${width} ${locale}: map height`).toBeGreaterThanOrEqual(300);
         const sideways = await overflow(bobPage);

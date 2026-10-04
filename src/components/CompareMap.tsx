@@ -110,7 +110,9 @@ export default function CompareMap({ points, ranges }: { points: ComparePoint[];
           </button>
         ))}
       </div>
-      <div ref={container} role="img" aria-label={t("mapLabel")} className="h-80 w-full rounded-lg sm:h-96" />
+      <div role="group" aria-label={t("mapLabel")}>
+        <div ref={container} className="h-80 w-full rounded-lg sm:h-96" />
+      </div>
       <ul aria-label={t("legend")} className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
         {legend.map((item) => (
           <li key={item.key} className="flex items-center gap-2">

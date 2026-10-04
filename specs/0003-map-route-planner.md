@@ -7,7 +7,8 @@ Owner code: `src/lib/route-geometry.ts`, `src/lib/route-stats.ts`, `src/componen
 ## Goal
 
 Draw walked and not-yet-walked parts of the trail, and let the user pick two stamps to see the
-stretch between them with its distance, ascent, descent and walking time.
+stretch between them with its distance, ascent, descent and walking time. On a friend's page the same map
+shows who of the two walked which stretch.
 
 ## Behaviour
 
