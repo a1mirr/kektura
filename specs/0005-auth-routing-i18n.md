@@ -31,17 +31,18 @@ dropdown, and a visitor with no signal gets Hungarian.
   to the landing page in the current locale.
 - **AC-7**: Message keys are typed from `messages/en.json`, the reference locale: an unknown key or namespace in
   `useTranslations` / `getTranslations` (namespaced or not) fails `npm run typecheck`.
-- **AC-8**: The `Locale` type is `hu | en | de | ru`, derived from `src/i18n/routing.ts`, so a page that reads
+- **AC-8**: The `Locale` type is the union of the languages in `src/i18n/routing.ts` (today `hu | en | de | ru`), so a page that reads
   `params.locale` must narrow it with `hasLocale(routing.locales, locale)` and call `notFound()` otherwise (an
   unknown locale is a 404): the compiler refuses a plain `string`.
 - **AC-9**: The default language is Hungarian (`hu`). An address without a language is sent to the language of the
   browser (the `Accept-Language` header, or the language cookie of an earlier choice) when it is one of ours, and to
   `/hu` when it is not. Everything that falls back to the default follows: the 404 page (and its logo link), an unknown
-  `?locale=` of the OAuth callback and of sign-out, the request config. The addresses of every language (`/hu`,
-  `/en`, `/de`, `/ru` and all pages under them) answer; an unknown language is a 404 (AC-8).
+  `?locale=` of the OAuth callback and of sign-out, the request config. The addresses of every language (`/<language>`
+  and all pages under it) answer; an unknown language is a 404 (AC-8).
 - **AC-10**: The language is chosen from one dropdown (a native `<select>`) on the landing page and in the dashboard
-  header, not from a row of buttons. It is named "Language" (translated), shows the current language and lists all
-  four in the order of `routing.locales` (`hu`, `en`, `de`, `ru`), each by its own name (Magyar, English, Deutsch, and Russian written in Cyrillic), never by a code.
+  header, not from a row of buttons. It is named "Language" (translated), shows the current language and lists every
+  language in the order of `routing.locales` (today `hu`, `en`, `de`, `ru`), each by its own name (Magyar, English,
+  Deutsch, and Russian written in Cyrillic), never by a code. Adding a language adds an option, nothing else.
   Choosing one opens the same page in that language. It is operable with the keyboard, at least 44 px tall and fits a
   320 px screen.
 - **AC-11**: German (`de`) is a full language of the site: `messages/de.json` is complete (AC-5), and the changelog
@@ -67,6 +68,6 @@ dropdown, and a visitor with no signal gets Hungarian.
 | AC-4 | `e2e/auth.spec.ts` (a failed code exchange, no code, an unknown locale and a markup-carrying locale all end on `/<known locale>?error=auth` on the address the user is on; a forwarded host is honoured and a malformed one is not); `src/lib/landing-path.test.ts` (`next`); the dummy login's `next` is covered by `e2e/friends.spec.ts`. The success path needs a real Google sign-in: manual (a real OAuth round trip). Last checked: never recorded. |
 | AC-5 | `tests/messages.test.ts` |
 | AC-9 | `src/proxy.test.ts` (`/de` runs the proxy), `e2e/language-switcher.spec.ts` (a browser in German, Russian, English, Hungarian and one we don't have; every language's address answers, an unknown one is a 404), `e2e/auth.spec.ts` (an unknown `?locale=` ends on `/hu`), `e2e/site-logo.spec.ts` (the 404 page links to `/hu`) |
-| AC-10 | `e2e/language-switcher.spec.ts` (one dropdown with the four names in order, no button row; choosing a language; on the dashboard; keyboard, 44 px, 320 px) |
+| AC-10 | `e2e/language-switcher.spec.ts` (one dropdown with every language's name in order, no button row; choosing a language; on the dashboard; keyboard, 44 px, 320 px) |
 | AC-11 | `tests/messages.test.ts` (parity for `de`), `src/content/changelog.test.ts`, `src/content/links.test.ts`, `tests/stamp-descriptions.test.ts`, `e2e/about.spec.ts`, `e2e/changelog.spec.ts`, `e2e/footer.spec.ts`, `e2e/stamping.spec.ts` (German pages) |
 | AC-7, AC-8 | `src/i18n/typed-messages.test.ts`: `// @ts-expect-error` on unknown keys and namespaces (hook and server API, namespaced and root) and on a plain `string` as `locale`, so `npm run typecheck` fails if the typing ever stops working (an unused directive is an error); `useLocale()` is `"hu" \| "en" \| "de" \| "ru"` and `"fr"` is not a `Locale` |

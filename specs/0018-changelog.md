@@ -15,7 +15,7 @@ that tests protect.
   Each entry has a date (shown in the page's language, e.g. "October 2, 2026"), a title and a list of
   changes. The page has its own document title and description, one `h1` and one `h2` per entry.
 - **AC-2**: Each change has a kind, shown as a translated label: new, improved or fixed.
-- **AC-3**: Every title and change text exists in every language (`hu`, `en`, `de`, `ru`) and is shown
+- **AC-3**: Every title and change text exists in every language of `routing.locales` and is shown
   in the page's language. A missing translation fails the tests, never the page.
 - **AC-4**: Entries have real, unique calendar dates, listed in strictly descending order and none in
   the future; each has at least one change.
