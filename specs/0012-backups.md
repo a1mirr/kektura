@@ -7,7 +7,7 @@ Owner code: `.github/workflows/backup.yml`, `.github/actions/dump-user-data/acti
 
 The only irreplaceable data is what users entered: their accounts and stamps. Everything else can
 be rebuilt from migrations and seeds. The free Supabase plan gives no downloadable backups, so take
-our own.
+our own: every week, and once more before a deploy applies a migration (AC-5).
 
 ## Behaviour
 

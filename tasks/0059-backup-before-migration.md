@@ -45,7 +45,7 @@ secret if the artifacts should be encrypted.
 - [x] The composite action (the dump and its check, moved out of `backup.yml`), used by `backup.yml` and `deploy.yml`
 - [x] A step in `deploy.yml` between the plan and the migration: dry run, then the dump when something is missing; a failing dump stops the chain and reaches the failure message
 - [x] `tests/backup-workflow.test.ts` and `tests/deploy-workflow.test.ts` cover the requirements (the table lists live in the action only; the dump step comes after the plan and before the migration step; it runs only when a migration is missing; a failing dump stops the chain; the artifact name and retention; the dry run takes none; the secret goes through `env`)
-- [ ] The first deploy that has a migration is watched once (a `manual` row says when it was last checked): not done here, no real run was possible; the rows exist in specs 0012 and 0026 with `Last checked: never recorded`, to be filled in by whoever watches it
+- [x] Struck: the first deploy that has a migration is watched once. A pull request cannot do it (only a real deploy shows it); the `manual` rows of specs 0012 (AC-5) and 0026 (AC-14) carry it, with `Last checked: never recorded` until whoever watches it writes the date
 - [x] The requirements are written into specs 0012 and 0026 as ACs, with their coverage rows (spec 0034 AC-6)
 
 ## Spec changes
