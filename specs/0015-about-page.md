@@ -72,4 +72,4 @@ document).
 | AC-5 | `e2e/about.spec.ts` (links), `e2e/friends.spec.ts` (friends paragraph, flag on); the wording against spec 0014 and migration 0008: manual (judgement): read it next to them. Last checked: never recorded. |
 | AC-4 | `e2e/about.spec.ts` (every external link is `https:`, opens in a new tab with `noopener`) |
 | AC-8 | `e2e/about.spec.ts` (the link to the feedback form) |
-| AC-6, AC-7 | `tests/messages.test.ts` (parity incl. rich-text tags; no open-source / PWA wording in any locale), `e2e/about.spec.ts` (ru and hu, no overflow at 375 px) |
+| AC-6, AC-7 | `tests/messages.test.ts` (parity incl. rich-text tags; no open-source / PWA wording in any locale), `e2e/about.spec.ts` (the default language, no overflow at 375 px), `e2e/languages.spec.ts` (every language: its title and sections, no overflow at 375 px) |

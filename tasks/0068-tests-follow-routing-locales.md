@@ -1,6 +1,6 @@
 # 0068: Tests and the smoke test follow the list of languages instead of repeating it
 
-Status: Open
+Status: Done
 Specs: [0026](../specs/0026-automatic-deploy.md) AC-8 (the smoke test's language paths), [0005](../specs/0005-auth-routing-i18n.md) AC-8 to AC-10 (the typing and the dropdown tests), [0014](../specs/0014-pages-and-settings.md) AC-19 (the logo's E2E); a refactor, so no spec is expected to change beyond the coverage wording
 
 ## Goal
@@ -13,12 +13,12 @@ German heading, as literal fixtures.
 
 ## Done when
 
-- [ ] The open questions below are settled with the owner
-- [ ] No test or script repeats the list or the number of languages, except per-language fixtures (the expected
+- [x] The open questions below are settled with the owner
+- [x] No test or script repeats the list or the number of languages, except per-language fixtures (the expected
   text of a language) and the test that pins the list itself
-- [ ] Adding a language to `routing.locales` and its `messages/<language>.json` fails only the tests that need
+- [x] Adding a language to `routing.locales` and its `messages/<language>.json` fails only the tests that need
   per-language text, each saying what is missing; nothing else needs an edit
-- [ ] `npm run check` and CI are green; fresh-context review done
+- [x] `npm run check` and CI are green; fresh-context review done
 
 ## Requirements
 
@@ -36,14 +36,14 @@ tests that touch languages, set by the owner on 2026-10-04:
 
 Settled with the owner on 2026-10-04: the smoke test requests every language (it is the all-languages test of the deploy); tests follow the rule under Requirements.
 
-- **The smoke test's list.** `scripts/smoke-test.mjs` is plain JavaScript and cannot import the TypeScript
-  routing file on every Node version the deploy runs on. Derive the paths from the `messages/*.json` file names
-  (simple, no TypeScript), or import `src/i18n/routing.ts` directly (one source of truth, needs Node's type
-  stripping to be there)? This task leans to the file names.
+The smoke test's list is the file names of `messages/` (the owner left the choice to us): plain JavaScript, no TypeScript needed at deploy time, and `tests/smoke-test.test.ts` checks the list against `routing.locales`.
 
 ## Spec changes
 
-Filled in when the task is built.
+- Spec 0026: AC-8's text says the page of every language is requested, the languages being the files of `messages/`; the coverage row says the same.
+- Spec 0005: the coverage rows of AC-9 to AC-11 name `e2e/languages.spec.ts` and the smoke test. No AC changes.
+- Specs 0001, 0014, 0015, 0018, 0019, 0033: coverage rows only, where per-language assertions moved into `e2e/languages.spec.ts` or were reduced to the default language and one other.
+- Code: `next.config.ts` builds the `/settings` redirect from `routing.locales` (it was the last list in the app code); behaviour is unchanged (spec 0014 AC-15).
 
 ## Notes
 

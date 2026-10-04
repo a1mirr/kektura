@@ -53,23 +53,6 @@ test.describe("spec 0015: about page", () => {
     await expect(page).toHaveURL(/\/en\/feedback$/);
   });
 
-  test("AC-1, AC-7: Russian and Hungarian versions exist and keep the layout", async ({ page }) => {
-    await page.goto("/ru/about");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("О трекере Kéktúra");
-    await expect(page.locator("html")).toHaveAttribute("lang", "ru");
-    await expect(page.getByRole("heading", { level: 2 })).toHaveCount(5);
-
-    await page.goto("/hu/about");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("A Kéktúra követőről");
-    await expect(page.locator("html")).toHaveAttribute("lang", "hu");
-    await expect(page.getByRole("heading", { level: 2 })).toHaveCount(5);
-
-    await page.goto("/de/about");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Über den Kéktúra-Tracker");
-    await expect(page.locator("html")).toHaveAttribute("lang", "de");
-    await expect(page.getByRole("heading", { level: 2 })).toHaveCount(5);
-  });
-
   test("AC-1: fits a phone screen without horizontal scrolling", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/hu/about"); // the language with the longest words

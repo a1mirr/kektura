@@ -54,7 +54,7 @@ Release numbers; a feed (RSS); showing "what's new" inside the app; generating e
 | AC | Test |
 | --- | --- |
 | AC-3, AC-4 | `src/content/changelog.test.ts` |
-| AC-1, AC-2 | `e2e/changelog.spec.ts` (order, labels, every language; expectations come from `src/content/changelog.ts`, so a new entry doesn't break them) |
+| AC-1, AC-2 | `e2e/changelog.spec.ts` (order, labels; every language's heading, entry title, date and kind label: `e2e/languages.spec.ts`; expectations come from `src/content/changelog.ts`, so a new entry doesn't break them) |
 | AC-6 | `src/content/changelog.test.ts` (the three oldest entries are these, in this order), `e2e/changelog.spec.ts` (the oldest entry is the first version) |
 | AC-5 | manual (judgement): the text is read against what the app does. Last checked: every pull request (the fresh-context review, spec 0022, reads the changelog of the change). |
 | AC-7 | `tests/review-process.test.ts` (`CLAUDE.md`, the pull request template and the reviewer's brief ask for it, with the feature-flag clause); the Stop hook's question is covered by spec 0034 AC-12 (`tests/stop-nudges.test.ts`) |
