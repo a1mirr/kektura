@@ -1,6 +1,6 @@
 # 0036: Turn the existing specs into area specs and tasks
 
-Status: In progress
+Status: Done
 Specs: all of `specs/` (0001-0033)
 
 ## Goal
@@ -12,7 +12,7 @@ migrations that carry spec numbers don't all move at once.
 
 ## Done when
 
-- [ ] Every spec was read against the code, and each AC that the code does not satisfy was fixed in the code or marked `Removed` or corrected in the spec (see Progress for what was read and what is left)
+- [x] Every spec was read against the code, and each AC that the code does not satisfy was fixed in the code or marked `Removed` or corrected in the spec (see Progress for what was read and what is left)
 - [x] Each area has one spec (the drafts fold into their area when they are built); a spec absorbed into another moves to `tasks/` (`git mv`: number and history stay), its "Spec changes" section maps old ACs to new ones, and its tests and code comments cite the new spec
 - [x] Task-shaped specs became tasks (history only), their lasting rules moved into the area spec
 - [x] Goals and Notes of the remaining specs describe the area, not a change
@@ -63,7 +63,16 @@ Checked against the repository, with scripts (now partly permanent: `tests/specs
 
 Findings: the committed seeds predate the cleanup that 0004 AC-9 describes (task 0037); 0015 carried a note about `as any` that is no longer true (removed); the deploy workflow's "pick the commit" step has no retry and failed once on a GitHub API 504 (merge of #28, a docs-only change, so nothing was lost).
 
-Still to do: read these specs line by line against the code, not only through their tests: 0008, 0015 to 0019, 0021, 0022, 0024, 0033 (0012 was re-checked in task 0039: the backup would have failed on its first run).
+Read line by line against the code (2026-10-04), not only through their tests: 0008, 0015 to 0019, 0021, 0022, 0024, 0033 (0012 was re-checked in task 0039: the backup would have failed on its first run). What the reads found, all fixed in the spec unless a test is named:
+
+- 0008 named two of the four stamp actions and covered only the stamp actions, while `src/lib/log.ts` also serves the feedback, account deletion and friends actions: new AC-5 and a test for it (the title is now "failed actions")
+- 0015 described four sections but the page has a fifth ("Questions or ideas?", which holds the `/feedback` link)
+- 0017: a signed-in account without an email is sent as `user <id>`, not "anonymous" (the spec said only the two); the check of the Telegram setup (AC-9) was described as a one-off run and is now `tests/telegram-check.test.ts`; a note about a rewritten migration was history and went
+- 0018: two hand-checked rows did not say `manual`; the check in `tests/specs.test.ts` now also catches "review by"
+- 0021 AC-6 and `CLAUDE.md` told the author to follow CI with `gh pr checks <n> --watch`, which blocks everything else: now one look, never `--watch` or a sleep loop
+- 0024: profiles are also visible to the people a user asked (the policy says so), the friend functions return the friend's id next to the place ids, and a friend who stopped sharing is a name without a link and a 404 on their page (E2E already tested it)
+- 0026 AC-8: the production check of the dummy login now has its date, 2026-10-04 (deploy run 37163363692, looked at in the Actions log)
+- 0016, 0019, 0022, 0033: no difference found
 
 ## Spec changes
 

@@ -1,25 +1,28 @@
-# 0008: Server-side logging of failed stamp actions
+# 0008: Server-side logging of failed actions
 
 Status: Done
-Owner code: `src/app/[locale]/dashboard/actions.ts`, `src/lib/log.ts`
+Owner code: `src/lib/log.ts`, `src/app/[locale]/dashboard/actions.ts` (the stamp actions)
 
 ## Goal
 
-Stamp actions deliberately turn every error into `{ ok: false, reason: "failed" }` for the client
-(spec 0002 AC-6, AC-7), so a failure would leave no trace. Each one is logged on the server instead, so
-production problems can be found in the host's logs.
+Server actions (the stamp actions first, then feedback, account deletion and friends) deliberately turn every
+error into a plain `failed` result for the client (spec 0002 AC-6, AC-7), so a failure would leave no trace.
+Each one is logged on the server instead, so production problems can be found in the host's logs.
 
 ## Behaviour
 
 - **AC-1**: When a stamp action fails because of a database error or a thrown exception, the server
   logs exactly one line via `console.error`, prefixed `[stamp-action]`. The line has the action name
-  (`setPlacesStamped` / `setExtraStamped`), the stage (`read`, `write` or `exception`), the Supabase
+  (`setPlacesStamped`, `setStampDate`, `setExtraStamped` or `setExtraStampDate`), the stage (`read`, `write` or `exception`), the Supabase
   error code and message (or the exception's message), and the user id.
 - **AC-2**: Log lines never contain tokens, cookies, emails or request bodies beyond the action name
   and ids.
 - **AC-3**: Rejected input (0002 AC-1) is logged once with `console.warn` (`[stamp-action] invalid
   input`) without echoing the input. A missing session (`unauthorized`) is expected and not logged.
 - **AC-4**: What the client receives doesn't change.
+- **AC-5**: The other server actions that turn errors into a result log through the same file, one line each, under their
+  own tag and by the same rules as AC-2: `[feedback]` (spec 0017), `[account-delete]` (spec 0014) and `[friends]` (spec
+  0024). Which failures each logs is in its own spec; the line formats are below.
 
 ## Out of scope
 
@@ -33,6 +36,10 @@ Line formats (one `console.error` / `console.warn` call, one string argument eac
 ```
 [stamp-action] action=setPlacesStamped stage=write user=<uuid> code=42501 message="..."
 [stamp-action] invalid input action=setExtraStamped
+[feedback] stage=write user=<uuid or anonymous> code=- message="..."
+[feedback] telegram notification failed reason=http_401
+[account-delete] stage=rpc user=<uuid> code=- message="..."
+[friends] action=sendRequest code=- message="..."
 ```
 
 - `user` is `unknown` when the failure happens before the session is known (creating the client or
@@ -53,3 +60,4 @@ Line formats (one `console.error` / `console.warn` call, one string argument eac
 | --- | --- |
 | AC-1 ... AC-4 | `src/app/[locale]/dashboard/actions.test.ts`, `describe("spec 0008: ...")` (spies on `console.error` / `console.warn`; the AC-2 test checks that the user's email, the place keys and the error's `details` / `hint` are absent) |
 | AC-1 ... AC-3 (line format, one-line guarantee, non-Error values) | `src/lib/log.test.ts` |
+| AC-5 | `src/lib/log.test.ts` (the `[feedback]` and `[account-delete]` lines), the actions' own tests (`feedback/actions.test.ts`, `account/actions.test.ts`, `friends/actions.test.ts`) |

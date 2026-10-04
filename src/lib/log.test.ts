@@ -3,6 +3,7 @@ import {
   logAccountDeletionError,
   logFeedbackError,
   logFeedbackNotifyFailure,
+  logFriendsError,
   logStampActionError,
   logStampActionInvalidInput,
 } from "./log";
@@ -53,6 +54,23 @@ describe("spec 0008: log lines", () => {
     logStampActionInvalidInput("setExtraStamped");
     expect(lineOf(warnLog)).toBe("[stamp-action] invalid input action=setExtraStamped");
     expect(errorLog).not.toHaveBeenCalled();
+  });
+});
+
+describe("spec 0008: the other actions' lines", () => {
+  it("AC-5: feedback, account-delete and friends lines each keep to one line, their tag, and the code and message only", () => {
+    const error = { code: "42501", message: "line one\nline two", details: "secret-details", hint: "secret-hint" };
+    logFeedbackError("write", error, "u-1");
+    logAccountDeletionError("rpc", error, "u-1");
+    logFriendsError("sendRequest", error);
+    const lines = errorLog.mock.calls.map((call) => call[0] as string);
+    expect(lines.map((line) => line.split(" ")[0])).toEqual(["[feedback]", "[account-delete]", "[friends]"]);
+    expect(lines[2]).not.toContain("u-1"); // the friends line carries no user id
+    for (const line of lines) {
+      expect(line).not.toContain("\n");
+      expect(line).toContain('message="line one\\nline two"');
+      expect(line).not.toMatch(/secret/);
+    }
   });
 });
 

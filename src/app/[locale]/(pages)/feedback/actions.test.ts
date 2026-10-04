@@ -117,6 +117,15 @@ describe("spec 0017: telegram notification", () => {
     expect(text).toBe("New feedback (?)\nFrom: anonymous\n\nHi");
   });
 
+  it("AC-4: an account without an email is named by its id", async () => {
+    useSupabase({ user: { id: "user-1" } });
+    enableTelegram();
+    fetchMock.mockResolvedValue(new Response("{}", { status: 200 }));
+    await submitFeedback({ message: "Hi", locale: "en" });
+    const { text } = JSON.parse(String((fetchMock.mock.calls[0] as [string, RequestInit])[1].body));
+    expect(text).toBe("New feedback (en)\nFrom: user user-1\n\nHi");
+  });
+
   it("AC-4: without a token and chat id the message is only stored", async () => {
     const { insert } = useSupabase();
     vi.stubGlobal("fetch", fetchMock);

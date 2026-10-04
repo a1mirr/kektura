@@ -19,8 +19,8 @@ sharing at any moment. Ships behind the feature flag `friends` (spec 0023).
   characters (trimmed, no control characters, enforced by a database constraint). It is populated automatically
   via a database trigger on account creation, defaulting to the first name from the Google account (or a
   fallback if the name is missing or empty), and is editable on the Friends page. It is stored in `profiles`
-  and visible only to the user, their friends and pending requesters, and (AC-3) to a signed-in holder of
-  their invite link. Whatever the Google profile holds, creating the account never fails because of the name.
+  and visible only to the user, their friends, the people who asked them and the people they asked, and (AC-3) to a
+  signed-in holder of their invite link (the name only). Whatever the Google profile holds, creating the account never fails because of the name.
 
 ### Connecting
 
@@ -51,7 +51,8 @@ sharing at any moment. Ships behind the feature flag `friends` (spec 0023).
 - **AC-8**: A friend's numbers are computed by the same functions as the owner's dashboard
   (`src/lib/progress.ts`), from the friend's stamped place ids, so the two never disagree.
 - **AC-9**: Each user controls their side: per friend, a switch "show my progress to this friend". When it
-  is off, that friend sees "not sharing" and no numbers. The switch is independent in each direction.
+  is off, that friend sees "not sharing" and no numbers, the name is no longer a link, and the friend's own page
+  answers 404. The switch is independent in each direction.
 
 ### Ending it
 
@@ -66,7 +67,7 @@ sharing at any moment. Ships behind the feature flag `friends` (spec 0023).
 - **AC-12**: `profiles` and `friendships` have row level security enabled. A user's
   stamps stay unreadable to everyone but themselves (spec 0002); a friend's progress is read only through
   `security definer` functions (empty `search_path`, executable by `authenticated` only, revoked from `anon`)
-  that check the friendship and the friend's sharing switch, and return nothing else than the stamped place ids.
+  that check the friendship and the friend's sharing switch, and return nothing else than each friend's id and their stamped place ids.
   Someone who is not an accepted friend, or whose sharing switch towards me is off, simply does not appear in
   the answer: there is no way to ask about a particular user.
   Nobody writes `profiles` or `friendships` directly: creating, approving, ignoring, removing and switching

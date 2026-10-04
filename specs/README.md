@@ -73,7 +73,7 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0005](0005-auth-routing-i18n.md) | Sign-in, routing, translations, typed message keys | Done |
 | [0006](0006-test-server.md) | Test server with dummy login, E2E tests and how they sign in | Done |
 | [0007](0007-ci.md) | CI, E2E caches and timing report, generated-types check, Dependabot | Done |
-| [0008](0008-action-logging.md) | Server-side logging of failed stamp actions | Done |
+| [0008](0008-action-logging.md) | Server-side logging of failed actions | Done |
 | [0012](0012-backups.md) | Weekly backup of production user data | Done |
 | [0014](0014-pages-and-settings.md) | Footer pages, account page (sign out, chart, account deletion) | Done |
 | [0016](0016-stamp-dates.md) | Stamp dates: validation, own time zone, safe editing, the yyyy-mm-dd field | Done |
