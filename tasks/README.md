@@ -55,3 +55,4 @@ A finished task stays as history and is not updated when behaviour changes later
 | [0062](0062-security-checks-in-ci.md) | Free security checks in CI (spec 0007) | Open |
 | [0063](0063-stop-hook-changelog-nudge.md) | The Stop hook also asks about the changelog (spec 0034) | Open |
 | [0064](0064-ci-is-the-e2e-authority.md) | CI is the authority for the end-to-end tests (specs 0007, 0022) | Done |
+| [0065](0065-worktree-base-ref-fresh.md) | Claude Code's own worktrees start from the remote's default branch (spec 0021) | Done |

@@ -205,6 +205,8 @@ describe("spec 0021: work happens in a linked worktree", () => {
       const settings = JSON.parse(read(".claude/settings.json"));
       const entry = settings.hooks.PreToolUse.find((h: { hooks: { command: string }[] }) => h.hooks.some((x) => x.command.includes("worktree-guard.mjs")));
       expect(entry.matcher).toBe("Edit|Write|NotebookEdit|Bash|PowerShell");
+      // AC-9: Claude Code's own worktree tool starts from the remote's default branch, not from the checkout's HEAD.
+      expect(settings.worktree.baseRef).toBe("fresh");
       const script = path.resolve(new URL("../.claude/hooks/worktree-guard.mjs", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1"));
       const run = spawnSync("node", [script], { input: "not json", encoding: "utf8" });
       expect(run.status).toBe(0);
