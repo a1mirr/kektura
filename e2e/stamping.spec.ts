@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import type { Locale } from "next-intl";
+import { routing } from "../src/i18n/routing";
 import { expandAllStages, measureDescriptions, signInAsNewUser, stat } from "./helpers";
 import { psql } from "./local-db";
 
@@ -57,26 +59,28 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
 
   test("0033 AC-1: stamp descriptions follow the page language, the Hungarian original stays in hu", async ({ page }) => {
     await signInAsNewUser(page);
-    const expected = {
+    const expected: Record<Locale, [string, string]> = {
       // a place (Piliscsaba) and the first extra stamp (Velem, 3.8 km)
       en: ["Piliscsaba - At the junction of Wesselényi, Árpád vezér and Kálmán király streets, on an electricity pole. (OKTPH_66)", "At the Szent Vid chapel."],
       ru: ["Piliscsaba - На пересечении улиц Wesselényi, Árpád vezér и Kálmán király, на электрическом столбе. (OKTPH_66)", "У часовни Szent Vid."],
       de: ["Piliscsaba - An der Kreuzung der Wesselényi-, Árpád-vezér- und Kálmán-király-Straße, an einem Strommast. (OKTPH_66)", "An der Kapelle Szent Vid."],
       hu: ["Piliscsaba - A Wesselényi-, Árpád vezér- és Kálmán király utca találkozásánál, egy villanyoszlopon. (OKTPH_66)", "A Szent Vid-kápolnánál."],
     };
-    for (const [locale, [placeText, extraText]] of Object.entries(expected)) {
+    // The one test that runs over every language: adding a language fails to compile until it has its texts here.
+    for (const locale of routing.locales) {
+      const [placeText, extraText] = expected[locale];
       await page.goto(`/${locale}/dashboard`);
       await expect(place(page, "OKTPH_66")).toContainText(placeText);
       await expect(page.locator("#extra-stamps li").first()).toContainText(extraText);
     }
   });
 
-  test("0001 AC-11: the dashboard never scrolls sideways at 375 px: collapsed, expanded and with stamped rows, in every language", async ({
+  test("0001 AC-11: the dashboard never scrolls sideways at 375 px: collapsed, expanded and with stamped rows, in the default language and the one with the longest words", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 375, height: 800 });
     await signInAsNewUser(page);
-    const locales = ["en", "hu", "ru", "de"];
+    const locales = [routing.defaultLocale, "de"]; // the default and German
     const widths = () =>
       page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, viewport: window.innerWidth }));
     const expectFits = async (label: string, stagesOpen: boolean) => {

@@ -11,7 +11,7 @@ Everything it says is true of the app today.
 
 ## Behaviour
 
-- **AC-1**: `/about` is public (no sign-in) in `ru`, `en` and `hu`, reachable from the footer. It has its
+- **AC-1**: `/about` is public (no sign-in) in every language, reachable from the footer. It has its
   own document title and description, and a single `h1` followed by
   one `h2` per section below (the four sections of AC-2 to AC-5, then AC-8's).
 - **AC-2**: "The trail in numbers" shows the number of stages, of official stamping places and the total
@@ -72,4 +72,4 @@ document).
 | AC-5 | `e2e/about.spec.ts` (links), `e2e/friends.spec.ts` (friends paragraph, flag on); the wording against spec 0014 and migration 0008: manual (judgement): read it next to them. Last checked: never recorded. |
 | AC-4 | `e2e/about.spec.ts` (every external link is `https:`, opens in a new tab with `noopener`) |
 | AC-8 | `e2e/about.spec.ts` (the link to the feedback form) |
-| AC-6, AC-7 | `tests/messages.test.ts` (parity incl. rich-text tags; no open-source / PWA wording in any locale), `e2e/about.spec.ts` (ru and hu, no overflow at 375 px) |
+| AC-6, AC-7 | `tests/messages.test.ts` (parity incl. rich-text tags; no open-source / PWA wording in any locale), `e2e/about.spec.ts` (the default language, no overflow at 375 px), `e2e/languages.spec.ts` (every language: its title and sections, no overflow at 375 px) |

@@ -32,21 +32,4 @@ test.describe("spec 0019: useful links page", () => {
     }
   });
 
-  test("AC-2: Russian and Hungarian have their own groups and descriptions", async ({ page }) => {
-    await page.goto("/ru/links");
-    await expect(page.getByRole("heading", { level: 2 })).toHaveText(["Маршрут", "Планирование похода", "Сообщество и данные"]);
-    await expect(page.getByText("Официальный сайт Országos Kéktúra.")).toBeVisible();
-    await page.goto("/hu/links");
-    await expect(page.getByRole("heading", { level: 2 })).toHaveText(["A nyomvonal", "Túratervezés", "Közösség és adatok"]);
-    await expect(page.getByText("Az Országos Kéktúra hivatalos weboldala.")).toBeVisible();
-  });
-
-  test("AC-1: fits a phone screen without horizontal scrolling", async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 812 });
-    for (const locale of ["hu", "ru", "en", "de"]) {
-      await page.goto(`/${locale}/links`);
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-      expect(overflow, locale).toBeLessThanOrEqual(0);
-    }
-  });
 });

@@ -1,4 +1,5 @@
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
+import { routing } from "../src/i18n/routing";
 import { expandAllStages, measureDescriptions, signInAsNewUser, stat } from "./helpers";
 import { psql } from "./local-db";
 
@@ -182,15 +183,17 @@ test.describe("spec 0024: friends", () => {
     psql(`update public.profiles set display_name = repeat('W', 40) where id in ('${anaId}', '${bobId}')`);
     await anaPage.setViewportSize({ width: 375, height: 812 });
 
-    for (const locale of ["hu", "ru"]) {
+    const approveLabel: Record<string, string> = { hu: "Elfogadás", ru: "Одобрить" };
+    const longWords = [routing.defaultLocale, "ru"]; // the default and one other
+    for (const locale of longWords) {
       await anaPage.goto(`/${locale}/friends`); // the longest words; Bob's request is pending
-      await expect(anaPage.getByRole("button", { name: locale === "hu" ? "Elfogadás" : "Одобрить" })).toBeVisible();
+      await expect(anaPage.getByRole("button", { name: approveLabel[locale] })).toBeVisible();
       expect(await overflow(anaPage), `${locale} pending`).toBeLessThanOrEqual(0);
     }
     await anaPage.goto("/en/friends");
     await anaPage.getByRole("button", { name: "Approve" }).click();
     await expect(anaPage.getByRole("button", { name: "Approve" })).toHaveCount(0);
-    for (const locale of ["hu", "ru"]) {
+    for (const locale of longWords) {
       await anaPage.goto(`/${locale}/friends`);
       expect(await overflow(anaPage), `${locale} friend`).toBeLessThanOrEqual(0);
     }
@@ -353,7 +356,7 @@ test.describe("spec 0024: the Friends page buttons respond", () => {
       await anaPage.setViewportSize({ width, height: 812 });
       for (const approved of [false, true]) {
         if (approved) await approve(anaPage);
-        for (const locale of ["en", "ru", "hu"]) {
+        for (const locale of [routing.defaultLocale, "ru"]) {
           await anaPage.goto(`/${locale}/friends`);
           await anaPage.locator("summary").first().click(); // the open question is the widest state
           const small = await anaPage.locator("button:visible, summary:visible").evaluateAll((els) =>

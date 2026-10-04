@@ -3,8 +3,6 @@ import { CHANGELOG } from "../src/content/changelog";
 
 // The expectations come from the data the page renders, so adding an entry on top (spec 0018 AC-7)
 // doesn't break them; what they check is that the page shows that data in order and in each language.
-const noHorizontalScroll = (page: import("@playwright/test").Page) =>
-  page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 const longDate = (locale: string, date: string) =>
   new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`));
 const newest = CHANGELOG[0];
@@ -34,31 +32,4 @@ test.describe("spec 0018: changelog page", () => {
     await expect(page.getByRole("article").last().getByText("Sign in with Google.")).toBeVisible();
   });
 
-  test("AC-3: Russian, Hungarian and German show their own text, dates and labels", async ({ page }) => {
-    await page.goto("/ru/changelog");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("История изменений");
-    await expect(page.getByRole("heading", { level: 2 }).first()).toHaveText(newest.title.ru);
-    await expect(page.locator("time").first()).toHaveText(longDate("ru", newest.date));
-    await expect(page.getByText("Исправлено", { exact: true }).first()).toBeVisible();
-
-    await page.goto("/hu/changelog");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Változások");
-    await expect(page.getByRole("heading", { level: 2 }).first()).toHaveText(newest.title.hu);
-    await expect(page.locator("time").first()).toHaveText(longDate("hu", newest.date));
-    await expect(page.getByText("Javítás", { exact: true }).first()).toBeVisible();
-
-    await page.goto("/de/changelog");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Änderungen");
-    await expect(page.getByRole("heading", { level: 2 }).first()).toHaveText(newest.title.de);
-    await expect(page.locator("time").first()).toHaveText(longDate("de", newest.date));
-    await expect(page.getByText("Behoben", { exact: true }).first()).toBeVisible();
-  });
-
-  test("AC-1: fits a phone screen without horizontal scrolling", async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 812 });
-    for (const locale of ["hu", "ru", "de"]) {
-      await page.goto(`/${locale}/changelog`);
-      expect(await noHorizontalScroll(page), locale).toBeLessThanOrEqual(0);
-    }
-  });
 });

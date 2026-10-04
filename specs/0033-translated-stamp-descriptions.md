@@ -45,6 +45,6 @@ user-submitted translations.
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-2 | `src/lib/stamp-description.test.ts`, `e2e/stamping.spec.ts` (en/hu/ru/de) |
+| AC-1, AC-2 | `src/lib/stamp-description.test.ts`, `e2e/stamping.spec.ts` (every language) |
 | AC-3, AC-4 | `tests/stamp-descriptions.test.ts` |
 | AC-5 | `tests/stamp-descriptions.test.ts` (the seed generator and the seed do not mention the translations file) |
