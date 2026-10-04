@@ -182,6 +182,17 @@ describe("spec 0021: work happens in a linked worktree", () => {
     expect(gitInvocation("npm test", "/r")).toBeNull();
   });
 
+  it("AC-8, AC-9, AC-10: CLAUDE.md tells the author to work in a worktree from a fresh origin/main, to tidy after a merge, and what a denied call means", () => {
+    const claude = read("CLAUDE.md");
+    expect(claude).toMatch(/Always work in your own worktree, never in the primary checkout and never on `main`/);
+    expect(claude).toMatch(/`git fetch origin` as a call of its own, then `git worktree add \.claude\/worktrees\/<name> -b <topic> origin\/main`/);
+    expect(claude).toMatch(/`npm run tidy -- --apply` does it/);
+    expect(claude).toMatch(/It keeps the worktree it runs in/);
+    expect(claude).toMatch(/denies is not retried, split or routed around, and it is not a place to stop/);
+    expect(claude).toMatch(/give the user the denied command \(in its own `bash` block\) in the final message/);
+    expect(claude).toMatch(/never chained with reads, so a denial cannot swallow the rest/);
+  });
+
   describe("AC-7: wiring", () => {
     it("the hook runs before Edit, Write, NotebookEdit and Bash, and a payload it cannot read does not block", () => {
       const settings = JSON.parse(read(".claude/settings.json"));

@@ -22,8 +22,10 @@ branches were found). Make the right way the only way that works, and clean up a
 
 ## Spec changes
 
-Spec 0021: AC-7 (the hook), AC-8 (`tidy`) and AC-9 (a fresh `origin/main` as the base) added, with their coverage
-rows and owner code; the Goal says that where the work is done and the clean-up are part of the area. Status stays
+Spec 0021: AC-7 (the hook), AC-8 (`tidy`), AC-9 (a fresh `origin/main` as the base) and AC-10 (a denied call is not
+a place to stop) added, with their coverage rows and owner code. The same change also drafts the acceptance criteria
+of tasks 0041 to 0046 in the specs they belong to (0006, 0007, 0012, 0022, 0026, 0034: each is `Accepted` with a
+"Not built yet" coverage row) and rewords 0007 AC-10 and 0022 AC-4 (task 0047); the Goal says that where the work is done and the clean-up are part of the area. Status stays
 `Done`: every AC holds and has a test, and the one check that needs a live Claude Code session is a `manual` row.
 
 ## Notes

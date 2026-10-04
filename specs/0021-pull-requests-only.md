@@ -73,7 +73,16 @@ leftovers of a merged change are cleaned up.
   reached; a branch whose worktree could not be removed (locked, say) is kept; a branch is deleted only at the sha it
   has just checked against `origin/main`, never with `-D`. `--remote` also deletes merged branches on `origin`, with a lease on the sha it checked, so a commit
   pushed since is not thrown away.
-  Without `--apply` nothing changes. The author runs it after every merge (`CLAUDE.md`, workflow step 7).
+  Without `--apply` nothing changes. The author runs it after every merge (`CLAUDE.md`, workflow step 7). It
+  judges only by "merged", so it is wider than the per-branch limits of AC-6, which cover the branch of a pull
+  request the author merged: it removes a clean, merged worktree whoever made it, so a session that is idling in
+  one has its directory taken away (run it when no other session is mid-work in a merged worktree), a merged local
+  branch is deleted even when another tool made it (its worktree outside `.claude/worktrees` is kept), and
+  `--remote` does not check for an open pull request based on the branch (CLAUDE.md step 7 retargets it first).
+- **AC-10**: `CLAUDE.md` says what to do when the auto-mode classifier denies a tool call: do not retry, split or
+  route around it, and do not stop; say so in one line, carry on with every step that does not depend on it, and
+  hand the denied command to the user at the end; commands that delete or change shared state run as a call of
+  their own, so a denial cannot swallow the rest. (A rule for the author, checked as text.)
 
 - **AC-9**: New work starts from the real `origin/main`, never from a stale local `main` or another branch. The
   `worktree-guard` hook enforces it for the way work is started (`git worktree add`); a branch made later inside a
@@ -84,7 +93,9 @@ leftovers of a merged change are cleaned up.
   alone; with no reachable origin there is nothing to compare, so the base rule alone applies. `npm run tidy
   --apply` also moves a local `main` that is only behind up to `origin/main` (forward only, at the sha it checked),
   unless a worktree has `main` checked out (it says to update that one with `git merge --ff-only origin/main`, which
-  the hook allows), so `git switch main` is never a stale start either.
+  the hook allows): a stale local `main` is brought up when `tidy` runs (after a merge), not at every moment, and the
+  hook does not look at `git switch main`. Stacking a branch on another unmerged branch is not a case this workflow
+  has: the hook refuses it, and the owner makes such a worktree by hand if it is wanted.
 
 ## Out of scope
 
@@ -117,6 +128,7 @@ leftovers of a merged change are cleaned up.
 | AC-7 | `tests/worktree-guard.test.ts` (`decide` against a real primary checkout and linked worktrees: every file tool, a new file in a new directory, a worktree on `main`, ignored files, other repositories, `git -C` and `cd` (also Git Bash paths), `FOO=1 git`, `command git`, `git.exe`, forward-only updates of `main`, mutating and reading git commands, the settings wiring, the hook run as a process: exit codes and message) |
 | AC-7 (the hook inside Claude Code) | manual (it needs a Claude Code session): in the primary checkout ask Claude to edit a tracked file and see the refusal with the `git worktree add` line. Last checked: never recorded. |
 | AC-9 | `tests/worktree-guard.test.ts` (against a bare origin and a clone: `origin/main` as base allowed, a local main, another branch or no base refused, a stale `origin/main` refused until fetched, an existing branch allowed, a chained fetch refused, no origin allowed); `tests/tidy.test.ts` (a stale local main is fast-forwarded and left alone when a worktree has it) |
+| AC-8 (the step in the workflow), AC-10 | `tests/worktree-guard.test.ts` (`CLAUDE.md` names `npm run tidy`, the hook, `git fetch origin` as a call of its own, and the classifier rule) |
 | AC-8 | `tests/tidy.test.ts` (`planTidy` for every keep and remove reason, the junction left alone, the script against a bare origin and a clone: dry run, `--apply`, a new branch with no commit kept, a locked worktree keeps its branch, unknown argument) |
 | AC-1, AC-2, AC-3 | `tests/git-hooks.test.ts` (`checkPush` for the three URL forms, every spelling of a push to `main`, topic branches, deleting a topic branch, tags, the deploy remote, a look-alike host; the guard run as a process: exit codes and message) |
 | AC-4 | `tests/git-hooks.test.ts` (hook script calls the guard, `hooks:install` sets `core.hooksPath`, no `prepare`/`postinstall`/`preinstall` script) |
