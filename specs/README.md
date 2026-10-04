@@ -92,4 +92,3 @@ hook doesn't run them: CI's "End-to-end tests" job is the authority and must be 
 | [0026](0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Done |
 | [0033](0033-translated-stamp-descriptions.md) | Stamp descriptions translated into ru and en | Done |
 | [0034](0034-specs-and-tasks.md) | Specs and tasks: how work is written down | Done |
-| [0066](0066-uptime-monitoring.md) | Uptime check: a scheduled run against the public site, a Telegram message on the second failure in a row | Done |

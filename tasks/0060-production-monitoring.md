@@ -1,7 +1,7 @@
 # 0060: Know when production is broken
 
-Status: In progress
-Specs: [0066](../specs/0066-uptime-monitoring.md) AC-1 to AC-5 (new); [0026](../specs/0026-automatic-deploy.md) AC-8, AC-9 (relied on: the smoke test's checks and the Telegram message)
+Status: Done
+Specs: none
 
 ## Goal
 
@@ -12,46 +12,32 @@ failures already arrive.
 
 ## Done when
 
-- [x] ~~The requirements below written down and their open questions settled with the owner~~ Not asked beforehand: the task's own recommendation (options 1 and 2 first, no new accounts) was followed for option 1, and the owner sees the choice in the pull request. Option 2 is still an open question (below).
-- [x] Option 1 built: the uptime workflow, its alert script and tests (spec 0066)
-- [ ] Option 2 (failed actions to Telegram) decided and built, or dropped
-- [x] The specs listed above mirror the code as built (spec 0034 AC-6)
+- [x] The decision is made (owner, 2026-10-04): option 4, an external uptime service
+- [x] The external monitor is written up for the owner in `deploy/README.md` ("Watching the site from outside"); the owner creates the account and the monitor
+- [x] Option 1 struck with its reason, option 2 moved to its own task (0066)
+- [x] No spec states a rule this task changes (see Spec changes)
 - [ ] Fresh-context review done
 
-## Options to decide between
+## Options
 
-1. **Uptime check from GitHub Actions**: a scheduled workflow runs the existing `scripts/smoke-test.mjs` against
-   the public site every 15 minutes and tells the owner through the existing `scripts/notify-telegram.mjs` when it
-   fails twice in a row. No new account and no new secret. GitHub's cron is best-effort (runs can be delayed by
-   minutes) and an idle repository's schedules are disabled after 60 days without activity. **Built here.**
-2. **Failed actions to Telegram**: `src/lib/log.ts` is the one place a failure passes through; it could send one
-   rate-limited message per kind of failure. It must keep the logging rules (no emails, ids, tokens, input,
-   Supabase `details`/`hint`), and the Telegram token must never reach a log (CLAUDE.md gotcha).
-3. **Sentry (or similar) free tier**: richer (stack traces, grouping) but needs an account, a DSN, and a look at
-   what personal data a stack trace can carry; adds a dependency to a 1 GB server.
-4. **An external uptime service** (UptimeRobot and similar, free): checks every 5 minutes from outside, no code.
-
-Recommendation: 1 and 2 first (no new accounts, built on what exists); 3 only if 2 turns out too thin.
-
-## Open questions
-
-- **Option 2**: not built, because the text does not settle its design (what counts as a "kind of failure", the
-  rate limit and whether it is kept in the memory of one PM2 process, which failures are worth a night-time
-  message, and that it puts a Telegram call into the production server's error paths). Build it, drop it, or take
-  option 3 or 4 instead?
-- **Option 1, as built**: the second failed run in a row means two completed runs of the workflow, about 15 minutes
-  apart, each retried for a minute; a longer outage gets no reminder and a recovery gets no message (both stated in
-  spec 0066). Say if either is wanted.
+1. ~~**Uptime check from GitHub Actions**: a scheduled workflow runs the existing `scripts/smoke-test.mjs` against
+   the public site every 15 minutes and tells the owner through `scripts/notify-telegram.mjs`.~~ Dropped: a 15-minute
+   cron is about 2,880 billed minutes a month, and the Free plan has 2,000 for private repositories, so it would stop
+   CI and deploys. (It was built on this branch first and removed.)
+2. ~~**Failed actions to Telegram** from `src/lib/log.ts`.~~ Moved to task [0066](0066-telegram-for-failed-actions.md).
+3. ~~**Sentry (or similar) free tier**~~ Not chosen: needs an account, a DSN, a look at what personal data a stack
+   trace can carry, and adds a dependency to a 1 GB server.
+4. **An external uptime service** (UptimeRobot, Better Stack and similar, free): checks every 5 minutes from
+   outside, no code. **Chosen**; written up in `deploy/README.md`, "Watching the site from outside". No service is
+   required by the repository; free-tier limits change, so the owner checks them.
 
 ## Spec changes
 
-- New spec [0066](../specs/0066-uptime-monitoring.md) (AC-1 to AC-5, a `manual` coverage row for a real scheduled
-  run) for the uptime workflow, the alert rule and the message; the index in `specs/README.md` has its row.
-- No change to spec 0026: the smoke test and the Telegram message it relies on behave as before (the smoke
-  script's header says the uptime check shares its checks).
+None. The change is a section of `deploy/README.md` and no spec states a rule it changes (spec 0026 owns the deploy's
+smoke test, which is untouched).
 
 ## Notes
 
-- Built on a topic branch with only unit tests and a read of the YAML: the workflow has not run, and nothing
-  was probed on production. It needs no new secret; it uses `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` when they
-  exist. `deploy/README.md`, "Uptime check", has the owner's side (re-enabling a switched-off schedule).
+- The service, its account and its Telegram link are the owner's: nothing about them is in the repository, and no
+  secret is needed here.
+- Until the monitor exists, a site outage is still noticed by a user first.

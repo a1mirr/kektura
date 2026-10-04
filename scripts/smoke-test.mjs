@@ -1,6 +1,5 @@
 // Checks that the site answers after a deploy (spec 0026 AC-8): /en and /ru give 200, an unknown route gives
 // 404, and the test server's dummy login is not there (404, spec 0006 AC-4). It is a sanity check of the running build, not a test suite. It retries, because the reload takes a moment.
-// The scheduled uptime check (spec 0066) runs the same checks, so a change here changes both.
 //
 //   node scripts/smoke-test.mjs <base url> [timeout seconds]
 import fs from "node:fs";
