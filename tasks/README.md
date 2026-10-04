@@ -41,3 +41,11 @@ A finished task stays as history and is not updated when behaviour changes later
 | [0053](0053-bulk-stamp-dates.md) | Change the date of many stamps at once (spec 0044) | Open |
 | [0054](0054-ci-runs-once-per-change.md) | CI runs once per change (spec 0045) | Open |
 | [0055](0055-database-tests-fail-in-ci.md) | Database tests fail in CI instead of skipping (spec 0045) | Open |
+| [0056](0056-worktrees-and-tidy.md) | Work only in worktrees from a fresh origin/main, and tidy after a merge (spec 0021) | Done |
+| [0057](0057-review-recorded-check.md) | A CI check that a review was recorded (spec 0022) | Open |
+| [0058](0058-backup-before-migration.md) | A backup before every migration (specs 0012, 0026) | Open |
+| [0059](0059-production-monitoring.md) | Know when production is broken | Open |
+| [0060](0060-mobile-and-accessibility-e2e.md) | End-to-end tests at phone width, and accessibility checks (spec 0006) | Open |
+| [0061](0061-security-checks-in-ci.md) | Free security checks in CI (spec 0007) | Open |
+| [0062](0062-stop-hook-changelog-nudge.md) | The Stop hook also asks about the changelog (spec 0034) | Open |
+| [0063](0063-ci-is-the-e2e-authority.md) | CI is the authority for the end-to-end tests (specs 0007, 0022) | Done |
