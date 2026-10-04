@@ -10,7 +10,7 @@ specs it touches, the requirements of planned behaviour and what is done when. A
 product behaves; a spec never tells the story of a change, and never describes behaviour that is not built yet (its
 status is always `Done`).
 Spec numbers are their own sequence (next number = the highest in `specs/` plus one); a task's number is its issue
-number. Details: [0034](0034-specs-and-tasks.md). A quick test for where a sentence belongs: will it still be true in
+number. Details: [0034](project/0034-specs-and-tasks.md). A quick test for where a sentence belongs: will it still be true in
 a year if nobody touches it? Yes: spec. No: task.
 
 ## Workflow
@@ -21,7 +21,7 @@ a year if nobody touches it? Yes: spec. No: task.
    a task without requirements, a trivial fix needs neither.
 2. **Agree on it.** Resolve the open questions with the owner before implementing.
 3. **Write the ACs and the tests as you build.** Edit the spec that owns the area (add, change or remove ACs); a new
-   area: copy [`_template.md`](_template.md) to `specs/NNNN-short-slug.md`, status `Done`. Turn each requirement
+   area: copy [`_template.md`](_template.md) to `specs/product/NNNN-short-slug.md` (what users and the running app see and do) or `specs/project/NNNN-short-slug.md` (how the project builds, checks, ships and is run), with the next number (the highest in `specs/` plus one), status `Done`, and add it to the index under a heading. Turn each requirement
    into numbered acceptance criteria (`AC-1`, `AC-2`, ...), each one observable, testable statement: "given X, when
    Y, then Z". Then the tests: `describe("spec NNNN: <area>")`, and every test title starts
    with the AC it covers (`it("AC-3: ...")`). An AC that can't be automated yet is listed as
@@ -32,7 +32,7 @@ a year if nobody touches it? Yes: spec. No: task.
    reality: an AC for behaviour that exists and no AC states, `Removed` for an AC that was dropped, status `Done`,
    the coverage table, the index below; every requirement of the task is built or struck with the reason. Where code and spec disagree, decide which is right and fix that one.
    Write what changed in the pull request description's "Spec changes" section; the merge closes the task issue (`Closes #N`).
-6. **Review with a fresh agent** before the pull request is merged ([0022](0022-fresh-context-review.md)):
+6. **Review with a fresh agent** before the pull request is merged ([0022](project/0022-fresh-context-review.md)):
    spawn the `fresh-reviewer` agent with only the task's issue number (the spec number for a change that is only a spec,
    `none` for a small change with neither) and the base branch. It has none of your context and reads the specs
    and the diff like a stranger would, in both directions. Fix its valid findings, answer the rest in the pull
@@ -64,33 +64,72 @@ parallel. A failure is sent back to Claude to fix (up to 3 attempts, then you ge
 code changed but no spec did, it asks once whether behaviour changed (then the spec and its tests are
 updated) or not (then say so in one line); in the same message it asks whether a change to a file users can see
 (messages, a page, a layout, a component) belongs in the changelog when `src/content/changelog.ts` did not change
-([0034](0034-specs-and-tasks.md) AC-10, AC-12). Run the same checks yourself with `npm run check`. E2E tests need Docker, so the
+([0034](project/0034-specs-and-tasks.md) AC-10, AC-12). Run the same checks yourself with `npm run check`. E2E tests need Docker, so the
 hook doesn't run them: CI's "End-to-end tests" job is the authority and must be green on the pull request
-(skipped for one that changes only Markdown, [0007](0007-ci.md) AC-10; [0007](0007-ci.md) AC-8); run `npm run e2e` locally only to reproduce a failure.
+(skipped for one that changes only Markdown, [0007](project/0007-ci.md) AC-10; [0007](project/0007-ci.md) AC-8); run `npm run e2e` locally only to reproduce a failure.
 
 ## Index
 
+Specs live in `product/` (what users and the running app see and do) or `project/` (how the project builds,
+checks, ships and is run). The headings below only group the index: moving a spec between headings changes no file.
+
+### `product/`
+
+#### Stamps
+
 | Spec | Area | Status |
 | --- | --- | --- |
-| [0001](0001-progress.md) | Progress: places, walked stretches, stats, stages, extra stamps in stages | Done |
-| [0002](0002-stamping.md) | Stamping: server actions, stamp buttons, cached reference data | Done |
-| [0003](0003-map-route-planner.md) | Map lines, the route planner, the comparison map of a friend's page and how the map code is structured | Done |
-| [0004](0004-trail-data.md) | Generated trail data and seeds | Done |
-| [0005](0005-auth-routing-i18n.md) | Sign-in, routing, languages (Hungarian default, German), the language dropdown, typed message keys | Done |
-| [0006](0006-test-server.md) | Test server with dummy login, E2E tests and how they sign in | Done |
-| [0007](0007-ci.md) | CI once per change (Markdown-only pull requests skip E2E), a check that a pull request is up to date with main, E2E caches and timing report, generated-types check, Dependabot | Done |
-| [0008](0008-action-logging.md) | Server-side logging of failed actions | Done |
-| [0012](0012-backups.md) | Weekly backup of production user data | Done |
-| [0014](0014-pages-and-settings.md) | Footer pages, site logo, account page (sign out, chart, account deletion) | Done |
-| [0016](0016-stamp-dates.md) | Stamp dates: validation, own time zone, safe editing, the yyyy-mm-dd field | Done |
-| [0017](0017-feedback.md) | Feedback form with Telegram notifications | Done |
-| [0018](0018-changelog.md) | Changelog page | Done |
-| [0019](0019-useful-links.md) | Useful links page | Done |
-| [0020](0020-origin-and-deploy.md) | Request origin behind the proxy; deploy files | Done |
-| [0015](0015-about-page.md) | About page | Done |
-| [0021](0021-pull-requests-only.md) | main only changes through pull requests (pre-push guard; opening, merging and cleaning up with gh); work happens in worktrees from a fresh origin/main (worktree guard hook, tidy) | Done |
-| [0022](0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Done |
-| [0024](0024-friends-sharing.md) | Sharing progress with friends | Done |
-| [0026](0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Done |
-| [0033](0033-translated-stamp-descriptions.md) | Stamp descriptions translated into ru, en and de | Done |
-| [0034](0034-specs-and-tasks.md) | Specs and tasks: how work is written down | Done |
+| [0001](product/0001-progress.md) | Progress: places, walked stretches, stats, stages, extra stamps in stages | Done |
+| [0002](product/0002-stamping.md) | Stamping: server actions, stamp buttons, cached reference data | Done |
+| [0016](product/0016-stamp-dates.md) | Stamp dates: validation, own time zone, safe editing, the yyyy-mm-dd field | Done |
+| [0033](product/0033-translated-stamp-descriptions.md) | Stamp descriptions translated into ru, en and de | Done |
+
+#### Map and trail data
+
+| Spec | Area | Status |
+| --- | --- | --- |
+| [0003](product/0003-map-route-planner.md) | Map lines, the route planner, the comparison map of a friend's page and how the map code is structured | Done |
+| [0004](product/0004-trail-data.md) | Generated trail data and seeds | Done |
+
+#### Friends
+
+| Spec | Area | Status |
+| --- | --- | --- |
+| [0024](product/0024-friends-sharing.md) | Sharing progress with friends | Done |
+
+#### Pages
+
+| Spec | Area | Status |
+| --- | --- | --- |
+| [0014](product/0014-pages-and-settings.md) | Footer pages, site logo, account page (sign out, chart, account deletion) | Done |
+| [0015](product/0015-about-page.md) | About page | Done |
+| [0017](product/0017-feedback.md) | Feedback form with Telegram notifications | Done |
+| [0018](product/0018-changelog.md) | Changelog page | Done |
+| [0019](product/0019-useful-links.md) | Useful links page | Done |
+
+#### Platform
+
+| Spec | Area | Status |
+| --- | --- | --- |
+| [0005](product/0005-auth-routing-i18n.md) | Sign-in, routing, languages (Hungarian default, German), the language dropdown, typed message keys | Done |
+| [0008](product/0008-action-logging.md) | Server-side logging of failed actions | Done |
+| [0020](product/0020-origin-and-deploy.md) | Request origin behind the proxy; deploy files | Done |
+
+### `project/`
+
+#### Workflow
+
+| Spec | Area | Status |
+| --- | --- | --- |
+| [0021](project/0021-pull-requests-only.md) | main only changes through pull requests (pre-push guard; opening, merging and cleaning up with gh); work happens in worktrees from a fresh origin/main (worktree guard hook, tidy) | Done |
+| [0022](project/0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Done |
+| [0034](project/0034-specs-and-tasks.md) | Specs and tasks: how work is written down | Done |
+
+#### Delivery and operations
+
+| Spec | Area | Status |
+| --- | --- | --- |
+| [0006](project/0006-test-server.md) | Test server with dummy login, E2E tests and how they sign in | Done |
+| [0007](project/0007-ci.md) | CI once per change (Markdown-only pull requests skip E2E), a check that a pull request is up to date with main, E2E caches and timing report, generated-types check, Dependabot | Done |
+| [0012](project/0012-backups.md) | Weekly backup of production user data | Done |
+| [0026](project/0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Done |

@@ -5,7 +5,7 @@ import { getFormatter, getTranslations, setRequestLocale } from "next-intl/serve
 import { routing } from "@/i18n/routing";
 import { CHANGELOG, type ChangeKind } from "@/content/changelog";
 
-// See specs/0018-changelog.md. The entries are data in src/content/changelog.ts.
+// See spec 0018. The entries are data in src/content/changelog.ts.
 
 type Props = { params: Promise<{ locale: string }> };
 

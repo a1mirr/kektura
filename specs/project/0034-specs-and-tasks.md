@@ -17,8 +17,10 @@ behaviour would be spread over files that disagree with the code.
 
 ### Specs are files, tasks are issues
 
-- **AC-1**: `specs/` holds the specs, as `NNNN-slug.md` files written in English; the repository has no `tasks/`
-  folder. Spec numbers are one sequence: the next is the highest in `specs/` plus one, and a number is never reused
+- **AC-1**: `specs/` holds the specs, as `NNNN-slug.md` files written in English, each in `specs/product/` (what
+  users and the running app see and do) or `specs/project/` (how the project builds, checks, ships and is run), and
+  nowhere else: `specs/` itself holds only `README.md` and `_template.md`, and the folders are never nested deeper.
+  The repository has no `tasks/` folder. Spec numbers are one sequence: the next is the highest in `specs/` plus one, and a number is never reused
   or changed. Tasks are GitHub issues labelled `task`, numbered by GitHub (`#N`); the tasks that predate the issues
   are issues too (#56 to #99), whose titles keep their old four-digit number (`0054: …`).
 - **AC-2**: A spec is the contract of one area (a part of the product, or of how the project is run) as it
@@ -82,7 +84,9 @@ behaviour would be spread over files that disagree with the code.
 
 - **AC-9**: `tests/specs.test.ts` checks that `specs/README.md` lists every spec once with the status written in the
   file (`Done`), that no spec number is used twice, that `specs/` is written in English and that the repository has no
-  `tasks/` folder. It also checks that a test title citing an AC
+  `tasks/` folder. The index (`specs/README.md`) groups the specs under headings that are not paths, and links each
+  spec by its path; a path that names a spec (under `specs/product/` or `specs/project/`) in any tracked text file, and a
+  relative Markdown link, must point at a file that exists, and no file cites a spec by the old flat path. It also checks that a test title citing an AC
   (under `describe("spec NNNN …")` or as `NNNN AC-n`) cites one that exists, and that the repository files named
   in backticks by a spec exist, and that every coverage row of a spec that
   says `manual` has a reason and a `Last checked` (the way to check it is for the reviewer, AC-8).
@@ -121,7 +125,7 @@ that is in the repository.
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-9 | `tests/specs.test.ts` (file names, the index, statuses, unique numbers, English, no `tasks/` folder, test titles that cite an AC that does not exist, files named by a spec that do not exist) |
+| AC-1, AC-9 | `tests/specs.test.ts` (the two spec folders and their file names, the grouped index and the path in each row, statuses, unique numbers, English, no `tasks/` folder, every path that names a spec and every relative Markdown link resolves, test titles that cite an AC that does not exist, files named by a spec that do not exist) |
 | AC-2, AC-3, AC-4, AC-5, AC-6, AC-7 | `tests/specs.test.ts` (the rules are written in `specs/README.md`, `CLAUDE.md` and the issue template, which has the sections; a spec has no status but `Done`) and `tests/review-process.test.ts` |
 | AC-8 | `tests/review-process.test.ts` (reviewer brief, `CLAUDE.md`, pull request template) and `tests/specs.test.ts` (the reviewer re-checks the hand-checked rows of what it touches) |
 | AC-10 | `tests/specs.test.ts` (the hook source watches `specs/` and nudges on a missing spec change); manual (it runs a Claude Code hook): change a file under `src/` only, finish a turn, and the hook asks once; change a file under `specs/` and the hook runs the checks. Last checked: never recorded. |

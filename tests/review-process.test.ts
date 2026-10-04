@@ -75,7 +75,7 @@ describe("spec 0022: fresh-context review", () => {
       expect(body).toMatch(/not named `NNNN_slug\.sql` after the number of the task issue that adds it/);
       expect(body).toMatch(/regenerated types \(`npm run types:gen`\)/);
       expect(body).toMatch(/A merge deploys by itself, so nobody else will look at this/);
-      expect(read("specs/0022-fresh-context-review.md")).toMatch(/checks every migration in the diff against spec 0026 AC-5/);
+      expect(read("specs/project/0022-fresh-context-review.md")).toMatch(/checks every migration in the diff against spec 0026 AC-5/);
       expect(read("CLAUDE.md")).toMatch(/a migration in the diff that the code running in production could not live with while it is applied/);
     });
 
@@ -94,7 +94,8 @@ describe("spec 0022: fresh-context review", () => {
 
     it("starts from CLAUDE.md and the spec (or the owning specs for `none`), and runs the checks", () => {
       expect(body).toContain("CLAUDE.md");
-      expect(body).toMatch(/specs\/NNNN/);
+      expect(body).toMatch(/specs\/product\/NNNN/);
+      expect(body).toMatch(/specs\/project\/NNNN/);
       expect(body).toMatch(/`none`/);
       expect(body).toMatch(/should have had a spec/);
       expect(body).toContain("npm run check");
@@ -119,7 +120,7 @@ describe("spec 0022: fresh-context review", () => {
     it("checks that every requirement of the task holds and that no spec describes unbuilt behaviour", () => {
       expect(body).toMatch(/A requirement of the task that the built change does not satisfy/);
       expect(body).toMatch(/describes behaviour that is\s+not built/);
-      expect(read("specs/0022-fresh-context-review.md")).toMatch(/requirements of the task that do not hold/);
+      expect(read("specs/project/0022-fresh-context-review.md")).toMatch(/requirements of the task that do not hold/);
     });
 
     it("reports findings most severe first with file:line and a failing scenario, what was fine, and allows 'No findings'", () => {
@@ -157,7 +158,7 @@ describe("spec 0018: the changelog rule", () => {
     expect(read("CLAUDE.md")).toMatch(/A feature flag is no excuse while it is on in production \(look it up/);
     expect(read(".github/pull_request_template.md")).toContain("a feature flag that is on in production does not make it invisible");
     expect(read(".claude/agents/fresh-reviewer.md")).toMatch(/A feature flag does not excuse a missing entry while it is on in production: look up the production state/);
-    expect(read("specs/0018-changelog.md")).toMatch(/A feature flag does not excuse a missing entry while the flag is on in\s+production/);
+    expect(read("specs/product/0018-changelog.md")).toMatch(/A feature flag does not excuse a missing entry while the flag is on in\s+production/);
   });
 
   it("AC-7: the pull request template asks for it", () => {

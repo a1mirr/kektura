@@ -1,15 +1,23 @@
 // specs/README.md rules (spec 0034): the index lists every spec with its real status, spec numbers are unique, specs
 // are written in English, tasks are GitHub issues (the repository has no tasks/ folder), and the rules are written
 // down where authors, the reviewer and the hook look.
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const specsDir = new URL("../specs/", import.meta.url);
-const files = (dir: URL) => fs.readdirSync(dir).filter((name) => /^\d{4}-.+\.md$/.test(name));
+const SPEC_FOLDERS = ["product", "project"]; // spec 0034 AC-1: the only places a spec lives
+const baseName = (path: string) => path.slice(path.lastIndexOf("/") + 1);
 const read = (dir: URL, name: string) => fs.readFileSync(new URL(name, dir), "utf8");
 const readRoot = (path: string) => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
-const specFiles = files(specsDir);
+const specFiles = SPEC_FOLDERS.flatMap((folder) =>
+  fs
+    .readdirSync(new URL(`${folder}/`, specsDir))
+    .filter((name) => /^\d{4}-.+\.md$/.test(name))
+    .map((name) => `${folder}/${name}`),
+); // "product/0001-progress.md": relative to specs/
 
 const indexOf = (readme: string) =>
   new Map(
@@ -28,18 +36,25 @@ describe("spec 0034: specs/README.md", () => {
       const own = /^Status: (.+?)\s*$/m.exec(read(specsDir, name))?.[1];
       expect(own, `${name} has a "Status:" line`).toMatch(/^Done$/);
       expect(indexed.get(name)?.status, name).toBe(own);
-      expect(indexed.get(name)?.number, name).toBe(name.slice(0, 4));
+      expect(indexed.get(name)?.number, name).toBe(baseName(name).slice(0, 4));
     }
   });
 
-  it("AC-1: every file in specs/ is NNNN-slug.md, README.md or _template.md", () => {
-    for (const name of fs.readdirSync(specsDir)) {
-      expect(name, name).toMatch(/^(\d{4}-[a-z0-9-]+\.md|README\.md|_template\.md)$/);
+  it("AC-1: specs/ holds README.md, _template.md and the folders product/ and project/, nothing else", () => {
+    expect(fs.readdirSync(specsDir).sort()).toEqual(["README.md", "_template.md", ...SPEC_FOLDERS].sort());
+  });
+
+  it("AC-1: every file in a spec folder is NNNN-slug.md, and the folders are not nested", () => {
+    for (const folder of SPEC_FOLDERS) {
+      for (const entry of fs.readdirSync(new URL(`${folder}/`, specsDir), { withFileTypes: true })) {
+        expect(entry.isFile(), `${folder}/${entry.name} is a file`).toBe(true);
+        expect(entry.name, `${folder}/${entry.name}`).toMatch(/^\d{4}-[a-z0-9-]+\.md$/);
+      }
     }
   });
 
   it("AC-1: no spec number is used twice", () => {
-    const numbers = specFiles.map((name) => name.slice(0, 4));
+    const numbers = specFiles.map((name) => baseName(name).slice(0, 4));
     expect(numbers.filter((n, i) => numbers.indexOf(n) !== i)).toEqual([]);
   });
 
@@ -164,7 +179,7 @@ describe("spec 0034: the rules are written where authors and the reviewer look",
     expect(claude).toMatch(/no spec describing behaviour that is not built/);
     const body = readRoot(".claude/agents/fresh-reviewer.md");
     expect(body).toMatch(/You are told a task's issue number/);
-    expect(body).toContain("specs/0034-specs-and-tasks.md");
+    expect(body).toContain("specs/project/0034-specs-and-tasks.md");
     expect(body).toMatch(/in both directions and beyond the lines the diff touches/);
     expect(body).toMatch(/Goal or Notes tell the story of a change/);
     expect(body).toMatch(/a pull request whose "Spec changes" section is empty/);
@@ -195,7 +210,7 @@ describe("spec 0034: specs and the repository agree", () => {
   const testFiles = ["src", "tests", "e2e", "scripts"].flatMap((d) => walk(`${root}/${d}`)).filter((f) => /\.(test\.tsx?|spec\.ts)$/.test(f));
 
   const acsOf = new Map(
-    specFiles.map((name) => [name.slice(0, 4), new Set([...read(specsDir, name).matchAll(/^- \*\*AC-(\d+)\*\*/gm)].map((m) => Number(m[1])))]),
+    specFiles.map((name) => [baseName(name).slice(0, 4), new Set([...read(specsDir, name).matchAll(/^- \*\*AC-(\d+)\*\*/gm)].map((m) => Number(m[1])))]),
   );
 
   it("AC-9: a test title that cites an AC (under describe(\"spec NNNN …\") or as \"NNNN AC-n\") cites one that exists", () => {
@@ -262,5 +277,43 @@ describe("spec 0034: manual checks", () => {
     expect(readRoot("CLAUDE.md")).toMatch(/the `manual` coverage rows of the touched areas/);
     expect(read(specsDir, "README.md")).toMatch(/`manual \(why it can't be automated\): how to check it\. Last checked: <date>`/);
     expect(readRoot(".claude/agents/fresh-reviewer.md")).toMatch(/A `manual` coverage row of a touched area \(spec 0034 AC-11\)/);
+  });
+});
+
+// Spec 0034 AC-9: a spec is cited by number or by its real path. Every path that names a spec in a tracked text file,
+// and every relative Markdown link, points at a file that exists; the old flat path (before the specs moved into
+// product/ and project/) is not used anywhere. Fixtures with made-up names are not allowed either.
+describe("spec 0034: spec paths and links resolve", () => {
+  const root = new URL("..", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1").replace(/\/$/, "");
+  const tracked = execFileSync("git", ["ls-files", "-z"], { cwd: root, encoding: "utf8" })
+    .split("\0")
+    .filter((f) => /\.(md|ts|tsx|mjs|mts|yml)$/.test(f));
+  const specPaths = new Set(specFiles.map((name) => `specs/${name}`));
+  // Built from parts so that this file does not match its own patterns.
+  const specPath = new RegExp("specs/(?:(" + SPEC_FOLDERS.join("|") + ")/)?(\\d{4}-[a-z0-9-]+\\.md)", "g");
+
+  it("AC-9: every path that names a spec is a spec that exists, in its folder", () => {
+    const wrong: string[] = [];
+    for (const file of tracked) {
+      fs.readFileSync(`${root}/${file}`, "utf8").split("\n").forEach((line, i) => {
+        for (const m of line.matchAll(specPath)) {
+          if (!m[1] || !specPaths.has(m[0])) wrong.push(`${file}:${i + 1} ${m[0]}`);
+        }
+      });
+    }
+    expect(wrong).toEqual([]);
+  });
+
+  it("AC-9: every relative Markdown link in a tracked Markdown file points at a file that exists", () => {
+    const broken: string[] = [];
+    for (const file of tracked.filter((f) => f.endsWith(".md"))) {
+      const text = fs.readFileSync(`${root}/${file}`, "utf8").replace(/```[\s\S]*?```/g, "").replace(/`[^`\n]*`/g, "");
+      for (const m of text.matchAll(/\]\(([^)\s]+)\)/g)) {
+        const target = m[1].split("#")[0];
+        if (!target || /^(https?:|mailto:)/.test(target)) continue;
+        if (!fs.existsSync(path.resolve(root, path.dirname(file), target))) broken.push(`${file} -> ${m[1]}`);
+      }
+    }
+    expect(broken).toEqual([]);
   });
 });

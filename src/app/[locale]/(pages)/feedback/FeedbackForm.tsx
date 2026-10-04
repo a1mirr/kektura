@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { characterCount, FEEDBACK_MAX } from "@/lib/feedback";
 import { submitFeedback, type FeedbackResult } from "./actions";
 
-// See specs/0017-feedback.md.
+// See spec 0017.
 
 // Which message to show for the server's answer (AC-8).
 function messageKey(result: FeedbackResult) {

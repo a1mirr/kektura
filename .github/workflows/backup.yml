@@ -1,7 +1,7 @@
 # Spec 0012. Weekly dump of the data users entered (accounts and stamps) from the production
 # database, kept as a workflow artifact for 90 days. The dump itself, its check and the upload are the composite
 # action .github/actions/dump-user-data, which the deploy workflow uses too (spec 0026). Restore steps:
-# specs/0012-backups.md.
+# spec 0012.
 # Needs the repository secret SUPABASE_DB_URL (session pooler connection string); without it the
 # run succeeds with a notice. The secret is only ever referenced, never printed: no `set -x`.
 name: Backup

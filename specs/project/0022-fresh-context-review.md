@@ -31,7 +31,7 @@ author's context, and wants that to be part of how work is done here, not someth
     anything not committed yet,
     and starts its report with the commit it reviewed and whether the working tree was clean, so a review of
     uncommitted work can't pass for a review of the final state;
-  - it starts from `CLAUDE.md`, `specs/0034-specs-and-tasks.md` and the task issue it is given (`gh issue view`) and the specs that
+  - it starts from `CLAUDE.md`, `specs/project/0034-specs-and-tasks.md` and the task issue it is given (`gh issue view`) and the specs that
     task lists (with a spec number, that spec; with `none`, the specs that own the behaviour the diff touches,
     saying whether the change needed a spec or a task of its own), and does not trust the spec's status or its
     coverage table: it checks each AC of the touched specs against the code and the tests, and the behaviour of

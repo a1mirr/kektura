@@ -5,7 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { LINK_GROUPS } from "@/content/links";
 
-// See specs/0019-useful-links.md. The links are data in src/content/links.ts.
+// See spec 0019. The links are data in src/content/links.ts.
 
 type Props = { params: Promise<{ locale: string }> };
 

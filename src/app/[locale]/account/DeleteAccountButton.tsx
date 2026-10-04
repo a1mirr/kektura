@@ -6,7 +6,7 @@ import { useRouter } from "@/i18n/navigation";
 import type { ActionResult } from "@/lib/action-result";
 import { deleteAccountAction } from "./actions";
 
-// Two steps (AC-9): the button asks, the confirmation deletes. See specs/0014-pages-and-settings.md.
+// Two steps (AC-9): the button asks, the confirmation deletes. See spec 0014.
 export default function DeleteAccountButton() {
   const t = useTranslations("account");
   const router = useRouter();

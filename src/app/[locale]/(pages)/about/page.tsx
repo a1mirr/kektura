@@ -7,7 +7,7 @@ import { routing } from "@/i18n/routing";
 import { friendsOn } from "@/lib/friends-flag";
 import { TRAIL_FACTS } from "@/lib/trail-facts";
 
-// See specs/0015-about-page.md. Everything the page says has to be true of the app today.
+// See spec 0015. Everything the page says has to be true of the app today.
 
 type Props = { params: Promise<{ locale: string }> };
 

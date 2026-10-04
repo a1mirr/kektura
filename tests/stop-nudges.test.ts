@@ -9,7 +9,7 @@ const readRoot = (path: string) => fs.readFileSync(new URL(`../${path}`, import.
 describe("spec 0034: the Stop hook's turn-end nudge", () => {
   it("AC-10: app code without a spec change is asked about, a spec change silences it", () => {
     expect(nudgeTargets(["src/lib/progress.ts"]).appCode).toEqual(["src/lib/progress.ts"]);
-    expect(nudgeTargets(["src/lib/progress.ts", "specs/0001-progress.md"]).appCode).toEqual([]);
+    expect(nudgeTargets(["src/lib/progress.ts", "specs/product/0001-progress.md"]).appCode).toEqual([]);
     expect(nudgeMessage(["src/lib/progress.ts"])).toMatch(/app code changed without a spec change:\n {2}src\/lib\/progress\.ts/);
   });
 
@@ -37,7 +37,7 @@ describe("spec 0034: the Stop hook's turn-end nudge", () => {
 
   it("AC-12: the changelog among the changed files silences the question", () => {
     expect(nudgeTargets(["messages/en.json", "src/content/changelog.ts"]).userVisible).toEqual([]);
-    expect(nudgeMessage(["src/components/TrailMap.tsx", "src/content/changelog.ts", "specs/0003-map.md"])).toBe("");
+    expect(nudgeMessage(["src/components/TrailMap.tsx", "src/content/changelog.ts", "specs/product/0003-map-route-planner.md"])).toBe("");
   });
 
   it("AC-12: tests, generated types and files users do not see are ignored", () => {
@@ -51,7 +51,7 @@ describe("spec 0034: the Stop hook's turn-end nudge", () => {
       "src/content/changelog.ts",
       "messages/notes.txt",
       "messages/nested/en.json",
-      "specs/0018-changelog.md",
+      "specs/product/0018-changelog.md",
       "e2e/dashboard.spec.ts",
     ]) {
       expect(isUserVisible(f), f).toBe(false);
@@ -64,7 +64,7 @@ describe("spec 0034: the Stop hook's turn-end nudge", () => {
     expect(message).toMatch(/\n\nAnd files users can see changed without a changelog entry:/);
     expect(message.match(/Checks pass/g)).toHaveLength(1);
     // only the changelog question when a spec changed too
-    expect(nudgeMessage(["src/lib/progress.ts", "messages/en.json", "specs/0001-progress.md"])).not.toMatch(/without a spec change/);
+    expect(nudgeMessage(["src/lib/progress.ts", "messages/en.json", "specs/product/0001-progress.md"])).not.toMatch(/without a spec change/);
   });
 
   it("AC-10, AC-12: the hook asks through this module, once per turn end", () => {
@@ -95,6 +95,6 @@ describe("spec 0034: the Stop hook's turn-end nudge", () => {
     expect(nudgeToAsk([], committed, asked, "abc:2")).toBe(first);
     expect(nudgeToAsk([], [...committed, "src/components/CompareMap.tsx"], asked, "abc:1")).not.toBe(""); // more files
     expect(nudgeToAsk([], [], asked, "abc:1")).toBe("");
-    expect(nudgeToAsk([], [...committed, "src/content/changelog.ts", "specs/0003-map-route-planner.md"], undefined, "abc:1")).toBe(""); // the entry and the spec are there
+    expect(nudgeToAsk([], [...committed, "src/content/changelog.ts", "specs/product/0003-map-route-planner.md"], undefined, "abc:1")).toBe(""); // the entry and the spec are there
   });
 });

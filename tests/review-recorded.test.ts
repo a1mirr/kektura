@@ -59,7 +59,7 @@ describe("spec 0022: Review recorded", () => {
     });
 
     it("passes when the reviewed commit is an ancestor and only Markdown changed after it", () => {
-      const reviewed = { sha: OLD, changedAfter: ["CLAUDE.md", "specs/0022-fresh-context-review.md", ".github/ISSUE_TEMPLATE/task.md"] };
+      const reviewed = { sha: OLD, changedAfter: ["CLAUDE.md", "specs/project/0022-fresh-context-review.md", ".github/ISSUE_TEMPLATE/task.md"] };
       expect(checkReviewRecorded({ description: body(OLD), head: HEAD, reviewed }).ok).toBe(true);
     });
 
@@ -68,7 +68,7 @@ describe("spec 0022: Review recorded", () => {
     });
 
     it("fails when anything but Markdown changed after the ancestor, naming the files (a wording fix in code or messages included)", () => {
-      const reviewed = { sha: OLD, changedAfter: ["specs/0022-fresh-context-review.md", "messages/en.json", "src/app/page.tsx"] };
+      const reviewed = { sha: OLD, changedAfter: ["specs/project/0022-fresh-context-review.md", "messages/en.json", "src/app/page.tsx"] };
       const result = checkReviewRecorded({ description: body(OLD), head: HEAD, reviewed });
       expect(result.ok).toBe(false);
       expect(result.message).toContain("messages/en.json");
