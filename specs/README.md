@@ -62,7 +62,9 @@ dummy user each (`signInAsNewUser` in `e2e/helpers.ts`), so they never depend on
 Claude Code is about to finish a turn with changed source files: typecheck, lint and tests in
 parallel. A failure is sent back to Claude to fix (up to 3 attempts, then you get a message). If app
 code changed but no spec did, it asks once whether behaviour changed (then the spec and its tests are
-updated) or not (then say so in one line). Run the same checks yourself with `npm run check`. E2E tests need Docker, so the
+updated) or not (then say so in one line); in the same message it asks whether a change to a file users can see
+(messages, a page, a layout, a component) belongs in the changelog when `src/content/changelog.ts` did not change
+([0034](0034-specs-and-tasks.md) AC-10, AC-12). Run the same checks yourself with `npm run check`. E2E tests need Docker, so the
 hook doesn't run them: CI's "End-to-end tests" job is the authority and must be green on the pull request
 (skipped for one that changes only Markdown, [0007](0007-ci.md) AC-10; [0007](0007-ci.md) AC-8); run `npm run e2e` locally only to reproduce a failure.
 
