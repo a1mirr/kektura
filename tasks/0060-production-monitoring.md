@@ -1,7 +1,7 @@
 # 0060: Know when production is broken
 
 Status: Open
-Specs: none yet (a spec for the area is drafted first, with the owner, before anything is built)
+Specs: none yet (the requirements and open questions below are settled with the owner here; the spec text is written once the behaviour is built)
 
 ## Goal
 
@@ -12,7 +12,7 @@ failures already arrive.
 
 ## Done when
 
-- [ ] A spec (new, "Production monitoring") with numbered acceptance criteria, its open questions settled with the owner
+- [ ] The requirements below written down and their open questions settled with the owner
 - [ ] The decisions below are made and built
 - [ ] The specs listed above mirror the code as built (spec 0034 AC-6)
 

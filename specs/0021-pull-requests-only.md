@@ -61,7 +61,7 @@ leftovers of a merged change are cleaned up.
   `git -C` (`/c/Personal/x`, `/mnt/c/x`, `~/x`) are read as the command and directory they mean. A path outside the
   repository, a different repository, a payload the hook cannot read and a directory that is not a git checkout are
   let through. It stops the usual mistake; it is not a sandbox (a shell redirect, `sed -i` or a script that writes
-  files is not recognised).
+  files is not recognised, nor are git commands behind a subshell, a brace group, `if`, `for`, `$(...)`, `sudo`, `env`, `time` or the PowerShell call operator `&`; and when `git` cannot be run at all, the guard lets everything through).
 - **AC-8**: `npm run tidy` (`scripts/tidy.mjs`) lists what a merge leaves behind and, with `--apply`, removes it:
   worktrees under `.claude/worktrees` and local branches whose work a pull request has merged: "merged" means a
   merge commit of `origin/main` brought the branch's tip in, so a new branch that has no commit of its own yet, which
@@ -69,7 +69,8 @@ leftovers of a merged change are cleaned up.
   keeps, and says why: the primary checkout, the worktree it runs in (so a worktree is removed by a run from another
   checkout, for instance the next session's), a worktree with a modified or untracked file, a branch, or a worktree
   on a branch, that no merge commit contains (a detached worktree has no branch to protect: it only has to point at
-  something that is in `origin/main`, which is what the clean-up recipe of `CLAUDE.md` step 7 leaves behind), a branch checked out in a kept worktree, `main`, and worktrees outside `.claude/worktrees`
+  something that is in `origin/main`, which is what the clean-up recipe of `CLAUDE.md` step 7 leaves behind; so a clean detached worktree that was made a
+  moment ago and has no commit yet is removed too), a branch checked out in a kept worktree, `main`, and worktrees outside `.claude/worktrees`
   (another tool's). Before it removes a worktree it unlinks a `node_modules` junction, so the real one is never
   reached; a branch whose worktree could not be removed (locked, say) is kept; a branch is deleted only at the sha it
   has just checked against `origin/main`, never with `-D`. `--remote` also deletes merged branches on `origin`, with a lease on the sha it checked, so a commit
