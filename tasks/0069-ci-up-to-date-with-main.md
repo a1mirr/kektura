@@ -56,12 +56,10 @@ None. (The owner asked for this workflow, as its own task and pull request, on 2
 
 - Spec 0007: new AC-11 (the job "Up to date with main"), a Notes line and two coverage rows (a test row and a `manual` row for the job on GitHub, `Last checked: never recorded`); `scripts/check-up-to-date.mjs` is in Owner code.
 - Spec 0021: AC-6's merge rule adds the up-to-date condition and the live check.
-- Spec 0022: AC-5 says merging the base branch into a reviewed branch needs no new review (only the pull request's own commits count).
+- Spec 0022: AC-5 says merging the base branch into a reviewed branch needs no new review (only the pull request's own commits count, a merge commit by what differs from an automatic re-merge; an octopus merge is not looked into); its coverage row names the new tests.
+- Spec 0021: the AC-6 coverage row names `tests/up-to-date.test.ts`. The pull request template's comment mentions the merge-from-main exception.
 - `CLAUDE.md` step 7 names the job and the live check; `scripts/check-review-recorded.mjs` takes the base branch into account.
 
 ## Notes
 
-- The pull request run of CI checks out the merge of the pull request into `main` as of the moment it starts, which
-  is why a second pull request merged later is not seen by the first one's green result.
-- `scripts/check-review-recorded.mjs` compares the reviewed commit with the head by file; a merge of `main` brings
-  every file `main` changed since, which today reads as "code changed after the review".
+- Why a green pull request can still break `main`: CI checks out the merge of the pull request into `main` as of the moment it starts, so a second pull request merged later is not seen by the first one's green result.
