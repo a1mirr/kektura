@@ -28,6 +28,6 @@ A finished task stays as history and is not updated when behaviour changes later
 | [0032](0032-iso-date-input.md) | Stamp dates as yyyy-mm-dd (now spec 0016) | Done |
 | [0035](0035-specs-and-tasks.md) | Introduce tasks next to specs | Done |
 | [0036](0036-reshape-specs.md) | Turn the existing specs into area specs and tasks | Done |
-| [0037](0037-regenerate-seeds.md) | Regenerate the seeds with the current generator | Open |
+| [0037](0037-regenerate-seeds.md) | Regenerate the seeds with the current generator | Done |
 | [0038](0038-deploy-gh-retry.md) | Retry the GitHub API calls of the deploy workflow | Done |
 | [0039](0039-manual-coverage-rows.md) | Audit the manual coverage rows | Done |

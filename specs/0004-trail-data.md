@@ -41,12 +41,6 @@ Downloading the source files (done by hand from kektura.hu / heyjoe.hu); stamp a
   changes stages.
 - Extra stamps: heyjoe.hu's `okt_pecsetek.gpx` (https://heyjoe.hu/pecset_gpx.php?mozgalom=okt).
 
-**Known gap.** `supabase/seed.sql` and `seed_extra.sql` in the repository were generated before the generator
-wrote the transaction and the cleanup of AC-9 (their header is `delete from public.checkpoints where code is null`
-and they have no `begin`/`commit`), so AC-9 holds for the generator and for seeds produced by it from now on, not
-yet for the committed files. Nothing needs cleaning today. Task [0037](../tasks/0037-regenerate-seeds.md) closes
-the gap; delete this paragraph when it is done.
-
 **Regenerating.** Run `node scripts/build-data.mjs <stamps.gpx> <route.gpx> [okt_pecsetek.gpx]`. It
 writes `supabase/seed.sql`, `public/data/okt-route.json`, `okt-route-detail.json`, `okt-hops.json`
 and, with the third argument, `supabase/seed_extra.sql`. Never edit those by hand. Then:
@@ -83,4 +77,5 @@ exists in any open source (MTSZ owns it), so don't scrape for it; the plan is us
 | AC | Test |
 | --- | --- |
 | AC-1 ... AC-8 | `tests/trail-data.test.ts` |
-| AC-9 | manual (it needs a regenerated seed and a database with stamps): read the generated seed's `begin` ... `commit` block, then check the cleanup with a read-only query first (codes not in the new list, stamps that would move); a simulated drop of `OKTPH_03_1` should move its stamps to `OKTPH_03_2`. Last checked: never recorded (the committed seeds predate the cleanup, task 0037). |
+| AC-9 | `tests/seed-cleanup.test.ts` (against the local database, each drill in a transaction that is rolled back: both committed seeds are one `begin` ... `commit`; a stamp on a dropped code moves, with its date, to the remaining variant of the place; an extra stamp that came back under a new code keeps its users' stamps; a place that is gone, and a row without a code, take their stamps with them) |
+| AC-9 (a real source file) | manual (it needs the downloaded GPX files): after regenerating, read the seed's `begin` ... `commit` block and run its cleanup as a read-only query first (codes not in the new list, stamps that would move) before applying it to production. Last checked: 2026-10-04 (the seeds were regenerated from the files of 2026-09-24: production already held exactly their rows, so the cleanup had nothing to remove). |
