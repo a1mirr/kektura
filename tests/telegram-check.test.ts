@@ -3,10 +3,11 @@ import { spawn } from "node:child_process";
 import http from "node:http";
 import os from "node:os";
 import type { AddressInfo } from "node:net";
+import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const SECRET = "123456:SECRET-TOKEN";
-const script = new URL("../scripts/telegram-check.mjs", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1");
+const script = fileURLToPath(new URL("../scripts/telegram-check.mjs", import.meta.url));
 
 let server: http.Server;
 let base: string;

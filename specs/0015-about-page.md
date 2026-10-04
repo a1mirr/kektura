@@ -13,7 +13,7 @@ Everything it says is true of the app today.
 
 - **AC-1**: `/about` is public (no sign-in) in `ru`, `en` and `hu`, reachable from the footer. It has its
   own document title and description, a "back to the tracker" link to `/`, and a single `h1` followed by
-  one `h2` per section below (the four sections of AC-2 to AC-5, then "Questions or ideas?").
+  one `h2` per section below (the four sections of AC-2 to AC-5, then AC-8's).
 - **AC-2**: "The trail in numbers" shows the number of stages, of official stamping places and the total
   length in km (one decimal), computed from `scripts/data/okt-stages.json` (the MTSZ stage table), never
   typed in by hand. Today: 27 stages, 161 places, 1,183.1 km.
@@ -36,7 +36,7 @@ Everything it says is true of the app today.
     which map layers are on);
   - the "Account" page deletes the account and all stamps; feedback messages already sent are kept but
     no longer linked to the user;
-  - a link to `/account` (in this section), and a closing "Questions or ideas?" section that links to `/feedback`;
+  - a link to `/account`;
   - while the friends feature is on (spec 0024, `FF_FRIENDS=1`): what a connected friend can see (display name,
     official stamps, kilometres, stages; no dates or extra stamps) and that sharing can be stopped on the
     Friends page. With the feature off this paragraph is not shown.
@@ -46,6 +46,7 @@ Everything it says is true of the app today.
 - **AC-7**: The page text has the same keys in all three locales (`tests/messages.test.ts`); each
   locale reads naturally and uses the app's own terms (`ru`: печати, этап, участок; `hu`: bélyegzőhely,
   szakasz).
+- **AC-8**: The page ends with a "Questions or ideas?" section (`h2`) that links to `/feedback`.
 
 ## Out of scope
 
@@ -70,4 +71,5 @@ document).
 | AC-3 | `e2e/about.spec.ts` (four points, the rule's wording); the content against specs 0001 and 0002: manual (judgement): read the four points next to those specs. Last checked: never recorded. |
 | AC-5 | `e2e/about.spec.ts` (links), `e2e/friends.spec.ts` (friends paragraph, flag on); the wording against spec 0014 and migration 0008: manual (judgement): read it next to them. Last checked: never recorded. |
 | AC-4 | `e2e/about.spec.ts` (every external link is `https:`, opens in a new tab with `noopener`) |
+| AC-8 | `e2e/about.spec.ts` (the link to the feedback form) |
 | AC-6, AC-7 | `tests/messages.test.ts` (parity incl. rich-text tags; no open-source / PWA wording in any locale), `e2e/about.spec.ts` (ru and hu, no overflow at 375 px) |
