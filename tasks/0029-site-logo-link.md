@@ -14,7 +14,7 @@ and the site looks like one place.
 
 - [x] The open questions below are settled with the owner before any code is written
 - [x] Every requirement below holds and has a test (or, where no test can, a `manual (reason)` row in the owning spec); the owning specs are edited as the behaviour is built
-- [ ] The specs listed above mirror the code as built (spec 0034 AC-6); fresh-context review done
+- [x] The specs listed above mirror the code as built (spec 0034 AC-6); fresh-context review done
 
 ## Requirements
 
@@ -72,10 +72,10 @@ Asked before the answers:
 
 | Requirement | Test |
 | --- | --- |
-| R-1, R-3 | planned: `e2e/site-logo.spec.ts` (on every page, in the three languages: the link, its address, its accessible name; a click leads to the main page; target size) |
-| R-2, R-5 | planned: `tests/site-logo.test.ts` (the layout and the 404 page render the component; no page imports it; the SVG exists and has no external references) |
-| R-4 | planned: `e2e/site-logo.spec.ts` (no horizontal overflow at 320 and 375 px on each page) |
-| R-6, R-7 | planned: `tests/messages.test.ts` (the removed keys are gone in all three files); review of the pages |
+| R-1, R-3 | `e2e/site-logo.spec.ts` (on every page, in the three languages: the link, its address, its accessible name; a click leads to the main page; target size) |
+| R-2, R-5 | `tests/site-logo.test.ts` (the layout and the 404 page render the component; no page imports it; the SVG exists and has no external references) |
+| R-4 | `e2e/site-logo.spec.ts` (no horizontal overflow at 320 and 375 px on each page; the test banner above it); the map's fullscreen view covering it is by construction (the logo is not positioned) and has no test |
+| R-6, R-7 | `tests/site-logo.test.ts` (the `about.back` and `friends.back` keys are gone in all three files), `e2e/site-logo.spec.ts` (no back link on the About page); review of the pages |
 
 ## Spec changes
 

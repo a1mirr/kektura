@@ -11,7 +11,7 @@ Owner code: `src/components/Footer.tsx`, `src/app/[locale]/(pages)/*`, `src/app/
 Footer navigation to the informational pages (About, Changelog, Useful links, Feedback), and an account page for
 signed-in users that holds everything about the account: the stamps-per-month chart, signing out and deleting the
 account. The dashboard header stays light (the language switcher and one "Account" link), which matters most on a
-phone, and "Account" says what is behind the link.
+phone, and "Account" says what is behind the link. Every page also carries the site logo, a way home that never needs the footer.
 
 ## Behaviour
 
@@ -78,7 +78,7 @@ phone, and "Account" says what is behind the link.
   named "Kéktúra tracker: home" (translated, containing the visible name), with a visible keyboard focus ring and a
   touch target of at least 44 x 44 px; the mark itself is decorative (empty `alt`). It sits in normal flow above the
   page content, below the test server banner, and the pages still fit 320 px without sideways scrolling; the map's
-  fullscreen view covers it. The mark is the single file `public/logo.svg`, loaded from the site itself. Pages keep
+  fullscreen view (spec 0003 AC-11), which is positioned, covers it because the logo is not. The mark is the single file `public/logo.svg`, loaded from the site itself. Pages keep
   their own headers, and the About and friends pages have no "back to the tracker" link of their own.
 
 ## Out of scope
