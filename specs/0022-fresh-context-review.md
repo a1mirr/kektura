@@ -67,7 +67,7 @@ author's context, and wants that to be part of how work is done here, not someth
   opened by Dependabot) runs `scripts/check-review-recorded.mjs` on a full clone and fails unless the description of the pull
   request has a `Reviewed commit:` line (the last one counts; lines inside an HTML comment don't) with a sha of 7 to 40
   hex digits that exists, is the head of the pull request or an ancestor of it, and, when it is an ancestor, nothing
-  but Markdown (`*.md`) changed after it. Any other changed file (wording fixes in code or messages included) needs a
+  but Markdown (`*.md`) changed after it: what counts is what the pull request's own commits changed (a conflict resolved by hand in a merge commit included), so files that arrive by merging the base branch into it do not need a new review (the merge commit is judged by `git log --remerge-diff`, which skips an octopus merge: the job is a tripwire, and this repository merges two parents at a time). Any other changed file (wording fixes in code or messages included) needs a
   new review and a new sha in the description. The job reads the description through the API when it runs, so
   after editing it the job is re-run by hand (`gh run rerun <run-id> --job <job-id>`, of the newest run: an older run
   checks the head it started with); a push runs it again by itself.
@@ -119,6 +119,6 @@ author's context, and wants that to be part of how work is done here, not someth
 | AC | Test |
 | --- | --- |
 | AC-1, AC-2, AC-3, AC-4 | `tests/review-process.test.ts` (AC-4's wording about the end-to-end job is asserted under spec 0007 AC-8 in the same file; the rule is in `CLAUDE.md` and `specs/README.md`; the agent file exists, is read-only and names what it checks; the pull request template has the checklist and the findings section) |
-| AC-5 | `tests/review-recorded.test.ts` (reading the description; every decision: no line, unknown sha, head, ancestor with only Markdown or nothing after it, ancestor with code after it; the git side against a real temporary repository; the job's name, trigger, Dependabot skip and permissions; the job named in `CLAUDE.md` and the template) |
+| AC-5 | `tests/review-recorded.test.ts` (reading the description; updating a branch from its base: files that arrive by a merge, including one that both sides edited in different places, do not count, code written after it does, and so does a conflict the author resolved; every decision: no line, unknown sha, head, ancestor with only Markdown or nothing after it, ancestor with code after it; the git side against a real temporary repository; the job's name, trigger, Dependabot skip and permissions; the job named in `CLAUDE.md` and the template) |
 | AC-5 (the job itself, on GitHub) | manual (only a real pull request exercises the `pull_request` event, the full clone and `gh api`): read the job's result on a pull request with and without a recorded review. Last checked: never recorded (the pull request that adds it is its first run; whoever checks it replaces this with the date) |
 | AC-3 (quality of the reviews) | manual (judgement): the owner reads the findings in each pull request. Last checked: every pull request. |

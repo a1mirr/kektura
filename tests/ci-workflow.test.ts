@@ -46,10 +46,11 @@ describe("spec 0007: the CI workflow", () => {
       );
     });
 
-    it("keeps the two job names the merge step and the deploy workflow refer to, and the Review recorded job", () => {
+    it("keeps the two job names the merge step and the deploy workflow refer to, and the Review recorded and Up to date jobs", () => {
       expect(job("check")).toContain("name: Typecheck, lint, unit tests");
       expect(job("e2e")).toContain("name: End-to-end tests");
       expect(job("review")).toContain("name: Review recorded");
+      expect(job("up-to-date")).toContain("name: Up to date with main");
     });
   });
 
@@ -73,9 +74,9 @@ describe("spec 0007: the CI workflow", () => {
       expect(e2e.slice(0, e2e.indexOf("steps:"))).not.toMatch(/always\(\)|failure\(\)|cancelled\(\)/);
     });
 
-    it("adds no job for it: the detection costs a step of the check job, not a billed job", () => {
+    it("adds no job for it: the detection costs a step of the check job, not a billed job (the two pull-request-only checks are the other jobs)", () => {
       const jobIds = lines.slice(lines.indexOf("jobs:") + 1).filter((line) => /^ {2}[a-z][\w-]*:$/.test(line));
-      expect(jobIds).toEqual(["  check:", "  review:", "  e2e:"]);
+      expect(jobIds).toEqual(["  check:", "  review:", "  up-to-date:", "  e2e:"]);
     });
   });
 

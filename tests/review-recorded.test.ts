@@ -133,6 +133,102 @@ describe("spec 0022: Review recorded", () => {
     });
   });
 
+  describe("AC-5: updating a reviewed branch from its base does not need a new review", () => {
+    let dir: string;
+    const git = (...args: string[]) => execFileSync("git", args, { cwd: dir, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+    const ident = ["-c", "user.name=t", "-c", "user.email=t@example.com", "-c", "commit.gpgsign=false"];
+    const commit = (file: string, content: string, message: string) => {
+      fs.mkdirSync(path.dirname(path.join(dir, file)), { recursive: true });
+      fs.writeFileSync(path.join(dir, file), content);
+      git("add", "-A");
+      git(...ident, "commit", "-m", message);
+      return git("rev-parse", "HEAD").trim();
+    };
+    let reviewed: string;
+    let afterMerge: string;
+    let afterDocs: string;
+    let afterCode: string;
+    let afterResolution: string;
+
+    beforeAll(() => {
+      dir = fs.mkdtempSync(path.join(os.tmpdir(), "review-recorded-base-"));
+      git("init", "-q", "-b", "main");
+      commit("src/shared.ts", "base", "base");
+      git("switch", "-q", "-c", "topic");
+      reviewed = commit("src/topic.ts", "1", "the reviewed work");
+      git("switch", "-q", "main");
+      commit("messages/en.json", "main", "main changes code and messages");
+      commit("src/shared.ts", "main version", "main changes a shared file");
+      git("switch", "-q", "topic");
+      git(...ident, "merge", "--no-edit", "main"); // brings main's files in, without a conflict
+      afterMerge = git("rev-parse", "HEAD").trim();
+      afterDocs = commit("specs/x.md", "1", "wording");
+      afterCode = commit("src/topic.ts", "2", "a code change after the review");
+      // a conflict: both sides change the same file, the author resolves it by hand
+      git("switch", "-q", "main");
+      commit("src/conflict.ts", "main side", "main");
+      git("switch", "-q", "topic");
+      commit("src/conflict.ts", "topic side", "topic");
+      try {
+        git(...ident, "merge", "--no-edit", "main");
+      } catch {
+        // expected: the conflict
+      }
+      fs.writeFileSync(path.join(dir, "src/conflict.ts"), "resolved by the author");
+      git("add", "-A");
+      git(...ident, "commit", "--no-edit");
+      afterResolution = git("rev-parse", "HEAD").trim();
+    });
+    afterAll(() => fs.rmSync(dir, { recursive: true, force: true }));
+
+    it("without a base every file that differs counts: the files merged in from main look like code changed after the review", () => {
+      expect(inspectCommit(git, reviewed, afterMerge)?.changedAfter.sort()).toEqual(["messages/en.json", "src/shared.ts"]);
+    });
+
+    it("with the base, the files that arrived by merging it do not count", () => {
+      expect(inspectCommit(git, reviewed, afterMerge, "main")).toEqual({ sha: reviewed, changedAfter: [] });
+      const result = checkReviewRecorded({ description: body(reviewed), head: afterMerge, reviewed: inspectCommit(git, reviewed, afterMerge, "main") });
+      expect(result.ok).toBe(true);
+    });
+
+    it("with the base, Markdown written after the merge still passes, and code written after it still fails", () => {
+      expect(inspectCommit(git, reviewed, afterDocs, "main")?.changedAfter).toEqual(["specs/x.md"]);
+      expect(checkReviewRecorded({ description: body(reviewed), head: afterDocs, reviewed: inspectCommit(git, reviewed, afterDocs, "main") }).ok).toBe(true);
+      expect(inspectCommit(git, reviewed, afterCode, "main")?.changedAfter.sort()).toEqual(["specs/x.md", "src/topic.ts"]);
+      expect(checkReviewRecorded({ description: body(reviewed), head: afterCode, reviewed: inspectCommit(git, reviewed, afterCode, "main") }).ok).toBe(false);
+    });
+
+    it("with the base, a conflict resolved by hand in a merge commit counts as the author's change", () => {
+      const changed = inspectCommit(git, reviewed, afterResolution, "main")?.changedAfter ?? [];
+      expect(changed).toContain("src/conflict.ts");
+      expect(checkReviewRecorded({ description: body(reviewed), head: afterResolution, reviewed: inspectCommit(git, reviewed, afterResolution, "main") }).ok).toBe(false);
+    });
+
+    it("with the base, a file that both sides edited in different places and that merged cleanly does not count", () => {
+      const list = (edits: Record<number, string> = {}) =>
+        Array.from({ length: 40 }, (_, i) => edits[i + 1] ?? String(i + 1)).join("\n") + "\n";
+      git("switch", "-q", "main");
+      commit("shared/list.txt", list(), "main adds a file");
+      git("switch", "-q", "topic");
+      git(...ident, "merge", "--no-edit", "main");
+      const reviewedHere = commit("shared/list.txt", list({ 2: "topic edit" }), "topic edits near the top");
+      git("switch", "-q", "main");
+      commit("shared/list.txt", list({ 38: "main edit" }), "main edits near the bottom");
+      git("switch", "-q", "topic");
+      git(...ident, "merge", "--no-edit", "main"); // merges cleanly: the two edits are far apart
+      const merged = git("rev-parse", "HEAD").trim();
+      // the file differs from the reviewed commit and `--cc` would list it, but nobody changed it by hand
+      expect(inspectCommit(git, reviewedHere, merged)?.changedAfter).toEqual(["shared/list.txt"]);
+      expect(inspectCommit(git, reviewedHere, merged, "main")).toEqual({ sha: reviewedHere, changedAfter: [] });
+      const result = checkReviewRecorded({ description: body(reviewedHere), head: merged, reviewed: inspectCommit(git, reviewedHere, merged, "main") });
+      expect(result.ok).toBe(true);
+    });
+
+    it("main's own files never show up when the branch merges main again, with nothing else changed", () => {
+      expect(inspectCommit(git, afterResolution, afterResolution, "main")).toEqual({ sha: afterResolution, changedAfter: [] });
+    });
+  });
+
   describe("AC-5: the CI job", () => {
     const ci = read(".github/workflows/ci.yml");
     const lines = ci.split("\n");
@@ -161,7 +257,7 @@ describe("spec 0022: Review recorded", () => {
 
     it("is named in CLAUDE.md step 7 among the jobs that must be green, and in the pull request template", () => {
       const claude = read("CLAUDE.md");
-      expect(claude).toMatch(/CI's jobs: "Typecheck, lint, unit tests", "End-to-end tests" and, for a pull request that is not Dependabot's, "Review recorded"/);
+      expect(claude).toMatch(/CI's jobs: "Typecheck, lint, unit tests", "End-to-end tests", "Up to date with main" and, for a pull request that is not Dependabot's, "Review recorded"/);
       expect(read(".github/pull_request_template.md")).toMatch(/Review recorded/);
     });
   });

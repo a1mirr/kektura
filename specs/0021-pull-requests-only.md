@@ -37,7 +37,7 @@ leftovers of a merged change are cleaned up.
   reviewed commit plus, at most, wording fixes). The body file starts from a copy of
   `.github/pull_request_template.md`, which `gh` doesn't apply to `--body-file`. Merging happens on the owner's
   standing permission (given in chat on 2026-10-03, revocable) for pull requests the author wrote, once CI is green
-  and the fresh-context review (spec 0022) is done; a merge deploys by itself (spec 0026); never `--admin`. After the merge the pull request's branch is deleted, remote and local, once it is
+  and the fresh-context review (spec 0022) is done and the branch is up to date with `main` (CI's "Up to date with main", spec 0007 AC-11, shows the last run; the author checks live just before merging: `git fetch origin`, then `git merge-base --is-ancestor origin/main <full-sha>`; a branch that is behind gets `origin/main` merged in, `npm run check`, a push and a new CI run first, without a new review for what arrives from `main`); a merge deploys by itself (spec 0026); never `--admin`. After the merge the pull request's branch is deleted, remote and local, once it is
   verified (after a `git fetch`) to be contained in `main`, and never with `-D`; an open pull request based on
   the branch is retargeted to `main` first. Only branches of pull requests the author merged, or was asked to clean
   up, are deleted; the remote branch always goes, but a local branch another session has checked out is left to
@@ -143,5 +143,5 @@ leftovers of a merged change are cleaned up.
 | AC-4 | `tests/git-hooks.test.ts` (hook script calls the guard, `hooks:install` sets `core.hooksPath`, no `prepare`/`postinstall`/`preinstall` script) |
 | AC-4 (the refusal in a clone) | manual (it needs a clone with the hook installed and a GitHub remote): `git push origin HEAD:main --dry-run` is refused. Last checked: never recorded. |
 | AC-5 | `tests/git-hooks.test.ts` (CLAUDE.md mentions the rule and `hooks:install`) |
-| AC-6 | `tests/git-hooks.test.ts` (CLAUDE.md names the three commands with the options that make them work without a terminal, the conditions for merging, the deletion of the merged branch and its check, and the install path, and has no control characters) |
+| AC-6 | `tests/up-to-date.test.ts` (CLAUDE.md names the job "Up to date with main" and the live check), `tests/git-hooks.test.ts` (CLAUDE.md names the three commands with the options that make them work without a terminal, the conditions for merging, the deletion of the merged branch and its check, and the install path, and has no control characters) |
 | AC-6 (the deletion recipe works) | manual (it needs a real GitHub branch), after any change to the recipe: on a throwaway branch, push it, merge it, then run the recipe from a detached `origin/main` and confirm that `git branch -d` succeeds and that a branch with a commit added after the merge is refused. Last checked: 2026-10-04 (only the deletion: it worked for two merges). |
