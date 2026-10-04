@@ -1,7 +1,9 @@
 {
   "app": {
     "title": "Kektura — my progress",
-    "testBanner": "Test server: local data and a dummy login. Not production."
+    "testBanner": "Test server: local data and a dummy login. Not production.",
+    "name": "Kéktúra tracker",
+    "home": "Kéktúra tracker: home"
   },
   "home": {
     "headline": "Hike the Országos Kéktúra — one stamp at a time",
@@ -86,7 +88,6 @@
   "about": {
     "title": "About Kéktúra tracker",
     "description": "A personal tracker for the Országos Kéktúra, Hungary's National Blue Trail: mark the stamps you have collected and see how much of the trail you have walked.",
-    "back": "← Back to the tracker",
     "factsTitle": "The trail in numbers",
     "factsStages": "Stages",
     "factsPlaces": "Official stamping places",
@@ -196,7 +197,6 @@
     "error_unauthorized": "Please sign in first.",
     "friendNotSharing": "Not sharing with you",
     "error_incoming_pending": "This person already asked to connect with you: approve the request below.",
-    "requestSent": "Request sent. You will see them here once they approve it.",
-    "back": "← Back to the tracker"
+    "requestSent": "Request sent. You will see them here once they approve it."
   }
 }

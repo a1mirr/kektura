@@ -1,17 +1,17 @@
-# 0014: Footer pages and the account page
+# 0014: Footer pages, the site logo and the account page
 
 Status: Done
 Owner code: `src/components/Footer.tsx`, `src/app/[locale]/(pages)/*`, `src/app/[locale]/account/*`,
-`src/components/SignOutButton.tsx`, `src/app/[locale]/dashboard/page.tsx` (header), `next.config.ts` (the
+`src/components/SignOutButton.tsx`, `src/components/SiteLogo.tsx`, `public/logo.svg`, `src/app/[locale]/dashboard/page.tsx` (header), `next.config.ts` (the
 `/settings` redirect), `supabase/migrations/0008_pages_settings.sql`, `messages/*.json` (`account.*`,
-`dashboard.account`)
+`dashboard.account`, `app.name`, `app.home`)
 
 ## Goal
 
 Footer navigation to the informational pages (About, Changelog, Useful links, Feedback), and an account page for
 signed-in users that holds everything about the account: the stamps-per-month chart, signing out and deleting the
 account. The dashboard header stays light (the language switcher and one "Account" link), which matters most on a
-phone, and "Account" says what is behind the link.
+phone, and "Account" says what is behind the link. Every page also carries the site logo, a way home that never needs the footer.
 
 ## Behaviour
 
@@ -66,9 +66,24 @@ phone, and "Account" says what is behind the link.
 - **AC-18**: The page, the header link and the button are translated in all three languages, and the About page
   (spec 0015) calls the page by its name in its "Your data" text and links to `/account`.
 
+### Site logo
+
+- **AC-19**: Every page shows the logo, a blue trail blaze, with the name next to it ("Kéktúra tracker",
+  `ru`: Трекер Kéktúra, `hu`: Kéktúra követő) in its top-left corner, and it links to the main page of the page's
+  language (`/ru`, `/en`, `/hu`): for a signed-in user that leads to the dashboard (spec 0005 AC-2), for everybody
+  else the landing page. "Every page" is the landing page, dashboard, account, friends pages, About, Changelog,
+  Useful links, Feedback, the error page and the 404 page, which has no language in its address and so links
+  to the default language's main page. It is one component, `SiteLogo`, drawn once by the locale layout and by the 404
+  page (which brings its own document): a page does not draw its own, so a new page gets it. It is a link
+  named "Kéktúra tracker: home" (translated, containing the visible name), with a visible keyboard focus ring and a
+  touch target of at least 44 x 44 px; the mark itself is decorative (empty `alt`). It sits in normal flow above the
+  page content, below the test server banner, and the pages still fit 320 px without sideways scrolling; the map's
+  fullscreen view (spec 0003 AC-11), which is positioned, covers it because the logo is not. The mark is the single file `public/logo.svg`, loaded from the site itself. Pages keep
+  their own headers, and the About and friends pages have no "back to the tracker" link of their own.
+
 ## Out of scope
 
-Other settings (language, email, export of the data); a "type your email to confirm" step; showing the signed-in
+A navigation menu or breadcrumbs, a favicon or app icons (spec 0015 AC-6); other settings (language, email, export of the data); a "type your email to confirm" step; showing the signed-in
 email on the page.
 
 ## Notes
@@ -106,4 +121,5 @@ email on the page.
 | AC-13 | `src/app/[locale]/account/actions.test.ts`, `src/lib/log.test.ts` |
 | AC-16 | `e2e/account.spec.ts` (the button sits next to the heading; sign out from the account page in each language, then dashboard and account redirect), `e2e/auth.spec.ts` |
 | AC-17 | `e2e/account.spec.ts` (with JavaScript disabled) |
+| AC-19 | `tests/site-logo.test.ts` (one component, drawn only by the locale layout and the 404 page, which also covers the error page: the layout wraps its boundary; the SVG is local; empty `alt`; translated names; no back-link keys left), `e2e/site-logo.spec.ts` (every public and signed-in page: link, address, accessible name, 44 px target, top-left, no overflow at 320 and 375 px, focus ring, banner above it, ru/en/hu, the 404 page) |
 | AC-18 | `tests/messages.test.ts` (the header link, the page title and the About page's link text use the same name in each language, and no key is still called settings), `e2e/account.spec.ts` (`ru` and `hu`), `e2e/about.spec.ts` (link) |

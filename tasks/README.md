@@ -30,7 +30,7 @@ A finished task stays as history and is not updated when behaviour changes later
 | [0025](0025-account-page.md) | Account page: sign out moves in, "Settings" becomes "Account" (now spec 0014) | Done |
 | [0027](0027-feature-flags-via-telegram.md) | Switch feature flags from the Telegram bot | Open |
 | [0028](0028-landing-screenshots.md) | Screenshots on the landing page | Open |
-| [0029](0029-site-logo-link.md) | A logo that leads home, on every page | Open |
+| [0029](0029-site-logo-link.md) | A logo that leads home, on every page (now spec 0014) | Done |
 | [0030](0030-faster-e2e.md) | Faster end-to-end tests (now specs 0006 and 0007) | Done |
 | [0031](0031-e2e-sharding.md) | Sharded end-to-end tests: two parallel CI jobs | Open |
 | [0032](0032-iso-date-input.md) | Stamp dates as yyyy-mm-dd (now spec 0016) | Done |

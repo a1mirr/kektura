@@ -44,10 +44,7 @@ export default async function AboutPage({ params }: Props) {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-8">
-      <Link href="/" className="text-sm text-blue-700 hover:underline">
-        {t("back")}
-      </Link>
-      <h1 className="mb-4 mt-4 text-2xl font-bold text-blue-700">{t("title")}</h1>
+      <h1 className="mb-4 text-2xl font-bold text-blue-700">{t("title")}</h1>
       <p className="text-stone-700">{t("description")}</p>
 
       <section aria-labelledby="about-facts" className="mt-8">

@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("spec 0015: about page", () => {
-  test("AC-1: the footer link opens it without signing in, with its own title and a way back", async ({ page }) => {
+  test("AC-1: the footer link opens it without signing in, with its own title", async ({ page }) => {
     await page.goto("/en");
     await page.getByRole("contentinfo").getByRole("link", { name: "About" }).click();
     await expect(page).toHaveURL(/\/en\/about$/);
@@ -14,9 +14,6 @@ test.describe("spec 0015: about page", () => {
       "Your data",
       "Questions or ideas?",
     ]);
-
-    await page.getByRole("link", { name: "← Back to the tracker" }).click();
-    await expect(page).toHaveURL(/\/en$/);
   });
 
   test("AC-2: the trail in numbers comes from the stage table", async ({ page }) => {
