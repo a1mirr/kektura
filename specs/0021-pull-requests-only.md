@@ -54,7 +54,7 @@ leftovers of a merged change are cleaned up.
     `apply`, `checkout`, `cherry-pick`, `clean`, `commit`, `merge`, `mv`, `pull`, `rebase`, `reset`, `restore`,
     `revert`, `rm`, `stash`, `switch`) there; `git -C <dir>` and a leading `cd <dir> &&` say which checkout is meant.
 
-  Reading (`status`, `log`, `diff`, `fetch`), `git worktree` (except creating a branch from a stale or wrong
+  Reading (`status`, `log`, `diff`, `fetch`, `stash list`, `stash show`), `git worktree` (except creating a branch from a stale or wrong
   base, AC-9), `git branch -r`, pushing (the pre-push guard owns that) and a forward-only update of a checkout that
   is on `main` (`git merge --ff-only`, `git pull --ff-only`: upkeep, not work) are never refused. The refusal tells
   Claude how to make a worktree. `FOO=1 git ...`, `command git ...`, `git.exe`, and Git Bash or WSL paths in `cd` and
@@ -79,11 +79,6 @@ leftovers of a merged change are cleaned up.
   one has its directory taken away (run it when no other session is mid-work in a merged worktree), a merged local
   branch is deleted even when another tool made it (its worktree outside `.claude/worktrees` is kept), and
   `--remote` does not check for an open pull request based on the branch (CLAUDE.md step 7 retargets it first).
-- **AC-10**: `CLAUDE.md` says what to do when the auto-mode classifier denies a tool call: do not retry, split or
-  route around it, and do not stop; say so in one line, carry on with every step that does not depend on it, and
-  hand the denied command to the user at the end; commands that delete or change shared state run as a call of
-  their own, so a denial cannot swallow the rest. (A rule for the author, checked as text.)
-
 - **AC-9**: New work starts from the real `origin/main`, never from a stale local `main` or another branch. The
   `worktree-guard` hook enforces it for the way work is started (`git worktree add`); a branch made later inside a
   worktree (`git switch -c`) is not recognised. The hook refuses a `git worktree add` that creates a branch (`-b` or `-B`) unless its base is
@@ -96,6 +91,10 @@ leftovers of a merged change are cleaned up.
   the hook allows): a stale local `main` is brought up when `tidy` runs (after a merge), not at every moment, and the
   hook does not look at `git switch main`. Stacking a branch on another unmerged branch is not a case this workflow
   has: the hook refuses it, and the owner makes such a worktree by hand if it is wanted.
+- **AC-10**: `CLAUDE.md` says what to do when the auto-mode classifier denies a tool call: do not retry, split or
+  route around it, and do not stop; say so in one line, carry on with every step that does not depend on it, and
+  hand the denied command to the user at the end; commands that delete or change shared state run as a call of
+  their own, so a denial cannot swallow the rest. (A rule for the author, checked as text.)
 
 ## Out of scope
 

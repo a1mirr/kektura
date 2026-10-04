@@ -169,6 +169,7 @@ export function decide(input, { project = input.cwd ?? process.cwd(), git = real
         continue;
       }
       if (!MUTATING.has(invocation.subcommand)) continue;
+      if (invocation.subcommand === "stash" && /^(list|show)$/.test(invocation.rest[0] ?? "")) continue; // a read
       // Bringing a checkout that is on main up to date, forward only, is upkeep and not a change of work.
       if ((invocation.subcommand === "pull" || invocation.subcommand === "merge") && invocation.rest.includes("--ff-only") && where.branch === "main") continue;
       const reason = refusal(where);

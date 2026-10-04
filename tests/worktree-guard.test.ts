@@ -124,6 +124,13 @@ describe("spec 0021: work happens in a linked worktree", () => {
       },
     );
 
+    it("reading the stash is a read; changing it is not", () => {
+      expect(decide(bash("git stash list", primary), { project: topic })).toBe("");
+      expect(decide(bash("git stash show -p", primary), { project: topic })).toBe("");
+      expect(decide(bash("git stash push -m x", primary), { project: topic })).toMatch(/primary checkout/);
+      expect(decide(bash("git stash pop", primary), { project: topic })).toMatch(/primary checkout/);
+    });
+
     it("another tool is never refused", () => {
       expect(decide({ tool_name: "Read", tool_input: { file_path: path.join(primary, "a.txt") }, cwd: primary }, { project: topic })).toBe("");
     });
