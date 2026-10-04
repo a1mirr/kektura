@@ -1,10 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import FriendActionButton from "@/components/FriendActionButton";
 import SignInButton from "@/components/SignInButton";
 import TestLoginForm from "@/components/TestLoginForm";
 import { routing } from "@/i18n/routing";
 import { friendsOn } from "@/lib/friends-flag";
+import { friendsPath } from "@/lib/friends-input";
 import { createClient } from "@/lib/supabase/server";
 import { testLoginEnabled } from "@/lib/test-login";
 import { sendRequest } from "../../actions";
@@ -67,12 +69,10 @@ export default async function InvitePage({
         action={async () => {
           "use server";
           const res = await sendRequest(token);
-          redirect(`/${locale}/friends?${res.ok ? "sent=1" : `error=${res.reason}`}`);
+          redirect(`/${locale}${friendsPath(res, "sent")}`);
         }}
       >
-        <button className="rounded-lg bg-blue-600 px-6 py-2 font-medium text-white hover:bg-blue-700">
-          {t("sendRequest")}
-        </button>
+        <FriendActionButton tone="primary">{t("sendRequest")}</FriendActionButton>
       </form>
     </div>
   );

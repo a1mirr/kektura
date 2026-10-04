@@ -1,4 +1,4 @@
-import { expect, test, type Browser, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
 import { expandAllStages, measureDescriptions, signInAsNewUser, stat } from "./helpers";
 import { psql } from "./local-db";
 
@@ -34,18 +34,31 @@ async function requestedFriendship(browser: Browser) {
   await expect(bobPage.getByRole("heading", { name: "Invite from Ana" })).toBeVisible();
 
   await bobPage.getByRole("button", { name: "Send request" }).click();
-  await expect(bobPage).toHaveURL(/\/en\/friends\?sent=1$/);
-  await expect(bobPage.getByText("Request sent.")).toBeVisible(); // AC-3: the requester is told
+  await expect(bobPage).toHaveURL(/\/en\/friends\?ok=sent$/);
+  await expect(status(bobPage)).toContainText("Request sent."); // AC-3: the requester is told
   const userId = (email: string) => psql(`select id from auth.users where email = '${email}'`);
   return { anaPage, bobPage, anaId: userId(anaEmail), bobId: userId(bobEmail), inviteUrl };
 }
 
+// The page's own answer (spec 0024 AC-18): the test server's banner is a `status` too, and Next's route
+// announcer an (empty) `alert`.
+const status = (page: Page) => page.locator("[role=status][aria-live=polite]");
+const alert = (page: Page) => page.getByRole("alert").filter({ hasText: /\S/ });
+
 const inviteLink = (page: Page) => page.locator("input[readonly]").inputValue();
+
+// Spec 0024 AC-19: remove and regenerate ask first. The question is a <details>: its summary opens it, the
+// confirming button inside is the real submit.
+async function confirmed(scope: Locator, label: string, yes: string) {
+  await scope.locator("summary", { hasText: label }).click();
+  await scope.getByRole("button", { name: yes }).click();
+}
 
 async function approve(anaPage: Page) {
   await anaPage.goto("/en/friends");
   await anaPage.getByRole("button", { name: "Approve" }).click();
   await expect(anaPage.getByRole("button", { name: "Approve" })).toHaveCount(0);
+  await expect(status(anaPage)).toHaveText("Friend request approved."); // AC-18
 }
 
 test.describe("spec 0024: friends", () => {
@@ -77,17 +90,20 @@ test.describe("spec 0024: friends", () => {
     // AC-9: Ana stops sharing; Bob sees "not sharing" and cannot open her page. The switch is hers alone.
     await anaPage.getByRole("button", { name: "Stop sharing" }).click();
     await expect(anaPage.getByRole("button", { name: "Start sharing" })).toBeVisible();
+    await expect(status(anaPage)).toHaveText("Sharing stopped."); // AC-18
     await bobPage.goto("/en/friends");
     await expect(bobPage.getByRole("listitem").filter({ hasText: "Ana" })).toContainText("Not sharing with you");
     await expect(bobPage.getByRole("link", { name: "Ana" })).toHaveCount(0);
     expect((await bobPage.request.get(friendPage)).status()).toBe(404);
     await anaPage.getByRole("button", { name: "Start sharing" }).click();
     await expect(anaPage.getByRole("button", { name: "Stop sharing" })).toBeVisible();
+    await expect(status(anaPage)).toHaveText("You are sharing your progress with this friend."); // AC-18
 
     // AC-10: Bob removes Ana; both lists are empty, and Ana's page is closed to him.
     await bobPage.goto("/en/friends");
-    await bobPage.getByRole("button", { name: "Remove" }).click();
+    await confirmed(bobPage.getByRole("listitem").filter({ hasText: "Ana" }), "Remove", "Yes, remove");
     await expect(bobPage.getByText("You haven't added any friends yet.")).toBeVisible();
+    await expect(status(bobPage)).toHaveText("Friend removed."); // AC-18
     await anaPage.reload();
     await expect(anaPage.getByText("You haven't added any friends yet.")).toBeVisible();
     expect((await bobPage.request.get(friendPage)).status()).toBe(404);
@@ -95,7 +111,8 @@ test.describe("spec 0024: friends", () => {
 
   test("AC-2: regenerating the link invalidates the old one", async ({ browser }) => {
     const { anaPage, bobPage, inviteUrl } = await requestedFriendship(browser);
-    await anaPage.getByRole("button", { name: "Regenerate" }).click();
+    await confirmed(anaPage.locator("section", { hasText: "Your invite link" }), "Regenerate", "Yes, create a new link");
+    await expect(status(anaPage)).toContainText("The old one no longer works."); // AC-18
     await expect(async () => {
       await anaPage.reload();
       expect(await inviteLink(anaPage)).not.toBe(inviteUrl);
@@ -151,7 +168,11 @@ test.describe("spec 0024: friends", () => {
     await other.goto("/en/friends?error=Your%20account%20is%20suspended");
     await expect(other.getByText("suspended")).toHaveCount(0);
     await other.goto("/en/friends?error=already_friends");
-    await expect(other.getByText("You are already friends.")).toBeVisible();
+    await expect(alert(other)).toHaveText("You are already friends."); // AC-18: a failure is an alert
+    await other.goto("/en/friends?ok=Everything%20is%20fine");
+    await expect(status(other)).toHaveCount(0); // AC-18: an unknown ?ok= is not shown either
+    await other.goto("/en/friends?sent=1");
+    await expect(status(other)).toHaveCount(0); // the old way of saying "request sent" is gone
   });
 
   test("AC-7: the friends pages fit a phone screen, also with the longest names", async ({ browser }) => {
@@ -213,7 +234,8 @@ test.describe("spec 0024: friends", () => {
     await page.getByLabel("Your name (shown to friends)").fill("Anna");
     await page.getByRole("button", { name: "Save" }).click();
     await expect(page.getByText("Something went wrong, please try again.")).toHaveCount(0);
-    await expect(page).toHaveURL(/\/en\/friends$/);
+    await expect(page).toHaveURL(/\/en\/friends\?ok=name$/);
+    await expect(status(page)).toHaveText("Name saved.");
   });
 
   test("AC-3: someone who already asked you is told to approve instead", async ({ browser }) => {
@@ -231,5 +253,131 @@ test.describe("spec 0024: friends", () => {
     await expect(page).toHaveURL(/\/en\/friends$/);
     await page.goto("/en/about");
     await expect(page.getByText("They cannot see your stamp dates or extra stamps.")).toBeVisible();
+  });
+});
+
+test.describe("spec 0024: the Friends page buttons respond", () => {
+  test("AC-17: a pressed button is disabled and busy until the server answers, and a second press sends nothing", async ({ page }) => {
+    await signInAsNewUser(page);
+    await page.goto("/en/friends");
+    let posts = 0;
+    await page.route("**/en/friends", async (route) => {
+      if (route.request().method() === "POST") {
+        posts++;
+        await new Promise((resolve) => setTimeout(resolve, 1_500)); // a slow server
+      }
+      await route.continue();
+    });
+    await expect(async () => {
+      await page.getByLabel("Your name (shown to friends)").fill("Anna");
+      await page.getByRole("button", { name: "Save" }).click({ timeout: 1_000 });
+      await expect(page.getByRole("button", { name: "Save" })).toBeDisabled({ timeout: 500 });
+    }).toPass();
+    const save = page.getByRole("button", { name: "Save" });
+    await expect(save).toHaveAttribute("aria-busy", "true");
+    await save.click({ force: true }); // a disabled button takes no press
+    await expect(status(page)).toHaveText("Name saved.");
+    await expect(save).toBeEnabled();
+    expect(posts).toBe(1);
+  });
+
+  test("AC-18: the answer is said in the page's language", async ({ browser }) => {
+    const { anaPage } = await requestedFriendship(browser);
+    await anaPage.goto("/ru/friends");
+    await anaPage.getByRole("button", { name: "Одобрить" }).click();
+    await expect(status(anaPage)).toHaveText("Запрос в друзья одобрен.");
+    await anaPage.goto("/hu/friends");
+    await anaPage.getByLabel("A neved (a barátaid látják)").fill("Ana");
+    await anaPage.getByRole("button", { name: "Mentés" }).click();
+    await expect(status(anaPage)).toHaveText("Név mentve.");
+  });
+
+  test("AC-18: ignoring a request says so, and the next action clears the message", async ({ browser }) => {
+    const { anaPage } = await requestedFriendship(browser);
+    await anaPage.goto("/en/friends");
+    await anaPage.getByRole("button", { name: "Ignore" }).click();
+    await expect(status(anaPage)).toHaveText("Friend request ignored.");
+    await anaPage.getByRole("button", { name: "Save" }).click();
+    await expect(status(anaPage)).toHaveText("Name saved.");
+  });
+
+  test("AC-19: removing a friend and regenerating the link ask first, in the page", async ({ browser }) => {
+    const { anaPage, bobPage } = await requestedFriendship(browser);
+    await approve(anaPage);
+    await bobPage.goto("/en/friends");
+    const row = bobPage.getByRole("listitem").filter({ hasText: "Ana" });
+    const details = row.locator("details");
+
+    // The first press only asks: nothing is removed. Cancel and Escape close the question.
+    await expect(async () => {
+      await row.locator("summary", { hasText: "Remove" }).click();
+      await expect(row.getByText("Remove Ana from your friends?")).toBeVisible({ timeout: 1_000 });
+    }).toPass();
+    await expect(row.getByRole("button", { name: "Yes, remove" })).toBeVisible();
+    await row.getByRole("button", { name: "Cancel" }).click();
+    await expect(details).not.toHaveAttribute("open", "");
+    await row.locator("summary", { hasText: "Remove" }).click();
+    await bobPage.keyboard.press("Escape");
+    await expect(details).not.toHaveAttribute("open", "");
+    await expect(row).toContainText("Ana");
+
+    const regenerate = bobPage.locator("section", { hasText: "Your invite link" });
+    const link = await inviteLink(bobPage);
+    await regenerate.locator("summary", { hasText: "Regenerate" }).click();
+    await expect(regenerate.getByText("The old link stops working at once")).toBeVisible();
+    expect(await inviteLink(bobPage)).toBe(link); // asked, not done
+  });
+
+  test("AC-21: with JavaScript off the buttons are plain forms that still act, and the question still opens", async ({ browser }) => {
+    const { anaPage, bobPage } = await requestedFriendship(browser);
+    const noScript = await browser.newContext({ javaScriptEnabled: false, storageState: await anaPage.context().storageState() });
+    const page = await noScript.newPage();
+    await page.goto("/en/friends");
+    await page.getByRole("button", { name: "Approve" }).click();
+    await expect(status(page)).toHaveText("Friend request approved.");
+    await expect(page.getByRole("button", { name: "Cancel" })).toHaveCount(0); // no JavaScript, no Cancel button
+
+    await page.locator("summary", { hasText: "Remove" }).click(); // the browser opens a <details> itself
+    await page.getByRole("button", { name: "Yes, remove" }).click();
+    await expect(status(page)).toHaveText("Friend removed.");
+    await expect(page.getByText("You haven't added any friends yet.")).toBeVisible();
+    await noScript.close();
+    await bobPage.reload();
+    await expect(bobPage.getByText("You haven't added any friends yet.")).toBeVisible();
+  });
+
+  for (const width of [375, 320]) {
+    test(`AC-20: at ${width} px every button is at least 44 px and the page does not scroll sideways`, async ({ browser }) => {
+      const { anaPage, anaId, bobId } = await requestedFriendship(browser);
+      psql(`update public.profiles set display_name = repeat('W', 40) where id in ('${anaId}', '${bobId}')`);
+      await anaPage.setViewportSize({ width, height: 812 });
+      for (const approved of [false, true]) {
+        if (approved) await approve(anaPage);
+        for (const locale of ["en", "ru", "hu"]) {
+          await anaPage.goto(`/${locale}/friends`);
+          await anaPage.locator("summary").first().click(); // the open question is the widest state
+          const small = await anaPage.locator("button:visible, summary:visible").evaluateAll((els) =>
+            els.map((el) => ({ text: el.textContent, ...el.getBoundingClientRect().toJSON() })).filter((r) => r.width < 44 || r.height < 44),
+          );
+          expect(small, `${locale} approved=${approved}`).toEqual([]);
+          const overflow = await anaPage.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+          expect(overflow, `${locale} approved=${approved}`).toBeLessThanOrEqual(0);
+        }
+      }
+    });
+  }
+
+  test("AC-20: a button changes colour under the pointer and again while it is pressed", async ({ browser }) => {
+    const { anaPage } = await requestedFriendship(browser);
+    await anaPage.goto("/en/friends");
+    const approve = anaPage.getByRole("button", { name: "Approve" });
+    const colour = () => approve.evaluate((el) => getComputedStyle(el).backgroundColor);
+    const rest = await colour();
+    await approve.hover();
+    await expect.poll(colour).not.toBe(rest);
+    const hover = await colour();
+    await anaPage.mouse.down();
+    await expect.poll(colour).not.toBe(hover);
+    await anaPage.mouse.up();
   });
 });

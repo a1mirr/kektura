@@ -198,6 +198,18 @@
     "error_unauthorized": "Előbb jelentkezz be.",
     "friendNotSharing": "Nem oszt meg veled",
     "error_incoming_pending": "Ez a személy már kérte, hogy kapcsolódjatok: fogadd el a kérést lent.",
-    "requestSent": "Kérés elküldve. Itt fog megjelenni, ha elfogadja."
+    "ok_sent": "Kérés elküldve. Itt fog megjelenni, ha elfogadja.",
+    "ok_approved": "Barátkérés elfogadva.",
+    "ok_ignored": "Barátkérés elutasítva.",
+    "ok_removed": "Barát eltávolítva.",
+    "ok_regenerated": "Új meghívólink létrehozva. A régi többé nem működik.",
+    "ok_name": "Név mentve.",
+    "ok_sharing_on": "Megosztod az előrehaladásodat ezzel a baráttal.",
+    "ok_sharing_off": "A megosztás leállítva.",
+    "cancel": "Mégse",
+    "removeConfirm": "Eltávolítod {name} nevű barátodat? Egymás előrehaladását többé nem látjátok. Őt nem értesítjük.",
+    "removeYes": "Igen, eltávolítom",
+    "regenerateConfirm": "Új meghívólinket hozol létre? A régi link azonnal érvényét veszti mindenkinél, aki ismeri.",
+    "regenerateYes": "Igen, új link"
   }
 }

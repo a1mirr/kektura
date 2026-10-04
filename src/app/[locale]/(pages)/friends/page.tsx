@@ -2,23 +2,28 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import FlashMessage from "@/components/FlashMessage";
+import FriendActionButton from "@/components/FriendActionButton";
+import FriendActionGroup from "@/components/FriendActionGroup";
+import FriendConfirm from "@/components/FriendConfirm";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { friendsOn } from "@/lib/friends-flag";
 import { getFriendProgress, getFriends } from "@/lib/friends";
-import { REQUEST_REFUSALS } from "@/lib/friends-input";
+import { FRIEND_NOTICES, friendsPath, REQUEST_REFUSALS, type FriendNotice } from "@/lib/friends-input";
 import { originFromHeaders } from "@/lib/origin";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/action-result";
 import { approveRequest, ignoreRequest, regenerateInvite, removeFriend, setDisplayName, setSharing } from "./actions";
 
-// The `?error=` values the page itself sends back (a refused request, or an action that failed): anything
-// else in the URL is ignored, never shown.
+// The `?error=` and `?ok=` values the page itself sends back (a refused request, an action that failed or went
+// through): anything else in the URL is ignored, never shown.
 const ERRORS = [...REQUEST_REFUSALS, "unauthorized", "failed"] as const;
 
-// Every action ends by reloading the page: a failure says so (`?error=`), a success clears an earlier message.
-function done(locale: (typeof routing.locales)[number], result: ActionResult) {
-  redirect({ href: result.ok ? "/friends" : `/friends?error=${result.reason}`, locale });
+// Every action ends by reloading the page: the answer to it is in the URL (`?ok=`, `?error=`), which also clears the
+// previous one.
+function done(locale: (typeof routing.locales)[number], result: ActionResult, notice: FriendNotice) {
+  redirect({ href: friendsPath(result, notice), locale });
 }
 
 export default async function FriendsPage({
@@ -26,14 +31,15 @@ export default async function FriendsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ error?: string; sent?: string }>;
+  searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
   if (!(await friendsOn())) notFound();
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
-  const { error, sent } = await searchParams;
+  const { error, ok } = await searchParams;
   const errorKey = ERRORS.find((e) => e === error);
+  const noticeKey = FRIEND_NOTICES.find((n) => n === ok);
 
   const t = await getTranslations("friends");
   const tDash = await getTranslations("dashboard");
@@ -63,44 +69,46 @@ export default async function FriendsPage({
   return (
     <div className="mx-auto max-w-xl space-y-8 p-4">
       <h1 className="text-2xl font-bold">{t("title")}</h1>
-      {errorKey && <div className="rounded-lg bg-red-50 p-4 text-red-700">{t(`error_${errorKey}`)}</div>}
-      {sent === "1" && <div className="rounded-lg bg-green-50 p-4 text-green-800">{t("requestSent")}</div>}
+      {errorKey && <FlashMessage kind="error">{t(`error_${errorKey}`)}</FlashMessage>}
+      {!errorKey && noticeKey && <FlashMessage kind="ok">{t(`ok_${noticeKey}`)}</FlashMessage>}
 
       <section className="space-y-4">
         <form
-          className="flex gap-2"
+          className="flex flex-wrap items-end gap-2"
           action={async (data: FormData) => {
             "use server";
-            done(locale, await setDisplayName(String(data.get("name") ?? "")));
+            done(locale, await setDisplayName(String(data.get("name") ?? "")), "name");
           }}
         >
-          <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm text-stone-600">
+          <label className="flex min-w-0 flex-1 basis-48 flex-col gap-1 text-sm text-stone-600">
             {t("displayNameLabel")}
             <input
               name="name"
               required
               maxLength={40}
               defaultValue={profile?.display_name ?? ""}
-              className="w-full rounded border p-2 text-base text-stone-900"
+              className="min-h-11 w-full rounded border p-2 text-base text-stone-900"
             />
           </label>
-          <button className="self-end rounded bg-stone-200 px-4 py-2">{t("displayNameSave")}</button>
+          <FriendActionButton>{t("displayNameSave")}</FriendActionButton>
         </form>
       </section>
 
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">{t("inviteTitle")}</h2>
-        <div className="flex flex-wrap gap-2">
-          <input readOnly value={inviteLink} className="min-w-0 flex-1 basis-48 rounded border p-2" />
-          <form
-            action={async () => {
-              "use server";
-              done(locale, await regenerateInvite());
-            }}
-          >
-            <button className="rounded bg-stone-200 px-4 py-2">{t("regenerate")}</button>
-          </form>
-        </div>
+        <FriendActionGroup className="flex flex-wrap items-start gap-2">
+          <input readOnly value={inviteLink} aria-label={t("inviteTitle")} className="min-h-11 min-w-0 flex-1 basis-48 rounded border p-2" />
+          <FriendConfirm label={t("regenerate")} question={t("regenerateConfirm")} cancelLabel={t("cancel")} tone="neutral">
+            <form
+              action={async () => {
+                "use server";
+                done(locale, await regenerateInvite(), "regenerated");
+              }}
+            >
+              <FriendActionButton tone="danger">{t("regenerateYes")}</FriendActionButton>
+            </form>
+          </FriendConfirm>
+        </FriendActionGroup>
       </section>
 
       {pending.length > 0 && (
@@ -108,26 +116,26 @@ export default async function FriendsPage({
           <h2 className="text-xl font-semibold">{t("pendingTitle")}</h2>
           <ul className="space-y-2">
             {pending.map((f) => (
-              <li key={f.id} className="flex items-center justify-between rounded border p-2">
+              <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 rounded border p-2">
                 <span className="min-w-0 [overflow-wrap:anywhere]">{f.displayName}</span>
-                <div className="flex shrink-0 gap-2">
+                <FriendActionGroup className="flex shrink-0 flex-wrap gap-2">
                   <form
                     action={async () => {
                       "use server";
-                      done(locale, await approveRequest(f.id));
+                      done(locale, await approveRequest(f.id), "approved");
                     }}
                   >
-                    <button className="rounded bg-green-500 px-3 py-1 text-white">{t("approve")}</button>
+                    <FriendActionButton tone="approve">{t("approve")}</FriendActionButton>
                   </form>
                   <form
                     action={async () => {
                       "use server";
-                      done(locale, await ignoreRequest(f.id));
+                      done(locale, await ignoreRequest(f.id), "ignored");
                     }}
                   >
-                    <button className="rounded bg-red-500 px-3 py-1 text-white">{t("ignore")}</button>
+                    <FriendActionButton tone="danger">{t("ignore")}</FriendActionButton>
                   </form>
-                </div>
+                </FriendActionGroup>
               </li>
             ))}
           </ul>
@@ -142,23 +150,13 @@ export default async function FriendsPage({
           <ul className="space-y-4">
             {accepted.map((f) => (
               <li key={f.id} className="space-y-2 rounded border p-4">
-                <div className="flex items-center justify-between">
-                  {f.friendIsSharing ? (
-                    <Link href={`/friends/${f.id}`} className="min-w-0 [overflow-wrap:anywhere] font-bold text-blue-600 hover:underline">
-                      {f.displayName}
-                    </Link>
-                  ) : (
-                    <span className="min-w-0 [overflow-wrap:anywhere] font-bold">{f.displayName}</span>
-                  )}
-                  <form
-                    action={async () => {
-                      "use server";
-                      done(locale, await removeFriend(f.id));
-                    }}
-                  >
-                    <button className="text-sm text-red-600">{t("remove")}</button>
-                  </form>
-                </div>
+                {f.friendIsSharing ? (
+                  <Link href={`/friends/${f.id}`} className="block min-w-0 [overflow-wrap:anywhere] font-bold text-blue-600 hover:underline">
+                    {f.displayName}
+                  </Link>
+                ) : (
+                  <span className="block min-w-0 [overflow-wrap:anywhere] font-bold">{f.displayName}</span>
+                )}
                 <div className="text-sm text-stone-600">
                   {f.progress
                     ? t("summary", {
@@ -169,18 +167,28 @@ export default async function FriendsPage({
                       })
                     : t("friendNotSharing")}
                 </div>
-                <form
-                  action={async () => {
-                    "use server";
-                    done(locale, await setSharing(f.id, !f.isSharing));
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <button className="rounded bg-stone-200 px-2 py-1 text-sm">
-                    {f.isSharing ? t("stopSharing") : t("startSharing")}
-                  </button>
-                  <span className="text-sm text-stone-500">{f.isSharing ? t("isSharing") : t("notSharing")}</span>
-                </form>
+                <FriendActionGroup className="flex flex-wrap items-center gap-2">
+                  <form
+                    action={async () => {
+                      "use server";
+                      done(locale, await setSharing(f.id, !f.isSharing), f.isSharing ? "sharing_off" : "sharing_on");
+                    }}
+                    className="flex flex-wrap items-center gap-2"
+                  >
+                    <FriendActionButton>{f.isSharing ? t("stopSharing") : t("startSharing")}</FriendActionButton>
+                    <span className="text-sm text-stone-500">{f.isSharing ? t("isSharing") : t("notSharing")}</span>
+                  </form>
+                  <FriendConfirm label={t("remove")} question={t("removeConfirm", { name: f.displayName ?? "" })} cancelLabel={t("cancel")}>
+                    <form
+                      action={async () => {
+                        "use server";
+                        done(locale, await removeFriend(f.id), "removed");
+                      }}
+                    >
+                      <FriendActionButton tone="danger">{t("removeYes")}</FriendActionButton>
+                    </form>
+                  </FriendConfirm>
+                </FriendActionGroup>
               </li>
             ))}
           </ul>
