@@ -2,7 +2,7 @@
 
 Status: Done
 Owner code: `.claude/agents/fresh-reviewer.md`, `.github/pull_request_template.md`, `CLAUDE.md` (Workflow),
-`specs/README.md` (Workflow)
+`specs/README.md` (Workflow), and for AC-5 `scripts/check-review-recorded.mjs` and the `review` job of `.github/workflows/ci.yml`
 
 ## Goal
 
@@ -61,13 +61,24 @@ author's context, and wants that to be part of how work is done here, not someth
   change that needs no task; the touched specs mirror the code as built and describe nothing unbuilt; `npm run check` green and CI's end-to-end job passing (spec 0007 AC-8); everything users can see is in the changelog; fresh-context
   review done at the commit named in the pull
   request, with only wording fixes after it) and a section to record the reviewed commit, the review's
-  findings and what was done about each.
+  findings and what was done about each. The checklist line and the section's comment name the "Review recorded" job (AC-5).
+- **AC-5**: Every pull request shows, as a CI result, whether a review was recorded at the commit it is about to merge.
+  A job named "Review recorded" (`review` in `.github/workflows/ci.yml`; pull requests only, skipped for pull requests
+  opened by Dependabot) runs `scripts/check-review-recorded.mjs` on a full clone and fails unless the description of the pull
+  request has a `Reviewed commit:` line (the last one counts; lines inside an HTML comment don't) with a sha of 7 to 40
+  hex digits that exists, is the head of the pull request or an ancestor of it, and, when it is an ancestor, nothing
+  but Markdown (`*.md`) changed after it. Any other changed file (wording fixes in code or messages included) needs a
+  new review and a new sha in the description. The job reads the description through the API when it runs, so
+  after editing it the job is re-run by hand (`gh run rerun <run-id> --job <job-id>`); a push runs it again by itself.
+  `CLAUDE.md` step 7 names it among the jobs that must be green before a merge. It is a tripwire: it shows that a review
+  was recorded at a commit, not that it was good or that the sha was ever reviewed.
 
 ## Out of scope
 
-- Enforcing it mechanically. GitHub can't tell whether an agent ran, so the gate is the written rule, the
-  agent definition that makes the review one command and the checklist in every pull request. The owner's
-  own look at a pull request stays the final gate.
+- Enforcing that the review was done and was good. GitHub can't tell whether an agent ran, so beyond the tripwire of
+  AC-5 the gate is the written rule, the agent definition that makes the review one command and the checklist in
+  every pull request. The owner's own look at a pull request stays the final gate, and the job is a visible red mark,
+  not a required check (branch protection is off, spec 0021).
 - `/code-review ultra` (a billed, multi-agent cloud review the owner starts by hand) and
   `/code-review`: they can be used as well, but they don't replace this step, which is free to run on every
   change and reads the project's own rules.
@@ -106,4 +117,6 @@ author's context, and wants that to be part of how work is done here, not someth
 | AC | Test |
 | --- | --- |
 | AC-1, AC-2, AC-3, AC-4 | `tests/review-process.test.ts` (AC-4's wording about the end-to-end job is asserted under spec 0007 AC-8 in the same file; the rule is in `CLAUDE.md` and `specs/README.md`; the agent file exists, is read-only and names what it checks; the pull request template has the checklist and the findings section) |
+| AC-5 | `tests/review-recorded.test.ts` (reading the description; every decision: no line, unknown sha, head, ancestor with only Markdown or nothing after it, ancestor with code after it; the git side against a real temporary repository; the job's name, trigger, Dependabot skip and permissions; the job named in `CLAUDE.md` and the template) |
+| AC-5 (the job itself, on GitHub) | manual (only a real pull request exercises the `pull_request` event, the full clone and `gh api`): read the job's result on a pull request with and without a recorded review. Last checked: never (the pull request that adds it is its first run; whoever checks it replaces this with the date) |
 | AC-3 (quality of the reviews) | manual (judgement): the owner reads the findings in each pull request. Last checked: every pull request. |

@@ -1,7 +1,7 @@
 # 0058: A CI check that a review was recorded
 
-Status: Open
-Specs: [0022](../specs/0022-fresh-context-review.md) (an AC is added when this is built)
+Status: Done
+Specs: [0022](../specs/0022-fresh-context-review.md) AC-5 (added)
 
 ## Goal
 
@@ -23,16 +23,24 @@ tripwire: a CI job that reads the pull request description.
 
 ## Done when
 
-- [ ] `scripts/check-review-recorded.mjs`: a pure function of (description, head sha, the changed files after the reviewed commit) with the decisions above, and a thin CLI that reads them from git and the GitHub event
-- [ ] A job `Review recorded` in `ci.yml` (pull requests only, skipped for Dependabot's)
-- [ ] `CLAUDE.md` step 7 and the pull request template name the job
-- [ ] Tests for every decision above (missing line, unknown sha, head, ancestor with only Markdown after it, ancestor with code after it, Dependabot) and for the workflow's trigger and job name
-- [ ] The requirements above are written into spec 0022 as an AC, with its coverage row (spec 0034 AC-6)
+- [x] `scripts/check-review-recorded.mjs`: a pure function of (description, head sha, the changed files after the reviewed commit) with the decisions above, and a thin CLI that reads them from git and the GitHub event
+- [x] A job `Review recorded` in `ci.yml` (pull requests only, skipped for Dependabot's)
+- [x] `CLAUDE.md` step 7 and the pull request template name the job
+- [x] Tests for every decision above (missing line, unknown sha, head, ancestor with only Markdown after it, ancestor with code after it, Dependabot) and for the workflow's trigger and job name
+- [x] The requirements above are written into spec 0022 as an AC, with its coverage row (spec 0034 AC-6)
 
 ## Spec changes
 
-Filled in when built.
+Spec 0022: AC-5 added (the "Review recorded" job and its rule), AC-4 extended (the checklist line and the section's
+comment name the job), "Out of scope" narrowed from "enforcing it mechanically" to "enforcing that the review was done
+and was good", Owner code and the coverage table updated (a test row and a `manual` row for the job on GitHub). Spec 0007:
+a note that the workflow also holds this job, owned by 0022; no AC changed.
 
 ## Notes
 
+- Built as: `Reviewed commit:` takes 7 to 40 hex digits (the last such line counts; HTML comments are dropped, so the
+  template's unfilled `<short sha>` placeholder fails). The job reads the description through `gh api` when it runs, so
+  re-running only that job after a description edit is enough (the `pull_request` event is not triggered by edits, and
+  adding `edited` would rerun the end-to-end job on every edit); the author must remember that rerun, and the merge steps
+  in `CLAUDE.md` say so. "Changed after the reviewed commit" is `git diff --name-only --no-renames <reviewed> <head>`.
 - GitHub branch protection could make it required, but it is not available on a private repository without a paid plan (spec 0021); the job is a visible red mark and a line in the merge steps.

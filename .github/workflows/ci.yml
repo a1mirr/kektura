@@ -23,6 +23,26 @@ jobs:
       - run: npm ci
       - run: npm run check
 
+  # Spec 0022 AC-5: a tripwire for the fresh-context review. The description must name, on a `Reviewed commit:` line, a
+  # commit that is the head of the pull request or an ancestor of it with only Markdown changed after it. It reads the
+  # description fresh through the API, so after editing the description re-run just this job
+  # (`gh run rerun <run-id> --job <job-id>`); a new push runs it again by itself.
+  review:
+    name: Review recorded
+    if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - run: node scripts/check-review-recorded.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+
   e2e:
     name: End-to-end tests
     runs-on: ubuntu-latest
