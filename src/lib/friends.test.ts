@@ -2,7 +2,10 @@
 import { describe, expect, it } from "vitest";
 import { friendsEnabled } from "./friends-flag";
 import { getFriends, summarizeFriend } from "./friends";
-import { isUuid, isValidDisplayName } from "./friends-input";
+import { FRIEND_NOTICES, friendsPath, isUuid, isValidDisplayName } from "./friends-input";
+import en from "../../messages/en.json";
+import hu from "../../messages/hu.json";
+import ru from "../../messages/ru.json";
 import { buildPlaces, progressSummary, stampedPlaceKeys, walkedRanges, type Checkpoint, type StageMeta } from "./progress";
 
 function fakeSupabase(profiles: any[], friendships: any[], stamps: any[]) {
@@ -106,6 +109,20 @@ describe("spec 0024: feature flag", () => {
     expect(friendsEnabled({ FF_FRIENDS: "1" })).toBe(true);
     for (const env of [{}, { FF_FRIENDS: "" }, { FF_FRIENDS: "0" }, { FF_FRIENDS: "true" }, { NEXT_PUBLIC_FF_FRIENDS: "1" }]) {
       expect(friendsEnabled(env)).toBe(false);
+    }
+  });
+});
+
+describe("spec 0024: the answer of an action on the Friends page", () => {
+  it("AC-18: a success goes back to the page with a notice, a failure with its reason", () => {
+    expect(friendsPath({ ok: true }, "approved")).toBe("/friends?ok=approved");
+    expect(friendsPath({ ok: false, reason: "failed" }, "approved")).toBe("/friends?error=failed");
+  });
+
+  it("AC-18: every notice has its message in all three languages, and the messages of the old `?sent=1` are gone", () => {
+    for (const messages of [en, ru, hu]) {
+      for (const notice of FRIEND_NOTICES) expect(messages.friends[`ok_${notice}` as keyof typeof messages.friends]).toBeTruthy();
+      expect("requestSent" in messages.friends).toBe(false);
     }
   });
 });

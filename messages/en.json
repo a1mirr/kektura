@@ -197,6 +197,18 @@
     "error_unauthorized": "Please sign in first.",
     "friendNotSharing": "Not sharing with you",
     "error_incoming_pending": "This person already asked to connect with you: approve the request below.",
-    "requestSent": "Request sent. You will see them here once they approve it."
+    "ok_sent": "Request sent. You will see them here once they approve it.",
+    "ok_approved": "Friend request approved.",
+    "ok_ignored": "Friend request ignored.",
+    "ok_removed": "Friend removed.",
+    "ok_regenerated": "New invite link created. The old one no longer works.",
+    "ok_name": "Name saved.",
+    "ok_sharing_on": "You are sharing your progress with this friend.",
+    "ok_sharing_off": "Sharing stopped.",
+    "cancel": "Cancel",
+    "removeConfirm": "Remove {name} from your friends? You will stop seeing each other's progress. They are not notified.",
+    "removeYes": "Yes, remove",
+    "regenerateConfirm": "Create a new invite link? The old link stops working at once for everyone who has it.",
+    "regenerateYes": "Yes, create a new link"
   }
 }

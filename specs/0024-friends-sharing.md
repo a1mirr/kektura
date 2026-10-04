@@ -2,7 +2,7 @@
 
 Status: Done
 Owner code: `src/lib/friends.ts`, `src/lib/friends-flag.ts`, `src/lib/friends-input.ts`, `src/app/[locale]/(pages)/friends/*`,
-`supabase/migrations/0024_friends.sql`
+`src/components/Friend*.tsx`, `src/components/FlashMessage.tsx`, `supabase/migrations/0024_friends.sql`
 
 ## Goal
 
@@ -31,7 +31,7 @@ sharing at any moment. Ships behind the feature flag `friends` (AC-15).
 - **AC-3**: Opening an invite link signed out sends the visitor through sign-in and back to the link; the
   page before sign-in reveals neither the owner nor whether the link is valid. Signed in, the page shows the
   inviter's display name and a "Send request" button. After a request is sent the Friends page says so
-  ("Request sent"), since the requester has nothing else to see until the inviter approves. Opening an unknown
+  ("Request sent", AC-18), since the requester has nothing else to see until the inviter approves. Opening an unknown
   or revoked token shows a "this link is not valid" page. Opening your own link says it is yours.
   Sending a request when already friends, when you already asked, or when that person already asked you
   (approve it on `/friends`) says so. The `send_request`
@@ -87,6 +87,36 @@ sharing at any moment. Ships behind the feature flag `friends` (AC-15).
   including a network error) and log a failure as one `[friends]` line without tokens, names or user ids
   (spec 0008's rules).
 
+### The Friends page responds
+
+Every button on `/friends` (save name, regenerate link, approve, ignore, start and stop sharing, remove) and the invite
+page's "Send request" is a plain form that posts to a server action ending in a redirect. The rules of the actions
+(AC-12 to AC-14) are unchanged: only how the page reacts differs.
+
+- **AC-17**: Pressing one of these buttons changes it at once, before the server answers: it is disabled and busy
+  (`aria-busy`), a spinner replaces its label, and the label stays in the layout and for screen readers (transparent), so the button keeps its size and its name.
+  A second press sends nothing more. The buttons of one row (approve and ignore of one request, sharing and remove of one
+  friend, regenerate) share one busy state: while one runs, the others of the row are disabled too, and the buttons of other
+  rows are not.
+- **AC-18**: When an action is done the page says what happened, at the top and in the page's language: a success
+  ("Name saved", "Link regenerated", "Friend request approved" or "ignored", "Friend removed", "Sharing stopped" or "started",
+  and the "Request sent" of AC-3) as a polite status (`role="status"`, `aria-live="polite"`), a failure as an alert
+  (`role="alert"`) with the text of its reason. The answer is in the URL: `?ok=<code>` or `?error=<reason>`. Only a code on
+  the page's own list (`FRIEND_NOTICES`, `REQUEST_REFUSALS`, `unauthorized`, `failed`) is shown, as its message and never
+  as the value itself; anything else, and the former `?sent=1`, shows nothing. The next action replaces the message (every
+  action ends on `/friends` with its own answer) and the message scrolls into view.
+- **AC-19**: Removing a friend and regenerating the invite link ask first, in the page and not with `window.confirm`: a
+  `<details>` whose body says what will happen (removing: the two of you stop seeing each other's progress and the other is
+  not told; regenerating: the old link stops working at once) and holds the form with the confirming button. Nothing runs on
+  the first press. Cancel closes the question, and Escape too.
+- **AC-20**: Every button of the page is at least 44 x 44 px (also at 375 px and 320 px), wraps onto a second line instead
+  of overflowing, and, while enabled, looks different under the pointer (a darker shade) and while pressed (a darker still,
+  nudged one pixel down), with a visible focus ring for the keyboard; a disabled button shows none of these. Approve and
+  ignore differ by their words, not by colour alone.
+- **AC-21**: The buttons stay plain forms: before hydration and with JavaScript off every action still works and ends on
+  the page with its answer (AC-18), the confirmation of AC-19 still opens (the browser toggles a `<details>`), and Cancel,
+  which needs JavaScript, is not drawn.
+
 ### Feature flag and texts
 
 - **AC-15**: While the flag `friends` is off, `/friends`, `/friends/<id>` and `/friends/invite/*` answer 404,
@@ -130,3 +160,8 @@ route plan.
 | AC-13, AC-14 | `src/app/[locale]/(pages)/friends/actions.test.ts` (an action that fails is shown on the page: `e2e/friends.spec.ts`) |
 | AC-15 | `src/lib/friends.test.ts` (flag), `actions.test.ts` (`disabled`); the start-up value, not the build, decides: manual (it needs two builds): build once without `FF_FRIENDS`, start with `FF_FRIENDS=1` (and the other way round): the dashboard link, `/friends`, `/friends/invite/<token>` and the About paragraph follow the start-up value (the E2E server runs with the flag on). Last checked: never recorded. |
 | AC-16 | `tests/messages.test.ts`, `e2e/friends.spec.ts` (About paragraph); the changelog entry waits for the flag |
+| AC-17 | `src/components/FriendActionButton.test.tsx` (pending, no second press, the row), `e2e/friends.spec.ts` (a slow server) |
+| AC-18 | `src/lib/friends.test.ts` (the path, a message per notice in three languages), `src/components/FriendActionButton.test.tsx` (status and alert), `e2e/friends.spec.ts` (each action, three languages, unknown values) |
+| AC-19 | `src/components/FriendActionButton.test.tsx` (closed first, Cancel, Escape), `e2e/friends.spec.ts` (remove and regenerate ask first) |
+| AC-20 | `src/components/FriendActionButton.test.tsx` (the classes), `e2e/friends.spec.ts` (target size and no sideways scroll at 375 and 320 px in three languages; the colour under the pointer and while pressed) |
+| AC-21 | `e2e/friends.spec.ts` (JavaScript off) |
