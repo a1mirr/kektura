@@ -80,7 +80,7 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
   }) => {
     await page.setViewportSize({ width: 375, height: 800 });
     await signInAsNewUser(page);
-    const locales = [routing.defaultLocale, "de"]; // the default and the language with the longest words
+    const locales = [routing.defaultLocale, "de"]; // the default and German
     const widths = () =>
       page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, viewport: window.innerWidth }));
     const expectFits = async (label: string, stagesOpen: boolean) => {

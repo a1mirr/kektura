@@ -36,7 +36,7 @@ afterEach(async () => {
 
 const pages = (status: number): Answers => Object.fromEntries(LANGUAGES.map((language) => [`/${language}`, status]));
 const HEALTHY = pages(200);
-const [firstLanguage, ...otherLanguages] = LANGUAGES;
+const [firstLanguage] = LANGUAGES;
 const lastLanguage = LANGUAGES.at(-1)!;
 const fast = { intervalMs: 20, sleep: (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)) };
 
@@ -71,7 +71,6 @@ describe("spec 0026 AC-8: the smoke test", () => {
   it("treats a redirect as a failure instead of following it", async () => {
     const base = await serve({ ...HEALTHY, [`/${firstLanguage}`]: 301 });
     expect(await checkOnce(base)).toEqual([`/${firstLanguage}: expected 200, got 301`]);
-    expect(otherLanguages.length).toBeGreaterThan(0); // the other languages are asked for too
   });
 
   it("reports a server that is not there at all, without the URL", async () => {

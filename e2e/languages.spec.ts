@@ -19,7 +19,7 @@ test.describe("spec 0005: every language", () => {
   for (const locale of routing.locales) {
     const m = messages(locale);
 
-    test(`AC-10, AC-11, spec 0014 AC-1: the public pages are in ${locale}`, async ({ page }) => {
+    test(`AC-10, AC-11, 0014 AC-1, 0015 AC-1, AC-7, 0018 AC-3, 0019 AC-2: the public pages are in ${locale}`, async ({ page }) => {
       await page.goto(`/${locale}`);
       await expect(page.locator("html")).toHaveAttribute("lang", locale);
       await expect(page.getByRole("combobox", { name: m.app.language })).toHaveValue(locale); // the dropdown (AC-10)
@@ -47,7 +47,7 @@ test.describe("spec 0005: every language", () => {
       await expect(page.getByText(m.links.items.kekturaHu)).toBeVisible();
     });
 
-    test(`AC-10: the public pages fit a phone screen in ${locale}, without sideways scrolling`, async ({ page }) => {
+    test(`AC-10, 0015 AC-1, 0018 AC-1, 0019 AC-1: the public pages fit a phone screen in ${locale}, without sideways scrolling`, async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 812 });
       for (const route of ["", "/about", "/changelog", "/links", "/feedback"]) {
         await page.goto(`/${locale}${route}`);
@@ -56,7 +56,7 @@ test.describe("spec 0005: every language", () => {
       }
     });
 
-    test(`spec 0014 AC-15, AC-16, AC-18: the account link, page and sign-out button are in ${locale}, and the old /settings address keeps the language`, async ({ page }) => {
+    test(`0014 AC-15, AC-16, AC-18: the account link, page and sign-out button are in ${locale}, and the old /settings address keeps the language`, async ({ page }) => {
       await signInAsNewUser(page);
       await page.goto(`/${locale}/settings`);
       await expect(page).toHaveURL(new RegExp(`/${locale}/account$`));

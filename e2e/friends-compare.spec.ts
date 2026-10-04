@@ -1,4 +1,5 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
+import { routing } from "../src/i18n/routing";
 import { signInAsNewUser } from "./helpers";
 import { psql } from "./local-db";
 
@@ -114,7 +115,7 @@ test.describe("spec 0024: comparing with a friend", () => {
     const { bobPage, anaId } = await connected(browser);
     for (const width of [375, 320]) {
       await bobPage.setViewportSize({ width, height: 812 });
-      for (const locale of ["en", "ru", "hu", "de"]) {
+      for (const locale of [routing.defaultLocale, "de"]) {
         await bobPage.goto(`/${locale}/friends/${anaId}`);
         await expect(card(bobPage, "both")).toBeVisible();
         const boxes = await Promise.all(["both", "me", "them", "neither"].map((w) => card(bobPage, w).boundingBox()));

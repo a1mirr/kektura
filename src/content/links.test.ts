@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
-import de from "../../messages/de.json";
-import en from "../../messages/en.json";
-import hu from "../../messages/hu.json";
-import ru from "../../messages/ru.json";
+import { messageFiles } from "../../tests/message-files";
 import { LINK_GROUPS } from "./links";
 
+// Every message file (tests/messages.test.ts pins them to the routing's languages).
+const languages = Object.values(messageFiles) as (typeof import("../../messages/en.json"))[];
 const all = LINK_GROUPS.flatMap((g) => g.links);
 
 describe("spec 0019: useful links data", () => {
@@ -22,8 +21,8 @@ describe("spec 0019: useful links data", () => {
     }
   });
 
-  it("AC-2, AC-4: every link and group has a title or description in all four languages", () => {
-    for (const messages of [en, ru, hu, de]) {
+  it("AC-2, AC-4: every link and group has a title or description in every language", () => {
+    for (const messages of languages) {
       for (const link of all) expect(messages.links.items[link.id].trim(), link.id).not.toBe("");
       for (const group of LINK_GROUPS) expect(messages.links.groups[group.id].trim(), group.id).not.toBe("");
     }

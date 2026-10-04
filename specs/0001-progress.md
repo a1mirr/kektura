@@ -87,5 +87,5 @@ stage is AC-12 to AC-15); moving extra stamps into the stage's place list; chang
 | AC-5 (localized labels) | `e2e/account.spec.ts` (the month label on the account page's axis and in the tooltip, in the default language and in English, each the way `Intl` writes it for that language) |
 | AC-8, AC-9 | `src/components/StageSection.test.tsx` |
 | AC-10 | `src/components/StampDescriptions.test.tsx` (every description rendered, no truncation classes), `e2e/stamping.spec.ts` (dashboard) and `e2e/friends.spec.ts` (a friend's page): nothing clipped or sticking out of its row at 375 px |
-| AC-11 | `e2e/stamping.spec.ts` (375 px in the default language and in German, the language with the longest words: no sideways scroll with every stage collapsed, expanded, and with a stamped place and extra stamp) |
+| AC-11 | `e2e/stamping.spec.ts` (375 px in the default language and in German: no sideways scroll with every stage collapsed, expanded, and with a stamped place and extra stamp) |
 | AC-11 (own line, right-aligned) | `e2e/stamping.spec.ts` (at 375 px a stamped row's controls start below the text and end at the row's right padding) |

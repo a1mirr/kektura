@@ -2,11 +2,12 @@
 import { describe, expect, it } from "vitest";
 import { friendsEnabled } from "./friends-flag";
 import { getFriends, summarizeFriend } from "./friends";
+import { messageFiles } from "../../tests/message-files";
 import { FRIEND_NOTICES, friendsPath, isUuid, isValidDisplayName } from "./friends-input";
-import en from "../../messages/en.json";
-import hu from "../../messages/hu.json";
-import ru from "../../messages/ru.json";
 import { buildPlaces, progressSummary, stampedPlaceKeys, walkedRanges, type Checkpoint, type StageMeta } from "./progress";
+
+// Every message file (tests/messages.test.ts pins them to the routing's languages).
+const languages = Object.values(messageFiles) as (typeof import("../../messages/en.json"))[];
 
 function fakeSupabase(profiles: any[], friendships: any[], stamps: any[]) {
   return {
@@ -119,8 +120,8 @@ describe("spec 0024: the answer of an action on the Friends page", () => {
     expect(friendsPath({ ok: false, reason: "failed" }, "approved")).toBe("/friends?error=failed");
   });
 
-  it("AC-18: every notice has its message in all three languages, and the messages of the old `?sent=1` are gone", () => {
-    for (const messages of [en, ru, hu]) {
+  it("AC-18: every notice has its message in every language, and the messages of the old `?sent=1` are gone", () => {
+    for (const messages of languages) {
       for (const notice of FRIEND_NOTICES) expect(messages.friends[`ok_${notice}` as keyof typeof messages.friends]).toBeTruthy();
       expect("requestSent" in messages.friends).toBe(false);
     }
