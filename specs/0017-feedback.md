@@ -28,7 +28,7 @@ the rest.
   filed in somebody else's name, and nothing can read feedback through the API.
 - **AC-4**: After storing, the server sends the message to Telegram (Bot API `sendMessage`, plain text,
   no markup parsing): the text, the language of the page, and the sender (the signed-in user's email,
-  or "anonymous"). Sent only when `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are set; otherwise the
+  `user <id>` for an account without one, or "anonymous"). Sent only when `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are set; otherwise the
   message is just stored. Texts over Telegram's 4096-character limit are cut.
 - **AC-5**: Telegram is best effort: an error, a non-2xx answer or a 4 s timeout never fails the
   submission (the row is saved) and is logged as one line without the token or the message text.
@@ -66,8 +66,6 @@ Supabase dashboard, table `user_feedback`).
 - Node's `fetch` keeps sockets alive, and on Windows that crashes a process at exit with a libuv
   assertion (seen in `telegram-check.mjs` and in E2E workers). The script throws instead of calling
   `process.exit()`, and the E2E helpers use Playwright's `request` fixture instead of `fetch`.
-- Migration `0008` was rewritten in place: it had not been applied anywhere but the local test database
-  (production had neither 0007 nor 0008 when this was written).
 
 ## Coverage
 
@@ -78,4 +76,5 @@ Supabase dashboard, table `user_feedback`).
 | AC-4, AC-5 | `src/lib/telegram.test.ts`, `actions.test.ts` (notification text and target, skipped without config, failures never fail the action, token and message text never logged), `src/lib/log.test.ts` |
 | AC-7 | `src/lib/rate-limit.test.ts`, `actions.test.ts` (honeypot, per-address limit) |
 | AC-1, AC-6, AC-8 | `e2e/feedback.spec.ts` (footer link, title, send, cleared form, ru/hu labels), `FeedbackForm.test.tsx` (counter, every message, sending state, honeypot wiring, note) |
-| AC-9 | `npm run telegram:check` exercised against a fake Telegram API on localhost in 7 situations (works, find chat id, bad token, no chats yet, no token, no chat id, unreachable): correct output and exit codes, token never printed. Not run against the real Telegram: that needs your bot |
+| AC-9 | `tests/telegram-check.test.ts` (the script against a fake Telegram API on localhost: a working setup, `--find-chat-id` with and without chats, a bad token, no token, no chat id, an unreachable API; the token is never printed) |
+| AC-9 (the real bot) | manual (it needs the real bot and chat): `npm run telegram:check` prints "Test message sent" and the message arrives. Last checked: never recorded. |

@@ -13,7 +13,7 @@ Everything it says is true of the app today.
 
 - **AC-1**: `/about` is public (no sign-in) in `ru`, `en` and `hu`, reachable from the footer. It has its
   own document title and description, a "back to the tracker" link to `/`, and a single `h1` followed by
-  one `h2` per section below.
+  one `h2` per section below (the four sections of AC-2 to AC-5, then "Questions or ideas?").
 - **AC-2**: "The trail in numbers" shows the number of stages, of official stamping places and the total
   length in km (one decimal), computed from `scripts/data/okt-stages.json` (the MTSZ stage table), never
   typed in by hand. Today: 27 stages, 161 places, 1,183.1 km.
@@ -36,7 +36,7 @@ Everything it says is true of the app today.
     which map layers are on);
   - the "Account" page deletes the account and all stamps; feedback messages already sent are kept but
     no longer linked to the user;
-  - links to `/account` and `/feedback`;
+  - a link to `/account` (in this section), and a closing "Questions or ideas?" section that links to `/feedback`;
   - while the friends feature is on (spec 0024, `FF_FRIENDS=1`): what a connected friend can see (display name,
     official stamps, kilometres, stages; no dates or extra stamps) and that sharing can be stopped on the
     Friends page. With the feature off this paragraph is not shown.

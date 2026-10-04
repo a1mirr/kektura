@@ -28,7 +28,8 @@ on GitHub, for everybody who works in a clone of this repository, Claude Code in
   knows both.
 - **AC-6**: `CLAUDE.md` says how a pull request is opened and merged with `gh`:
   `gh pr create --base main --head <topic> --title "<title>" --body-file <file>` (title and body are always
-  given: a shell without a terminal can't answer gh's prompts), `gh pr checks <n> --watch`,
+  given: a shell without a terminal can't answer gh's prompts), `gh pr checks <n>` (one look, never `--watch` or a sleep loop: a
+  wait blocks all other work, and a finished run is reported anyway; the same goes for a deploy run),
   `gh pr merge <n> --merge --match-head-commit <full-sha>` (the full sha of the pull request's current head: the
   reviewed commit plus, at most, wording fixes). The body file starts from a copy of
   `.github/pull_request_template.md`, which `gh` doesn't apply to `--body-file`. Merging happens on the owner's

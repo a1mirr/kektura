@@ -113,7 +113,7 @@ describe("spec 0021: pull requests only", () => {
   it("AC-6: CLAUDE.md says how pull requests are opened and merged with gh, and when merging is allowed", () => {
     const claude = read("CLAUDE.md");
     expect(claude).toContain('gh pr create --base main --head <topic> --title "<title>" --body-file <file>');
-    expect(claude).toContain("gh pr checks <n> --watch");
+    expect(claude).toContain("`gh pr checks <n>` once, never with `--watch` or a sleep loop");
     expect(claude).toContain("gh pr merge <n> --merge --match-head-commit <full-sha>");
     expect(claude).toMatch(/on the owner's standing permission \(given in chat on 2026-10-03, revocable\) for pull requests you wrote, once CI is green and the fresh-context review is done/);
     expect(claude).toContain("never `--admin`");

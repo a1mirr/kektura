@@ -220,7 +220,7 @@ describe("spec 0034: manual checks", () => {
     for (const name of specFiles) {
       const text = read(specsDir, name);
       if (!/^Status: (Done|Accepted)\s*$/m.test(text)) continue;
-      for (const row of coverageRows(text).filter((line) => /\bmanual\b|\bby hand\b|checked in review|\breview of\b/i.test(line))) {
+      for (const row of coverageRows(text).filter((line) => /\bmanual\b|\bby hand\b|checked in review|\breview (of|by)\b/i.test(line))) {
         manualRows += 1;
         const cell = row.slice(0, 60);
         if (!/\bmanual \([^)]+\)/.test(row)) incomplete.push(`${name}: no "manual (reason)": ${cell}`);
