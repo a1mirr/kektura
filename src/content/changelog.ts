@@ -14,12 +14,39 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     date: "2026-10-04",
     title: {
-      en: "German, Hungarian by default, a language menu and a logo",
-      ru: "Немецкий язык, венгерский по умолчанию, меню языков и логотип",
-      hu: "Német nyelv, alapértelmezett magyar, nyelvválasztó menü és logó",
-      de: "Deutsch, Ungarisch als Standard, ein Sprachmenü und ein Logo",
+      en: "Friends, German, Hungarian by default, a language menu and a logo",
+      ru: "Друзья, немецкий язык, венгерский по умолчанию, меню языков и логотип",
+      hu: "Barátok, német nyelv, alapértelmezett magyar, nyelvválasztó menü és logó",
+      de: "Freunde, Deutsch, Ungarisch als Standard, ein Sprachmenü und ein Logo",
     },
     changes: [
+      {
+        kind: "new",
+        text: {
+          en: "Friends: connect with a friend through your invite link and see each other's progress (places, kilometres, stages). Nothing is shared until you accept a request, and you can stop sharing or remove a friend at any time.",
+          ru: "Друзья: свяжитесь с другом по своей ссылке-приглашению и смотрите прогресс друг друга (места, километры, этапы). Ничего не показывается, пока вы не примете запрос, а делиться или дружить можно перестать в любой момент.",
+          hu: "Barátok: kapcsolódj egy baráthoz a meghívólinkeddel, és lássátok egymás előrehaladását (helyek, kilométerek, szakaszok). Addig semmi nem látszik, amíg el nem fogadsz egy kérést, a megosztást és a barátságot pedig bármikor megszüntetheted.",
+          de: "Freunde: Verbinde dich über deinen Einladungslink mit einem Freund und seht gegenseitig euren Fortschritt (Orte, Kilometer, Etappen). Nichts wird geteilt, bevor du eine Anfrage annimmst, und du kannst das Teilen oder die Freundschaft jederzeit beenden.",
+        },
+      },
+      {
+        kind: "new",
+        text: {
+          en: "On a friend's page you can compare your progress: the kilometres and places you both walked, only you, only them and neither, how every stage stands, and one map that shows who walked which stretch (switch between both, yours and theirs; tap a place to jump to it in the list).",
+          ru: "На странице друга можно сравнить прогресс: километры и места, которые прошли оба, только вы, только друг и никто, как обстоит дело с каждым этапом, и одна карта, на которой видно, кто какой участок прошёл (переключение: оба, ваша, его; нажмите на место, чтобы перейти к нему в списке).",
+          hu: "A barátod oldalán összehasonlíthatod az előrehaladásotokat: a kilométerek és helyek, amelyeket mindketten, csak te, csak ő vagy egyikőtök sem járt be, minden szakasz állása, és egy térkép, amely megmutatja, ki melyik szakaszt járta be (váltás: mindkettő, a tiéd, az övé; koppints egy helyre, hogy a listában odaugorj).",
+          de: "Auf der Seite eines Freundes kannst du euren Fortschritt vergleichen: die Kilometer und Orte, die ihr beide, nur du, nur der Freund oder keiner gewandert seid, wie jede Etappe steht, und eine Karte, die zeigt, wer welchen Abschnitt gewandert ist (Umschalten: beide, deine, seine; tippe einen Ort an, um in der Liste dorthin zu springen).",
+        },
+      },
+      {
+        kind: "improved",
+        text: {
+          en: "The buttons on the Friends page react at once (they are disabled with a spinner while they work), the page says what happened (name saved, request approved, friend removed and so on), and removing a friend or creating a new invite link asks you first.",
+          ru: "Кнопки на странице друзей реагируют сразу (пока работают, они неактивны и показывают индикатор), страница сообщает, что произошло (имя сохранено, запрос одобрен, друг удалён и так далее), а удаление друга или создание новой ссылки-приглашения сначала спрашивает подтверждение.",
+          hu: "A Barátok oldal gombjai azonnal reagálnak (munka közben letiltva vannak, és forgó jelzést mutatnak), az oldal kiírja, mi történt (név mentve, kérés elfogadva, barát eltávolítva és így tovább), a barát eltávolítása és az új meghívólink létrehozása pedig előbb megerősítést kér.",
+          de: "Die Schaltflächen auf der Freunde-Seite reagieren sofort (während sie arbeiten, sind sie gesperrt und zeigen einen Ladekreis), die Seite sagt, was passiert ist (Name gespeichert, Anfrage angenommen, Freund entfernt und so weiter), und das Entfernen eines Freundes oder ein neuer Einladungslink fragt zuerst nach.",
+        },
+      },
       {
         kind: "new",
         text: {

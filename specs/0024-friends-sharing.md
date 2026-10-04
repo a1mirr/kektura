@@ -141,9 +141,10 @@ page's "Send request" is a plain form that posts to a server action ending in a 
   link, the About page paragraph). The flag is the server environment variable `FF_FRIENDS=1`: read on every
   request (a restart of the server applies a change, no rebuild: the pages that would otherwise be static opt into
   per-request rendering), off unless set, the same for every viewer.
-- **AC-16**: Every user-visible string exists in `ru`, `en` and `hu`. The About page (spec 0015) tells
+- **AC-16**: Every user-visible string exists in every language of the site. The About page (spec 0015) tells
   what friends can see and how to stop it (only while the flag is on: with it off the page must not mention
-  a page that answers 404), and the changelog gets an entry when the flag goes on for everyone.
+  a page that answers 404), and the changelog describes the friends page and each visible change to it like any
+  other (spec 0018 AC-7): the flag is on in production, so no change to it is hidden from users.
 
 ## Out of scope
 
@@ -176,7 +177,7 @@ route plan.
 | AC-12 | `tests/friends-migration.test.ts` (forged friendship, direct writes, token column, anon, the trigger function); Supabase advisors after applying |
 | AC-13, AC-14 | `src/app/[locale]/(pages)/friends/actions.test.ts` (an action that fails is shown on the page: `e2e/friends.spec.ts`) |
 | AC-15 | `src/lib/friends.test.ts` (flag), `actions.test.ts` (`disabled`); the start-up value, not the build, decides: manual (it needs two builds): build once without `FF_FRIENDS`, start with `FF_FRIENDS=1` (and the other way round): the dashboard link, `/friends`, `/friends/invite/<token>` and the About paragraph follow the start-up value (the E2E server runs with the flag on). Last checked: never recorded. |
-| AC-16 | `tests/messages.test.ts`, `e2e/friends.spec.ts` (About paragraph); the changelog entry waits for the flag |
+| AC-16 | `tests/messages.test.ts`, `e2e/friends.spec.ts` (About paragraph); `src/content/changelog.ts` (the friends entries; the rule: spec 0018 AC-7) |
 | AC-17 | `src/components/FriendActionButton.test.tsx` (pending, no second press, the row), `e2e/friends.spec.ts` (a slow server) |
 | AC-18 | `src/lib/friends.test.ts` (the path, a message per notice in three languages), `src/components/FriendActionButton.test.tsx` (status and alert), `e2e/friends.spec.ts` (each action, three languages, unknown values) |
 | AC-19 | `src/components/FriendActionButton.test.tsx` (closed first, Cancel, Escape), `e2e/friends.spec.ts` (remove and regenerate ask first) |

@@ -28,9 +28,12 @@ that tests protect.
   extends an entry in `src/content/changelog.ts` in the same pull request, in every language; changes
   users can't see (process, tests, refactors, deploy files) add none. Dates can't repeat (AC-4): a change
   made on the date of the newest entry is added to that entry, otherwise a new entry with today's date goes
-  first. `CLAUDE.md` (Workflow), the pull request template and the fresh-context reviewer (spec 0022) each
-  ask for it, and the Stop hook asks once at the end of a turn when a file users can see changed and the
-  changelog did not (spec 0034 AC-12).
+  first. A feature flag does not excuse a missing entry while the flag is on in production, which is looked up (a
+  flagged page answers 404 while the flag is off) and never assumed; a change behind a flag that is off in
+  production needs no entry until the pull request that switches the flag on, which adds one. `CLAUDE.md`
+  (Workflow), the pull request template and the fresh-context reviewer (spec 0022) each ask for it, and the Stop
+  hook asks once at the end of a turn when a file users can see changed, uncommitted or committed on the branch, and
+  the changelog did not (spec 0034 AC-12).
 
 ## Out of scope
 

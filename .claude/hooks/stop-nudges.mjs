@@ -16,6 +16,12 @@ export const isUserVisible = (f) =>
 
 export const CHANGELOG = "src/content/changelog.ts";
 
+/**
+ * The paths the nudge looks at: what is changed in the working tree plus what the branch has already committed since it
+ * left origin/main. Work is usually committed before a turn ends, and a nudge that only saw the working tree never fired.
+ */
+export const changedForNudge = (uncommitted, committed) => [...new Set([...uncommitted, ...committed])];
+
 /** What the turn-end nudge is about: app code changed without a spec, user-visible files changed without the changelog. */
 export function nudgeTargets(changed) {
   const specChanged = changed.some((f) => f.startsWith("specs/"));

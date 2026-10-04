@@ -2,7 +2,7 @@
 // (.claude/hooks/stop-nudges.mjs); the hook itself (a Claude Code session) is the manual row of the spec.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
-import { isUserVisible, nudgeMessage, nudgeTargets } from "../.claude/hooks/stop-nudges.mjs";
+import { changedForNudge, isUserVisible, nudgeMessage, nudgeTargets } from "../.claude/hooks/stop-nudges.mjs";
 
 const readRoot = (path: string) => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -69,7 +69,17 @@ describe("spec 0034: the Stop hook's turn-end nudge", () => {
 
   it("AC-10, AC-12: the hook asks through this module, once per turn end", () => {
     const hook = readRoot(".claude/hooks/stop-check.mjs");
-    expect(hook).toMatch(/const nudge = nudgeMessage\(changed\);\s*if \(nudge && !input\.stop_hook_active\)/);
+    expect(hook).toMatch(/nudgeMessage\(changedForNudge\(changed, committed\)\);\s*if \(!message \|\| input\.stop_hook_active\) return;/);
+    expect(hook).toMatch(/"merge-base", "HEAD", "origin\/main"/); // work committed on the branch counts
     expect(hook).toMatch(/WATCHED = \[[^\]]*"messages",/);
+  });
+
+  it("AC-12: work already committed on the branch counts, so a clean working tree does not silence the question", () => {
+    const committed = ["src/components/FriendActionButton.tsx", "messages/en.json"];
+    expect(nudgeMessage(changedForNudge([], committed))).toMatch(/files users can see changed without a changelog entry/);
+    expect(nudgeMessage(changedForNudge([], []))).toBe("");
+    // The union has each path once, and the changelog among the committed files silences the question.
+    expect(changedForNudge(["a.ts", "b.ts"], ["b.ts", "c.ts"])).toEqual(["a.ts", "b.ts", "c.ts"]);
+    expect(nudgeMessage(changedForNudge([], [...committed, "src/content/changelog.ts"]))).not.toMatch(/changelog entry/);
   });
 });

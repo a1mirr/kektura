@@ -9,7 +9,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { nudgeMessage } from "./stop-nudges.mjs";
+import { changedForNudge, nudgeMessage } from "./stop-nudges.mjs";
 
 const MAX_ATTEMPTS = 3;
 const WATCHED = [
@@ -67,7 +67,32 @@ const changed = status.stdout
   .split("\n")
   .filter(Boolean)
   .map((line) => line.slice(3).replace(/^.* -> /, "").replace(/^"|"$/g, ""));
-if (!changed.length) process.exit(0);
+
+// What the branch has already committed since it left origin/main (work is usually committed before a turn ends).
+const committed = (() => {
+  const base = spawnSync("git", ["merge-base", "HEAD", "origin/main"], { encoding: "utf8" });
+  if (base.status !== 0) return [];
+  const diff = spawnSync("git", ["-c", "core.quotepath=false", "diff", "--name-only", base.stdout.trim(), "HEAD", "--", ...WATCHED], {
+    encoding: "utf8",
+  });
+  return diff.status === 0 ? diff.stdout.split("\n").filter(Boolean) : [];
+})();
+if (!changed.length && !committed.length) process.exit(0);
+
+// The turn-end nudge, once per distinct message (specs/0034 AC-10, AC-12): app code changed without a spec change (a
+// spec mirrors the built code, AC-6, and is edited as the behaviour is built), and/or files users can see changed without
+// a changelog entry (specs/0018 AC-7), counting the working tree and the branch's commits. Both questions go in one
+// message; the decision is in stop-nudges.mjs.
+function askOnce() {
+  const message = nudgeMessage(changedForNudge(changed, committed));
+  if (!message || input.stop_hook_active) return;
+  const id = createHash("sha1").update(message).digest("hex");
+  if (state.nudged === id) return;
+  state.nudged = id;
+  save();
+  console.error(message);
+  process.exit(2);
+}
 
 // Fingerprint of the working tree: same paths with the same mtimes/sizes = already checked.
 const hash = createHash("sha1");
@@ -76,7 +101,10 @@ for (const file of changed.sort()) {
   hash.update(`${file}:${st ? `${st.mtimeMs}:${st.size}` : "deleted"}\n`);
 }
 const fingerprint = hash.digest("hex");
-if (state.green === fingerprint) process.exit(0);
+if (!changed.length || state.green === fingerprint) {
+  askOnce();
+  process.exit(0);
+}
 
 const run = ([name, command]) =>
   new Promise((resolve) => {
@@ -113,12 +141,5 @@ state.green = fingerprint;
 state.attempts = 0;
 save();
 
-// Turn-end nudge, once (specs/0034 AC-10, AC-12): app code changed without a spec change (a spec mirrors the built
-// code, AC-6, and is edited as the behaviour is built), and/or files users can see changed without a changelog
-// entry (specs/0018 AC-7). Both questions go in one message; the decision is in stop-nudges.mjs.
-const nudge = nudgeMessage(changed);
-if (nudge && !input.stop_hook_active) {
-  console.error(nudge);
-  process.exit(2);
-}
+askOnce();
 process.exit(0);
