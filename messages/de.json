@@ -198,6 +198,18 @@
     "error_unauthorized": "Bitte melde dich zuerst an.",
     "friendNotSharing": "Teilt nichts mit dir",
     "error_incoming_pending": "Diese Person hat dich bereits um eine Verbindung gebeten: nimm die Anfrage unten an.",
-    "requestSent": "Anfrage gesendet. Du siehst die Person hier, sobald sie sie annimmt."
+    "ok_sent": "Anfrage gesendet. Du siehst die Person hier, sobald sie sie annimmt.",
+    "ok_approved": "Freundschaftsanfrage angenommen.",
+    "ok_ignored": "Freundschaftsanfrage ignoriert.",
+    "ok_removed": "Freund entfernt.",
+    "ok_regenerated": "Neuer Einladungslink erstellt. Der alte funktioniert nicht mehr.",
+    "ok_name": "Name gespeichert.",
+    "ok_sharing_on": "Du teilst deinen Fortschritt mit diesem Freund.",
+    "ok_sharing_off": "Teilen beendet.",
+    "cancel": "Abbrechen",
+    "removeConfirm": "{name} aus deinen Freunden entfernen? Ihr seht den Fortschritt des anderen dann nicht mehr. Die Person wird nicht benachrichtigt.",
+    "removeYes": "Ja, entfernen",
+    "regenerateConfirm": "Einen neuen Einladungslink erstellen? Der alte Link funktioniert sofort für alle nicht mehr, die ihn haben.",
+    "regenerateYes": "Ja, neuen Link erstellen"
   }
 }
