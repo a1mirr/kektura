@@ -1,8 +1,8 @@
 # 0024: Sharing progress with friends
 
 Status: Done
-Owner code: `src/lib/friends.ts`, `src/lib/friends-flag.ts`, `src/lib/friends-input.ts`, `src/app/[locale]/(pages)/friends/*`,
-`src/components/Friend*.tsx`, `src/components/FlashMessage.tsx`, `supabase/migrations/0024_friends.sql`
+Owner code: `src/lib/friends.ts`, `src/lib/friends-flag.ts`, `src/lib/friends-input.ts`, `src/lib/compare.ts`, `src/app/[locale]/(pages)/friends/*`,
+`src/components/Friend*.tsx`, `src/components/Compare*.tsx`, `src/components/FlashMessage.tsx`, `supabase/migrations/0024_friends.sql`
 
 ## Goal
 
@@ -117,6 +117,23 @@ page's "Send request" is a plain form that posts to a server action ending in a 
   the page with its answer (AC-18), the confirmation of AC-19 still opens (the browser toggles a `<details>`), and Cancel,
   which needs JavaScript, is not drawn.
 
+### Comparing with a friend
+
+- **AC-22**: A friend's page (only for an accepted friend who shares, AC-9: anyone else still ends on the 404, and nothing
+  is computed) has a "Compare" section above the stage list, with the user's own progress next to the friend's: four cards
+  (both, only me, only them, neither), each with the km and the number of places; a map of the two (spec 0003 AC-18 to AC-20);
+  and a list of the stages with how each stands (AC-24), each linking to its section below. It shows nothing the friend did
+  not already share: which places they stamped, never dates or extra stamps (AC-7). Besides the friend's shared stamps
+  it reads only the user's own. At 375 px and 320 px the cards are two to a row and the map is full width, with no sideways scroll.
+- **AC-23**: The places are counted as stamped by both, only me, only them or neither (a place with several variants once,
+  spec 0001 AC-1). The walked stretches of each person follow spec 0001 AC-3, so the comparison never disagrees with either
+  dashboard; the km walked by both is the intersection of the two sets of stretches, only me or only them what is left of one set, and
+  neither the rest of the trail. The four figures add up to the trail's total km exactly: three are rounded to 0.1 (spec 0001 AC-4)
+  and the fourth is the total minus them (never negative).
+- **AC-24**: A stage stands as "both complete" (both have all its places), "only me" (I have all, they do not), "only
+  them", "neither started" (neither has any) or "partly", in this order, so a stage with one place that only I stamped is
+  "only me". The page shows each person's count of the stage's places.
+
 ### Feature flag and texts
 
 - **AC-15**: While the flag `friends` is off, `/friends`, `/friends/<id>` and `/friends/invite/*` answer 404,
@@ -132,7 +149,7 @@ page's "Send request" is a plain form that posts to a server action ending in a 
 
 Public profile pages or links viewable without an account; groups, leaderboards and rankings; chat,
 comments and reactions; notifications by email or push; a feed of friends' latest stamps; finding
-people by name or email; importing contacts; showing a friend's map, dates or extra stamps; sharing a
+people by name or email; importing contacts; showing a friend's dates or extra stamps, or comparing with several friends at once; sharing a
 route plan.
 
 
@@ -165,3 +182,5 @@ route plan.
 | AC-19 | `src/components/FriendActionButton.test.tsx` (closed first, Cancel, Escape), `e2e/friends.spec.ts` (remove and regenerate ask first) |
 | AC-20 | `src/components/FriendActionButton.test.tsx` (the classes), `e2e/friends.spec.ts` (target size and no sideways scroll at 375 and 320 px in three languages; the colour under the pointer and while pressed) |
 | AC-21 | `e2e/friends.spec.ts` (JavaScript off) |
+| AC-22 | `src/lib/friends-compare.test.ts` (what is read), `e2e/friends-compare.spec.ts` (figures, stage list, 404s, 375 and 320 px in every language) |
+| AC-23, AC-24 | `src/lib/compare.test.ts` |

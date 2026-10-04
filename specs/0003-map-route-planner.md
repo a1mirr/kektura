@@ -1,12 +1,14 @@
-# 0003: Map lines and the route planner
+# 0003: Map lines, the route planner and the comparison map
 
 Status: Done
-Owner code: `src/lib/route-geometry.ts`, `src/lib/route-stats.ts`, `src/components/TrailMap.tsx`, `src/components/trail-map/`, `src/lib/map-*.ts`
+Owner code: `src/lib/route-geometry.ts`, `src/lib/route-stats.ts`, `src/components/TrailMap.tsx`, `src/components/trail-map/`, `src/lib/map-*.ts`,
+`src/lib/compare-map.ts`, `src/components/CompareMap.tsx`
 
 ## Goal
 
 Draw walked and not-yet-walked parts of the trail, and let the user pick two stamps to see the
-stretch between them with its distance, ascent, descent and walking time.
+stretch between them with its distance, ascent, descent and walking time. On a friend's page the same map
+shows who of the two walked which stretch.
 
 ## Behaviour
 
@@ -59,6 +61,22 @@ From `public/data/okt-hops.json`: 160 hops between neighbouring places, from the
 - **AC-16**: Updating stamps keeps the map's position and zoom (new data is pushed into the existing
   map, not a new one).
 
+### Comparison map
+
+The map of a friend's page (spec 0024 AC-22): the trail as two people have walked it. It shares the base map, the
+geometry (AC-9) and the layer code with the dashboard's map, and is read-only. It needs JavaScript: until it has loaded
+(or without JavaScript) a grey placeholder stands in its place, and the cards and the stage list above and below it do not need it.
+
+- **AC-18**: The trail is drawn by who walked each stretch, in a line style as well as a colour so that colour alone is
+  not needed: both solid (green), only me dashed (blue), only them dotted (orange), nobody a thin faint grey line. The
+  places are marked the same way (filled in the colour of their state, hollow for nobody), and a legend under the map names
+  the four.
+- **AC-19**: A switch picks the view: "both" (the default, AC-18), "mine" or "theirs". In "mine" and "theirs" the map is
+  the one the owner sees on their dashboard (AC-2): their walked stretches blue and solid, the rest grey dashed, their
+  stamped places filled. The legend follows the view.
+- **AC-20**: The map is read-only: hovering a place names it with its state (on a touch screen the legend and the cards
+  carry the meaning, since there is no hover), and nothing opens a menu or can stamp, route or plan from here. The detailed route takes over at zoom 9 as on the dashboard (AC-9).
+
 ### Structure
 
 - **AC-17**: `TrailMap.tsx` is a composition of focused hooks and modules (`src/components/trail-map/`: map
@@ -90,6 +108,8 @@ Routing off the trail; replacing MapLibre.
 | AC-4 ... AC-8 | `src/lib/route-stats.test.ts` |
 | Table totals | `tests/trail-data.test.ts` (0004 AC-6) |
 | AC-9, AC-10, AC-11, AC-13, AC-16 | `e2e/map.spec.ts` (the detailed route is requested once on first need and again after a failed load on the next zoom change; toggles and their persistence; fullscreen; 📍 on a place and on an extra stamp, which switches that layer on; stamping from the list keeps the stamp's label where it was on the map) |
+| AC-18, AC-19, AC-20 | `src/lib/compare-map.test.ts` (the lines and points of each view), `src/lib/map-layers.test.ts` (the layers: a style per state), `e2e/friends-compare.spec.ts` (the switch and the legend; a click on the map opens no popup) |
+| AC-18, AC-19, AC-20 (colours and line styles on the canvas, hover, the detailed route) | manual (the map is WebGL pixels that E2E cannot read): see the checklist below. Last checked: never recorded. |
 | AC-17 | `src/lib/map-storage.test.ts`, `map-data.test.ts`, `map-layers.test.ts`, `map-popups.test.ts`, `map-reveal.test.ts` (the pure helpers); `tests/map-structure.test.ts` (no file of the map code is over 300 lines) |
 | AC-4, AC-8, AC-12 (route from / to, mark and unmark) | `e2e/map.spec.ts`: two stamps picked through their popups show the stretch's numbers; a failed save keeps the popup open, the next save marks the stamp, and the popup of a marked stamp unmarks it |
 | AC-14 (restaurants), AC-12 (hover names, "Show in list" in a collapsed stage), AC-13 (the flight to zoom 12 or more), AC-9 (the line looks more detailed) | manual (canvas hover, click and pixels): see the checklist below; AC-15 popup builders: `src/lib/map-popups.test.ts`; the reveal of a list row: `src/lib/map-reveal.test.ts`. Last checked: never recorded. |
@@ -103,3 +123,5 @@ Manual checklist (dashboard, `npm run dev:test`, canvas interactions):
 - AC-12: hovering a stamp shows its name.
 - AC-13: press 📍 on a row: the map flies there at zoom 12 or more.
 - AC-14: with restaurants on, hover one (name and distance) and click it (pinned popup with an "Open on etteremhet.hu" link that opens in a new tab).
+- AC-18, AC-19: on a friend's page with both of you stamped, the map shows green solid, blue dashed, orange dotted and faint grey stretches; "Mine" and "Theirs" show blue solid and grey dashed, and the dots follow.
+- AC-20: hovering a place on that map shows its name and its state; clicking opens nothing; zoom in past level 9 and the line gets more detailed.

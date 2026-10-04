@@ -211,5 +211,28 @@
     "removeYes": "Igen, eltávolítom",
     "regenerateConfirm": "Új meghívólinket hozol létre? A régi link azonnal érvényét veszti mindenkinél, aki ismeri.",
     "regenerateYes": "Igen, új link"
+  },
+  "compare": {
+    "title": "Haladás összehasonlítása",
+    "who_both": "Mindketten",
+    "who_me": "Csak én",
+    "who_them": "Csak ő",
+    "who_neither": "Egyikünk sem",
+    "stamps": "{count, plural, one {# bélyegzés} other {# bélyegzés}}",
+    "stagesTitle": "Szakaszok",
+    "stageCounts": "Én {me}/{total} · Ő {them}/{total}",
+    "stage_both": "Mindketten teljesítettük",
+    "stage_me": "Csak én",
+    "stage_them": "Csak ő",
+    "stage_neither": "Egyikünk sem kezdte el",
+    "stage_partly": "Részben",
+    "viewLabel": "Térkép nézet",
+    "view_both": "Mindkettő",
+    "view_mine": "Az enyém",
+    "view_theirs": "Az övé",
+    "walked": "Megtett",
+    "notWalked": "Még nem megtett",
+    "mapLabel": "Az útvonal térképe: ki melyik szakaszt járta be",
+    "legend": "Jelmagyarázat"
   }
 }

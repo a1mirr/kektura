@@ -2,10 +2,11 @@ import { notFound } from 'next/navigation';
 import { hasLocale } from 'next-intl';
 import { routing } from '@/i18n/routing';
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server';
-import { getFriends, getFriendProgress } from '@/lib/friends';
+import { compareWithFriend, getFriends } from '@/lib/friends';
 import { createClient } from '@/lib/supabase/server';
 import { friendsOn } from '@/lib/friends-flag';
 import { Link, redirect } from '@/i18n/navigation';
+import CompareSection from '@/components/CompareSection';
 import StageControls from '@/components/StageControls';
 import StageSection from '@/components/StageSection';
 import StampDescriptions from '@/components/StampDescriptions';
@@ -33,7 +34,8 @@ export default async function FriendPage({
     notFound();
   }
 
-  const { summary, places, stages, stampedKeys } = await getFriendProgress(friend);
+  const { progress, comparison, points } = await compareWithFriend(supabase, friend);
+  const { summary, places, stages, stampedKeys } = progress;
   const t = await getTranslations('dashboard');
   const format = await getFormatter();
 
@@ -53,14 +55,16 @@ export default async function FriendPage({
         </Link>
       </header>
 
-      <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <dl className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-4 sm:grid-cols-4">
         {cards.map((c) => (
-          <div key={c.label} className="rounded-lg bg-white p-4 shadow-sm">
+          <div key={c.label} className="min-w-0 rounded-lg bg-white p-3 shadow-sm sm:p-4">
             <dt className="text-sm text-stone-500">{c.label}</dt>
-            <dd className="text-2xl font-semibold">{c.value}</dd>
+            <dd className="text-xl font-semibold sm:text-2xl">{c.value}</dd>
           </div>
         ))}
       </dl>
+
+      <CompareSection comparison={comparison} points={points} />
 
       <section>
         <h2 className="mb-2 font-semibold">{t("checkpoints")}</h2>

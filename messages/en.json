@@ -211,5 +211,28 @@
     "removeYes": "Yes, remove",
     "regenerateConfirm": "Create a new invite link? The old link stops working at once for everyone who has it.",
     "regenerateYes": "Yes, create a new link"
+  },
+  "compare": {
+    "title": "Compare progress",
+    "who_both": "Both",
+    "who_me": "Only me",
+    "who_them": "Only them",
+    "who_neither": "Neither",
+    "stamps": "{count, plural, one {# stamp} other {# stamps}}",
+    "stagesTitle": "Stages",
+    "stageCounts": "Me {me}/{total} · Them {them}/{total}",
+    "stage_both": "Both complete",
+    "stage_me": "Only me",
+    "stage_them": "Only them",
+    "stage_neither": "Neither started",
+    "stage_partly": "Partly",
+    "viewLabel": "Map view",
+    "view_both": "Both",
+    "view_mine": "Mine",
+    "view_theirs": "Theirs",
+    "walked": "Walked",
+    "notWalked": "Not walked",
+    "mapLabel": "Map of the trail: who walked which stretch",
+    "legend": "Legend"
   }
 }

@@ -211,5 +211,28 @@
     "removeYes": "Ja, entfernen",
     "regenerateConfirm": "Einen neuen Einladungslink erstellen? Der alte Link funktioniert sofort für alle nicht mehr, die ihn haben.",
     "regenerateYes": "Ja, neuen Link erstellen"
+  },
+  "compare": {
+    "title": "Fortschritt vergleichen",
+    "who_both": "Beide",
+    "who_me": "Nur ich",
+    "who_them": "Nur der Freund",
+    "who_neither": "Keiner",
+    "stamps": "{count, plural, one {# Stempel} other {# Stempel}}",
+    "stagesTitle": "Etappen",
+    "stageCounts": "Ich {me}/{total} · Freund {them}/{total}",
+    "stage_both": "Beide fertig",
+    "stage_me": "Nur ich",
+    "stage_them": "Nur der Freund",
+    "stage_neither": "Keiner angefangen",
+    "stage_partly": "Teilweise",
+    "viewLabel": "Kartenansicht",
+    "view_both": "Beide",
+    "view_mine": "Meine",
+    "view_theirs": "Seine",
+    "walked": "Gewandert",
+    "notWalked": "Noch nicht gewandert",
+    "mapLabel": "Karte des Weges: wer welchen Abschnitt gewandert ist",
+    "legend": "Legende"
   }
 }

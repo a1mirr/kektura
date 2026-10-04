@@ -116,3 +116,51 @@ export function trailLayers(initial: InitialVisibility): LayerSpecification[] {
     },
   ];
 }
+
+// The comparison map on a friend's page (spec 0003 AC-18): one source of lines whose features say how to draw
+// them (`style`, `color`), and one of points (`fill`, `stroke`). Dashes can't depend on a feature, so there is one layer
+// per line style.
+export const COMPARE_SOURCE_IDS = ["compare-lines", "compare-dots"] as const;
+export const COMPARE_DOTS_LAYER = "compare-dots";
+
+const ofStyle = (style: string): ExpressionSpecification => ["==", ["get", "style"], style];
+const byColor: ExpressionSpecification = ["get", "color"];
+
+// Bottom to top: a white casing under every line, the faint "nobody" line, then the dashed "not walked yet" line of
+// a single person's view, dotted, dashed and solid, and the points on top.
+export function compareLayers(): LayerSpecification[] {
+  const line = (id: string, style: string, paint: Record<string, unknown>, cap?: "round"): LayerSpecification =>
+    ({
+      id,
+      type: "line",
+      source: "compare-lines",
+      filter: ofStyle(style),
+      layout: { "line-join": "round", ...(cap ? { "line-cap": cap } : {}) },
+      paint: { "line-color": byColor, ...paint },
+    }) as LayerSpecification;
+  return [
+    {
+      id: "compare-casing",
+      type: "line",
+      source: "compare-lines",
+      layout: { "line-join": "round", "line-cap": "round" },
+      paint: { "line-color": "#ffffff", "line-width": 7, "line-opacity": 0.85 },
+    },
+    line("compare-faint", "faint", { "line-width": 2.5 }),
+    line("compare-todo", "todo", { "line-width": 3.5, "line-dasharray": [2, 1.5] }),
+    line("compare-dotted", "dotted", { "line-width": 4.5, "line-dasharray": [0.1, 1.6] }, "round"),
+    line("compare-dashed", "dashed", { "line-width": 4.5, "line-dasharray": [3, 1.8] }),
+    line("compare-solid", "solid", { "line-width": 4.5 }),
+    {
+      id: COMPARE_DOTS_LAYER,
+      type: "circle",
+      source: "compare-dots",
+      paint: {
+        "circle-radius": dotRadius,
+        "circle-color": ["get", "fill"],
+        "circle-stroke-color": ["get", "stroke"],
+        "circle-stroke-width": 1.5,
+      },
+    },
+  ];
+}
