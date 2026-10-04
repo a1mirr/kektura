@@ -37,8 +37,8 @@ author's context, and wants that to be part of how work is done here, not someth
     coverage table: it checks each AC of the touched specs against the code and the tests, and the behaviour of
     the touched area against the ACs, so a spec that has drifted from the code is a finding even where the
     diff did not touch it (spec 0034 AC-8);
-  - it looks for: ACs not implemented or built twice, ACs without a test that really asserts them, behaviour
-    that no AC describes, changes users can see that are missing from the changelog or described untruly
+  - it looks for: requirements of the task that do not hold, ACs not implemented or built twice, ACs without a test that really asserts them, behaviour
+    that no AC describes, specs that describe behaviour that is not built, changes users can see that are missing from the changelog or described untruly
     there (spec 0018 AC-7), leftovers of what was renamed or moved (code, messages in all three languages,
     docs, specs, links), the gotchas listed in `CLAUDE.md`, regressions for signed-out visitors, other
     locales, small screens and the no-JS paths, and security and privacy (authorization, secrets in logs,
@@ -57,8 +57,8 @@ author's context, and wants that to be part of how work is done here, not someth
     either changed while it worked;
   - it reports findings most severe first, each with `file:line`, what is wrong and a concrete failing
     scenario, then what it checked and found fine; "no findings" is a valid answer.
-- **AC-4**: `.github/pull_request_template.md` gives every pull request the checklist (spec first, or a small
-  change that needs none; the touched specs mirror the code as built; `npm run check` green and CI's end-to-end job passing (spec 0007 AC-8); everything users can see is in the changelog; fresh-context
+- **AC-4**: `.github/pull_request_template.md` gives every pull request the checklist (the task came first and its requirements hold, or a small
+  change that needs no task; the touched specs mirror the code as built and describe nothing unbuilt; `npm run check` green and CI's end-to-end job passing (spec 0007 AC-8); everything users can see is in the changelog; fresh-context
   review done at the commit named in the pull
   request, with only wording fixes after it) and a section to record the reviewed commit, the review's
   findings and what was done about each.

@@ -111,7 +111,7 @@ state.green = fingerprint;
 state.attempts = 0;
 save();
 
-// Spec-driven nudge: app code changed, but no spec did (a spec must mirror the code, specs/0034 AC-6).
+// Spec-driven nudge: app code changed, but no spec did (a spec mirrors the built code, specs/0034 AC-6, and is edited as the behaviour is built).
 const isTest = (f) => /\.test\.[cm]?[jt]sx?$/.test(f) || f.startsWith("tests/") || f.startsWith("e2e/");
 const appCode = changed.filter((f) => /^src\/.*\.(ts|tsx)$/.test(f) && !isTest(f) && !f.endsWith(".types.ts"));
 const specChanged = changed.some((f) => f.startsWith("specs/"));

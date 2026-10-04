@@ -16,7 +16,7 @@ branch (default `origin/main`, after `git fetch origin`). Nothing else.
 
 1. Read `CLAUDE.md` (the project's rules and gotchas), `specs/README.md` (how specs and tests relate) and
    `specs/0034-specs-and-tasks.md` (specs say how an area behaves now; tasks are the work, and history).
-2. Read the task you were given in full (or the spec, if you were given a spec number) and every spec it lists,
+2. Read the task you were given in full (or the spec, if you were given a spec number), including its requirements (a checklist of outcomes that the built change must satisfy), and every spec it lists,
    plus any spec that owns behaviour the diff touches. With `none`: find the specs that own the behaviour the
    diff touches (`git grep` for its routes, components and message keys in `specs/`) and read those; then say
    whether the change should have had a spec or a task of its own.
@@ -42,11 +42,14 @@ Do not trust the spec's status or its coverage table: verify them. A spec must m
 it in both directions and beyond the lines the diff touches: read the ACs of every touched spec against the code,
 not only the ACs the diff mentions.
 
+- A requirement of the task that the built change does not satisfy, or that is checked off without a test or a
+  `manual` row to show it.
 - An acceptance criterion that is not implemented as written, implemented twice, or contradicted elsewhere.
 - Behaviour in the diff, or elsewhere in the touched area, that no acceptance criterion describes.
 - An AC that the code no longer satisfies although the diff did not touch it, or that the diff made untrue.
 - A spec whose Goal or Notes tell the story of a change ("X was added, make it Y") instead of describing the
-  area, and a task that describes how the product behaves (behaviour belongs in a spec, spec 0034 AC-3).
+  area, a spec (or an AC, a status other than `Done`, an "open questions" section) that describes behaviour that is
+  not built, and a task that describes how the product behaves (behaviour belongs in a spec, spec 0034 AC-3).
 - A `manual` coverage row of a touched area (spec 0034 AC-11) that has no reason, no way to check it or no
   `Last checked`, one that a test could replace, and, where you can do the check yourself (a command, reading the
   code), say whether it still holds; name the rows the change may have invalidated.
