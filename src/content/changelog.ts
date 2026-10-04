@@ -12,6 +12,24 @@ export type ChangelogEntry = { date: string; title: Localized; changes: Change[]
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-04",
+    title: {
+      en: "A logo that takes you home",
+      ru: "Логотип, который ведёт на главную",
+      hu: "Egy logó, amely hazavisz",
+    },
+    changes: [
+      {
+        kind: "new",
+        text: {
+          en: "Every page now shows the Kéktúra tracker logo in the top-left corner; one tap takes you to the main page, or to your dashboard when you are signed in.",
+          ru: "На каждой странице в левом верхнем углу теперь логотип трекера Kéktúra: одно нажатие ведёт на главную страницу, а если вы вошли, то на ваш дашборд.",
+          hu: "Minden oldal bal felső sarkában ott van a Kéktúra követő logója: egy koppintás a főoldalra vezet, bejelentkezve pedig az áttekintő oldaladra.",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-10-03",
     title: {
       en: "Stamp descriptions in your language, and yyyy-mm-dd dates",

@@ -1,7 +1,7 @@
 # 0029: A logo that leads home, on every page
 
-Status: Open
-Specs: [0014](../specs/0014-pages-and-settings.md) AC-1 (footer navigation: a header logo joins it), [0015](../specs/0015-about-page.md) and [0024](../specs/0024-friends-sharing.md) (the back links of the About and friends pages go)
+Status: Done
+Specs: [0014](../specs/0014-pages-and-settings.md) AC-19 (the logo; added), [0015](../specs/0015-about-page.md) AC-1 (the About page's back link goes); [0024](../specs/0024-friends-sharing.md) is not changed (it states no back link)
 
 ## Goal
 
@@ -12,34 +12,34 @@ and the site looks like one place.
 
 ## Done when
 
-- [ ] The open questions below are settled with the owner before any code is written
-- [ ] Every requirement below holds and has a test (or, where no test can, a `manual (reason)` row in the owning spec); the owning specs are edited as the behaviour is built
+- [x] The open questions below are settled with the owner before any code is written
+- [x] Every requirement below holds and has a test (or, where no test can, a `manual (reason)` row in the owning spec); the owning specs are edited as the behaviour is built
 - [ ] The specs listed above mirror the code as built (spec 0034 AC-6); fresh-context review done
 
 ## Requirements
 
 What the product must do when this is built, as the owner asked for it. They are written into the owning specs as the behaviour is built; until then they live here.
 
-- [ ] **R-1**: Every page of the site shows the logo and the name "Kéktúra" in the top-left corner, in all three
+- [x] **R-1**: Every page of the site shows the logo and the name "Kéktúra" in the top-left corner, in all three
   languages, and it links to the main page of the visitor's language (`/ru`, `/en`, `/hu`). For a signed-in
   user the main page is their dashboard (the landing page redirects them, spec 0005 AC-2); for everybody else
   the landing page. "Every page" means the landing page, dashboard, account, friends (list, a friend,
   an invite), about, changelog, useful links, feedback, the error page and the 404 page.
-- [ ] **R-2**: It is one component, rendered once by the locale layout (`src/app/[locale]/layout.tsx`) and by the
+- [x] **R-2**: It is one component, rendered once by the locale layout (`src/app/[locale]/layout.tsx`) and by the
   404 page, which brings its own document (`CLAUDE.md` gotcha). A page does not draw its own copy, so a new page
   gets it without remembering.
-- [ ] **R-3**: It is a link with an accessible name ("Kéktúra tracker: home", translated), a visible focus ring, and a
+- [x] **R-3**: It is a link with an accessible name ("Kéktúra tracker: home", translated), a visible focus ring, and a
   touch target of at least 44 x 44 px. The logo image is decorative (empty `alt`) because the name next to it
   says what it is.
-- [ ] **R-4**: It sits above the page content in normal flow: it does not overlap anything, does not float over the
+- [x] **R-4**: It sits above the page content in normal flow: it does not overlap anything, does not float over the
   map's fullscreen view (which covers it), and keeps pages fitting a 320 px screen without horizontal scroll.
   The "Test server" banner of spec 0006 stays above it.
-- [ ] **R-5**: The logo is a single SVG file in `public/`, rendered at a fixed size without layout shift, with
+- [x] **R-5**: The logo is a single SVG file in `public/`, rendered at a fixed size without layout shift, with
   nothing loaded from another host.
-- [ ] **R-6**: The text links "back to the tracker" and "back to the start" that pages carry today (the About
+- [x] **R-6**: The text links "back to the tracker" and "back to the start" that pages carry today (the About
   page, the friends page, spec 0015 and 0024) are removed where the logo makes them redundant, together with
   their message keys in all three languages, so nothing is left behind unused.
-- [ ] **R-7**: Page headers that exist today keep their own content (the dashboard's title and links, the locale
+- [x] **R-7**: Page headers that exist today keep their own content (the dashboard's title and links, the locale
   switcher, the page title); the logo does not replace them.
 
 ## Out of scope
@@ -49,6 +49,10 @@ site is not a PWA, spec 0015 AC-6); a sticky or collapsing header; a dark varian
 only); animating the logo.
 
 ## Open questions
+
+Settled with the owner on 2026-10-04: the proposed blaze mark; the name "Kéktúra tracker" (`ru`: Трекер Kéktúra, `hu`: Kéktúra követő); the logo on the landing page too; the locale switcher stays where each page has it; the 404 page links to the default language's main page (`/ru`); `friends.back` goes with R-6. The text link of the 404 page itself ("Back to the start") stays: it is that page's only action.
+
+Asked before the answers:
 
 - **The logo itself.** No logo exists in the repository. A simple mark is proposed: the trail's own blaze, a
   blue horizontal band on a white square, next to the word "Kéktúra" in the app's blue. Is that right, or is
@@ -75,7 +79,9 @@ only); animating the logo.
 
 ## Spec changes
 
-Filled in when the task is built.
+- Spec 0014: added AC-19 (the site logo on every page: one component drawn by the locale layout and the 404 page, link, accessible name, target size, flow, local SVG; no back links on the About and friends pages), a coverage row, the new files in Owner code and the logo in Out of scope.
+- Spec 0015: AC-1 no longer mentions a back link; its coverage row follows.
+- Spec 0024: unchanged (it never stated the friends page's back link).
 
 ## Notes
 

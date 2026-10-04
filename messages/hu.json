@@ -1,7 +1,9 @@
 {
   "app": {
     "title": "Kéktúra — haladásom",
-    "testBanner": "Tesztszerver: helyi adatok és tesztbelépés. Nem éles környezet."
+    "testBanner": "Tesztszerver: helyi adatok és tesztbelépés. Nem éles környezet.",
+    "name": "Kéktúra követő",
+    "home": "Kéktúra követő: kezdőlap"
   },
   "home": {
     "headline": "Járd végig az Országos Kéktúrát — bélyegről bélyegre",
@@ -86,7 +88,6 @@
   "about": {
     "title": "A Kéktúra követőről",
     "description": "Személyes követő az Országos Kéktúrához: jelöld a begyűjtött bélyegzéseidet, és nézd meg, a nyomvonal mekkora részét teljesítetted.",
-    "back": "← Vissza a követőhöz",
     "factsTitle": "A nyomvonal számokban",
     "factsStages": "Szakasz",
     "factsPlaces": "Hivatalos bélyegzőhely",
@@ -196,7 +197,6 @@
     "error_unauthorized": "Előbb jelentkezz be.",
     "friendNotSharing": "Nem oszt meg veled",
     "error_incoming_pending": "Ez a személy már kérte, hogy kapcsolódjatok: fogadd el a kérést lent.",
-    "requestSent": "Kérés elküldve. Itt fog megjelenni, ha elfogadja.",
-    "back": "← Vissza a követőhöz"
+    "requestSent": "Kérés elküldve. Itt fog megjelenni, ha elfogadja."
   }
 }

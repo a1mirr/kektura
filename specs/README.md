@@ -81,7 +81,7 @@ hook doesn't run them: CI's "End-to-end tests" job is the authority and must be 
 | [0007](0007-ci.md) | CI once per change (Markdown-only pull requests skip E2E), E2E caches and timing report, generated-types check, Dependabot | Done |
 | [0008](0008-action-logging.md) | Server-side logging of failed actions | Done |
 | [0012](0012-backups.md) | Weekly backup of production user data | Done |
-| [0014](0014-pages-and-settings.md) | Footer pages, account page (sign out, chart, account deletion) | Done |
+| [0014](0014-pages-and-settings.md) | Footer pages, site logo, account page (sign out, chart, account deletion) | Done |
 | [0016](0016-stamp-dates.md) | Stamp dates: validation, own time zone, safe editing, the yyyy-mm-dd field | Done |
 | [0017](0017-feedback.md) | Feedback form with Telegram notifications | Done |
 | [0018](0018-changelog.md) | Changelog page | Done |
