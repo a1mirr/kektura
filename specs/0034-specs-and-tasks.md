@@ -91,7 +91,8 @@ behaviour would be spread over files that disagree with the code.
   (`messages/*.json`, a `page.tsx` or `layout.tsx` under `src/app`, a `.ts` or `.tsx` file under `src/components`
   that is not a test or a `.types.ts` file) and `src/content/changelog.ts` did not, the hook asks whether the change
   belongs in the changelog (then the entry is added in every language, spec 0018 AC-7) or not (then say so in one
-  line). The nudge, with both questions, is not repeated for the same commit and working tree and message (a new commit or other files ask again). Both questions come in one message, so there is no second round trip. The decision is a pure function of
+  line). Both questions come in one message, so there is no second round trip, and the message is not repeated for
+  the same commit, working tree and files (a new commit or other files ask again). The decision is a pure function of
   the changed paths (`.claude/hooks/stop-nudges.mjs`).
 
 ## Out of scope
