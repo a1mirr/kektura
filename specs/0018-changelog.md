@@ -29,7 +29,8 @@ that tests protect.
   users can't see (process, tests, refactors, deploy files) add none. Dates can't repeat (AC-4): a change
   made on the date of the newest entry is added to that entry, otherwise a new entry with today's date goes
   first. `CLAUDE.md` (Workflow), the pull request template and the fresh-context reviewer (spec 0022) each
-  ask for it.
+  ask for it, and the Stop hook asks once at the end of a turn when a file users can see changed and the
+  changelog did not (spec 0034 AC-12).
 
 ## Out of scope
 
@@ -53,5 +54,5 @@ Release numbers; a feed (RSS); showing "what's new" inside the app; generating e
 | AC-1, AC-2 | `e2e/changelog.spec.ts` (order, labels, three languages; expectations come from `src/content/changelog.ts`, so a new entry doesn't break them) |
 | AC-6 | `src/content/changelog.test.ts` (the three oldest entries are these, in this order), `e2e/changelog.spec.ts` (the oldest entry is the first version) |
 | AC-5 | manual (judgement): the text is read against what the app does. Last checked: every pull request (the fresh-context review, spec 0022, reads the changelog of the change). |
-| AC-7 | `tests/review-process.test.ts` (`CLAUDE.md`, the pull request template and the reviewer's brief ask for it) |
+| AC-7 | `tests/review-process.test.ts` (`CLAUDE.md`, the pull request template and the reviewer's brief ask for it); the Stop hook's question is covered by spec 0034 AC-12 (`tests/stop-nudges.test.ts`) |
 | AC-7 (an entry exists and is true) | manual (judgement): the change is compared with the entry. Last checked: every pull request (the fresh-context review, spec 0022). |

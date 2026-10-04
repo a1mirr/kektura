@@ -1,7 +1,7 @@
 # 0063: The Stop hook also asks about the changelog
 
-Status: Open
-Specs: [0034](../specs/0034-specs-and-tasks.md) (an AC is added when this is built)
+Status: Done
+Specs: [0034](../specs/0034-specs-and-tasks.md) AC-10, AC-12 (AC-12 added)
 
 ## Goal
 
@@ -19,14 +19,16 @@ moment the author still has the change in mind.
 
 ## Done when
 
-- [ ] The decision (which changed paths are "visible to users", and whether `src/content/changelog.ts` is among the changed ones) is a pure function in a module the hook imports, with a unit test (user-visible files without and with the changelog; tests and `.types.ts` ignored)
-- [ ] The hook asks once per turn end, together with the existing nudge
-- [ ] A `manual` row in spec 0034: change a message file only, finish a turn, and the hook asks once
-- [ ] The requirements are written into spec 0034 as an AC, with its coverage row (spec 0034 AC-6)
+- [x] The decision (which changed paths are "visible to users", and whether `src/content/changelog.ts` is among the changed ones) is a pure function in a module the hook imports, with a unit test (user-visible files without and with the changelog; tests and `.types.ts` ignored)
+- [x] The hook asks once per turn end, together with the existing nudge
+- [x] A `manual` row in spec 0034: change a message file only, finish a turn, and the hook asks once
+- [x] The requirements are written into spec 0034 as an AC, with its coverage row (spec 0034 AC-6)
 
 ## Spec changes
 
-Filled in when built.
+- Spec 0034: added AC-12 (the changelog question in the same turn-end nudge, with the paths that count as visible to users and the pure function that decides), added `.claude/hooks/stop-nudges.mjs` and `tests/stop-nudges.test.ts` to Owner code, and two coverage rows (the unit test; a `manual` row for the hook in a real session, `Last checked: never recorded`). AC-10 is unchanged; its decision now lives in the same module.
+- Spec 0018: AC-7 names the Stop hook as one more place that asks for the entry, with a coverage pointer to 0034 AC-12.
+- `specs/README.md` (Regression gate) and `CLAUDE.md` (Workflow, step 2) say the hook asks about the changelog too.
 
 ## Notes
 
