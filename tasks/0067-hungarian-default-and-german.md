@@ -14,7 +14,7 @@ language is chosen from a dropdown instead.
 
 - [x] The open questions below are settled with the owner before any code is written
 - [x] Every requirement below holds and has a test (or, where no test can, a `manual (reason)` row in the owning spec); the owning specs are edited as the behaviour is built
-- [ ] The specs listed above mirror the code as built (spec 0034 AC-6); fresh-context review done
+- [x] The specs listed above mirror the code as built (spec 0034 AC-6); fresh-context review done
 
 ## Requirements
 
@@ -62,12 +62,12 @@ Settled with the owner on 2026-10-04:
 
 | Requirement | Test |
 | --- | --- |
-| R-1 | planned: E2E (the bare `/` and an unknown `Accept-Language` land on `/hu`; `/ru`, `/en`, `/de` stay), `src/proxy.test.ts` |
-| R-2 | planned: `src/i18n/typed-messages.test.ts` (`Locale` is `hu \| en \| ru \| de`), `src/proxy.test.ts` (`/de` runs the proxy) |
-| R-3 | planned: `tests/messages.test.ts` (parity for `de`), `src/content/changelog.test.ts`, `src/content/links.test.ts`, `tests/stamp-descriptions.test.ts` (every code has a `de` text, marker codes kept) |
-| R-4 | planned: `e2e/language-switcher.spec.ts` (the dropdown on the landing page, dashboard and account; names; choosing a language; keyboard; 320 px; target size) and a component test |
-| R-5 | planned: E2E (the old language addresses still answer 200 and keep their language) |
-| R-6 | planned: `tests/smoke-test.test.ts`, `e2e/changelog.spec.ts` |
+| R-1 | E2E (the bare `/` and an unknown `Accept-Language` land on `/hu`; `/ru`, `/en`, `/de` stay), `src/proxy.test.ts` |
+| R-2 | `src/i18n/typed-messages.test.ts` (`Locale` is `hu \| en \| ru \| de`), `src/proxy.test.ts` (`/de` runs the proxy) |
+| R-3 | `tests/messages.test.ts` (parity for `de`), `src/content/changelog.test.ts`, `src/content/links.test.ts`, `tests/stamp-descriptions.test.ts` (every code has a `de` text, marker codes kept) |
+| R-4 | `e2e/language-switcher.spec.ts` (the dropdown on the landing page and dashboard; names and order; choosing a language; keyboard; 44 px; 320 px on the landing page, the dashboard at 320 px is covered by `e2e/site-logo.spec.ts`'s no-overflow check); no component test, the behaviour is the browser's native select |
+| R-5 | E2E (the old language addresses still answer 200 and keep their language) |
+| R-6 | `tests/smoke-test.test.ts`, `e2e/changelog.spec.ts` |
 
 ## Spec changes
 

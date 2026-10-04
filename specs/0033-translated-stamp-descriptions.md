@@ -16,7 +16,7 @@ description is also available in `ru`, `en` and `de`; Hungarian visitors keep th
   stamp (dashboard) is shown in the language of the page: `ru`, `en` and `de` use the translation of that stamp, `hu`
   uses the original Hungarian text from the database.
 - **AC-2**: A stamp without a translation in the page's language shows the Hungarian original (never an empty
-  line). Today every stamp has both translations (AC-3).
+  line). Today every stamp has every translation (AC-3).
 - **AC-3**: Every stamp code in `supabase/seed.sql` and `supabase/seed_extra.sql` has a non-empty `en`, `ru` and `de`
   translation in `src/content/stamp-descriptions.json`, and the file has no entry for a code that is no longer
   in the seeds. After the trail data is regenerated (spec 0004), a new or renamed stamp makes the tests fail
