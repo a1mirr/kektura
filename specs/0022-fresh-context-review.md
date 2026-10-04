@@ -103,7 +103,7 @@ author's context, and wants that to be part of how work is done here, not someth
   the reviewed commit next to the head, so the owner can see what came after it.
 - The Stop hook doesn't watch `CLAUDE.md`, `.claude/` or `.github/`, so editing only those files doesn't run
   `tests/review-process.test.ts` at the end of a turn. `npm run check` and CI run it (CI on every pull
-  request). Adding the three paths to `WATCHED` in `.claude/hooks/stop-check.mjs` would close the gap; that
+  request update). Adding the three paths to `WATCHED` in `.claude/hooks/stop-check.mjs` would close the gap; that
   hook is the owner's, so it is left as it is.
 - A small change with no spec (CLAUDE.md allows that for trivial fixes) is reviewed too: the author passes
   `none` and the reviewer works out which specs own the behaviour touched.

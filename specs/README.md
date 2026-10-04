@@ -64,7 +64,7 @@ parallel. A failure is sent back to Claude to fix (up to 3 attempts, then you ge
 code changed but no spec did, it asks once whether behaviour changed (then the spec and its tests are
 updated) or not (then say so in one line). Run the same checks yourself with `npm run check`. E2E tests need Docker, so the
 hook doesn't run them: CI's "End-to-end tests" job is the authority and must be green on the pull request
-([0007](0007-ci.md) AC-8); run `npm run e2e` locally only to reproduce a failure.
+(skipped for one that changes only Markdown, [0007](0007-ci.md) AC-10; [0007](0007-ci.md) AC-8); run `npm run e2e` locally only to reproduce a failure.
 
 ## Index
 
@@ -76,7 +76,7 @@ hook doesn't run them: CI's "End-to-end tests" job is the authority and must be 
 | [0004](0004-trail-data.md) | Generated trail data and seeds | Done |
 | [0005](0005-auth-routing-i18n.md) | Sign-in, routing, translations, typed message keys | Done |
 | [0006](0006-test-server.md) | Test server with dummy login, E2E tests and how they sign in | Done |
-| [0007](0007-ci.md) | CI, E2E caches and timing report, generated-types check, Dependabot | Done |
+| [0007](0007-ci.md) | CI once per change (Markdown-only pull requests skip E2E), E2E caches and timing report, generated-types check, Dependabot | Done |
 | [0008](0008-action-logging.md) | Server-side logging of failed actions | Done |
 | [0012](0012-backups.md) | Weekly backup of production user data | Done |
 | [0014](0014-pages-and-settings.md) | Footer pages, account page (sign out, chart, account deletion) | Done |
