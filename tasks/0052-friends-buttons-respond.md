@@ -1,8 +1,8 @@
 # 0052: Friends page buttons respond
 
 Status: Open
-Specs: [0043](../specs/0043-friends-comparison-and-feedback.md) AC-11 to AC-17 (added), [0024](../specs/0024-friends-sharing.md) AC-14
-(changed: the actions' feedback; their rules are unchanged)
+Specs: [0043](../specs/0043-friends-comparison-and-feedback.md) AC-11 to AC-17 (added), [0024](../specs/0024-friends-sharing.md) AC-3
+(changed: the "request sent" message joins one family of messages; the actions' rules, AC-14, are unchanged)
 
 ## Goal
 

@@ -5,7 +5,7 @@ Owner code: `src/components/AccountMenu.tsx`, `src/components/PageShell.tsx` (ne
 `src/app/[locale]/dashboard/page.tsx`, every page's `<main>`, `src/components/Footer.tsx`, `messages/*.json`
 (`accountMenu.*`)
 
-Amends, when built: [0014](0014-pages-and-settings.md) Goal and AC-7, AC-14 (the dashboard header's account link becomes the
+Amends, when built: [0014](0014-pages-and-settings.md) Goal, AC-1, AC-7, AC-14 (the dashboard header's account link becomes the
 menu), AC-15 and AC-18 (the page is named "Settings" again: title, `h1`, About text, one name); [0015](0015-about-page.md) (the
 About page's name for it); [0024](0024-friends-sharing.md)
 AC-15 (the Friends link is the menu entry); [0029](0029-site-logo-link.md) AC-7 and its out-of-scope line about a navigation
@@ -88,7 +88,8 @@ switcher into the menu; a new visual design; a sidebar; a "sign out" entry in th
   AC-3). That changes tests that pin the old name: `tests/messages.test.ts` (no message key named `settings`, spec 0014
   AC-18), `e2e/account.spec.ts` (no "Settings" link) and `e2e/footer.spec.ts`. Confirm the rename, or label the entry
   "Account" instead.
-- **Static pages.** About, changelog, links, feedback and the landing page are statically generated today. The menu needs
+- **Static pages.** Changelog, links, feedback and the landing page are statically generated today (About already renders per
+  request, because it reads the `friends` flag). The menu needs
   the session and the runtime `friends` flag (`connection()`, the gotcha in `CLAUDE.md`), so a menu in the layout makes
   every page render per request. Proposal: accept that (the pages are small); the alternative is a client island that
   fetches the session and the flag from a small endpoint after load, which keeps those pages static but adds an endpoint.
@@ -106,7 +107,7 @@ switcher into the menu; a new visual design; a sidebar; a "sign out" entry in th
   dashboard. The menu therefore needs the shared strip of spec 0029 (or one built here) in the locale layout.
 - Today the dashboard, account, about, changelog, feedback, links and friend pages use `mx-auto max-w-3xl px-6 py-8`,
   the friends list `max-w-xl p-4`, the invite `max-w-md`, and `Footer` `max-w-3xl`. The friends link is
-  `friendsEnabled()` in the dashboard header: the menu renders its entries on the server so the flag is read at
+  `friendsEnabled()` in the dashboard header: the layout reads the session with `getUser()` only (the gotcha in `CLAUDE.md`), and the menu renders its entries on the server so the flag is read at
   request time (the runtime-flag gotcha in `CLAUDE.md`); a client component is needed only for focus handling (see the open
   question on static pages).
 - Tailwind 4: define the width as a CSS variable (`--page-width`).

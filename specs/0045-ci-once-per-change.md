@@ -47,9 +47,9 @@ fail the job instead of letting every security test pass unrun.
   forgets the helper cannot hide.
 - **AC-9**: A test of the helper (pure, with the environment passed in) covers: not required and unreachable gives a skip;
   required and unreachable gives a failure with the message; reachable gives neither. All three database test files on
-  `main` use it: `tests/friends-migration.test.ts`, `tests/database-rules.test.ts` (both import `e2e/local-db` and call
+  `main` use it: `tests/friends-migration.test.ts`, `tests/database-rules.test.ts` (both import `e2e/local-db.ts` and call
   `ctx.skip()` themselves today) and `tests/seed-cleanup.test.ts` (which has its own `hasDatabase()` and does not import
-  the helper). A repository test fails when a file under `tests/` that touches the database (imports `e2e/local-db`, or
+  the helper). A repository test fails when a file under `tests/` that touches the database (imports `e2e/local-db.ts`, or
   defines its own reachability check) has a `ctx.skip()` or a `hasDatabase()` of its own instead of the helper.
 
 ## Out of scope

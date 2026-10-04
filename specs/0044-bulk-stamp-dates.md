@@ -70,7 +70,7 @@ row; undo after Apply; a "same day for a whole stage" shortcut beyond AC-2's sel
 | AC | Test |
 | --- | --- |
 | AC-1, AC-2, AC-3 | planned: `src/components/StageSection.test.tsx`, `src/components/StageControls.test.tsx` (checkboxes on stamped rows only, select all per stage and overall, shift ranges in trail order) |
-| AC-4, AC-5 | planned: `src/components/BulkDateBar.test.tsx` (the field, Apply disabled states, nothing sent before Apply, pending); manual (a real phone keyboard): the bar stays visible. Last checked: never recorded. |
+| AC-4, AC-5 | planned: `src/components/BulkDateBar.test.tsx` (the field, Apply disabled states, nothing sent before Apply, pending); manual (a real phone keyboard, which no test can open): on a phone, tap the date field in the bar and check that the bar stays above the keyboard. Last checked: never recorded. |
 | AC-6 | planned: `src/app/[locale]/dashboard/actions.test.ts`, plus a database test for the function if one is added |
 | AC-7, AC-8, AC-9, AC-10 | planned: `e2e/stamp-dates.spec.ts` (select, apply, the new month in the chart, 375 px, keyboard) |
 | AC-11 | `tests/messages.test.ts` |

@@ -4,8 +4,8 @@ Status: Draft
 Owner code: `src/lib/progress.ts` (`stampsPerMonth`, or a new `monthlyProgress`), `src/components/StampsChart.tsx`,
 `src/app/[locale]/stats/page.tsx` (new), `src/app/[locale]/account/page.tsx`
 
-Amends, when built: [0001](0001-progress.md) AC-5 (per-month counting: the months are now all shown, and carry stages
-and km) and [0014](0014-pages-and-settings.md) Goal, AC-8, its Notes line about the chart's place, its coverage row and its index row
+Amends, when built: [0001](0001-progress.md) AC-5 and its coverage row (per-month counting: the months are now all shown, and carry stages
+and km; the localized-labels check moves with the chart) and [0014](0014-pages-and-settings.md) Goal, AC-8, its Notes line about the chart's place, its coverage row and its index row
 in `specs/README.md` (the chart leaves `/account`, replaced by AC-1 here).
 
 ## Goal

@@ -16,7 +16,7 @@ show it with a short note to users whose walk dates are before the retirement.
 - [ ] The source for the retired stamp's code, coordinates and position is found in an official MTSZ publication (spec 0042's
       open question), or the owner decides to enter the position by hand
 - [ ] The open questions for retired stamps are settled (does a missing one unverify a stretch, the monthly chart) and the part of
-      the spec is `Accepted`
+      the spec is `Accepted` (once its first planned file lands: `tests/specs.test.ts` requires the files an Accepted spec names to exist)
 - [ ] `scripts/data/okt-retired-stamps.json`, `build-data.mjs`, the migration `0049_retired_stamps.sql` (local first) and the
       list, toggle and notes are built with the tests of the coverage table
 - [ ] The changelog entry in all three languages

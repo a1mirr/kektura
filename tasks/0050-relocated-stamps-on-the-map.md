@@ -12,7 +12,7 @@ from a new MTSZ file to a live site.
 
 ## Done when
 
-- [ ] The part of spec 0042 for moved stamps is `Accepted` (the 180 days and the 100 m threshold are settled)
+- [ ] The part of spec 0042 for moved stamps is `Accepted` (once its first planned file lands: `tests/specs.test.ts` requires the files an Accepted spec names to exist) (the 180 days and the 100 m threshold are settled)
 - [ ] `moved_on` entries come from official publications; the migration `0050_stamp_moved_on.sql` (if the column is needed) is
       applied locally first
 - [ ] The note, the ring, the route-distance test, the freshness line and the report link are built with the tests of the

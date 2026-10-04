@@ -89,8 +89,9 @@ app shows (`19.6`, from the stage table's order) and the trail order shift for t
 - **AC-14**: In the stage list, a place with a `required_from` shows it ("Stamp required from 8 May 2025", localized)
   next to its name; where the user's dates waive it, "not required for your walk". The map's popup says the same.
 - **AC-15**: Every place that has a `required_from` shows a hint (a short text in the row and a tooltip or popover on the
-  date, reachable by tap and by keyboard, not by hover only): "New stamp, required from 8 May 2025. The MTSZ allows a
-  one-month tolerance after the date when a booklet is inspected." The hint states the MTSZ's rule; the stats do not
+  date, reachable by tap and by keyboard, not by hover only) explains the date, without repeating it: "This stamp became
+  required on that day; a hiker who walked earlier is not missing it." For entries flagged `tolerance_note` it adds: "The MTSZ
+  allows a one-month tolerance after the date when a booklet is inspected." The hint states the MTSZ's rule; the stats do not
   apply the tolerance (AC-4 uses the date itself), so a stretch walked inside the month shows as unverified and the
   hint is how the user learns it may still be accepted. The tolerance sentence is shown only for entries that are
   flagged `tolerance_note` in the dates file, set only where an official announcement says it (2025 and 2026).
@@ -107,11 +108,11 @@ their record. Example: Vércverés replaced Nyírjesi-erdészház on 2014-11-21.
 - **AC-18**: A retired stamp is a checkpoint row that is **kept**: it has a `retired_on` date (the first day it is no
   longer valid), optionally the place that replaced it (`replaced_by`, a place key) and where it sat
   (`after_place_key`, the current place it followed in trail order, so it has a position in its stage). Current stamps
-  have `retired_on` null. A retired row is outside the 161 places and the trail order: its `seq` is above every current
+  have `retired_on` null. Its `place_key` is its own code (non-null and unique, so stamping by key works). A retired row is outside the 161 places and the trail order: its `seq` is above every current
   row's, its `stage_seq` is null (its place in the list comes from `after_place_key`), its `km_from_start` is that of the
   place it follows (not measured), and `buildPlaces` and the checks of spec 0004 AC-1 to AC-3 look at current rows only.
 - **AC-19**: Retired stamps come from `scripts/data/okt-retired-stamps.json`: code, name, stage, `after_place_key`,
-  `retired_on`, `replaced_by`, optional `lat` and `lng` (from an official source; without them the stamp is on no map) and
+  `retired_on`, `replaced_by`, optional `lat` and `lng` (from an official source, kept for the record: a retired stamp is never a map marker, AC-24) and
   the official URL, under the rules of AC-2 and AC-3. `build-data.mjs` writes them as
   rows with `retired_on` set and never deletes one (this amends spec 0004 AC-9: rows the source no longer has are
   deleted, except retired ones).
@@ -126,8 +127,9 @@ their record. Example: Vércverés replaced Nyírjesi-erdészház on 2014-11-21.
 - **AC-23**: A retired stamp has no "today" default (spec 0016 AC-1 would date it after `retired_on`): ticking it opens its
   date field and the stamp is created with the date the user enters, which must be before `retired_on` (and obey spec 0016
   AC-2). Editing the date (`setStampDate`) or changing it in bulk (spec 0044) follows the same rule. Unlike spec 0016 AC-3
-  (an out-of-range date on creation is ignored and the default applies), a date on or after `retired_on` is refused as
-  `failed` without database access, and the field's `max` is the day before.
+  (an out-of-range date on creation is ignored and the default applies), a date on or after `retired_on`, or no date at all (the database default would be today), is refused as `failed`, without a write:
+  the action reads `retired_on` first, as it already reads `checkpoints` for the ids. A request that mixes a retired stamp with
+  others is refused as a whole. The field's `max` is the day before.
 - **AC-24**: Retired stamps never count towards "N / 161", the walked km, the stage's "complete" state or the monthly
   counts (spec 0041). They show on their own: "Retired stamps collected: n" under the stage list and a separate mark
   in the stage row. (The old route is not in the data, so no stretch can be drawn or measured.) A retired stamp never
@@ -244,6 +246,8 @@ re-check against the source, when entering it):
   are not part of this app. The 2017 list calls Lokó-pihenő `OKTPH_85_2`; the seed has it as `OKTPH_84_B` (stage 18, place 1;
   `OKTPH_85` is Magyarkút), so the MTSZ has renumbered codes since: enter dates by the seed's code, and match an old
   announcement to its place by name and position, not by the code printed in it.
+- Dates are entered exactly as the source prints them (year, month and day); a source that gives only a month is not entered
+  until the day is found in an official publication.
 - The 2025 announcement states the rule of AC-4: a hiker who completed a section before the date need not go back for
   the stamp; one who completes it after must have it. The current stamp tables are PDFs on kektura.hu's
   "okt-szakaszok" page; they list the stamps now valid, not when each was introduced, so the news posts remain the
@@ -285,7 +289,7 @@ re-check against the source, when entering it):
 | AC-4, AC-5, AC-6, AC-7, AC-8 | planned: `src/lib/progress.test.ts` (a waived place between stamped neighbours, before and after the date, a stamp added later, the sum of the months) |
 | AC-9, AC-10, AC-11 | planned: `tests/trail-data.test.ts` (a seed with an inserted place keeps ids and stamps), `tests/labels.test.ts`; the E2E counts follow the data |
 | AC-12 | planned: `tests/friends-migration.test.ts` (the function returns only waived keys, only for accepted sharing friends), `src/lib/friends.test.ts` |
-| AC-13 | manual (a procedure, not behaviour): follow the recipe once for a real MTSZ file and tick its checklist. Last checked: never recorded. |
+| AC-13 | planned: `tests/trail-data.test.ts` (spec 0004's "Regenerating" section names the dates file, the retired file and the checks of AC-9 to AC-11) |
 | AC-14, AC-15, AC-16, AC-17 | planned: `src/components/StageSection.test.tsx`, `e2e/stamping.spec.ts` (375 px), `tests/messages.test.ts` |
 | AC-18, AC-19, AC-20 | planned: `tests/trail-data.test.ts` (retired rows kept, stamps kept after a regeneration) and a migration check in `tests/*-migration.test.ts` |
 | AC-21, AC-24 (the rules) | planned: `src/lib/progress.test.ts` |

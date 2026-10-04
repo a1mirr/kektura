@@ -14,7 +14,7 @@ progress.
 ## Done when
 
 - [ ] The open questions of spec 0042 for new stamps are settled (which neighbour date, honest dates, the tolerance, friends'
-      waivers) and the part of the spec is `Accepted`
+      waivers) and the part of the spec is `Accepted` (once its first planned file lands: `tests/specs.test.ts` requires the files an Accepted spec names to exist)
 - [ ] `scripts/data/okt-stamp-dates.json` holds the fifteen codes (fourteen places) of spec 0042's notes, each re-checked against
       its source and entered under the seed's current code (Lokó-pihenő is `OKTPH_84_B` there), and the migration `0048_checkpoint_required_from.sql` is applied
       locally first

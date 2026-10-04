@@ -13,7 +13,7 @@ phone.
 ## Done when
 
 - [ ] The open questions (the 500 limit, a per-stage shortcut, a mode versus visible checkboxes) are settled and the spec is
-      `Accepted`
+      `Accepted` (once its first planned file lands: `tests/specs.test.ts` requires the files an Accepted spec names to exist)
 - [ ] The selection mode, the bar, the server action and (if needed) the migration `0053_bulk_stamp_dates.sql`, local first, are
       built with the tests of the coverage table
 - [ ] `npm run types:gen` if the schema changed; `npm run e2e`; checked at 320 and 375 px; the changelog entry in all three
