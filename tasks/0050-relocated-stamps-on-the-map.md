@@ -12,7 +12,8 @@ from a new MTSZ file to a live site.
 
 ## Done when
 
-- [ ] The part of spec 0042 for moved stamps is `Accepted` (once its first planned file lands: `tests/specs.test.ts` requires the files an Accepted spec names to exist) (the 180 days and the 100 m threshold are settled)
+- [ ] Task 0048 is done first: this task uses its dates file (spec 0042 AC-2, AC-3, AC-31)
+- [ ] The part of spec 0042 for moved stamps is settled in the spec (it stays `Draft` until it is built: `tests/specs.test.ts` requires every file an Accepted or Done spec names to exist, so `Accepted` and `Done` are set when those files do) (the 180 days and the 100 m threshold are settled)
 - [ ] `moved_on` entries come from official publications; the migration `0050_stamp_moved_on.sql` (if the column is needed) is
       applied locally first
 - [ ] The note, the ring, the route-distance test, the freshness line and the report link are built with the tests of the

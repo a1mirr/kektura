@@ -5,7 +5,7 @@ Owner code: `src/lib/compare.ts` (new, pure functions), `src/app/[locale]/(pages
 `src/app/[locale]/(pages)/friends/[id]/page.tsx`, `src/components/FriendActionButton.tsx` (new),
 `src/components/TrailMap.tsx` / `src/components/trail-map/*`, `src/lib/friends.ts`
 
-Amends, when built: [0024](0024-friends-sharing.md) AC-3 (the "request sent" message joins a family of success messages), AC-7 and AC-8 (a friend's
+Amends, when built: [0003](0003-map-route-planner.md) (the map gains the four-state line and a friend's map), [0024](0024-friends-sharing.md) AC-3 (the "request sent" message joins a family of success messages), AC-7 and AC-8 (a friend's
 page gains the comparison and a map; its "Out of scope" excluded a friend's map); [0042](0042-stamp-lifecycle.md) AC-16 (what counts as a
 complete stage).
 
@@ -87,6 +87,9 @@ updates when another user changes something; optimistic updates of the list.
 
 ## Open questions
 
+- **Waivers and dates.** Once spec 0042 is built, which places are waived for a friend tells the other side that they walked there
+  before a date (spec 0042's open question). Then AC-8's "never dates" is only true in the strict sense: settle that
+  question first.
 - **Dates.** "Who got there first" or a monthly race needs dates, which friends do not share. Leave them out (this draft)
   or add an opt-in later?
 - **Where the comparison lives.** A section on the friend's page (this draft) or a page of its own,
@@ -119,7 +122,7 @@ updates when another user changes something; optimistic updates of the list.
 | AC-1, AC-2, AC-3, AC-4 | planned: `src/lib/compare.test.ts` |
 | AC-5, AC-9, AC-10 | planned: `e2e/friends-compare.spec.ts` (two users, one shares: figures and stage list; not sharing gives 404; 375 px) |
 | AC-6, AC-7 | planned: `src/lib/map-layers.test.ts` (the layers for the four states), `e2e/friends-compare.spec.ts` (toggle) |
-| AC-8 | planned: `src/lib/friends.test.ts`; review of the page's queries |
+| AC-8 | planned: `src/lib/friends.test.ts` (what the page asks of the database is `getFriendProgress` and the waivers function, nothing else) |
 | AC-11, AC-12 | planned: `src/components/FriendActionButton.test.tsx` (pending disables, keeps size, ignores a second press; the other button of the row is disabled while one runs) |
 | AC-13, AC-14 | planned: `e2e/friends.spec.ts` (success message per action in three languages; confirmation steps) |
 | AC-15 | planned: `e2e/friends.spec.ts` (JavaScript off: the buttons still act) |

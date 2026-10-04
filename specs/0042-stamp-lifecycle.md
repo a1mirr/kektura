@@ -79,7 +79,7 @@ app shows (`19.6`, from the stage table's order) and the trail order shift for t
   progress) come from the data, never from a constant, so a new place changes them in the same change as the seed.
 - **AC-12**: A friend's figures equal the friend's own dashboard (spec 0024 AC-8), waived places included. Friends'
   dates are not shared, so the waivers are decided on the server from the friend's own stamp dates and only their result
-  is shared, never the dates. (Open question: the set of waived places itself tells a friend that the other walked there
+  is shared, never the dates, by a function only authenticated users may call (`anon` revoked, as in spec 0024 AC-12). (Open question: the set of waived places itself tells a friend that the other walked there
   before a date.) This changes what spec 0024 AC-12 says the friend functions return (only the friend's id and place ids).
 - **AC-13**: Adding a stamp is one recipe in the repository (spec 0004, "Regenerating"): the new GPX and stage table, a
   dates entry, the seed, the checks of AC-9 to AC-11, and the changelog line where users can see the change.
@@ -89,7 +89,7 @@ app shows (`19.6`, from the stage table's order) and the trail order shift for t
 - **AC-14**: In the stage list, a place with a `required_from` shows it ("Stamp required from 8 May 2025", localized)
   next to its name; where the user's dates waive it, "not required for your walk". The map's popup says the same.
 - **AC-15**: Every place that has a `required_from` shows a hint (a short text in the row and a tooltip or popover on the
-  date, reachable by tap and by keyboard, not by hover only) explains the date, without repeating it: "This stamp became
+  date, reachable by tap and by keyboard, not by hover only) shows a tooltip or popover that explains the date without repeating it: "This stamp became
   required on that day; a hiker who walked earlier is not missing it." For entries flagged `tolerance_note` it adds: "The MTSZ
   allows a one-month tolerance after the date when a booklet is inspected." The hint states the MTSZ's rule; the stats do not
   apply the tolerance (AC-4 uses the date itself), so a stretch walked inside the month shows as unverified and the
@@ -213,6 +213,9 @@ letting a user declare their own waivers.
 - **Stamp codes change.** The Lokó-pihenő case above shows the MTSZ renumbering codes, so a code is not a permanent identity
   for the dates file or for users' stamps. Spec 0004 AC-9 covers a dropped code only when the place key stays. Does a
   renumbering need its own rule (a mapping from old to new code kept in the data)?
+- **A partly known walk date.** AC-4 reads the walk date from the stamped neighbours on either side. If a waived place has a
+  stamped neighbour on one side only, which date counts? And does the stage header's "x of y" count a waived place?
+- **Retired stamps in the chart** is asked here and in spec 0041; settle it once, in the stats spec.
 - **Detecting changes.** Nothing notices a change on the MTSZ site; the dates, the files and the seed are entered by hand.
   A scheduled check of the MTSZ news and GPX file that opens an issue would close the gap. Wanted, as a task of its own?
 - **Friends and waivers.** AC-12 proposes a `security definer` function that returns only the waived place keys for an
@@ -287,16 +290,16 @@ re-check against the source, when entering it):
 | --- | --- |
 | AC-1, AC-2, AC-3 | planned: `tests/trail-data.test.ts` (dates valid, from the source, codes in the seed) |
 | AC-4, AC-5, AC-6, AC-7, AC-8 | planned: `src/lib/progress.test.ts` (a waived place between stamped neighbours, before and after the date, a stamp added later, the sum of the months) |
-| AC-9, AC-10, AC-11 | planned: `tests/trail-data.test.ts` (a seed with an inserted place keeps ids and stamps), `tests/labels.test.ts`; the E2E counts follow the data |
+| AC-9, AC-10, AC-11 | planned: a database test beside `tests/seed-cleanup.test.ts` (the ids are `serial`, so keeping them can only be checked against the database: apply a seed with an inserted place and check that every code keeps its id and users' stamps), `tests/labels.test.ts`; the E2E counts follow the data |
 | AC-12 | planned: `tests/friends-migration.test.ts` (the function returns only waived keys, only for accepted sharing friends), `src/lib/friends.test.ts` |
 | AC-13 | planned: `tests/trail-data.test.ts` (spec 0004's "Regenerating" section names the dates file, the retired file and the checks of AC-9 to AC-11) |
 | AC-14, AC-15, AC-16, AC-17 | planned: `src/components/StageSection.test.tsx`, `e2e/stamping.spec.ts` (375 px), `tests/messages.test.ts` |
-| AC-18, AC-19, AC-20 | planned: `tests/trail-data.test.ts` (retired rows kept, stamps kept after a regeneration) and a migration check in `tests/*-migration.test.ts` |
+| AC-18, AC-19, AC-20 | planned: `tests/trail-data.test.ts` (the retired file and the generated seed), and a database test beside `tests/seed-cleanup.test.ts` (a retired row kept and its stamps kept after a regeneration) |
 | AC-21, AC-24 (the rules) | planned: `src/lib/progress.test.ts` |
 | AC-22, AC-24 (the toggle, its memory, the count and the mark) | planned: `src/components/StageControls.test.tsx`, `src/components/StageSection.test.tsx` |
 | AC-23 | planned: `src/app/[locale]/dashboard/actions.test.ts`, `src/lib/stamp-date.test.ts` |
 | AC-25, AC-26, AC-27 | planned: `src/components/StageSection.test.tsx`, `src/lib/friends.test.ts`, `e2e/stamping.spec.ts` (375 px) |
-| AC-28, AC-29, AC-30 | planned: `tests/trail-data.test.ts` (a moved coordinate keeps ids and stamps; the distance to the line within the limit; the JSON and the seed agree on every stamp's coordinates), `src/lib/map-popups.test.ts` |
+| AC-28, AC-29, AC-30 | planned: `tests/trail-data.test.ts` and a database test beside `tests/seed-cleanup.test.ts` (a moved coordinate keeps ids and stamps; the distance to the line within the limit; the JSON and the seed agree on every stamp's coordinates), `src/lib/map-popups.test.ts` |
 | AC-31 | planned: `src/lib/stamp-moves.test.ts` (the 100 m threshold, the 180-day window), `src/lib/map-layers.test.ts` (the ring) |
 | AC-32 | manual (a real deploy and production data): follow the checklist of spec 0004 and run the read-only query on production. Last checked: never recorded. |
 | AC-33 | planned: `tests/trail-data.test.ts` (the generated data carries the file date), `e2e/about.spec.ts` |

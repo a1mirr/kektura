@@ -88,11 +88,14 @@ switcher into the menu; a new visual design; a sidebar; a "sign out" entry in th
   AC-3). That changes tests that pin the old name: `tests/messages.test.ts` (no message key named `settings`, spec 0014
   AC-18), `e2e/account.spec.ts` (no "Settings" link) and `e2e/footer.spec.ts`. Confirm the rename, or label the entry
   "Account" instead.
-- **Static pages.** Changelog, links, feedback and the landing page are statically generated today (About already renders per
-  request, because it reads the `friends` flag). The menu needs
+- **Static pages.** Changelog, links and feedback are statically generated today (About already renders per request, because it
+  reads the `friends` flag; the landing page reads the session and the search parameters). The feedback page would turn
+  per-request anyway if the report link of spec 0042 AC-34 passes a stamp code. The menu needs
   the session and the runtime `friends` flag (`connection()`, the gotcha in `CLAUDE.md`), so a menu in the layout makes
   every page render per request. Proposal: accept that (the pages are small); the alternative is a client island that
   fetches the session and the flag from a small endpoint after load, which keeps those pages static but adds an endpoint.
+- **The settings address.** The page is renamed "Settings" but stays at `/account`, with `/settings` redirecting to it today (spec
+  0014 AC-15). Keep both as they are, or move the page to `/settings` and redirect `/account`?
 - **The label.** The button says "Account" rather than the user's display name, because the display name is editable only
   on the Friends page, which is behind a flag.
 - **How wide.** `max-w-6xl` (1152 px) is a guess; `max-w-5xl` is safer for text, `max-w-7xl` suits a big map. A look at

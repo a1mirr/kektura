@@ -14,9 +14,9 @@ column through one layout component, for desktop and mobile.
 ## Done when
 
 - [ ] The header strip of spec 0029 exists: built here, or by that spec's own task first (spec 0040 cannot be done without it)
-- [ ] The tests that pin the old name are changed with the rename (`tests/messages.test.ts`, `e2e/account.spec.ts`, `e2e/footer.spec.ts`)
+- [ ] The tests that pin the old header and name are changed with the menu and the rename: `tests/messages.test.ts`, `e2e/account.spec.ts` (lines about the header links and "Settings"), `e2e/footer.spec.ts`, `e2e/auth.spec.ts`, `e2e/friends.spec.ts` (the Friends link) and `e2e/about.spec.ts` (the "Account" link in "Your data")
 - [ ] The open questions of spec 0040 are settled with the owner (sign out in the menu, one header strip with the logo, the
-      width) and the spec is `Accepted` (once its first planned file lands: `tests/specs.test.ts` requires the files an Accepted spec names to exist)
+      width) and the spec is settled in the spec (it stays `Draft` until it is built: `tests/specs.test.ts` requires every file an Accepted or Done spec names to exist, so `Accepted` and `Done` are set when those files do)
 - [ ] The menu and `PageShell` are built, every page uses the shell, and the tests of the spec's coverage table exist
 - [ ] `npm run e2e` run for the user flow; checked at 320, 375, 768, 1024 and 1440 px
 - [ ] The changelog entry in all three languages (spec 0018 AC-7)

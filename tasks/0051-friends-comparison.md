@@ -12,7 +12,7 @@ and on a phone.
 ## Done when
 
 - [ ] The open questions for the comparison are settled (dates, where it lives, wording, extra stamps) and the part of the spec is
-      `Accepted` (once its first planned file lands: `tests/specs.test.ts` requires the files an Accepted spec names to exist)
+      settled in the spec (it stays `Draft` until it is built: `tests/specs.test.ts` requires every file an Accepted or Done spec names to exist, so `Accepted` and `Done` are set when those files do)
 - [ ] The pure comparison functions, the "Compare" section and the map's four states are built with the tests of the coverage table
 - [ ] `npm run e2e`; checked at 320 and 375 px; the changelog entry in all three languages
 - [ ] The specs listed above mirror the code as built (spec 0034 AC-6); fresh-context review done

@@ -11,7 +11,7 @@ tap say how many stamps, how many km and which stages that month holds.
 
 ## Done when
 
-- [ ] The open questions of spec 0041 are settled (the month a stretch belongs to, the toggle) and the spec is `Accepted` (once its first planned file lands: `tests/specs.test.ts` requires the files an Accepted spec names to exist)
+- [ ] The open questions of spec 0041 are settled (the month a stretch belongs to, the toggle) and the spec is settled in the spec (it stays `Draft` until it is built: `tests/specs.test.ts` requires every file an Accepted or Done spec names to exist, so `Accepted` and `Done` are set when those files do)
 - [ ] The pure month functions, the chart and `/stats` are built, with the tests of the coverage table
 - [ ] The chart's tests move with it: `e2e/account.spec.ts` (the chart on the account page, the only check of spec 0001 AC-5's
       localized labels) becomes a stats-page test, and 0014's coverage row for AC-8 follows

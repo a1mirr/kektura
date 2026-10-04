@@ -4,7 +4,8 @@ Status: Draft
 Owner code: `.github/workflows/ci.yml`, `e2e/local-db.ts`, `tests/friends-migration.test.ts`, `tests/database-rules.test.ts`,
 `tests/seed-cleanup.test.ts`
 
-Amends, when built: [0007](0007-ci.md) AC-1 (the triggers) and AC-2 (the database step of the E2E job).
+Amends, when built: [0007](0007-ci.md) Goal and AC-1 (the triggers) and AC-2 (the database step of the E2E job).
+Owner code also: the script that reads the JSON report for AC-8 (`scripts/check-db-tests.mjs`, new).
 
 ## Goal
 

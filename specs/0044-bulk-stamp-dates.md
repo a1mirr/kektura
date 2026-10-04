@@ -26,7 +26,7 @@ step instead of editing fourteen fields. It works on desktop and on a phone.
 ### Setting the date
 
 - **AC-4**: A sticky bar (bottom on mobile, kept inside the visible area while the on-screen keyboard is open; top on desktop) shows the number selected, a date
-  field and an "Apply" button. The field is the `yyyy-mm-dd` text field of spec 0016 AC-5 with its calendar button (AC-9),
+  field and an "Apply" button. The field is the `yyyy-mm-dd` text field of spec 0016 AC-5 with its calendar button (spec 0016 AC-9),
   and the same limits (a real date, `min` 1938-01-01, `max` tomorrow in UTC, spec 0016 AC-2). Apply is disabled for an empty, invalid or out-of-range date and when nothing is selected.
 - **AC-5**: Nothing is sent until Apply (spec 0016 AC-6: never save on `change`). While saving, the bar shows a pending
   state and a second press sends nothing.
@@ -53,6 +53,9 @@ row; undo after Apply; a "same day for a whole stage" shortcut beyond AC-2's sel
 
 ## Open questions
 
+- **Gaps in a request.** A request in which some rows no longer exist (a stamp removed in another tab): partial success or
+  failure of the whole? AC-6 says all or nothing; confirm. And how does a shift range run across the places and the separate
+  extra-stamps section?
 - **Limit.** 500 per request leaves room for everything (161 places plus 72 extras are 233). Is a limit needed at all?
 - **Stage as a unit.** A quick "set the date of this stage" on each stage header (no mode) may be what people want most.
   Add it next to AC-2, or leave it?
