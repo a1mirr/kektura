@@ -1,0 +1,56 @@
+# Spec 0066. Every 15 minutes: the checks of the deploy's smoke test (scripts/smoke-test.mjs) against the public site.
+# A failed run is a red run (GitHub's own failure e-mail); the second failed run in a row also sends a Telegram message
+# through the bot of spec 0017, once per outage (scripts/uptime-alert.mjs).
+#
+# Needs nothing: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID (the secrets the deploy workflow uses) are optional, without
+# them only the red run and GitHub's e-mail say anything. Secrets are only ever referenced in a step's `env`, never
+# printed: no `set -x`, no echo of them. GitHub starts scheduled runs late now and then, and switches the schedule of
+# a repository off after 60 days without activity (deploy/README.md, "Uptime check").
+name: Uptime
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read # only to see how the earlier runs of this workflow ended
+
+# One run at a time: the "previous run" of the second-failure rule has to be one that has finished.
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
+jobs:
+  uptime:
+    name: Check that the site answers
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SITE_URL: https://kektura-tracker.com
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      # Retried for a minute, so the few seconds of a reload after a deploy are not an outage.
+      - name: Check that the site answers
+        id: smoke
+        run: node scripts/smoke-test.mjs "$SITE_URL" 60
+
+      - name: Tell the developer when this is the second failure in a row
+        if: failure() && steps.smoke.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          # This run is still in progress, so the completed runs are the ones before it. If GitHub's API does not
+          # answer, the script is told `unknown` and sends the message.
+          previous=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow uptime.yml --status completed --limit 2 --json conclusion --jq '[.[].conclusion] | join(",")') || previous=unknown
+          PREVIOUS_CONCLUSIONS="$previous" node scripts/uptime-alert.mjs

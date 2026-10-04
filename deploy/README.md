@@ -130,6 +130,20 @@ rm -rf ~/kektura_app/.next/cache/fetch-cache
 pm2 restart kektura
 ```
 
+## Uptime check
+
+(Spec 0066.) `.github/workflows/uptime.yml` runs every 15 minutes: the checks of the deploy's smoke test against
+`https://kektura-tracker.com`, retried for a minute. A failed run is red and GitHub e-mails it. The second failed run
+in a row also sends a Telegram message (once per outage, no reminder, no recovery message) when the repository secrets
+`TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` exist, the same ones the deploy uses. Nothing else has to be set up.
+
+- GitHub's schedule is best-effort (a run can start minutes late or be dropped). GitHub switches a schedule off after 60 days
+  without repository activity (its documentation names public repositories; this one is private, but nothing here
+  relies on that): a "scheduled workflow is disabled" notice then appears on the Actions tab, and Actions, Uptime,
+  Enable workflow turns it on again. A merge is activity.
+- It sees what an outside visitor sees. Why a failing check fails is in the run's log; the server side is below.
+- To look at it by hand: Actions, Uptime, Run workflow (changes nothing).
+
 ## When something is wrong
 
 - Logs: `pm2 logs kektura` (stamp and feedback failures are `[stamp-action]`, `[feedback]`,
