@@ -1,6 +1,6 @@
-// Server-side logging for the stamp actions (specs/0008-action-logging.md). The actions turn every
-// error into `{ ok: false, reason: "failed" }` for the client, so this is the only trace a failure
-// leaves. It is the single place to hook an error-monitoring service in later.
+// Server-side logging for the server actions (specs/0008-action-logging.md): the stamp actions, feedback,
+// account deletion and friends. They turn every error into a plain `failed` result for the client, so
+// this is the only trace a failure leaves. It is the single place to hook an error-monitoring service in later.
 //
 // One line per event, plain `key=value` text that is easy to grep in the host's logs. Only the action
 // name, the stage, the user id and the error's own code/message are logged: never tokens, cookies,

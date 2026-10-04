@@ -71,6 +71,7 @@ Read line by line against the code (2026-10-04), not only through their tests: 0
 - 0018: two hand-checked rows did not say `manual`; the check in `tests/specs.test.ts` now also catches "review by"
 - 0021 AC-6 and `CLAUDE.md` told the author to follow CI with `gh pr checks <n> --watch`, which blocks everything else: now one look, never `--watch` or a sleep loop
 - 0024: profiles are also visible to the people a user asked (the policy says so), the friend functions return the friend's id next to the place ids, and a friend who stopped sharing is a name without a link and a 404 on their page (E2E already tested it)
+- 0026 AC-8: the production check of the dummy login now has its date, 2026-10-04 (deploy run 37163363692, looked at in the Actions log)
 - 0016, 0019, 0022, 0033: no difference found
 
 ## Spec changes

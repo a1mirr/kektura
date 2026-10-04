@@ -5,9 +5,9 @@ Owner code: `src/lib/log.ts`, `src/app/[locale]/dashboard/actions.ts` (the stamp
 
 ## Goal
 
-Stamp actions deliberately turn every error into `{ ok: false, reason: "failed" }` for the client
-(spec 0002 AC-6, AC-7), so a failure would leave no trace. Each one is logged on the server instead, so
-production problems can be found in the host's logs.
+Server actions (the stamp actions first, then feedback, account deletion and friends) deliberately turn every
+error into a plain `failed` result for the client (spec 0002 AC-6, AC-7), so a failure would leave no trace.
+Each one is logged on the server instead, so production problems can be found in the host's logs.
 
 ## Behaviour
 

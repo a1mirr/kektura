@@ -65,6 +65,7 @@ describe("spec 0008: the other actions' lines", () => {
     logFriendsError("sendRequest", error);
     const lines = errorLog.mock.calls.map((call) => call[0] as string);
     expect(lines.map((line) => line.split(" ")[0])).toEqual(["[feedback]", "[account-delete]", "[friends]"]);
+    expect(lines[2]).not.toContain("u-1"); // the friends line carries no user id
     for (const line of lines) {
       expect(line).not.toContain("\n");
       expect(line).toContain('message="line one\\nline two"');
