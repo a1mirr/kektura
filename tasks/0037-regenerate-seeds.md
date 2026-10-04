@@ -16,7 +16,7 @@ heyjoe's `okt_pecsetek.gpx`), which are downloaded by hand and are not in the re
 - [x] The source files are downloaded (the same dates the current seeds were built from, so the data does not change: `git diff` of `public/data` and of the seed rows is empty apart from the header and the cleanup block)
 - [x] `node scripts/build-data.mjs <stamps.gpx> <route.gpx> <okt_pecsetek.gpx>` has been run and the output committed
 - [x] `npm test`, `npm run testdb:reset` and `npm run e2e` pass
-- [x] The seeds are applied to production by hand and the reference-data cache is cleared (`deploy/README.md`, "After the seeds change"); the deploy workflow does not apply seeds: not needed, see Progress
+- [x] (skipped on purpose: production already holds exactly these rows) The seeds are applied to production by hand and the reference-data cache is cleared (`deploy/README.md`, "After the seeds change"); the deploy workflow does not apply seeds (see Progress)
 - [x] Spec 0004's "Known gap" paragraph is deleted
 
 ## Progress
