@@ -14,7 +14,7 @@ describe("spec 0034: the Stop hook's turn-end nudge", () => {
   });
 
   it("AC-10: tests, e2e, generated types and non-src files are not app code", () => {
-    const quiet = ["src/lib/progress.test.ts", "src/x/y.test.tsx", "tests/specs.test.ts", "e2e/stamp.spec.ts", "src/lib/db.types.ts", "scripts/build-data.mjs", "tasks/0063-x.md"];
+    const quiet = ["src/lib/progress.test.ts", "src/x/y.test.tsx", "tests/specs.test.ts", "e2e/stamp.spec.ts", "src/lib/db.types.ts", "scripts/build-data.mjs", ".github/ISSUE_TEMPLATE/task.md"];
     expect(nudgeTargets(quiet).appCode).toEqual([]);
     expect(nudgeMessage(quiet)).toBe("");
   });

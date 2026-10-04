@@ -20,7 +20,7 @@ behaviour would be spread over files that disagree with the code.
 - **AC-1**: `specs/` holds the specs, as `NNNN-slug.md` files written in English; the repository has no `tasks/`
   folder. Spec numbers are one sequence: the next is the highest in `specs/` plus one, and a number is never reused
   or changed. Tasks are GitHub issues labelled `task`, numbered by GitHub (`#N`); the tasks that predate the issues
-  are closed issues whose titles keep their old four-digit number (`0054: …`).
+  are issues too (#56 to #99), whose titles keep their old four-digit number (`0054: …`).
 - **AC-2**: A spec is the contract of one area (a part of the product, or of how the project is run) as it
   behaves now. Its Goal and Notes describe the area, not a change to it; history lives in tasks and in git. Its
   acceptance criteria are numbered and never renumbered or deleted: a dropped one is marked `Removed`. Its status
