@@ -74,7 +74,7 @@ hook doesn't run them: CI's "End-to-end tests" job is the authority and must be 
 | --- | --- | --- |
 | [0001](0001-progress.md) | Progress: places, walked stretches, stats, stages, extra stamps in stages | Done |
 | [0002](0002-stamping.md) | Stamping: server actions, stamp buttons, cached reference data | Done |
-| [0003](0003-map-route-planner.md) | Map lines, the route planner and how the map code is structured | Done |
+| [0003](0003-map-route-planner.md) | Map lines, the route planner, the comparison map of a friend's page and how the map code is structured | Done |
 | [0004](0004-trail-data.md) | Generated trail data and seeds | Done |
 | [0005](0005-auth-routing-i18n.md) | Sign-in, routing, languages (Hungarian default, German), the language dropdown, typed message keys | Done |
 | [0006](0006-test-server.md) | Test server with dummy login, E2E tests and how they sign in | Done |

@@ -1,4 +1,4 @@
-# 0003: Map lines and the route planner
+# 0003: Map lines, the route planner and the comparison map
 
 Status: Done
 Owner code: `src/lib/route-geometry.ts`, `src/lib/route-stats.ts`, `src/components/TrailMap.tsx`, `src/components/trail-map/`, `src/lib/map-*.ts`,
@@ -63,7 +63,8 @@ From `public/data/okt-hops.json`: 160 hops between neighbouring places, from the
 ### Comparison map
 
 The map of a friend's page (spec 0024 AC-22): the trail as two people have walked it. It shares the base map, the
-geometry (AC-9) and the layer code with the dashboard's map, and is read-only.
+geometry (AC-9) and the layer code with the dashboard's map, and is read-only. It needs JavaScript: until it has loaded
+(or without JavaScript) a grey placeholder stands in its place, and the cards and the stage list above and below it do not need it.
 
 - **AC-18**: The trail is drawn by who walked each stretch, in a line style as well as a colour so that colour alone is
   not needed: both solid (green), only me dashed (blue), only them dotted (orange), nobody a thin faint grey line. The
@@ -72,8 +73,8 @@ geometry (AC-9) and the layer code with the dashboard's map, and is read-only.
 - **AC-19**: A switch picks the view: "both" (the default, AC-18), "mine" or "theirs". In "mine" and "theirs" the map is
   the one the owner sees on their dashboard (AC-2): their walked stretches blue and solid, the rest grey dashed, their
   stamped places filled. The legend follows the view.
-- **AC-20**: The map is read-only: hovering a place names it with its state, and nothing opens a menu or can stamp,
-  route or plan from here. The detailed route takes over at zoom 9 as on the dashboard (AC-9).
+- **AC-20**: The map is read-only: hovering a place names it with its state (on a touch screen the legend and the cards
+  carry the meaning, since there is no hover), and nothing opens a menu or can stamp, route or plan from here. The detailed route takes over at zoom 9 as on the dashboard (AC-9).
 
 ### Structure
 

@@ -88,7 +88,7 @@ test.describe("spec 0024: comparing with a friend", () => {
     const { bobPage, anaId } = await connected(browser);
     for (const width of [375, 320]) {
       await bobPage.setViewportSize({ width, height: 812 });
-      for (const locale of ["en", "ru", "hu"]) {
+      for (const locale of ["en", "ru", "hu", "de"]) {
         await bobPage.goto(`/${locale}/friends/${anaId}`);
         await expect(card(bobPage, "both")).toBeVisible();
         const boxes = await Promise.all(["both", "me", "them", "neither"].map((w) => card(bobPage, w).boundingBox()));
@@ -125,7 +125,9 @@ test.describe("spec 0003: the comparison map", () => {
     await group.getByRole("button", { name: "Both" }).click();
     await expect(legend.getByRole("listitem")).toHaveCount(4);
 
-    // AC-20: read-only: the dashboard's stamp buttons are not on the page.
+    // AC-20: read-only: a click on the map (which opens a stamp menu on the dashboard) opens nothing.
+    await bobPage.locator("canvas.maplibregl-canvas").click();
+    await expect(bobPage.locator(".maplibregl-popup")).toHaveCount(0);
     await expect(bobPage.getByRole("button", { name: "Add stamp" })).toHaveCount(0);
   });
 });

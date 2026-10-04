@@ -13,7 +13,7 @@ and on a phone.
 - [x] The open questions below are settled with the owner before any code is written (2026-10-04, answers under each)
 - [x] Every requirement below holds and has a test (or, where no test can, a `manual (reason)` row in the owning spec); the owning specs are edited as the behaviour is built
 - [x] The pure comparison functions, the "Compare" section and the map's four states are built with the tests under "Tests to write"
-- [x] `npm run e2e` (the whole suite, locally, before the pull request); checked at 320 and 375 px in three languages (e2e)
+- [x] `npm run e2e` (the whole suite, locally, before the pull request); checked at 320 and 375 px in every language (e2e)
 - [x] No changelog entry: friends are behind `FF_FRIENDS` and spec 0024 AC-16 holds the entry back until the flag goes on for everyone
 - [x] The specs listed above mirror the code as built (spec 0034 AC-6)
 - [ ] Fresh-context review done

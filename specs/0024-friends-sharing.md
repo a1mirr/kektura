@@ -182,5 +182,5 @@ route plan.
 | AC-19 | `src/components/FriendActionButton.test.tsx` (closed first, Cancel, Escape), `e2e/friends.spec.ts` (remove and regenerate ask first) |
 | AC-20 | `src/components/FriendActionButton.test.tsx` (the classes), `e2e/friends.spec.ts` (target size and no sideways scroll at 375 and 320 px in three languages; the colour under the pointer and while pressed) |
 | AC-21 | `e2e/friends.spec.ts` (JavaScript off) |
-| AC-22 | `src/lib/friends-compare.test.ts` (what is read), `e2e/friends-compare.spec.ts` (figures, stage list, 404s, 375 and 320 px in three languages) |
+| AC-22 | `src/lib/friends-compare.test.ts` (what is read), `e2e/friends-compare.spec.ts` (figures, stage list, 404s, 375 and 320 px in every language) |
 | AC-23, AC-24 | `src/lib/compare.test.ts` |
