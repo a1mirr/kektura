@@ -5,7 +5,7 @@ import { config } from "./proxy";
 const matches = (path: string) => config.matcher.some((m) => new RegExp(`^${m}$`).test(path));
 
 describe("spec 0005: proxy matcher", () => {
-  it.each(["/", "/ru", "/en/dashboard", "/hu/dashboard"])("AC-1: runs on page %s", (path) => {
+  it.each(["/", "/ru", "/en/dashboard", "/hu/dashboard", "/de", "/de/dashboard"])("AC-1: runs on page %s", (path) => {
     expect(matches(path)).toBe(true);
   });
 

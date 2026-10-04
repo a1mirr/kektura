@@ -22,7 +22,7 @@ describe("spec 0018: changelog data", () => {
     }
   });
 
-  it("AC-3: translations are really translated (the three languages differ)", () => {
+  it("AC-3: translations are really translated (the languages differ)", () => {
     for (const { where, text } of texts()) {
       expect(new Set(Object.values(text)).size, where).toBe(routing.locales.length);
     }
@@ -61,6 +61,7 @@ describe("spec 0018: the account page in the changelog", () => {
       en: ["Sign out", "Account", "Settings"],
       ru: ["Выйти", "Аккаунт", "Настройки"],
       hu: ["Kijelentkezés", "Fiók", "Beállítások"],
+      de: ["Abmelden", "Konto", "Einstellungen"],
     };
     for (const locale of routing.locales) {
       const said = entry.changes.some((c) => words[locale].every((w) => c.text[locale].includes(w)));
@@ -73,6 +74,7 @@ describe("spec 0018: the account page in the changelog", () => {
       en: [/An Account page/, /chart moved to the Account page/],
       ru: [/Страница «Аккаунт»/, /График.*на страницу «Аккаунт»/],
       hu: [/Fiók oldal, ahol/, /diagram átkerült a Fiók oldalra/],
+      de: [/Eine Seite „Konto“/, /Diagramm „Stempel pro Monat“ ist auf die Seite „Konto“ umgezogen/],
     };
     for (const locale of routing.locales) {
       for (const claim of claims[locale]) {
@@ -81,7 +83,7 @@ describe("spec 0018: the account page in the changelog", () => {
     }
     for (const [i, change] of entry.changes.entries()) {
       for (const locale of routing.locales) {
-        expect(change.text[locale], `change ${i + 1} (${locale})`).not.toMatch(/Account settings|Настройки аккаунта|fiókbeállítás/i);
+        expect(change.text[locale], `change ${i + 1} (${locale})`).not.toMatch(/Account settings|Настройки аккаунта|fiókbeállítás|Kontoeinstellungen/i);
       }
     }
   });

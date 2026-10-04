@@ -43,9 +43,9 @@ Everything it says is true of the app today.
 - **AC-6**: The page makes no claim that isn't true today. In particular it doesn't call the app open
   source (the repository is private) or a progressive web app (no manifest or service worker). Whoever
   makes either true edits this AC and its test.
-- **AC-7**: The page text has the same keys in all three locales (`tests/messages.test.ts`); each
+- **AC-7**: The page text has the same keys in every locale (`tests/messages.test.ts`); each
   locale reads naturally and uses the app's own terms (`ru`: печати, этап, участок; `hu`: bélyegzőhely,
-  szakasz).
+  szakasz; `de`: Stempelstelle, Etappe).
 - **AC-8**: The page ends with a "Questions or ideas?" section (`h2`) that links to `/feedback`.
 
 ## Out of scope

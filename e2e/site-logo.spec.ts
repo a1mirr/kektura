@@ -5,6 +5,7 @@ const NAMES = {
   en: { link: "Kéktúra tracker: home", text: "Kéktúra tracker" },
   ru: { link: "Трекер Kéktúra: на главную", text: "Трекер Kéktúra" },
   hu: { link: "Kéktúra követő: kezdőlap", text: "Kéktúra követő" },
+  de: { link: "Kéktúra-Tracker: Startseite", text: "Kéktúra-Tracker" },
 } as const;
 
 const logo = (page: Page, locale: keyof typeof NAMES) => page.getByRole("link", { name: NAMES[locale].link });
@@ -29,7 +30,7 @@ async function expectNoOverflow(page: Page, width: number) {
 }
 
 test.describe("spec 0014: site logo", () => {
-  for (const locale of ["ru", "en", "hu"] as const) {
+  for (const locale of ["hu", "en", "de", "ru"] as const) {
     test(`AC-19: the landing page and the About page carry it in ${locale}; a click leads to the landing page`, async ({ page }) => {
       await page.goto(`/${locale}/about`);
       await expectLogo(page, locale);
@@ -61,9 +62,9 @@ test.describe("spec 0014: site logo", () => {
   test("AC-19: the 404 page has it too, leading to the default language's main page", async ({ page }) => {
     const response = await page.goto("/en/no-such-page");
     expect(response?.status()).toBe(404);
-    await expectLogo(page, "ru");
-    await logo(page, "ru").click();
-    await expect(page).toHaveURL(/\/ru$/);
+    await expectLogo(page, "hu");
+    await logo(page, "hu").click();
+    await expect(page).toHaveURL(/\/hu$/);
   });
 
   test("AC-19: it can be reached and shown with the keyboard (visible focus ring)", async ({ page }) => {

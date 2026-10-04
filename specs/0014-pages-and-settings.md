@@ -10,7 +10,7 @@ Owner code: `src/components/Footer.tsx`, `src/app/[locale]/(pages)/*`, `src/app/
 
 Footer navigation to the informational pages (About, Changelog, Useful links, Feedback), and an account page for
 signed-in users that holds everything about the account: the stamps-per-month chart, signing out and deleting the
-account. The dashboard header stays light (the language switcher and one "Account" link), which matters most on a
+account. The dashboard header stays light (the language dropdown and one "Account" link), which matters most on a
 phone, and "Account" says what is behind the link. Every page also carries the site logo, a way home that never needs the footer.
 
 ## Behaviour
@@ -52,18 +52,18 @@ phone, and "Account" says what is behind the link. Every page also carries the s
   and can't be executed by anonymous callers.
 - **AC-13**: The delete action never throws: it returns an `ActionResult` (`ok`, `unauthorized` or
   `failed`) and logs a failure as one `[account-delete]` line without secrets (spec 0008's rules).
-- **AC-14**: The dashboard header has the language switcher and one link, "Account" (`ru`: Аккаунт, `hu`: Fiók), to
+- **AC-14**: The dashboard header has the language dropdown (spec 0005 AC-10) and one link, "Account" (`ru`: Аккаунт, `hu`: Fiók, `de`: Konto), to
   `/account`. It has no "Settings" link and no "Sign out" control.
 - **AC-15**: The page's document title and `h1` are "Account". The old address `/settings`, in any language prefix,
   redirects (307, in `next.config.ts`, so before the proxy and without a session) to `/account` in the same
   language, so open tabs and old links don't end on a 404.
-- **AC-16**: The account page has a "Sign out" button (`ru`: Выйти, `hu`: Kijelentkezés) next to its heading. It
+- **AC-16**: The account page has a "Sign out" button (`ru`: Выйти, `hu`: Kijelentkezés, `de`: Abmelden) next to its heading. It
   behaves as spec 0005 AC-6 says: a plain form POST to `/auth/sign-out` that revokes the session, clears the
   cookies and returns to the landing page in the current locale. Afterwards the dashboard and the account page send
   the visitor to the landing page.
 - **AC-17**: Signing out from the account page works with JavaScript off (the button is a plain form, not a client
   component).
-- **AC-18**: The page, the header link and the button are translated in all three languages, and the About page
+- **AC-18**: The page, the header link and the button are translated in every language, and the About page
   (spec 0015) calls the page by its name in its "Your data" text and links to `/account`.
 
 ### Site logo
@@ -109,7 +109,7 @@ email on the page.
 
 | AC | Test |
 | --- | --- |
-| AC-1 | `e2e/footer.spec.ts` (four links on a public page and on the dashboard, in ru/en/hu, none for the account page; landing page and footer fit one phone screen) |
+| AC-1 | `e2e/footer.spec.ts` (four links on a public page and on the dashboard, in ru/hu/de, none for the account page; landing page and footer fit one phone screen) |
 | AC-2 | spec 0015 |
 | AC-3, AC-4 | specs 0018, 0019 |
 | AC-5, AC-6 | spec 0017 |
@@ -121,5 +121,5 @@ email on the page.
 | AC-13 | `src/app/[locale]/account/actions.test.ts`, `src/lib/log.test.ts` |
 | AC-16 | `e2e/account.spec.ts` (the button sits next to the heading; sign out from the account page in each language, then dashboard and account redirect), `e2e/auth.spec.ts` |
 | AC-17 | `e2e/account.spec.ts` (with JavaScript disabled) |
-| AC-19 | `tests/site-logo.test.ts` (one component, drawn only by the locale layout and the 404 page, which also covers the error page: the layout wraps its boundary; the SVG is local; empty `alt`; translated names; no back-link keys left), `e2e/site-logo.spec.ts` (every public and signed-in page: link, address, accessible name, 44 px target, top-left, no overflow at 320 and 375 px, focus ring, banner above it, ru/en/hu, the 404 page) |
-| AC-18 | `tests/messages.test.ts` (the header link, the page title and the About page's link text use the same name in each language, and no key is still called settings), `e2e/account.spec.ts` (`ru` and `hu`), `e2e/about.spec.ts` (link) |
+| AC-19 | `tests/site-logo.test.ts` (one component, drawn only by the locale layout and the 404 page, which also covers the error page: the layout wraps its boundary; the SVG is local; empty `alt`; translated names; no back-link keys left), `e2e/site-logo.spec.ts` (every public and signed-in page: link, address, accessible name, 44 px target, top-left, no overflow at 320 and 375 px, focus ring, banner above it, hu/en/de/ru, the 404 page) |
+| AC-18 | `tests/messages.test.ts` (the header link, the page title and the About page's link text use the same name in each language, and no key is still called settings), `e2e/account.spec.ts` (`ru`, `hu` and `de`), `e2e/about.spec.ts` (link) |

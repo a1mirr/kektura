@@ -16,9 +16,9 @@ in the user's language.
   translated one-line description.
 - **AC-3**: Every link is `https:`, opens in a new tab with `rel="noopener noreferrer"`, and the intro
   says that they lead to websites that aren't ours.
-- **AC-4**: Every link has a description in all three languages (the message-parity test), links are
+- **AC-4**: Every link has a description in every language (the message-parity test), links are
   unique, and every group has at least one link. The list is data (`src/content/links.ts`), so
-  adding a link is one entry plus three sentences.
+  adding a link is one entry plus a sentence in every language.
 - **AC-5**: Only links that were checked are listed: each answered with HTTP 200 when last checked (2026-10-03) and its
   page says what the description says. Today's list:
   - the trail: kektura.hu (official site), kektura.hu/okt-szakaszok (stages and GPX files),

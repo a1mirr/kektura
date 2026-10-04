@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import en from "../messages/en.json";
+import de from "../messages/de.json";
 import hu from "../messages/hu.json";
 import ru from "../messages/ru.json";
 
@@ -42,11 +43,11 @@ describe("spec 0014: the site logo", () => {
     expect(component).toContain('t("name")');
   });
 
-  it.each(Object.entries({ en, ru, hu }))("AC-19: %s names the site and the link, and the name is part of the link's name", (_, messages) => {
+  it.each(Object.entries({ en, ru, hu, de }))("AC-19: %s names the site and the link, and the name is part of the link's name", (_, messages) => {
     expect(messages.app.home).toContain(messages.app.name);
   });
 
-  it.each(Object.entries({ en, ru, hu }))("AC-19: %s has no 'back to the tracker' text left on the About and friends pages", (_, messages) => {
+  it.each(Object.entries({ en, ru, hu, de }))("AC-19: %s has no 'back to the tracker' text left on the About and friends pages", (_, messages) => {
     expect(Object.keys(messages.about)).not.toContain("back");
     expect(Object.keys(messages.friends)).not.toContain("back");
   });

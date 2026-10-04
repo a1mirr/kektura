@@ -104,7 +104,7 @@ Secrets (repository secrets, used by `deploy.yml` only; `SUPABASE_DB_URL` is als
   `Deployed <sha>`: `git push` exits 0 even when the hook fails, so the workflow reads the hook's last line and
   fails without it. The workflow authenticates with a key whose forced
   command (`deploy/ssh-gate.sh`) lets it reach only that repository (push and list refs).
-- **AC-8**: After the reload the workflow requests `/en` and `/ru` on the public address and expects 200, expects
+- **AC-8**: After the reload the workflow requests `/hu`, `/en`, `/de` and `/ru` on the public address and expects 200, expects
   an unknown route to answer 404, and POSTs to `/auth/test-login`, expecting 404 too: the test server's dummy login
   signs anybody in and must never be reachable on the public address (spec 0006 AC-4). It is a sanity check of the
   running build, not a test suite; a route behind a feature flag would fail every deploy once the flag is

@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
   // Spec 0014 AC-15: the account page used to live at /settings. Temporary (307), so the address stays free
   // for real settings later.
   async redirects() {
-    return [{ source: "/:locale(ru|en|hu)/settings", destination: "/:locale/account", permanent: false }];
+    return [{ source: "/:locale(hu|en|de|ru)/settings", destination: "/:locale/account", permanent: false }];
   },
   webpack(config) {
     config.resolve.alias["next-intl/config"] = path.resolve(

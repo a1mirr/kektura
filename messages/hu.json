@@ -3,7 +3,8 @@
     "title": "Kéktúra — haladásom",
     "testBanner": "Tesztszerver: helyi adatok és tesztbelépés. Nem éles környezet.",
     "name": "Kéktúra követő",
-    "home": "Kéktúra követő: kezdőlap"
+    "home": "Kéktúra követő: kezdőlap",
+    "language": "Nyelv"
   },
   "home": {
     "headline": "Járd végig az Országos Kéktúrát — bélyegről bélyegre",

@@ -1,4 +1,4 @@
-// Checks that the site answers after a deploy (spec 0026 AC-8): /en and /ru give 200, an unknown route gives
+// Checks that the site answers after a deploy (spec 0026 AC-8): /hu, /en, /de and /ru give 200, an unknown route gives
 // 404, and the test server's dummy login is not there (404, spec 0006 AC-4). It is a sanity check of the running build, not a test suite. It retries, because the reload takes a moment.
 //
 //   node scripts/smoke-test.mjs <base url> [timeout seconds]
@@ -9,7 +9,9 @@ import { pathToFileURL } from "node:url";
 export class Problem extends Error {}
 
 export const CHECKS = [
+  { path: "/hu", status: 200 },
   { path: "/en", status: 200 },
+  { path: "/de", status: 200 },
   { path: "/ru", status: 200 },
   { path: "/en/smoke-test-no-such-page", status: 404 },
   // The dummy login signs anybody in: a stray TEST_LOGIN=1 must never open it on the public address.

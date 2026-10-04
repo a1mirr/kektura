@@ -3,7 +3,8 @@
     "title": "Kektura — my progress",
     "testBanner": "Test server: local data and a dummy login. Not production.",
     "name": "Kéktúra tracker",
-    "home": "Kéktúra tracker: home"
+    "home": "Kéktúra tracker: home",
+    "language": "Language"
   },
   "home": {
     "headline": "Hike the Országos Kéktúra — one stamp at a time",

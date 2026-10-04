@@ -32,7 +32,7 @@ describe("spec 0034: the Stop hook's turn-end nudge", () => {
     ];
     expect(nudgeTargets(visible).userVisible).toEqual(visible);
     expect(nudgeMessage(["messages/hu.json"])).toMatch(/files users can see changed without a changelog entry:\n {2}messages\/hu\.json/);
-    expect(nudgeMessage(["messages/hu.json"])).toMatch(/src\/content\/changelog\.ts in all three languages/);
+    expect(nudgeMessage(["messages/hu.json"])).toMatch(/src\/content\/changelog\.ts in every language/);
   });
 
   it("AC-12: the changelog among the changed files silences the question", () => {
