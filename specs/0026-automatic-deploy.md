@@ -55,7 +55,8 @@ Secrets (repository secrets, used by `deploy.yml` only; `SUPABASE_DB_URL` is als
 - **AC-1**: A deploy starts only for a push to `main` (a merged pull request) whose CI jobs ("Typecheck, lint,
   unit tests" and "End-to-end tests") passed on that commit: the deploy workflow is started by the completion
   of the CI workflow and checks that it succeeded, was a push and was on `main`. Pull requests, other branches
-  and forks never reach the deploy job or its secrets. A failed or still running CI never deploys.
+  and forks never reach the deploy job or its secrets. A failed or still running CI never deploys. CI always runs both jobs on a push to `main` (spec 0007 AC-10
+  skips the end-to-end job only for a Markdown-only pull request), so a skipped job never stands in for a passed one.
 - **AC-2**: Only one deploy runs at a time. A merge that arrives while one is running waits for it and then
   deploys the newest `main` (the older one is skipped, not run in parallel). The deploy job has the concurrency
   group, not the workflow, so a run whose job is skipped (CI failed on `main`, say) never takes the place of a
@@ -181,7 +182,7 @@ seeds (spec 0004) and clearing the dashboard cache afterwards, which stay manual
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-2, AC-3, AC-10 | `tests/deploy-workflow.test.ts` (the trigger and its conditions, the commit picked (the newest whose CI passed), a run started from the Actions tab only from `main` and only for a commit CI passed, the concurrency group on the job and a separate one for dry runs, a timeout on the push step, the `dry_run` input, read-only permissions, secrets only in `env`, none echoed) |
+| AC-1, AC-2, AC-3, AC-10 | `tests/ci-workflow.test.ts` (the end-to-end job runs for every push), `tests/deploy-workflow.test.ts` (the trigger and its conditions, the commit picked (the newest whose CI passed), a run started from the Actions tab only from `main` and only for a commit CI passed, the concurrency group on the job and a separate one for dry runs, a timeout on the push step, the `dry_run` input, read-only permissions, secrets only in `env`, none echoed) |
 | AC-14 | `tests/deploy-workflow.test.ts` (the dry-run step after the plan and before the dump and the migrations, the dump step after the plan and before the migration step, only when a migration is missing and never in a dry run, the artifact name and retention, the connection string through `env`, no `continue-on-error` and no status function on the migration step, the failure message names the step), `tests/migrate-production.test.ts` (the dry run writes `missing=true\|false`, also with a baseline), `tests/notify-telegram.test.ts` (the message names the backup), `tests/backup-workflow.test.ts` (the shared action, spec 0012 AC-5) |
 | AC-14 (on GitHub) | manual (it needs a real run with a missing migration): the first deploy that applies a migration stores `pre-migration-<sha7>` before the migration step runs and the artifact opens as a dump; a manual dry run says that a dump would be taken and stores none. Last checked: never recorded. |
 | AC-4, AC-6, AC-13 | `tests/migrate-production.test.ts` (order, recorded in the same transaction, skipped when recorded, a file that sorts before the latest applied one, stop at the first failure, the baseline rules, the password redacted) |

@@ -150,7 +150,7 @@ describe("spec 0022: Review recorded", () => {
 
     it("runs on pull requests only, and not for Dependabot's", () => {
       expect(review).toMatch(/if: github\.event_name == 'pull_request' && github\.event\.pull_request\.user\.login != 'dependabot\[bot\]'/);
-      expect(ci).toMatch(/^on:\s*\n\s+push:\s*\n\s+pull_request:/m);
+      expect(ci).toMatch(/^on:\s*\n\s+push:\s*\n\s+branches: \[main\]\s*\n\s+pull_request:/m);
     });
 
     it("may read the pull request's description and nothing else, with the workflow's own token", () => {

@@ -69,6 +69,11 @@ Filled in when the task is built.
 
 ## Notes
 
+Parked (2026-10-04, the GitHub Actions minutes quota): sharding does not reduce billed minutes, because jobs are billed per
+job and rounded up to whole minutes, and it adds the setup (Supabase start, `npm ci`, browser install, about 2 minutes) once
+per shard. The repository is private on the Free plan with 2,000 minutes a month; saving minutes comes first (task 0054). The
+task stays `Open` for the day minutes stop being the constraint.
+
 Numbers from task 0030 (single job, 2-core runner): whole job 4 m 00 s to 4 m 52 s; of that Supabase start about
 60 s, npm ci about 15 to 20 s, browser install about 17 s, build about 13 s with a cache hit, tests about 120 s.
 Two shards would give about 60 s of tests plus the same setup, so roughly 3 minutes, if the split is even.

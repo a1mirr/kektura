@@ -19,7 +19,8 @@ Specs describe how each area behaves now, as numbered acceptance criteria in `sp
 - `npm test`: unit and regression tests (Vitest); `npm run test:watch` while working.
 - `npm run check`: typecheck + lint + tests. Claude Code runs the same gate automatically before
   finishing a turn (`.claude/settings.json`). GitHub Actions run the same checks plus the E2E tests
-  on every push and pull request (`.github/workflows/ci.yml`, spec 0007).
+  once per change, on every pull request update and every push to `main`, the E2E tests not for a pull request that
+  changes only Markdown (`.github/workflows/ci.yml`, spec 0007).
 - `npm run types:gen`: regenerates `src/lib/supabase/database.types.ts` from the local test database
   after a migration change (`npm run types:check` fails in CI when the file is stale).
 - A weekly workflow (`.github/workflows/backup.yml`, spec 0012) dumps users and their stamps from

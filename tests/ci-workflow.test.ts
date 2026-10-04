@@ -24,13 +24,59 @@ function step(jobText: string, name: string) {
 }
 
 describe("spec 0007: the CI workflow", () => {
-  it("AC-1: the check job runs on every push and pull request, on Node 24, with npm ci and npm run check", () => {
-    expect(ci).toMatch(/^on:\s*\n\s+push:\s*\n\s+pull_request:/m);
+  it("AC-1: the check job runs on every pull request update and every push to main, on Node 24, with npm ci and npm run check", () => {
     const check = job("check");
     expect(check).toContain("name: Typecheck, lint, unit tests");
     expect(check).toContain("runs-on: ubuntu-latest");
     expect(check).toMatch(/node-version: 24\s*\n\s+cache: npm/);
     expect(check).toMatch(/- run: npm ci\s*\n\s+- run: npm run check/);
+  });
+
+  describe("AC-9: one run per change", () => {
+    it("is triggered by pull requests and by pushes to main only", () => {
+      expect(ci).toContain("\non:\n  push:\n    branches: [main]\n  pull_request:\n");
+      expect(ci.match(/^ {2}(push|pull_request|workflow_dispatch|schedule|workflow_run|create):/gm)).toEqual(["  push:", "  pull_request:"]);
+    });
+
+    it("cancels the earlier run of a pull request when a new push arrives, and never a run on main (grouped by commit)", () => {
+      expect(ci).toContain(
+        "\nconcurrency:\n" +
+          "  group: ci-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.sha }}\n" +
+          "  cancel-in-progress: ${{ github.event_name == 'pull_request' }}\n",
+      );
+    });
+
+    it("keeps the two job names the merge step and the deploy workflow refer to, and the Review recorded job", () => {
+      expect(job("check")).toContain("name: Typecheck, lint, unit tests");
+      expect(job("e2e")).toContain("name: End-to-end tests");
+      expect(job("review")).toContain("name: Review recorded");
+    });
+  });
+
+  describe("AC-10: a Markdown-only pull request skips the end-to-end job", () => {
+    it("the check job lists the changed files first, from a checkout deep enough for the merge commit, and publishes code_changed", () => {
+      const check = job("check");
+      expect(check).toContain("outputs:\n      code_changed: ${{ steps.changes.outputs.code_changed }}");
+      expect(check).toMatch(/- uses: actions\/checkout@v\d+\s*\n\s+with:\s*\n\s+fetch-depth: 2/);
+      const detect = step(check, "Does the change touch more than Markdown");
+      expect(detect).toContain("id: changes");
+      expect(detect).toContain("run: node scripts/ci-changes.mjs");
+      expect(check.indexOf("scripts/ci-changes.mjs")).toBeLessThan(check.indexOf("npm ci"));
+      expect(fs.existsSync(new URL("../scripts/ci-changes.mjs", import.meta.url))).toBe(true);
+    });
+
+    it("the e2e job waits for the check job, runs for every push, and for a pull request only when code changed", () => {
+      const e2e = job("e2e");
+      expect(e2e).toContain("\n    needs: check\n");
+      expect(e2e).toContain("\n    if: github.event_name != 'pull_request' || needs.check.outputs.code_changed == 'true'\n");
+      // a status function in the condition would drop the implied success() and let a failed check job start this one
+      expect(e2e.slice(0, e2e.indexOf("steps:"))).not.toMatch(/always\(\)|failure\(\)|cancelled\(\)/);
+    });
+
+    it("adds no job for it: the detection costs a step of the check job, not a billed job", () => {
+      const jobIds = lines.slice(lines.indexOf("jobs:") + 1).filter((line) => /^ {2}[a-z][\w-]*:$/.test(line));
+      expect(jobIds).toEqual(["  check:", "  review:", "  e2e:"]);
+    });
   });
 
   it("AC-2: the e2e job starts the local Supabase, installs Chromium and runs the suite, keeping the report when it fails", () => {

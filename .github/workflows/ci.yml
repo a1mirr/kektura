@@ -2,9 +2,19 @@
 # end-to-end tests against a local Supabase. Needs no secrets.
 name: CI
 
+# Once per change (AC-9): a pull request runs on every update (it tests the result of merging into main), a push runs
+# only on main (the merge commit, which the deploy workflow waits for, spec 0026). A branch without a pull request gets
+# no run.
 on:
   push:
+    branches: [main]
   pull_request:
+
+# A new push to a pull request cancels the run of the one before it; every commit on main is tested, so a run there is
+# grouped by commit and never cancelled.
+concurrency:
+  group: ci-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -14,8 +24,19 @@ jobs:
     name: Typecheck, lint, unit tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    outputs:
+      code_changed: ${{ steps.changes.outputs.code_changed }}
     steps:
+      # Depth 2: on a pull request the checkout is the merge commit and its two parents, enough to list what the pull
+      # request changes.
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      # Spec 0007 AC-10: `code_changed` is false for a pull request that changes only Markdown, and the end-to-end job
+      # then does not run. A step of this job, so that no extra job is billed for it.
+      - name: Does the change touch more than Markdown
+        id: changes
+        run: node scripts/ci-changes.mjs
       - uses: actions/setup-node@v7
         with:
           node-version: 24
@@ -45,6 +66,11 @@ jobs:
 
   e2e:
     name: End-to-end tests
+    # AC-10: after the cheap job (a failure there stops this one: `if` without a status function implies success()), and
+    # skipped for a pull request that changes only Markdown. Every push (to main) runs it, so the deploy workflow always
+    # finds both jobs.
+    needs: check
+    if: github.event_name != 'pull_request' || needs.check.outputs.code_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
