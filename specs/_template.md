@@ -5,7 +5,7 @@ Owner code: `path/to/module.ts`, `path/to/Component.tsx`
 
 ## Goal
 
-What this area is for and for whom, in two or three sentences. Describe the area as it is, not a change to it: the work belongs in a task (`tasks/`).
+What this area is for and for whom, in two or three sentences. Describe the area as it is, not a change to it: the work belongs in a task (a GitHub issue).
 
 ## Behaviour
 

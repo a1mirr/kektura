@@ -11,7 +11,7 @@ describe("spec 0022: fresh-context review", () => {
     expect(claude).toContain("Fresh-context review before merge");
     expect(claude).toContain("`fresh-reviewer`");
     expect(claude).toMatch(
-      /only the task number \(the spec number for a change that is only a spec, `none` for a small change that has neither\) and the base branch/,
+      /only the task's issue number \(`#N`; the spec number for a change that is only a spec, `none` for a small change that has neither\) and the base branch/,
     );
     expect(claude).toMatch(/before it is merged/);
     expect(claude).toMatch(/Fix every valid finding and answer the rest in the pull request description/);
@@ -36,7 +36,7 @@ describe("spec 0022: fresh-context review", () => {
     expect(lastStep?.[2]).toMatch(/review/i);
     expect(steps).toContain("fresh-reviewer");
     expect(steps).toContain("`none`");
-    expect(steps).toContain("only the task number");
+    expect(steps).toContain("only the task's issue number");
   });
 
   describe("AC-3: the fresh-reviewer agent", () => {
@@ -72,7 +72,7 @@ describe("spec 0022: fresh-context review", () => {
     it("checks every migration against the running code, its name and the regenerated types (a merge deploys by itself)", () => {
       expect(body).toMatch(/A migration in the diff that the code running in production could not live with while it is applied/);
       expect(body).toMatch(/takes two merges, the second after the first has deployed: spec\s+0026 AC-5/);
-      expect(body).toMatch(/not named `NNNN_slug\.sql` after the task that adds it/);
+      expect(body).toMatch(/not named `NNNN_slug\.sql` after the number of the task issue that adds it/);
       expect(body).toMatch(/regenerated types \(`npm run types:gen`\)/);
       expect(body).toMatch(/A merge deploys by itself, so nobody else will look at this/);
       expect(read("specs/0022-fresh-context-review.md")).toMatch(/checks every migration in the diff against spec 0026 AC-5/);
