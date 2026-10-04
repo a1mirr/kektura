@@ -87,8 +87,8 @@ behaviour would be spread over files that disagree with the code.
   end, when app code changed and no spec did: has behaviour changed (then the spec and its tests are updated), or
   not (then say so in one line).
 - **AC-12**: In the same turn-end nudge as AC-10, once the checks pass, when a file that users can see changed
-  (`messages/*.json`, a `page.tsx` or `layout.tsx` under `src/app`, a component under `src/components` that is
-  not a test or a `.types.ts` file) and `src/content/changelog.ts` did not, the hook asks whether the change
+  (`messages/*.json`, a `page.tsx` or `layout.tsx` under `src/app`, a `.ts` or `.tsx` file under `src/components`
+  that is not a test or a `.types.ts` file) and `src/content/changelog.ts` did not, the hook asks whether the change
   belongs in the changelog (then the entry is added in three languages, spec 0018 AC-7) or not (then say so in one
   line). Both questions come in one message, so there is no second round trip. The decision is a pure function of
   the changed paths (`.claude/hooks/stop-nudges.mjs`).
@@ -117,5 +117,5 @@ in the repository so the reviewer and the hook see them.
 | AC-8 | `tests/review-process.test.ts` (reviewer brief, `CLAUDE.md`, pull request template) and `tests/specs.test.ts` (the reviewer re-checks the hand-checked rows of what it touches) |
 | AC-10 | `tests/specs.test.ts` (the hook source watches `tasks/` and nudges on a missing spec change); manual (it runs a Claude Code hook): change a file under `src/` only, finish a turn, and the hook asks once; change a file under `tasks/` and the hook runs the checks. Last checked: never recorded. |
 | AC-10 (the decision), AC-12 | `tests/stop-nudges.test.ts` (which changed paths are app code and which users can see, with and without a spec or the changelog; tests and `.types.ts` ignored; one message for both questions) |
-| AC-12 (the hook asks) | manual (it runs a Claude Code hook): change a file under `messages/` only, finish a turn, and the hook asks once about the changelog; change it again with `src/content/changelog.ts` edited and the hook does not ask. Last checked: never recorded. |
+| AC-12 (the hook asks) | manual (it runs a Claude Code hook): change the text of an existing message in `messages/` only (same keys in all three files: a missing key fails the unit tests first), finish a turn, and the hook asks once about the changelog; change it again with `src/content/changelog.ts` edited and the hook does not ask. Last checked: never recorded. |
 | AC-11 | `tests/specs.test.ts` (every hand-checked row of a spec has a reason and a `Last checked` of a date, `never recorded` or `every pull request`; the rule is written in `CLAUDE.md`, `specs/README.md` and the reviewer's brief) |
