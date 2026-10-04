@@ -5,7 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { GeoJSONSource, Map as MapLibreMap, Popup } from "maplibre-gl";
 import type { ComparisonRanges } from "@/lib/compare";
-import { COMPARE_VIEWS, compareDots, compareLines, WHO_COLOR, WHO_LINE_STYLE, type ComparePoint, type CompareView } from "@/lib/compare-map";
+import { revealInList } from "@/lib/map-reveal";
+import { COMPARE_VIEWS, compareDots, compareHoverText, compareLines, WHO_COLOR, WHO_LINE_STYLE, type ComparePoint, type CompareView } from "@/lib/compare-map";
 import { COMPARE_DOTS_LAYER, compareLayers, DONE, TODO_LINE } from "@/lib/map-layers";
 import type { Route } from "@/lib/route-geometry";
 import CompareSwatch from "./CompareSwatch";
@@ -65,9 +66,14 @@ export default function CompareMap({ points, ranges }: { points: ComparePoint[];
           if (f?.geometry.type === "Point") {
             hover
               .setLngLat(f.geometry.coordinates as [number, number])
-              .setText(`${f.properties?.name} · ${translate.current(`who_${String(f.properties?.who) as "both"}`)}`)
+              .setText(compareHoverText(f.properties, translate.current(`who_${String(f.properties?.who) as "both"}`)))
               .addTo(m);
           }
+        });
+        // A click goes to the place's row in the list below, like "Show in list" on the dashboard's map (spec 0003 AC-12).
+        m.on("click", COMPARE_DOTS_LAYER, (e) => {
+          const key = e.features?.[0]?.properties?.key;
+          if (key !== undefined) revealInList("place", String(key));
         });
         m.on("mouseleave", COMPARE_DOTS_LAYER, () => {
           m.getCanvas().style.cursor = "";

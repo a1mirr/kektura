@@ -60,6 +60,7 @@ describe("spec 0024: comparing with a friend", () => {
     const { supabase } = recordingSupabase([{ checkpoint_id: 1, stamped_on: "2026-05-01" }]);
     const { points } = await compareWithFriend(supabase, friend);
     expect(points.map((p) => [p.placeKey, p.who])).toEqual([["P0", "me"], ["P1", "them"], ["P2", "them"]]);
-    for (const p of points) expect(Object.keys(p).sort()).toEqual(["lat", "lng", "name", "placeKey", "who"]);
+    expect(points.map((p) => p.label)).toEqual(["1.1", "1.2", "1.3"]); // the numbers of the list
+    for (const p of points) expect(Object.keys(p).sort()).toEqual(["label", "lat", "lng", "name", "placeKey", "who"]);
   });
 });

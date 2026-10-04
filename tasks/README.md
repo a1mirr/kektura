@@ -63,3 +63,4 @@ A finished task stays as history and is not updated when behaviour changes later
 | [0067](0067-hungarian-default-and-german.md) | Hungarian is the default language, German is added, the language is chosen from a dropdown (now specs 0005, 0033) | Done |
 | [0069](0069-ci-up-to-date-with-main.md) | A pull request that is behind main is flagged by CI and never merged (specs 0007, 0021, 0022) | Done |
 | [0070](0070-desktop-layout.md) | Use the room on a desktop screen: shared width and edges, side-by-side blocks, 375 px as the narrowest promise | Open |
+| [0071](0071-compare-map-list-and-labels.md) | The comparison map leads to the list and names places with their number (spec 0003) | Done |

@@ -53,7 +53,8 @@ export function compareLines(route: Route, ranges: ComparisonRanges, view: Compa
   ]);
 }
 
-export type ComparePoint = { placeKey: string; name: string; lat: number; lng: number; who: Who };
+// `label` is the place's number in the list ("17.1"), `placeKey` the key of its list row.
+export type ComparePoint = { placeKey: string; label: string; name: string; lat: number; lng: number; who: Who };
 
 // A place stamped in the picked view is filled, a place that is not is hollow (the dashboard's dots).
 export function compareDots(points: ComparePoint[], view: CompareView): FeatureCollection<Point> {
@@ -64,9 +65,13 @@ export function compareDots(points: ComparePoint[], view: CompareView): FeatureC
       const color = view === "both" ? WHO_COLOR[p.who] : DONE;
       return {
         type: "Feature",
-        properties: { name: p.name, who: p.who, fill: stamped ? color : "#ffffff", stroke: stamped ? color : "#a8a29e" },
+        properties: { key: p.placeKey, label: p.label, name: p.name, who: p.who, fill: stamped ? color : "#ffffff", stroke: stamped ? color : "#a8a29e" },
         geometry: { type: "Point", coordinates: [p.lng, p.lat] },
       };
     }),
   };
 }
+
+// What hovering a place shows (spec 0003 AC-20): its number in the list, its name and its state.
+export const compareHoverText = (properties: { label?: unknown; name?: unknown }, state: string) =>
+  `${properties.label} ${properties.name} · ${state}`;

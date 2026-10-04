@@ -81,7 +81,7 @@ export async function compareWithFriend(supabase: SupabaseClient<Database>, frie
   const points: ComparePoint[] = progress.places.flatMap((p) =>
     p.variants
       .filter((v) => v.lat != null && v.lng != null)
-      .map((v) => ({ placeKey: placeKeyOf(v), name: v.name, lat: Number(v.lat), lng: Number(v.lng), who: comparison.placeWho.get(p.key)! })),
+      .map((v) => ({ placeKey: placeKeyOf(v), label: p.label, name: v.name, lat: Number(v.lat), lng: Number(v.lng), who: comparison.placeWho.get(p.key)! })),
   );
   return { progress, comparison, points };
 }
