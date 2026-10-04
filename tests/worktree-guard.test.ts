@@ -152,6 +152,20 @@ describe("spec 0021: work happens in a linked worktree", () => {
       },
     );
 
+    it("the PowerShell tool is guarded like Bash, with Set-Location and `;` in place of cd and &&", () => {
+      const ps = (command: string, cwd: string) => ({ tool_name: "PowerShell", tool_input: { command }, cwd });
+      expect(decide(ps("git commit -m x", primary), { project: topic })).toMatch(/primary checkout/);
+      expect(decide(ps(`Set-Location "${primary}"; git add -A`, topic), { project: topic })).toMatch(/primary checkout/);
+      expect(decide(ps(`Set-Location -Path "${primary}"; git switch x`, topic), { project: topic })).toMatch(/primary checkout/);
+      expect(decide(ps(`git -C "${primary}" reset --hard`, topic), { project: topic })).toMatch(/primary checkout/);
+      expect(decide(ps("git commit -m x", topic), { project: topic })).toBe("");
+      expect(decide(ps("Get-ChildItem", primary), { project: topic })).toBe("");
+    });
+
+    it('a quoted value with a space in an env prefix is one word: FOO="a b" git commit', () => {
+      expect(decide(bash('FOO="a b" git commit -m x', primary), { project: topic })).toMatch(/primary checkout/);
+    });
+
     it("a forward-only update of a checkout that is on main is upkeep and is allowed; any other merge or pull there is not", () => {
       for (const command of ["git merge --ff-only origin/main", "git pull --ff-only origin main", "git pull --ff-only"]) {
         expect(decide(bash(command, onMain), { project: topic }), command).toBe("");
@@ -172,7 +186,7 @@ describe("spec 0021: work happens in a linked worktree", () => {
     it("the hook runs before Edit, Write, NotebookEdit and Bash, and a payload it cannot read does not block", () => {
       const settings = JSON.parse(read(".claude/settings.json"));
       const entry = settings.hooks.PreToolUse.find((h: { hooks: { command: string }[] }) => h.hooks.some((x) => x.command.includes("worktree-guard.mjs")));
-      expect(entry.matcher).toBe("Edit|Write|NotebookEdit|Bash");
+      expect(entry.matcher).toBe("Edit|Write|NotebookEdit|Bash|PowerShell");
       const script = path.resolve(new URL("../.claude/hooks/worktree-guard.mjs", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1"));
       const run = spawnSync("node", [script], { input: "not json", encoding: "utf8" });
       expect(run.status).toBe(0);
@@ -236,6 +250,11 @@ describe("spec 0021: AC-9 a new branch starts from a fresh origin/main", () => {
     expect(stale).toMatch(/GitHub's main is [0-9a-f]{7}: run `git fetch origin` first/);
     git(clone, "fetch", "-q", "origin");
     expect(create("git worktree add .claude/worktrees/x -b topic origin/main")).toBe("");
+  });
+
+  it("the attached form -bNAME starts a new branch too and has to start from origin/main", () => {
+    expect(create("git worktree add .claude/worktrees/x -btopic main")).toMatch(/starts from origin\/main/);
+    expect(create("git worktree add .claude/worktrees/x -btopic origin/main")).toBe("");
   });
 
   it("checking out an existing branch (no -b) is not a new branch and is allowed", () => {

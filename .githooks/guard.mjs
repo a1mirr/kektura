@@ -27,7 +27,8 @@ export function checkPush(remoteUrl, stdinText) {
     message: [
       "Blocked: pushing to main on GitHub is not allowed here (spec 0021). main only changes through pull requests.",
       "Push a topic branch and open a pull request instead:",
-      "  git switch -c <topic>",
+      "  git fetch origin",
+      "  git worktree add .claude/worktrees/<name> -b <topic> origin/main",
       "  git push -u origin <topic>",
       "(Deploying is a push to the 'production' remote and is not affected.)",
     ].join("\n"),

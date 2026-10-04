@@ -8,7 +8,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 // Real git repositories: slow when the whole suite runs in parallel.
 vi.setConfig({ testTimeout: 60_000, hookTimeout: 60_000 });
-import { planTidy, unlinkNodeModules } from "../scripts/tidy.mjs";
+import { planTidy, restoreNodeModules, unlinkNodeModules } from "../scripts/tidy.mjs";
 
 const P = "/r";
 const wt = (name: string, over: Partial<{ branch: string | null; merged: boolean; clean: boolean }> = {}) => ({
@@ -92,10 +92,15 @@ describe("spec 0021: tidy after a merge", () => {
       const worktree = path.join(dir, "wt");
       fs.mkdirSync(worktree);
       fs.symlinkSync(real, path.join(worktree, "node_modules"), "junction");
-      expect(unlinkNodeModules(worktree)).toBe(true);
+      const link = unlinkNodeModules(worktree);
+      expect(link).toEqual({ target: expect.any(String) });
       expect(fs.existsSync(path.join(worktree, "node_modules"))).toBe(false);
       expect(fs.readFileSync(path.join(real, "keep.txt"), "utf8")).toBe("x");
       expect(unlinkNodeModules(worktree)).toBe(false); // nothing left to unlink
+      restoreNodeModules(worktree, link); // a worktree that could not be removed gets its link back
+      expect(fs.readFileSync(path.join(worktree, "node_modules", "keep.txt"), "utf8")).toBe("x");
+      expect(unlinkNodeModules(worktree)).toEqual({ target: expect.any(String) }); // and it unlinks again
+      expect(fs.readFileSync(path.join(real, "keep.txt"), "utf8")).toBe("x");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -131,6 +136,7 @@ describe("spec 0021: tidy after a merge", () => {
       fs.writeFileSync(path.join(wtDir("done"), "d.txt"), "d\n");
       git(wtDir("done"), "add", ".");
       git(wtDir("done"), "commit", "-q", "-m", "done work");
+      git(wtDir("done"), "push", "-q", "origin", "done");
       git(primary, "merge", "-q", "--no-ff", "-m", "Merge done", "done");
       git(primary, "push", "-q", "origin", "main");
       // Started after that merge, and another merge has moved origin/main on since: its tip is an ancestor of origin/main.
@@ -172,6 +178,19 @@ describe("spec 0021: tidy after a merge", () => {
       expect(git(primary, "branch", "--list", "fresh")).not.toBe("");
       expect(run.stdout).toMatch(/Keeping worktree fresh .*no commit yet/);
       expect(run.stdout).toMatch(/Keeping worktree me .*this runs in/);
+    });
+
+    it("AC-8: --remote deletes the merged branch on origin, and only with --remote", () => {
+      const origin = path.join(root, "origin.git");
+      const remoteHas = (name: string) => git(root, "ls-remote", "--heads", origin, name) !== "";
+      expect(remoteHas("done")).toBe(true); // the --apply run above left it
+      expect(tidy(wtDir("me"), "--apply").stdout).toMatch(/Would delete origin\/done \(needs --remote\)/);
+      expect(remoteHas("done")).toBe(true);
+      const run = tidy(wtDir("me"), "--apply", "--remote");
+      expect(run.status, run.stderr).toBe(0);
+      expect(run.stdout).toMatch(/Deleting origin\/done/);
+      expect(remoteHas("done")).toBe(false);
+      expect(remoteHas("main")).toBe(true);
     });
 
     it("AC-8: a merged worktree that will not be removed (locked) keeps its branch, and the run reports the failure", () => {

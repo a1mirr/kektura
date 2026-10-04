@@ -67,7 +67,8 @@ function simpleCommands(line) {
   return line.split(/&&|\|\||;|\||\r?\n/).map((s) => s.trim()).filter(Boolean);
 }
 const unquote = (s) => s.replace(/^["']|["']$/g, "");
-const words = (command) => [...command.matchAll(/"[^"]*"|'[^']*'|\S+/g)].map((m) => m[0]);
+// A word may mix quoted and bare parts: FOO="a b" is one word.
+const words = (command) => [...command.matchAll(/(?:"[^"]*"|'[^']*'|[^\s"'])+/g)].map((m) => m[0]);
 
 /** Git Bash and WSL write C:\x as /c/x or /mnt/c/x, and ~ is the home directory; Node on Windows reads neither the way the shell meant it. */
 export function toNative(p, platform = process.platform) {
@@ -104,7 +105,8 @@ export function newBranchBase(invocation) {
     if (word === "-b" || word === "-B") {
       creates = true;
       i++; // the branch name
-    } else if (word === "--reason") i++;
+    } else if (/^-[bB]./.test(word)) creates = true; // -bNAME
+    else if (word === "--reason") i++;
     else if (!word.startsWith("-")) positional.push(unquote(word));
   }
   return creates ? { base: positional[1] ?? "" } : null;
@@ -148,10 +150,10 @@ export function decide(input, { project = input.cwd ?? process.cwd(), git = real
     return refuse(`${input.tool_name} on ${path.relative(where.top, file).replace(/\\/g, "/")}`, reason);
   }
 
-  if (input.tool_name === "Bash") {
+  if (input.tool_name === "Bash" || input.tool_name === "PowerShell") {
     let dir = cwd;
     for (const command of simpleCommands(String(input.tool_input?.command ?? ""))) {
-      const cd = /^cd\s+(.+)$/.exec(command);
+      const cd = /^(?:cd|chdir|sl|Set-Location|Push-Location|pushd)\s+(?:-(?:Path|LiteralPath)\s+)?(.+)$/i.exec(command);
       if (cd) {
         dir = resolveFrom(dir, cd[1].trim());
         continue;

@@ -36,6 +36,11 @@ rows and owner code; the Goal says that where the work is done and the clean-up 
   its worktree could not be removed, and an unproven claim for spec 0007 AC-10. Left as documented limits: a
   `git switch -c` inside a worktree is not checked against `origin/main`, and the numbers 0040 to 0047 collide
   with drafts that sit on other unmerged local branches (see the pull request).
+- The second fresh review found, and this task fixed: `unlinkNodeModules` threw on Linux (CI), where a junction is an
+  ordinary symlink, and does not leave a worktree without its link when the removal fails; the PowerShell tool was not
+  guarded; the pre-push message and the spec notes still advised `git switch`; `--remote` had no test and no lease; the
+  attached `-bNAME` form and a quoted env value slipped past. Left as documented limits: `worktree.baseRef` (see
+  spec 0021 Notes: for the owner to decide), `git branch -f`, and a quoted `;` inside a commit message.
 - The hook takes effect in a checkout once this change is merged and the checkout has the new `.claude/settings.json`.
 - `git branch -d` tests "merged into HEAD", so `tidy` tests "merged into origin/main" itself and deletes the ref at the
   sha it checked (never `-D`).

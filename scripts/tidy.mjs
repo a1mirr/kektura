@@ -82,8 +82,18 @@ export function unlinkNodeModules(worktree) {
     return false;
   }
   if (!stat.isSymbolicLink()) return false;
-  fs.rmdirSync(nm); // removes the link itself, not what it points to
-  return true;
+  const target = fs.readlinkSync(nm);
+  try {
+    fs.unlinkSync(nm); // a symlink on any system
+  } catch {
+    fs.rmdirSync(nm); // a Windows junction; either way only the link goes, not what it points to
+  }
+  return { target };
+}
+
+/** Puts back what unlinkNodeModules took out, for a worktree that then could not be removed. */
+export function restoreNodeModules(worktree, link) {
+  if (link) fs.symlinkSync(link.target, path.join(worktree, "node_modules"), "junction"); // "junction" is ignored off Windows
 }
 
 const git = (cwd, args) => {
@@ -153,10 +163,13 @@ function main() {
   };
   const stuck = new Set(); // branches whose worktree would not go (locked, say): they stay, or the worktree would be left on a deleted branch
   for (const wt of plan.removeWorktrees) {
-    unlinkNodeModules(wt.path);
+    const link = unlinkNodeModules(wt.path);
     const result = git(cwd, ["worktree", "remove", wt.path]);
     run(`removing ${wt.path}`, result);
-    if (result.status !== 0 && wt.branch) stuck.add(wt.branch);
+    if (result.status !== 0) {
+      restoreNodeModules(wt.path, link); // a worktree that stays keeps its dependencies
+      if (wt.branch) stuck.add(wt.branch);
+    }
   }
   git(cwd, ["worktree", "prune"]);
   if (plan.advanceMain) {
@@ -179,7 +192,13 @@ function main() {
     run(`deleting ${name}`, git(cwd, ["update-ref", "-d", `refs/heads/${name}`, sha]));
     git(cwd, ["config", "--remove-section", `branch.${name}`]); // its tracking settings; fine when there are none
   }
-  if (remote) for (const name of plan.deleteRemote) run(`deleting origin/${name}`, git(cwd, ["push", "origin", "--delete", name]));
+  if (remote) {
+    // With a lease on the sha that was checked: a commit pushed since the fetch is not thrown away.
+    for (const name of plan.deleteRemote) {
+      const sha = git(cwd, ["rev-parse", "--verify", "-q", `refs/remotes/origin/${name}`]).stdout;
+      run(`deleting origin/${name}`, git(cwd, ["push", "origin", `--force-with-lease=refs/heads/${name}:${sha}`, "--delete", name]));
+    }
+  }
   if (failed) throw new Error(`${failed} step${failed === 1 ? "" : "s"} failed.`);
 }
 

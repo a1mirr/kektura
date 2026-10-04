@@ -47,7 +47,7 @@ leftovers of a merged change are cleaned up.
 - **AC-7**: Claude Code does not change files in the primary checkout of this repository, nor in any checkout that is
   on `main`: changes are made in a linked worktree on a topic branch (`git worktree add .claude/worktrees/<name> -b
   <topic> origin/main`). A `PreToolUse` hook (`.claude/hooks/worktree-guard.mjs`, wired in `.claude/settings.json` for
-  `Edit`, `Write`, `NotebookEdit` and `Bash`) refuses, with exit code 2:
+  `Edit`, `Write`, `NotebookEdit`, `Bash` and `PowerShell`) refuses, with exit code 2:
   - `Edit`, `Write` and `NotebookEdit` on a file inside such a checkout, unless git ignores the file (build output,
     `.env.local`);
   - a `Bash` command that runs a git command that changes a working tree, the index or a branch (`add`, `am`,
@@ -71,7 +71,8 @@ leftovers of a merged change are cleaned up.
   merge commit contains, a branch checked out in a kept worktree, `main`, and worktrees outside `.claude/worktrees`
   (another tool's). Before it removes a worktree it unlinks a `node_modules` junction, so the real one is never
   reached; a branch whose worktree could not be removed (locked, say) is kept; a branch is deleted only at the sha it
-  has just checked against `origin/main`, never with `-D`. `--remote` also deletes merged branches on `origin`.
+  has just checked against `origin/main`, never with `-D`. `--remote` also deletes merged branches on `origin`, with a lease on the sha it checked, so a commit
+  pushed since is not thrown away.
   Without `--apply` nothing changes. The author runs it after every merge (`CLAUDE.md`, workflow step 7).
 
 - **AC-9**: New work starts from the real `origin/main`, never from a stale local `main` or another branch. The
@@ -101,8 +102,13 @@ leftovers of a merged change are cleaned up.
   running it as a process.
 - A push that changes nothing (`git push origin main` when up to date) doesn't reach the check or doesn't need
   to: nothing is sent.
-- Merging a pull request on GitHub is not a push from this clone and is unaffected. After a merge:
-  `git switch main && git pull`.
+- Merging a pull request on GitHub is not a push from this clone and is unaffected. After a merge, `npm run tidy
+  -- --apply` (AC-8, AC-9) removes the leftovers and brings a stale local `main` up to `origin/main`; a checkout that
+  is on `main` is updated with `git merge --ff-only origin/main`.
+- A worktree made by Claude Code's own `EnterWorktree` tool is not made by a command the hook sees, so AC-9 does not
+  cover it: that tool starts from the setting `worktree.baseRef` in `.claude/settings.json` (now `head`, the
+  checkout's HEAD, which in the shared checkout can be a stale branch). Making worktrees with `git worktree add` (the
+  hook's refusal text shows how) is the way that is enforced.
 
 ## Coverage
 
