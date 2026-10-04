@@ -58,7 +58,7 @@ author's context, and wants that to be part of how work is done here, not someth
   - it reports findings most severe first, each with `file:line`, what is wrong and a concrete failing
     scenario, then what it checked and found fine; "no findings" is a valid answer.
 - **AC-4**: `.github/pull_request_template.md` gives every pull request the checklist (spec first, or a small
-  change that needs none; the touched specs mirror the code as built; `npm run check` green and CI's end-to-end job passing (spec 0007 AC-10); everything users can see is in the changelog; fresh-context
+  change that needs none; the touched specs mirror the code as built; `npm run check` green and CI's end-to-end job passing (spec 0007 AC-8); everything users can see is in the changelog; fresh-context
   review done at the commit named in the pull
   request, with only wording fixes after it) and a section to record the reviewed commit, the review's
   findings and what was done about each.
@@ -105,5 +105,5 @@ author's context, and wants that to be part of how work is done here, not someth
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-2, AC-3, AC-4 | `tests/review-process.test.ts` (the rule is in `CLAUDE.md` and `specs/README.md`; the agent file exists, is read-only and names what it checks; the pull request template has the checklist and the findings section) |
+| AC-1, AC-2, AC-3, AC-4 | `tests/review-process.test.ts` (AC-4's wording about the end-to-end job is asserted under spec 0007 AC-8 in the same file; the rule is in `CLAUDE.md` and `specs/README.md`; the agent file exists, is read-only and names what it checks; the pull request template has the checklist and the findings section) |
 | AC-3 (quality of the reviews) | manual (judgement): the owner reads the findings in each pull request. Last checked: every pull request. |

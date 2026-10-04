@@ -8,6 +8,8 @@ A finished task stays as history and is not updated when behaviour changes later
 - Copy [`_template.md`](_template.md) to `tasks/NNNN-short-slug.md`. The number is the next one after the
   highest in `specs/` **and** `tasks/` (one sequence over both folders), status `Open`. Written in English.
 - A task has no acceptance criteria. If you are writing "given X, when Y, then Z", it belongs in a spec.
+  An open task may list the requirements of the spec change it will make (and the open questions about them); they
+  move into the owning spec as acceptance criteria when the task is built, and the task keeps only a pointer.
 - A feature or behaviour change edits or drafts the spec first, then gets its task. A refactor, CI or deploy
   change or data update is only a task. A trivial fix needs no task.
 - Statuses: `Open`, `In progress`, `Done`, `Dropped` (say why in Notes).

@@ -2,7 +2,7 @@
 
 Status: Done
 Owner code: `.githooks/pre-push`, `.githooks/guard.mjs`, `.claude/hooks/worktree-guard.mjs`, `scripts/tidy.mjs`,
-`package.json` (`hooks:install`, `tidy`), `CLAUDE.md`
+`package.json` (`hooks:install`, `tidy`), `.claude/settings.json` (wires the hook), `CLAUDE.md`
 
 ## Goal
 

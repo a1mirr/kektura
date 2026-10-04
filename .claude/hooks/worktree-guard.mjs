@@ -22,7 +22,7 @@ const FILE_TOOLS = new Set(["Edit", "Write", "NotebookEdit"]);
 
 /** Runs `git <args>` in `dir`; returns { status, stdout }. Injected in the tests. */
 export function realGit(dir, args) {
-  const result = spawnSync("git", ["-c", "core.quotepath=false", ...args], { cwd: dir, encoding: "utf8" });
+  const result = spawnSync("git", ["-c", "core.quotepath=false", ...args], { cwd: dir, encoding: "utf8", timeout: 10_000, env: { ...process.env, GIT_TERMINAL_PROMPT: "0" } });
   return { status: result.status ?? 1, stdout: result.stdout ?? "" };
 }
 
