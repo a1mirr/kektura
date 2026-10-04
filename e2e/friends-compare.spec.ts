@@ -44,6 +44,32 @@ const overflow = (page: Page) =>
   });
 const card = (page: Page, who: string) => page.locator(`[data-who=${who}]`);
 
+// Where a place is on the comparison map, in pixels from the map's top-left corner, without a test hook in the page:
+// the map opens fitted to the trail's bounding box with 30 px of padding (createTrailMap), so the Web Mercator
+// arithmetic of that fit gives the position of any point.
+const mercatorX = (lng: number) => (lng + 180) / 360;
+const mercatorY = (lat: number) => (180 - (180 / Math.PI) * Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360))) / 360;
+function pixelOnFittedMap(
+  size: { width: number; height: number },
+  route: [number, number, number][],
+  point: { lat: number; lng: number },
+) {
+  const lngs = route.map((p) => p[0]);
+  const lats = route.map((p) => p[1]);
+  const [west, east] = [Math.min(...lngs), Math.max(...lngs)];
+  const [south, north] = [Math.min(...lats), Math.max(...lats)];
+  const padding = 30;
+  const scale = Math.min(
+    (size.width - 2 * padding) / (mercatorX(east) - mercatorX(west)),
+    (size.height - 2 * padding) / (mercatorY(south) - mercatorY(north)),
+  );
+  const centre = { x: (mercatorX(west) + mercatorX(east)) / 2, y: (mercatorY(south) + mercatorY(north)) / 2 };
+  return {
+    x: (mercatorX(point.lng) - centre.x) * scale + size.width / 2,
+    y: (mercatorY(point.lat) - centre.y) * scale + size.height / 2,
+  };
+}
+
 test.describe("spec 0024: comparing with a friend", () => {
   test("AC-22, AC-23: the figures of both, only me, only them and neither, from the places each stamped", async ({ browser }) => {
     const { bobPage, anaId } = await connected(browser);
@@ -129,5 +155,30 @@ test.describe("spec 0003: the comparison map", () => {
     await bobPage.locator("canvas.maplibregl-canvas").click();
     await expect(bobPage.locator(".maplibregl-popup")).toHaveCount(0);
     await expect(bobPage.getByRole("button", { name: "Add stamp" })).toHaveCount(0);
+  });
+
+  test("AC-20: clicking a place brings its row in the list into view, opening its stage, and opens no popup", async ({ browser }) => {
+    const { bobPage, anaId } = await connected(browser);
+    await bobPage.goto(`/en/friends/${anaId}`);
+    const route = (await (await bobPage.request.get("/data/okt-route.json")).json()) as { points: [number, number, number][] };
+    // Irott-ko, the trail's westernmost place. Its neighbours lie a few pixels away on an overview map, so the click may
+    // land on one of them: any row of stage 1 proves the click reached the list.
+    const [lat, lng] = psql("select lat, lng from public.checkpoints where coalesce(place_key, code) = 'OKTPH_01_DDKPH_01' limit 1")
+      .split("|")
+      .map(Number);
+
+    const map = bobPage.locator(".maplibregl-map");
+    await map.scrollIntoViewIfNeeded();
+    const stage = bobPage.locator("#stage-1 button[aria-expanded]");
+    await expect(stage).toHaveAttribute("aria-expanded", "false"); // collapsed: the click has to open it
+    // Retried: the points are drawn a moment after the map loads, and a click before that finds nothing.
+    await expect(async () => {
+      const box = (await map.boundingBox())!;
+      const at = pixelOnFittedMap(box, route.points, { lat, lng });
+      await bobPage.mouse.click(box.x + at.x, box.y + at.y);
+      await expect(stage).toHaveAttribute("aria-expanded", "true", { timeout: 1_000 });
+    }).toPass();
+    await expect(bobPage.locator("#stage-1 li.flash")).toHaveCount(1);
+    await expect(bobPage.locator(".maplibregl-popup")).toHaveCount(0);
   });
 });
