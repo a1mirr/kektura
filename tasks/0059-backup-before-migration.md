@@ -1,0 +1,58 @@
+# 0059: A backup before every migration
+
+Status: Open
+Specs: [0012](../specs/0012-backups.md) and [0026](../specs/0026-automatic-deploy.md) (an AC each is added when this is built)
+
+## Goal
+
+A merge deploys by itself, and a migration runs against production data with no way back: the weekly backup can be
+six days old. Take a backup of the user data right before the first missing migration is applied, and refuse to
+migrate when the backup fails.
+
+## What the owner has to do
+
+Nothing is required. The deploy already has the repository secret `SUPABASE_DB_URL`, the same one the weekly backup
+uses, and a manual run of the Backup workflow on 2026-10-04 proved that the dump works from GitHub's runners
+(1 m 19 s, check step passed, artifact stored; spec 0012, Notes). Optional, see the decisions below: a passphrase
+secret if the artifacts should be encrypted.
+
+## Requirements
+
+- Before the first missing migration is applied, the deploy backs up the user data: it dumps the same tables as the
+  weekly backup with the same steps and stores the dump as the workflow artifact `pre-migration-<sha7>` for 30 days.
+- A dump that fails or does not pass its check stops the deploy before any migration runs, and the failure is
+  reported like any failed step (spec 0026 AC-9).
+- A deploy with no missing migration takes no dump. A dry run says that a dump would be taken and takes none.
+  Whether migrations are missing is decided by the migration script's own dry run (`--dry-run`), so one place knows.
+- The dump is one piece used by every workflow that takes one, a composite action under `.github/actions/`, so the
+  table list, the exclude list and the check step exist once. The weekly run and the pre-migration dump differ only
+  in the artifact's name and retention, which they pass in. The action gets the connection string as an input from
+  the caller's `env` and never prints it.
+
+## Decisions taken (the owner may overrule)
+
+- **Which data**: the same six tables as the weekly backup (accounts, identities, stamps, extra stamps, profiles,
+  friendships). The schema and the reference data come back from git (migrations and seeds), so they are not dumped.
+  To restore after a bad migration: check out the commit before the merge, apply its migrations and seeds to an
+  empty database, load the dump (spec 0012, Restore).
+- **Where**: a workflow artifact, 30 days. Artifacts are readable by everyone with access to the repository and hold
+  emails and Google profile data. The repository is private with one owner, so the dump is not encrypted; revisit
+  when either changes (encrypting needs one new secret and one `gpg` step).
+- **When**: only when a migration is missing.
+
+## Done when
+
+- [ ] The composite action (the dump and its check, moved out of `backup.yml`), used by `backup.yml` and `deploy.yml`
+- [ ] A step in `deploy.yml` between the plan and the migration: dry run, then the dump when something is missing; a failing dump stops the chain and reaches the failure message
+- [ ] `tests/backup-workflow.test.ts` and `tests/deploy-workflow.test.ts` cover the requirements (the table lists live in the action only; the dump step comes after the plan and before the migration step; it runs only when a migration is missing; a failing dump stops the chain; the artifact name and retention; the dry run takes none; the secret goes through `env`)
+- [ ] The first deploy that has a migration is watched once (a `manual` row says when it was last checked)
+- [ ] The requirements are written into specs 0012 and 0026 as ACs, with their coverage rows (spec 0034 AC-6)
+
+## Spec changes
+
+Filled in when built.
+
+## Notes
+
+- The restore drill (spec 0012 AC-4) was done on the local stack only; loading a dump into a real Supabase project
+  was never tried (whether the `postgres` role may set `session_replication_role` is not verified).

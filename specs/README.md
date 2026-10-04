@@ -60,7 +60,8 @@ Claude Code is about to finish a turn with changed source files: typecheck, lint
 parallel. A failure is sent back to Claude to fix (up to 3 attempts, then you get a message). If app
 code changed but no spec did, it asks once whether behaviour changed (then the spec and its tests are
 updated) or not (then say so in one line). Run the same checks yourself with `npm run check`. E2E tests need Docker, so the
-hook doesn't run them: run `npm run e2e` before committing changes to user flows.
+hook doesn't run them: CI's "End-to-end tests" job is the authority and must be green on the pull request
+([0007](0007-ci.md) AC-8); run `npm run e2e` locally only to reproduce a failure.
 
 ## Index
 
@@ -82,7 +83,7 @@ hook doesn't run them: run `npm run e2e` before committing changes to user flows
 | [0019](0019-useful-links.md) | Useful links page | Done |
 | [0020](0020-origin-and-deploy.md) | Request origin behind the proxy; deploy files | Done |
 | [0015](0015-about-page.md) | About page | Done |
-| [0021](0021-pull-requests-only.md) | main only changes through pull requests (local pre-push guard; opening, merging and cleaning up after them with gh) | Done |
+| [0021](0021-pull-requests-only.md) | main only changes through pull requests (pre-push guard; opening, merging and cleaning up with gh); work happens in worktrees from a fresh origin/main (worktree guard hook, tidy) | Done |
 | [0022](0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Done |
 | [0024](0024-friends-sharing.md) | Sharing progress with friends | Done |
 | [0026](0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Done |
