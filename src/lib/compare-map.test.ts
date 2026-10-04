@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ComparisonRanges } from "./compare";
-import { compareDots, compareLines, WHO_COLOR, WHO_LINE_STYLE, type ComparePoint } from "./compare-map";
+import { compareDots, compareHoverText, compareLines, WHO_COLOR, WHO_LINE_STYLE, type ComparePoint } from "./compare-map";
 import { DONE } from "./map-layers";
 import type { Route } from "./route-geometry";
 
@@ -54,6 +54,7 @@ describe("spec 0003: the comparison map's lines and points", () => {
 
   const points: ComparePoint[] = (["both", "me", "them", "neither"] as const).map((who, i) => ({
     placeKey: who,
+    label: `1.${who.length}`,
     name: who,
     lat: 47,
     lng: 16 + i / 10,
@@ -73,5 +74,14 @@ describe("spec 0003: the comparison map's lines and points", () => {
     const filled = (view: "mine" | "theirs") => points.filter((p) => dot(view, p.who).fill !== "#ffffff").map((p) => p.who);
     expect(filled("mine")).toEqual(["both", "me"]);
     expect(filled("theirs")).toEqual(["both", "them"]);
+  });
+
+  it("AC-20: a point carries the key of its list row and its number, for the click and the hover", () => {
+    const f = compareDots(points, "both").features.find((p) => p.properties?.who === "me")!;
+    expect(f.properties).toMatchObject({ key: "me", label: "1.2", name: "me" });
+  });
+
+  it("AC-20: the hover shows the number, the name and the state", () => {
+    expect(compareHoverText({ label: "4.2", name: "Lokó-pihenő" }, "Only them")).toBe("4.2 Lokó-pihenő · Only them");
   });
 });
