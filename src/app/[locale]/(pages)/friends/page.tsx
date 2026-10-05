@@ -8,7 +8,7 @@ import FriendActionGroup from "@/components/FriendActionGroup";
 import FriendConfirm from "@/components/FriendConfirm";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import { friendsOn } from "@/lib/friends-flag";
+import { flagOn } from "@/lib/feature-flags-server";
 import { getFriendProgress, getFriends } from "@/lib/friends";
 import { FRIEND_NOTICES, friendsPath, REQUEST_REFUSALS, type FriendNotice } from "@/lib/friends-input";
 import { originFromHeaders } from "@/lib/origin";
@@ -33,7 +33,7 @@ export default async function FriendsPage({
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
-  if (!(await friendsOn())) notFound();
+  if (!(await flagOn("friends"))) notFound();
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);

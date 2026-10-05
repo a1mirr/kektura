@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, it } from "vitest";
-import { friendsEnabled } from "./friends-flag";
 import { getFriends, summarizeFriend } from "./friends";
 import { messageFiles } from "../../tests/message-files";
 import { FRIEND_NOTICES, friendsPath, isUuid, isValidDisplayName } from "./friends-input";
@@ -102,15 +101,6 @@ describe("spec 0024: a friend's numbers", () => {
     expect(summarizeFriend(checkpoints, [1, 11], stagesMeta).completedStages).toBe(1);
     expect(summarizeFriend(checkpoints, [1, 11, 21, 31], stagesMeta).completedStages).toBe(2);
     expect(summarizeFriend(checkpoints, [21, 31], stagesMeta).completedStages).toBe(1);
-  });
-});
-
-describe("spec 0024: feature flag", () => {
-  it("AC-15: friends are on only when FF_FRIENDS is exactly 1", () => {
-    expect(friendsEnabled({ FF_FRIENDS: "1" })).toBe(true);
-    for (const env of [{}, { FF_FRIENDS: "" }, { FF_FRIENDS: "0" }, { FF_FRIENDS: "true" }, { NEXT_PUBLIC_FF_FRIENDS: "1" }]) {
-      expect(friendsEnabled(env)).toBe(false);
-    }
   });
 });
 

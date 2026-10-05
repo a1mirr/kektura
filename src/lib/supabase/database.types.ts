@@ -34,6 +34,38 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"feature_flag_users": {
+                  Row: {
+                    "key": string,"user_id": string
+                  }
+                  Insert: {
+                    "key": string,"user_id": string
+                  }
+                  Update: {
+                    "key"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "feature_flag_users_key_fkey"
+      columns: ["key"]
+isOneToOne: false
+      referencedRelation: "feature_flags"
+      referencedColumns: ["key"]
+    }
+                  ]
+                },"feature_flags": {
+                  Row: {
+                    "key": string,"mode": string
+                  }
+                  Insert: {
+                    "key": string,"mode": string
+                  }
+                  Update: {
+                    "key"?: string,"mode"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"friendships": {
                   Row: {
                     "friend_id": string,"friend_is_sharing": boolean,"status": string,"user_id": string,"user_is_sharing": boolean
@@ -125,6 +157,11 @@ isOneToOne: false
                            },
 "delete_user_account":
 { Args: Record<PropertyKey, never>; Returns: undefined
+                           },
+"feature_flags_for_me":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "key": string,"listed": boolean,"mode": string
+            }[]
                            },
 "get_friend_stamps":
 { Args: Record<PropertyKey, never>; Returns: {

@@ -2,7 +2,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ActionResult } from "@/lib/action-result";
-import { friendsEnabled } from "@/lib/friends-flag";
+import { flagOn } from "@/lib/feature-flags-server";
 import { isUuid, isValidDisplayName, REQUEST_REFUSALS, type RequestRefusal } from "@/lib/friends-input";
 import { logFriendsError } from "@/lib/log";
 import { createRateLimiter } from "@/lib/rate-limit";
@@ -19,7 +19,7 @@ export type SendRequestResult = ActionResult | { ok: false; reason: RequestRefus
 const limiter = createRateLimiter({ limit: 30, windowMs: 60 * 60_000 });
 
 async function run<T>(name: string, limited: boolean, work: (supabase: SupabaseClient<Database>) => Promise<T>): Promise<T | Failure> {
-  if (!friendsEnabled()) return { ok: false, reason: "disabled" };
+  if (!(await flagOn("friends"))) return { ok: false, reason: "disabled" };
   try {
     const supabase = await createClient();
     const { data } = await supabase.auth.getUser();
