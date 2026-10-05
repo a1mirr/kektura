@@ -1,15 +1,14 @@
-# 0021: `main` only changes through pull requests (enforced on our side)
+# 0021: `main` only changes through pull requests
 
 Status: Done
 Owner code: `.githooks/pre-push`, `.githooks/guard.mjs`, `.claude/hooks/worktree-guard.mjs`, `scripts/tidy.mjs`,
-`package.json` (`hooks:install`, `tidy`), `.claude/settings.json` (wires the hook), `CLAUDE.md`
+`package.json` (`hooks:install`, `tidy`), `.claude/settings.json` (wires the hook), `CLAUDE.md`, `.github/rulesets/protect-main.json`
 
 ## Goal
 
-`main` is GitHub's default branch and the one that gets deployed. The owner keeps GitHub's own branch
-policy as it is (no protection rule), but wants every change to reach `main` through a pull request, so CI
-has run before it lands. Enforce that where the pushes start: a git hook that refuses a push to `main`
-on GitHub, for everybody who works in a clone of this repository, Claude Code included. The same goes for where
+`main` is GitHub's default branch and the one that gets deployed. Every change reaches `main` through a pull request, so CI
+has run before it lands. GitHub enforces that (AC-11), and the pushes are also refused where they start: a git hook
+that refuses a push to `main` on GitHub, for everybody who works in a clone of this repository, Claude Code included. The same goes for where
 the work is done: in a worktree of its own on a topic branch, not in the checkout every session shares, and the
 leftovers of a merged change are cleaned up.
 
@@ -37,7 +36,7 @@ leftovers of a merged change are cleaned up.
   reviewed commit plus, at most, wording fixes). The body file starts from a copy of
   `.github/pull_request_template.md`, which `gh` doesn't apply to `--body-file`. Merging happens on the owner's
   standing permission (given in chat on 2026-10-03, revocable) for pull requests the author wrote, once CI is green
-  and the fresh-context review (spec 0022) is done and the branch is up to date with `main` (CI's "Up to date with main", spec 0007 AC-11, shows the last run; the author checks live just before merging: `git fetch origin`, then `git merge-base --is-ancestor origin/main <full-sha>`; a branch that is behind gets `origin/main` merged in, `npm run check`, a push and a new CI run first, without a new review for what arrives from `main`); a merge deploys by itself (spec 0026); never `--admin`. After the merge the pull request's branch is deleted, remote and local, once it is
+  and the fresh-context review (spec 0022) is done (GitHub refuses to merge a branch that is behind `main`, AC-11: a branch that is behind gets `origin/main` merged in, `npm run check`, a push and a new CI run first, without a new review for what arrives from `main`); a merge deploys by itself (spec 0026); never `--admin`. After the merge the pull request's branch is deleted, remote and local, once it is
   verified (after a `git fetch`) to be contained in `main`, and never with `-D`; an open pull request based on
   the branch is retargeted to `main` first. Only branches of pull requests the author merged, or was asked to clean
   up, are deleted; the remote branch always goes, but a local branch another session has checked out is left to
@@ -97,6 +96,13 @@ leftovers of a merged change are cleaned up.
   has: the hook refuses it, and the owner makes such a worktree by hand if it is wanted. `.claude/settings.json` sets
   `worktree.baseRef` to `fresh`, so a worktree made by Claude Code's own tool starts from the remote's default branch
   and not from the checkout's HEAD (see Notes for how fresh that is).
+- **AC-11**: GitHub enforces the rule on `main` with the ruleset "Protect main", whose definition is `.github/rulesets/protect-main.json` (the
+  owner applies it with `gh api`, see Notes): `main` cannot be deleted or force-pushed; a change reaches it only by a pull request,
+  merged with a merge commit; the checks "Typecheck, lint, unit tests", "End-to-end tests" and "Review recorded" (the job names of
+  `.github/workflows/ci.yml`) must have passed, a skipped one counting as passed (spec 0007 AC-10, spec 0022 AC-5); and the branch
+  must be up to date with `main`, so two pull requests that are each green cannot break `main` together. No one can bypass it, and
+  no approval is required (one owner: the review count is 0, so the
+  rule's other approval settings, left at GitHub's defaults in the file, never make a pull request wait).
 - **AC-10**: `CLAUDE.md` says what to do when the auto-mode classifier denies a tool call: do not retry, split or
   route around it, and do not stop; say so in one line, carry on with every step that does not depend on it, and
   hand the denied command to the user at the end; commands that delete or change shared state run as a call of
@@ -104,14 +110,18 @@ leftovers of a merged change are cleaned up.
 
 ## Out of scope
 
-- GitHub-side enforcement (a branch protection rule or ruleset). The owner chose not to turn it on here;
-  on a private repository it also needs a paid GitHub plan. This hook protects only clones that installed it.
-- `git push --no-verify` skips every git hook. That stays available as the owner's escape hatch.
+- The hook protects only clones that installed it; the ruleset (AC-11) is what binds everybody.
+- `git push --no-verify` skips the local hook only; `main` on GitHub can still only be changed through a pull request, because the
+  ruleset (AC-11) refuses everything else, the owner included, until the ruleset itself is edited.
 - Opening the pull request is not part of the hook; `gh` does it (AC-6), and `git push -u origin <topic>` also
   prints GitHub's link for it.
 
 ## Notes
 
+- The ruleset is applied once, and again after a change to the file, with `gh api -X POST repos/a1mirr/kektura/rulesets --input
+  .github/rulesets/protect-main.json` (a new one) or `gh api -X PUT repos/a1mirr/kektura/rulesets/<id> --input ...` (an existing one;
+  `gh api repos/a1mirr/kektura/rulesets` lists the ids). It needs a public repository (or a paid plan). When a job is renamed in
+  `ci.yml`, the file and the live ruleset change with it, or the pull requests wait for a check that never comes.
 - The check works on what git feeds a `pre-push` hook: the remote's URL as the second argument, and one line
   per ref on stdin (`<local ref> <local sha> <remote ref> <remote sha>`). The decision is a pure function,
   `checkPush(remoteUrl, stdinText)`, in `.githooks/guard.mjs`, tested directly; the CLI wrapper is tested by
@@ -143,5 +153,7 @@ leftovers of a merged change are cleaned up.
 | AC-4 | `tests/git-hooks.test.ts` (hook script calls the guard, `hooks:install` sets `core.hooksPath`, no `prepare`/`postinstall`/`preinstall` script) |
 | AC-4 (the refusal in a clone) | manual (it needs a clone with the hook installed and a GitHub remote): `git push origin HEAD:main --dry-run` is refused. Last checked: never recorded. |
 | AC-5 | `tests/git-hooks.test.ts` (CLAUDE.md mentions the rule and `hooks:install`) |
-| AC-6 | `tests/up-to-date.test.ts` (CLAUDE.md names the job "Up to date with main" and the live check), `tests/git-hooks.test.ts` (CLAUDE.md names the three commands with the options that make them work without a terminal, the conditions for merging, the deletion of the merged branch and its check, and the install path, and has no control characters) |
+| AC-6 | `tests/git-hooks.test.ts` (CLAUDE.md names the three commands with the options that make them work without a terminal, the conditions for merging, the deletion of the merged branch and its check, and the install path, and has no control characters) |
 | AC-6 (the deletion recipe works) | manual (it needs a real GitHub branch), after any change to the recipe: on a throwaway branch, push it, merge it, then run the recipe from a detached `origin/main` and confirm that `git branch -d` succeeds and that a branch with a commit added after the merge is refused. Last checked: 2026-10-04 (only the deletion: it worked for two merges). |
+| AC-11 | `tests/ruleset.test.ts` (the file is a ruleset on the default branch with deletion, force-push and pull-request rules, merge commits only, up-to-date branches, no bypass actor; the required checks are exactly the names of the jobs of `ci.yml` that run for a pull request and nothing else) |
+| AC-11 (on GitHub) | manual (it is a repository setting): `gh api repos/a1mirr/kektura/rulesets` lists "Protect main" as active with the same checks as the file, and a pull request that is behind `main` shows "This branch is out-of-date" and cannot be merged. Last checked: never recorded. |

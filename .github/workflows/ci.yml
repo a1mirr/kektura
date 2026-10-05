@@ -33,7 +33,7 @@ jobs:
         with:
           fetch-depth: 2
       # Spec 0007 AC-10: `code_changed` is false for a pull request that changes only Markdown, and the end-to-end job
-      # then does not run. A step of this job, so that no extra job is billed for it.
+      # then does not run. A step of this job, not a job of its own.
       - name: Does the change touch more than Markdown
         id: changes
         run: node scripts/ci-changes.mjs
@@ -63,20 +63,6 @@ jobs:
       - run: node scripts/check-review-recorded.mjs
         env:
           GH_TOKEN: ${{ github.token }}
-
-  # Spec 0007 AC-11: a pull request whose base branch has moved on is flagged. GitHub's "require branches to be up to
-  # date" setting is not available for a private repository on the free plan, so this shows the state of the last run
-  # and the author checks again, live, just before merging (spec 0021 AC-6). A push to the pull request runs it again.
-  up-to-date:
-    name: Up to date with main
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - run: node scripts/check-up-to-date.mjs
 
   e2e:
     name: End-to-end tests
