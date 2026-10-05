@@ -121,7 +121,7 @@ checks, ships and is run). The headings below only group the index: moving a spe
 
 | Spec | Area | Status |
 | --- | --- | --- |
-| [0021](project/0021-pull-requests-only.md) | main only changes through pull requests (pre-push guard; opening, merging and cleaning up with gh); work happens in worktrees from a fresh origin/main (worktree guard hook, tidy) | Done |
+| [0021](project/0021-pull-requests-only.md) | main only changes through pull requests (a GitHub ruleset and a pre-push guard; opening, merging and cleaning up with gh); work happens in worktrees from a fresh origin/main (worktree guard hook, tidy) | Done |
 | [0022](project/0022-fresh-context-review.md) | A fresh-context agent reviews every change before it is merged | Done |
 | [0034](project/0034-specs-and-tasks.md) | Specs and tasks: how work is written down | Done |
 
@@ -130,7 +130,7 @@ checks, ships and is run). The headings below only group the index: moving a spe
 | Spec | Area | Status |
 | --- | --- | --- |
 | [0006](project/0006-test-server.md) | Test server with dummy login, E2E tests and how they sign in | Done |
-| [0007](project/0007-ci.md) | CI once per change (Markdown-only pull requests skip E2E), a check that a pull request is up to date with main, E2E caches and timing report, generated-types check, Dependabot | Done |
+| [0007](project/0007-ci.md) | CI once per change (Markdown-only pull requests skip E2E), E2E caches and timing report, generated-types check, Dependabot | Done |
 | [0012](project/0012-backups.md) | Weekly backup of production user data | Done |
 | [0026](project/0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Done |
 | [0035](project/0035-feature-flags.md) | Feature flags: merge a feature dark, switch it on for the developer, testers or everybody without a deploy | Done |

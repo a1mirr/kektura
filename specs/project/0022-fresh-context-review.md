@@ -79,8 +79,7 @@ author's context, and wants that to be part of how work is done here, not someth
 
 - Enforcing that the review was done and was good. GitHub can't tell whether an agent ran, so beyond the tripwire of
   AC-5 the gate is the written rule, the agent definition that makes the review one command and the checklist in
-  every pull request. The owner's own look at a pull request stays the final gate, and the job is a visible red mark,
-  not a required check (branch protection is off, spec 0021).
+  every pull request. The owner's own look at a pull request stays the final gate; the job is one of the required checks of the ruleset on `main` (spec 0021 AC-11).
 - `/code-review ultra` (a billed, multi-agent cloud review the owner starts by hand) and
   `/code-review`: they can be used as well, but they don't replace this step, which is free to run on every
   change and reads the project's own rules.
