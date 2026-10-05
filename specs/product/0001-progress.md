@@ -58,7 +58,8 @@ after it must have its stamp in the book, one who passed earlier is not missing 
   do not apply that tolerance. Escape closes the note. Without JavaScript the note is plain text (`<noscript>`).
 - **AC-20**: The count "N / 161" (and the friend's) counts stamps only and keeps its denominator: a waived place is not a stamp. A
   stage's progress counts a waived place as done, so a stage whose places are all stamped or waived is complete; the row still shows
-  it as not stamped, with the badge of AC-19.
+  it as not stamped, with the badge of AC-19. The stage's button follows the stamps alone: with a waived place unstamped it still reads
+  "Stamp stage" and marks it (AC-7).
 - **AC-21**: The date, hint, badge and note wrap under the place's name at 375 px and 320 px, in every language, and never widen
   the page.
 

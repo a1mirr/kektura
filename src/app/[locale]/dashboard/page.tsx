@@ -19,7 +19,7 @@ import {
   findStageForKm,
 } from "@/lib/progress";
 import { maxStampDate } from "@/lib/stamp-date";
-import { hasToleranceNote } from "@/lib/new-stamps";
+import { hasToleranceNote, requiredNote } from "@/lib/new-stamps";
 import LocateButton from "@/components/LocateButton";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import RequiredFrom from "@/components/RequiredFrom";
@@ -94,7 +94,7 @@ export default async function Dashboard({
         lng: Number(c.lng),
         km: placeKm.get(key)!,
         stamped: stampedPlaces.has(key),
-        ...(from ? { note: [t("requiredFrom", { date: dateText(from) }), waived.has(key) ? t("notRequired") : null].filter(Boolean).join(" · ") } : {}),
+        note: requiredNote(from ?? null, waived.has(key), { requiredFrom: (date) => t("requiredFrom", { date }), notRequired: t("notRequired") }, dateText),
       };
     });
 
@@ -152,7 +152,8 @@ export default async function Dashboard({
             {stages.map((stage) => {
               const { stage: n, meta, places: list } = stage;
               const keys = stageStampKeys(stage);
-              // A place the user was not missing (spec 0001 AC-17) counts as done for the stage, shown apart from a stamp.
+              // A place the user was not missing (spec 0001 AC-17) counts as done for the stage's progress (AC-20); the stage's
+              // button follows the stamps alone, so "Stamp stage" still marks a waived place.
               const done = countDone(list, stampedPlaces, waived);
               const stageExtras = extraListWithStage.filter((e) => e.stage === n);
               return (
@@ -174,7 +175,7 @@ export default async function Dashboard({
                       <StageStampButton
                         stampKeys={keys.stamp}
                         unstampKeys={keys.unstamp}
-                        done={done === list.length}
+                        done={list.every((p) => stampedPlaces.has(p.key))}
                       />
                     </div>
                   }

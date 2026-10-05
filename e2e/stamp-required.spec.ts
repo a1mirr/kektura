@@ -26,6 +26,9 @@ test.describe("spec 0001: stamps required from a date", () => {
     await expect(row.getByRole("button", { name: "Add stamp" })).toBeVisible(); // still unstamped, only not missing
     await expect(stat(page, "Stamps")).toHaveText("2 / 161"); // the waived place is not a stamp
     await expect(stat(page, "Kilometres")).toHaveText(kmBetweenNeighbours()); // the stretch across it is walked
+    const stage = page.locator("#stage-20"); // Mátraverebély -> Mátraháza: 6 places, 2 stamped, Vércverés waived
+    await expect(stage.locator("[aria-expanded]").first()).toContainText("3/6"); // the waived place is done for the stage's progress
+    await expect(stage.getByRole("button", { name: "Stamp stage" })).toBeVisible(); // but the button follows the stamps
 
     // The date explains itself, by click (and so by keyboard and touch).
     const why = row.getByText(/became required on that day/);
