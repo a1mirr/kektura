@@ -7,6 +7,8 @@ const mockRpc = vi.fn();
 const mockGetUser = vi.fn();
 const mockCreateClient = vi.fn();
 vi.mock("@/lib/supabase/server", () => ({ createClient: () => mockCreateClient() }));
+const mockFlagOn = vi.fn();
+vi.mock("@/lib/feature-flags-server", () => ({ flagOn: (key: string) => mockFlagOn(key) }));
 
 // Fresh module per test: the rate limiter is module state.
 async function load() {
@@ -16,7 +18,7 @@ async function load() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.stubEnv("FF_FRIENDS", "1");
+  mockFlagOn.mockResolvedValue(true);
   vi.spyOn(console, "error").mockImplementation(() => {});
   mockCreateClient.mockResolvedValue({ rpc: mockRpc, auth: { getUser: mockGetUser } });
   mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
@@ -93,11 +95,12 @@ describe("spec 0024: friends actions", () => {
   });
 
   it("AC-15: with the flag off every action says `disabled` before it touches anything", async () => {
-    vi.stubEnv("FF_FRIENDS", "");
+    mockFlagOn.mockResolvedValue(false);
     const actions = (await load()) as Record<string, (...a: unknown[]) => Promise<unknown>>;
     for (const name of ["sendRequest", "approveRequest", "ignoreRequest", "removeFriend", "setSharing", "regenerateInvite", "setDisplayName"]) {
       expect(await actions[name]("x", true), name).toEqual({ ok: false, reason: "disabled" });
     }
+    expect(mockFlagOn).toHaveBeenCalledWith("friends");
     expect(mockCreateClient).not.toHaveBeenCalled();
     expect(mockRpc).not.toHaveBeenCalled();
   });

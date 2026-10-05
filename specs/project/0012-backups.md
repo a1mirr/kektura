@@ -19,7 +19,7 @@ our own: every week, and once more before a deploy applies a migration (AC-5).
   select schemas, not tables, so the workflow dumps `auth` and `public` minus an explicit exclude list
   (every other table), and a check step fails the run, deleting the dump, if any table other than the
   six shows up in it (the dump, the exclude list and the check are the action of AC-5). Every table the migrations create in `public` is either one of the six or on the exclude
-  list (reference data, the deploy record, `user_feedback`, whose messages also reach the developer's Telegram). The dump is stored as a workflow artifact with 90-day retention.
+  list (reference data, the deploy record, the feature flag tables, which migrations seed and the developer sets, `user_feedback`, whose messages also reach the developer's Telegram). The dump is stored as a workflow artifact with 90-day retention.
 - **AC-2**: Without the secret, the workflow ends successfully with a notice saying what to configure;
   it never fails the repository's checks.
 - **AC-3**: The secret is never printed: the workflow uses only the secret reference and no

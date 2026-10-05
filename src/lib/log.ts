@@ -67,3 +67,10 @@ export function logFriendsError(action: string, error: unknown): void {
   const { code, message } = describeError(error);
   console.error(`[friends] action=${action} code=${code ?? "-"} message=${quote(message)}`);
 }
+
+// Feature flags (spec 0035 AC-9): a failed lookup.
+// The error's own code and message, never user ids, emails or the input.
+export function logFeatureFlagsError(error: unknown): void {
+  const { code, message } = describeError(error);
+  console.error(`[feature-flags] lookup failed code=${code ?? "-"} message=${quote(message)}`);
+}

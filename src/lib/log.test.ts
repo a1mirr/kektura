@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   logAccountDeletionError,
   logFeedbackError,
+  logFeatureFlagsError,
   logFeedbackNotifyFailure,
   logFriendsError,
   logStampActionError,
@@ -95,5 +96,12 @@ describe("spec 0017: feedback and account-deletion log lines", () => {
   it("spec 0014: an account deletion failure is one line with stage, user, code and message", () => {
     logAccountDeletionError("rpc", { code: "P0001", message: "Not authenticated" }, "u-2");
     expect(lineOf(errorLog)).toBe('[account-delete] stage=rpc user=u-2 code=P0001 message="Not authenticated"');
+  });
+});
+
+describe("spec 0035: feature flag log line", () => {
+  it("AC-9: one line with the code and message, nothing else", () => {
+    logFeatureFlagsError({ code: "57014", message: "timeout", details: "secret", hint: "secret" });
+    expect(lineOf(errorLog)).toBe('[feature-flags] lookup failed code=57014 message="timeout"');
   });
 });

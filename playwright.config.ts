@@ -18,7 +18,12 @@ export default defineConfig({
     locale: "en-US",
     trace: "retain-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  // The flags project switches declared flags for everybody, which the other tests must not see (spec 0035 AC-11), so
+  // it starts only when the rest has finished. Run it alone with `npx playwright test --project flags --no-deps`.
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] }, testIgnore: "feature-flags.spec.ts" },
+    { name: "flags", use: { ...devices["Desktop Chrome"] }, testMatch: "feature-flags.spec.ts", dependencies: ["chromium"] },
+  ],
   webServer: {
     command: "npm run build:e2e && npm run start:e2e",
     url: "http://localhost:3002/en",

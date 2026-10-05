@@ -133,3 +133,4 @@ checks, ships and is run). The headings below only group the index: moving a spe
 | [0007](project/0007-ci.md) | CI once per change (Markdown-only pull requests skip E2E), a check that a pull request is up to date with main, E2E caches and timing report, generated-types check, Dependabot | Done |
 | [0012](project/0012-backups.md) | Weekly backup of production user data | Done |
 | [0026](project/0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Done |
+| [0035](project/0035-feature-flags.md) | Feature flags: merge a feature dark, switch it on for the developer, testers or everybody without a deploy | Done |

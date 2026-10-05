@@ -5,7 +5,7 @@ import FriendActionButton from "@/components/FriendActionButton";
 import SignInButton from "@/components/SignInButton";
 import TestLoginForm from "@/components/TestLoginForm";
 import { routing } from "@/i18n/routing";
-import { friendsOn } from "@/lib/friends-flag";
+import { flagOn } from "@/lib/feature-flags-server";
 import { friendsPath } from "@/lib/friends-input";
 import { createClient } from "@/lib/supabase/server";
 import { testLoginEnabled } from "@/lib/test-login";
@@ -18,7 +18,7 @@ export default async function InvitePage({
 }: {
   params: Promise<{ locale: string; token: string }>;
 }) {
-  if (!(await friendsOn())) notFound();
+  if (!(await flagOn("friends"))) notFound();
   const { locale, token } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);

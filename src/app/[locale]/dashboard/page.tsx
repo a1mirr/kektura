@@ -4,7 +4,7 @@ import { getFormatter, getTranslations, setRequestLocale } from "next-intl/serve
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { loadDashboardData } from "@/lib/dashboard-data";
-import { friendsEnabled } from "@/lib/friends-flag";
+import { flagOn } from "@/lib/feature-flags-server";
 import { createClient } from "@/lib/supabase/server";
 import {
   buildPlaces,
@@ -48,7 +48,10 @@ export default async function Dashboard({
   if (!user) return redirect({ href: "/", locale });
 
   // Reference data comes from a shared server cache; only the user's own stamps hit the database (spec 0002 AC-15, AC-16).
-  const { checkpoints, extras: extraList, stamps, extraStamps } = await loadDashboardData(supabase);
+  const [showFriends, { checkpoints, extras: extraList, stamps, extraStamps }] = await Promise.all([
+    flagOn("friends"),
+    loadDashboardData(supabase),
+  ]);
   const extraDone = new Map(extraStamps.map((s) => [s.extra_id, s.stamped_on]));
   const mapExtras = extraList.map((e) => ({
     id: e.id,
@@ -98,7 +101,7 @@ export default async function Dashboard({
         <h1 className="text-2xl font-bold text-blue-700">{t("title")}</h1>
         <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
           <LocaleSwitcher />
-          {friendsEnabled() && (
+          {showFriends && (
             <Link href="/friends" className="text-sm text-stone-600 hover:underline">
               {t("friends")}
             </Link>

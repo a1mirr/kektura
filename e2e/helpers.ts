@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, type Page } from "@playwright/test";
+import { psql } from "./local-db";
 
 // Signs in through the dummy login with this email; the account is created on first use (spec 0006 AC-3).
 // Posts to the route the form submits to instead of loading the landing page and filling in the form
@@ -60,4 +61,18 @@ export function measureDescriptions(page: Page) {
     );
     return { measured: rows.length, clipped: rows.filter((r) => r.clipped).map((r) => r.id) };
   });
+}
+
+// Switches a feature flag in the local database (spec 0035 AC-11): its mode, and for `allowlist` the users it is on
+// for. The change shows on the next request. The flags are global, so a test that changes a declared flag belongs
+// in e2e/feature-flags.spec.ts (a project that runs alone, after the others) and puts it back when it is done.
+export function setFeatureFlag(key: string, mode: "off" | "allowlist" | "on", allowedEmails: string[] = []) {
+  const quote = (text: string) => `'${text.replaceAll("'", "''")}'`;
+  psql(
+    `update public.feature_flags set mode = ${quote(mode)} where key = ${quote(key)};` +
+      `delete from public.feature_flag_users where key = ${quote(key)};` +
+      (allowedEmails.length
+        ? `insert into public.feature_flag_users (key, user_id) select ${quote(key)}, id from auth.users where email in (${allowedEmails.map(quote).join(", ")});`
+        : ""),
+  );
 }
