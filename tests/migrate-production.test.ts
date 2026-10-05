@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { baselineFiles, migrationFiles, pendingMigrations, redact } from "../scripts/lib/deploy.mjs";
+import { baselineFiles, dropDetails, migrationFiles, pendingMigrations, redact } from "../scripts/lib/deploy.mjs";
 import { cli, createPsql, migrate, Problem } from "../scripts/migrate-production.mjs";
 
 const URL_WITH_SECRET = "postgresql://postgres.abcd:p%40ss%2Fword@aws-0-eu.pooler.supabase.com:5432/postgres";
@@ -245,6 +245,21 @@ describe("spec 0026: migrations", () => {
     it("reports a psql that cannot start as a failure", () => {
       const psql = createPsql(URL_WITH_SECRET, () => ({ status: null, stdout: null, stderr: null, error: new Error("spawn psql ENOENT") }));
       expect(psql(["-c", "select 1"]).status).not.toBe(0);
+    });
+
+    it("AC-13: a failing migration's output loses psql's DETAIL lines, which quote the failing row (the logs of a public repository are public)", () => {
+      const stderr = 'psql:0002_more.sql:3: ERROR:  duplicate key value violates unique constraint "users_email_key"\nDETAIL:  Key (email)=(someone@example.hu) already exists.';
+      const psql = () => ({ status: 3, stdout: "", stderr });
+      expect(dropDetails(stderr)).toBe('psql:0002_more.sql:3: ERROR:  duplicate key value violates unique constraint "users_email_key"');
+      const fail = fakeDb({ applied: ["0001_init.sql"] });
+      const wrapped = (args: string[]) => (args.includes("-f") ? psql() : fail.psql(args));
+      expect(() => run({ psql: wrapped })).toThrow(/duplicate key value violates unique constraint/);
+      try {
+        run({ psql: wrapped });
+      } catch (error) {
+        expect((error as Error).message).not.toContain("someone@example.hu");
+        expect((error as Error).message).not.toContain("DETAIL");
+      }
     });
 
     it("redact removes the whole string, the password (raw and decoded) and user:password", () => {

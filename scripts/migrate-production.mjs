@@ -10,7 +10,7 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { baselineFiles, migrationFiles, pendingMigrations, redact } from "./lib/deploy.mjs";
+import { baselineFiles, dropDetails, migrationFiles, pendingMigrations, redact } from "./lib/deploy.mjs";
 
 /** A problem to tell the user about. Thrown, not process.exit(): see the Windows note in CLAUDE.md. */
 export class Problem extends Error {}
@@ -49,7 +49,7 @@ export function migrate({ psql, dir, names, baseline, dryRun = false, url = "", 
   const files = migrationFiles(names);
   const run = (args, what) => {
     const result = psql(args);
-    if (result.status !== 0) throw new Problem(`${what} failed:\n${redact(result.stderr.trim() || result.stdout.trim(), url)}`);
+    if (result.status !== 0) throw new Problem(`${what} failed:\n${redact(dropDetails(result.stderr.trim() || result.stdout.trim()), url)}`);
     return result.stdout;
   };
 
@@ -100,7 +100,7 @@ export function migrate({ psql, dir, names, baseline, dryRun = false, url = "", 
     // One transaction per file: the file and its record commit together, or neither does.
     const result = psql(["-1", "-f", file, "-c", `insert into public.applied_migrations (file_name) values (${quote(name)})`]);
     if (result.status !== 0) {
-      throw new Problem(`Migration ${name} failed and was rolled back; nothing was recorded.\n${redact(result.stderr.trim(), url)}`);
+      throw new Problem(`Migration ${name} failed and was rolled back; nothing was recorded.\n${redact(dropDetails(result.stderr.trim()), url)}`);
     }
     done.push(name);
     log(`Applied ${name}.`);

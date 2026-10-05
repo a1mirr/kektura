@@ -47,6 +47,14 @@ export function baselineFiles(files, baseline) {
   return files.filter((file) => file <= baseline);
 }
 
+/** `text` without psql's `DETAIL:` lines, which quote the values of the row that failed (AC-13: a public repository's logs are public). */
+export function dropDetails(text) {
+  return text
+    .split("\n")
+    .filter((line) => !/^\s*DETAIL:/.test(line))
+    .join("\n");
+}
+
 /** `text` with the connection string, the password and the user:password part replaced (AC-13). */
 export function redact(text, connectionString) {
   const secrets = new Set([connectionString]);

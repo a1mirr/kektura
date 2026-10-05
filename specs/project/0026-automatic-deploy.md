@@ -39,7 +39,7 @@ spec, then the code):
 Also on 2026-10-03: the owner gave the author a standing permission to merge the author's own pull requests once CI
 is green and the fresh review is done (`CLAUDE.md`, spec 0021 AC-6). With no approval gate, such a merge is a deploy.
 
-Taken on 2026-10-04 (the owner may overrule): the backup before a migration (AC-14) stores the dump as a workflow
+The backup before a migration (AC-14) stores the dump as a workflow
 artifact, encrypted to the owner's public certificate (spec 0012 AC-6: a public repository's artifacts are open to everyone); it dumps only the six
 user-data tables, because the schema and the reference data come back from git (migrations and seeds); and it is taken
 only when a migration is missing, so a deploy that changes no schema is as fast as before. Restore: spec 0012, Notes.
@@ -86,7 +86,8 @@ Secrets (repository secrets, used by `deploy.yml` only; `SUPABASE_DB_URL` and `B
   refuses to run unless it is given `--baseline <file>` (the `baseline` input of a manual run), which records
   that file and every file that sorts before it as applied, without running them: the owner checks first that
   production has them. `--baseline` on a table that already has records is refused. Secrets, and the database
-  password in particular, never appear in its output.
+  password in particular, never appear in its output, and neither does a row of user data: psql's `DETAIL:` lines, which
+  quote the values of a failing row, are dropped from the errors it prints (the logs of a public repository are public).
 
 - **AC-14**: Before the first missing migration is applied, the deploy dumps the user data with the action of spec
   0012 AC-5 (the same six tables, the same check) and stores the dump as the workflow artifact `pre-migration-<sha7>`
@@ -186,8 +187,8 @@ seeds (spec 0004) and clearing the dashboard cache afterwards, which stay manual
 | --- | --- |
 | AC-1, AC-2, AC-3, AC-10 | `tests/ci-workflow.test.ts` (the end-to-end job runs for every push), `tests/deploy-workflow.test.ts` (the trigger and its conditions, the commit picked (the newest whose CI passed), a run started from the Actions tab only from `main` and only for a commit CI passed, the concurrency group on the job and a separate one for dry runs, a timeout on the push step, the `dry_run` input, read-only permissions, secrets only in `env`, none echoed) |
 | AC-14 | `tests/deploy-workflow.test.ts` (the dry-run step after the plan and before the dump and the migrations, the dump step after the plan and before the migration step, only when a migration is missing and never in a dry run, the artifact name and retention, the connection string through `env`, no `continue-on-error` and no status function on the migration step, the failure message names the step), `tests/migrate-production.test.ts` (the dry run writes `missing=true\|false`, also with a baseline), `tests/notify-telegram.test.ts` (the message names the backup), `tests/backup-workflow.test.ts` (the shared action, spec 0012 AC-5) |
-| AC-14 (on GitHub) | manual (it needs a real run with a missing migration): the first deploy that applies a migration stores `pre-migration-<sha7>` before the migration step runs and the artifact opens as a dump; a manual dry run says that a dump would be taken and stores none. Last checked: never recorded. |
-| AC-4, AC-6, AC-13 | `tests/migrate-production.test.ts` (order, recorded in the same transaction, skipped when recorded, a file that sorts before the latest applied one, stop at the first failure, the baseline rules, the password redacted) |
+| AC-14 (on GitHub) | manual (it needs a real run with a missing migration): the first deploy that applies a migration stores `pre-migration-<sha7>` before the migration step runs and the artifact holds one `.sql.cms` file that the owner's private key decrypts (spec 0012 AC-6) to a dump; a manual dry run says that a dump would be taken and stores none. Last checked: never recorded. |
+| AC-4, AC-6, AC-13 | `tests/migrate-production.test.ts` (order, recorded in the same transaction, skipped when recorded, a file that sorts before the latest applied one, stop at the first failure, the baseline rules, the password redacted, the `DETAIL:` lines dropped) |
 | AC-4, AC-13 (against a real database) | manual (it runs the script against a database through `docker exec psql`): the real `migrate()` against the local test database: refused without a baseline, a baseline recorded without running its files, a failing file rolled back with nothing recorded and the later file not tried, the record table with row level security and no grants for the API roles, a second run applying nothing, a baseline on a table with records refused. Repeat after any change to the SQL in `scripts/migrate-production.mjs`. Last checked: 2026-10-03. |
 | AC-5 | `tests/review-process.test.ts` (the reviewer's brief, spec 0022 and `CLAUDE.md` ask for it); manual (judgement): the reviewer checks every migration against it. Last checked: every pull request. |
 | AC-7 | `tests/deploy.test.ts` (the hook, spec 0020), `tests/deploy-workflow.test.ts` (pushes only to `production`, never forced; fails unless the hook's `Deployed <sha>` line comes back, and the hook prints exactly that; the gate script allows only that repository: run for real on Linux) |
