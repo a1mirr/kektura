@@ -71,6 +71,7 @@
     "requiredWhy": "This stamp became required on that day; a hiker who walked earlier is not missing it.",
     "requiredTolerance": "The MTSZ allows a one-month tolerance after the date when a booklet is inspected.",
     "requiredHint": "New stamp: needed if you walked this stretch from that day on.",
+    "requiredHintFriend": "New stamp: needed if the stretch was walked from that day on.",
     "notRequired": "Not required for your walk",
     "notRequiredFriend": "Not required for their walk",
     "mapAttribution": "© OpenStreetMap contributors · route: MTSZ",

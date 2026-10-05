@@ -71,6 +71,7 @@
     "requiredWhy": "Dieser Stempel ist ab diesem Tag erforderlich; wer früher gewandert ist, dem fehlt er nicht.",
     "requiredTolerance": "Der MTSZ gewährt bei der Prüfung des Stempelhefts nach dem Datum einen Monat Nachfrist.",
     "requiredHint": "Neuer Stempel: nötig, wenn du den Abschnitt ab diesem Tag gewandert bist.",
+    "requiredHintFriend": "Neuer Stempel: nötig, wenn der Abschnitt ab diesem Tag gewandert wurde.",
     "notRequired": "Für deine Wanderung nicht erforderlich",
     "notRequiredFriend": "Für diese Wanderung nicht erforderlich",
     "mapAttribution": "© OpenStreetMap-Mitwirkende · Route: MTSZ",

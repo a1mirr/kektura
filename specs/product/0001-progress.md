@@ -50,12 +50,12 @@ after it must have its stamp in the book, one who passed earlier is not missing 
   after, so the walked ranges, km, percent and the map's blue line are the same as before the place existed. A stretch whose
   neighbours were stamped on or after the date still needs the new stamp.
 - **AC-19**: Every place with a `requiredFrom` shows, in its row (also on a friend's page, spec 0024 AC-7), "Stamp required from
-  <date>" in the page's language, a short hint ("New stamp: needed if you walked this stretch from that day on") and, when it is
+  <date>" in the page's language, a short hint ("New stamp: needed if you walked this stretch from that day on"; on a friend's page worded for them) and, when it is
   waived, the badge "Not required for your walk" (on a friend's page: "Not required for their walk"), which is words, not colour alone. The date is a
   button, reachable by tap and keyboard, that opens a note: "This stamp became required on that day; a hiker who walked earlier is
   not missing it." For a stamp the MTSZ announced a one-month tolerance for (`tolerance_note` in the dates file, spec 0004 AC-10:
   the announcements of 2025 and 2026) the note adds that the MTSZ allows a month after the date when a booklet is inspected. The stats
-  do not apply that tolerance. Escape closes the note.
+  do not apply that tolerance. Escape closes the note. Without JavaScript the note is plain text (`<noscript>`).
 - **AC-20**: The count "N / 161" (and the friend's) counts stamps only and keeps its denominator: a waived place is not a stamp. A
   stage's progress counts a waived place as done, so a stage whose places are all stamped or waived is complete; the row still shows
   it as not stamped, with the badge of AC-19.

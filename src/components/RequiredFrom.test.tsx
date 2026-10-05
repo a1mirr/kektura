@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
+import { renderToString } from "react-dom/server";
 import { afterEach, describe, expect, it } from "vitest";
 import messages from "../../messages/en.json";
 import RequiredFrom from "./RequiredFrom";
@@ -31,10 +32,26 @@ describe("spec 0001: the date a stamp is required from", () => {
     expect(screen.queryByText(messages.dashboard.requiredHint)).toBeNull();
   });
 
-  it("AC-19: on a friend's page the waiver is theirs, not the viewer's", () => {
+  it("AC-19: on a friend's page the waiver and the hint are theirs, not the viewer's", () => {
     setup({ waived: true, who: "friend" });
     expect(screen.getByText(messages.dashboard.notRequiredFriend)).toBeTruthy();
     expect(screen.queryByText(messages.dashboard.notRequired)).toBeNull();
+    cleanup();
+    setup({ who: "friend" });
+    expect(screen.getByText(messages.dashboard.requiredHintFriend)).toBeTruthy();
+    expect(screen.queryByText(messages.dashboard.requiredHint)).toBeNull();
+  });
+
+  it("AC-19: the note is also plain text for a page without JavaScript", () => {
+    // React leaves a noscript empty in the browser; the server-rendered HTML is what a visitor without JavaScript gets.
+    const html = renderToString(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <RequiredFrom requiredFrom="2025-05-08" waived={false} tolerance />
+      </NextIntlClientProvider>,
+    );
+    const note = html.match(/<noscript>(.*?)<\/noscript>/)![1];
+    expect(note).toContain(messages.dashboard.requiredWhy);
+    expect(note).toContain(messages.dashboard.requiredTolerance);
   });
 
   it("AC-19: the date is a button (keyboard and touch) that opens the explanation, and Escape closes it", () => {

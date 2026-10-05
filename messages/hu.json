@@ -71,6 +71,7 @@
     "requiredWhy": "Ez a bélyegző ettől a naptól kötelező; aki korábban járta be, annak nem hiányzik.",
     "requiredTolerance": "Az MTSZ az igazolófüzet ellenőrzésekor a dátum után egy hónap türelmi időt ad.",
     "requiredHint": "Új bélyegző: akkor kell, ha a szakaszt ettől a naptól kezdve jártad be.",
+    "requiredHintFriend": "Új bélyegző: akkor kell, ha a szakaszt ettől a naptól kezdve járták be.",
     "notRequired": "A te túrádhoz nem kötelező",
     "notRequiredFriend": "Az ő túrájához nem kötelező",
     "mapAttribution": "© az OpenStreetMap közreműködői · útvonal: MTSZ",
