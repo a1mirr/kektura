@@ -131,7 +131,7 @@ comes back byte for byte after `openssl cms -decrypt -binary`.
 accepted the table list and the artifact `user-data-backup` was stored). **Not verified**: that production's
 `postgres` role may set `session_replication_role` when the dump is loaded (if not, delete that first line from
 the file; `pg_dump` already orders the tables so that foreign keys hold, but this is untested), and that the
-no-secret path ends green with the notice (it can't be run without removing the secret).
+no-secret path ends green with the notice (it ran for the first time when `BACKUP_PUBLIC_KEY` was still missing, so check the run's summary when you add the secrets).
 
 ## Coverage
 

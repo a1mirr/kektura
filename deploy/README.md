@@ -101,7 +101,7 @@ to rotate the key. Until the three deploy secrets of step 5 (`DEPLOY_SSH_KEY`, `
    with `ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub` on the server) and `SUPABASE_DB_URL` (it exists for the
    backup: the session pooler string of the `postgres` role, which can change the schema). Optional:
    `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (the same bot as the feedback form) for failure messages.
-6. Delete the two key files from your computer.
+6. Delete the two deploy key files (`gha-deploy` and `gha-deploy.pub`) from your computer. Keep the backup private key (`backup-private.pem`, spec 0012, Notes): without it no backup can be opened.
 7. **First run**, because the migration script never guesses what production has: check in Supabase that production
    has every file in `supabase/migrations/` (today the newest is `0024_friends.sql`). Then run Deploy by hand with
    `dry_run` ticked and `baseline` set to that file name and read the summary; run it again with `dry_run` unticked:

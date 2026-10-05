@@ -88,8 +88,9 @@ Secrets (repository secrets, used by `deploy.yml` only; `SUPABASE_DB_URL` and `B
   production has them. `--baseline` on a table that already has records is refused. Secrets, and the database
   password in particular, never appear in its output, and neither does the `DETAIL:` part of a psql error (it quotes the values of a failing
   row, newlines inside a value included), which is dropped from the errors it prints because the logs of a public repository
-  are public. The error message itself stays; a migration that casts user data can still name a value in it, which a
-  migration tested locally first does not do.
+  are public. The error message itself stays, and it can quote a production value (a cast that fails on a user's text,
+  say), which a local test database does not reveal: write a migration that converts user data so that it cannot fail
+  on a value.
 
 - **AC-14**: Before the first missing migration is applied, the deploy dumps the user data with the action of spec
   0012 AC-5 (the same six tables, the same check) and stores the dump as the workflow artifact `pre-migration-<sha7>`
