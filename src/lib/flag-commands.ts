@@ -31,7 +31,7 @@ export type PressResult = { reply?: BotReply; notice?: string };
 
 const HELP = [
   "Flag commands (/flags shows a panel with buttons for the same):",
-  "/flags - every flag with its mode",
+  "/flags - every flag with its mode, a button each",
   "/flag <key> <off|allowlist|on> - set a mode (on asks for /confirm)",
   "/allow <key> <email> - add a user to a flag's allowlist",
   "/deny <key> <email> - remove a user from it",
@@ -41,9 +41,10 @@ const FAILED = "Failed: nothing was changed. The reason is in the server log.";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,255}$/;
 
-// The data of the buttons (AC-31): `m:<key>:<mode>:<shown>` sets a mode, knowing the mode the panel showed; `u:<key>`
-// opens an allowlist; `d:<key>:<user id>` removes one user from it; `p` shows the panel again.
+// The data of the buttons (AC-31): `f:<key>` opens one flag; `m:<key>:<mode>:<shown>` sets a mode, knowing the mode the
+// view showed; `u:<key>` opens an allowlist; `d:<key>:<user id>` removes one user from it; `p` shows the list again.
 export const callbackData = {
+  flag: (key: FlagKey) => `f:${key}`,
   mode: (key: FlagKey, mode: FlagMode, shown: FlagMode) => `m:${key}:${mode}:${shown}`,
   users: (key: FlagKey) => `u:${key}`,
   remove: (key: FlagKey, userId: string) => `d:${key}:${userId}`,
@@ -67,26 +68,32 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
     return row && isFlagMode(row.mode) ? row.mode : FLAGS[key].default;
   };
 
-  // Every declared flag with its description and mode, and under each its three mode buttons (the current one marked)
-  // and, for an allowlist, a button that opens it (AC-17, AC-27).
+  // A flag's mode as the panels write it: "friends: allowlist, 2 users", "friends: off (default)" (AC-17).
+  const summary = (rows: StoredFlagSummary[], key: FlagKey): string => {
+    const row = rows.find((r) => r.key === key);
+    const mode = modeOf(rows, key);
+    return `${key}: ${mode}${mode === "allowlist" ? `, ${plural(row?.users ?? 0)}` : ""}${row ? "" : " (default)"}`;
+  };
+
+  // Every declared flag with its mode, one line and one button each; a button opens the flag (AC-17, AC-27).
   async function panel(note?: string): Promise<BotReply> {
     const rows = await store.list();
-    const lines = FLAG_KEYS.map((key) => {
-      const row = rows.find((r) => r.key === key);
-      const mode = modeOf(rows, key);
-      const users = mode === "allowlist" ? `, ${plural(row?.users ?? 0)}` : "";
-      return `${key}: ${mode}${users}${row ? "" : " (default)"}\n  ${FLAGS[key].description}`;
-    });
-    const keyboard: InlineKeyboard = FLAG_KEYS.flatMap((key) => {
-      const mode = modeOf(rows, key);
-      const buttons = [
-        FLAG_MODES.map((target) => ({ text: target === mode ? `● ${target}` : target, callback_data: callbackData.mode(key, target, mode) })),
-      ];
-      const users = rows.find((r) => r.key === key)?.users ?? 0;
-      if (mode === "allowlist" || users > 0) buttons.push([{ text: `${key}: ${plural(users)}`, callback_data: callbackData.users(key) }]);
-      return buttons;
-    });
-    return { text: [note, lines.join("\n")].filter(Boolean).join("\n\n"), keyboard };
+    const keyboard: InlineKeyboard = FLAG_KEYS.map((key) => [{ text: summary(rows, key), callback_data: callbackData.flag(key) }]);
+    return { text: [note, FLAG_KEYS.map((key) => summary(rows, key)).join("\n")].filter(Boolean).join("\n\n"), keyboard };
+  }
+
+  // One flag: its description and mode, the three mode buttons (the current one marked), for an allowlist or a flag with
+  // users a button that opens it, and Back to the list (AC-27).
+  async function flagPanel(key: FlagKey, note?: string): Promise<BotReply> {
+    const rows = await store.list();
+    const mode = modeOf(rows, key);
+    const users = rows.find((r) => r.key === key)?.users ?? 0;
+    const keyboard: InlineKeyboard = [
+      FLAG_MODES.map((target) => ({ text: target === mode ? `● ${target}` : target, callback_data: callbackData.mode(key, target, mode) })),
+    ];
+    if (mode === "allowlist" || users > 0) keyboard.push([{ text: `${key}: ${plural(users)}`, callback_data: callbackData.users(key) }]);
+    keyboard.push([{ text: "‹ Back", callback_data: callbackData.panel }]);
+    return { text: [note, `${summary(rows, key)}\n  ${FLAGS[key].description}`].filter(Boolean).join("\n\n"), keyboard };
   }
 
   // The users of one flag's allowlist, each with a Remove button (AC-29).
@@ -97,7 +104,7 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
     const more = users.length > shown.length ? `\nand ${users.length - shown.length} more` : "";
     const keyboard: InlineKeyboard = [
       ...shown.map((user) => [{ text: `Remove ${shorten(user.name)}`, callback_data: callbackData.remove(key, user.id) }]),
-      [{ text: "‹ Back", callback_data: callbackData.panel }],
+      [{ text: "‹ Back", callback_data: callbackData.flag(key) }],
     ];
     return { text: [note, head + more, "Add one with /allow " + key + " <email>."].filter(Boolean).join("\n\n"), keyboard };
   }
@@ -155,13 +162,13 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
   // (changed in the dashboard, or from another message) nothing is applied and the panel is shown as it is.
   async function pressMode(key: FlagKey, target: FlagMode, shown: FlagMode): Promise<PressResult> {
     const current = modeOf(await store.list(), key);
-    if (current !== shown) return { reply: await panel(`${key} is ${current} now, not ${shown}: nothing was changed.`), notice: "Changed since: nothing applied" };
+    if (current !== shown) return { reply: await flagPanel(key, `${key} is ${current} now, not ${shown}: nothing was changed.`), notice: "Changed since: nothing applied" };
     if (target === current) return { notice: `${key} is already ${current}` };
     if (target === "on") {
-      return { reply: { text: askToConfirm(key), keyboard: [[{ text: "‹ Back", callback_data: callbackData.panel }]] }, notice: "Send /confirm" };
+      return { reply: { text: askToConfirm(key), keyboard: [[{ text: "‹ Back", callback_data: callbackData.flag(key) }]] }, notice: "Send /confirm" };
     }
     const done = await apply(key, target);
-    return { reply: await panel(done), notice: done };
+    return { reply: await flagPanel(key, done), notice: done };
   }
 
   // A tap on Remove (AC-29): whoever is no longer listed is only a refreshed list.
@@ -204,6 +211,7 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
       try {
         if (kind === "p" && data === callbackData.panel) return { reply: await panel() };
         if (!key || !isFlagKey(key)) return {};
+        if (kind === "f" && data === callbackData.flag(key)) return { reply: await flagPanel(key) };
         if (kind === "m" && third && fourth && isFlagMode(third) && isFlagMode(fourth) && data === callbackData.mode(key, third, fourth)) {
           return await pressMode(key, third, fourth);
         }
