@@ -56,6 +56,14 @@ describe("spec 0035: the Telegram webhook", () => {
     expect(send).not.toHaveBeenCalled();
   });
 
+  it("AC-14: every other method is an empty 404 too, whatever is configured", async () => {
+    const route = await import("./route");
+    for (const method of ["GET", "HEAD", "PUT", "PATCH", "DELETE", "OPTIONS"] as const) {
+      const response = await route[method]();
+      expect([response.status, await response.text()], method).toEqual([404, ""]);
+    }
+  });
+
   it("AC-14: without the bot configured it is a 404 too", async () => {
     vi.stubEnv("TELEGRAM_BOT_TOKEN", "");
     expect((await (await load())(post("/flags"))).status).toBe(404);

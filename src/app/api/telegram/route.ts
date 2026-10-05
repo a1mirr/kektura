@@ -42,6 +42,15 @@ const NOT_CONFIGURED = "Flag commands are not configured on the server (SUPABASE
 
 const empty = (status: number) => new Response(null, { status });
 
+// Any other method is as absent as the address: Next would answer 405 for a method the route does not export, which
+// shows that something lives here (AC-14).
+export const GET = () => empty(404);
+export const HEAD = GET;
+export const PUT = GET;
+export const PATCH = GET;
+export const DELETE = GET;
+export const OPTIONS = GET;
+
 export async function POST(request: Request): Promise<Response> {
   const config = telegramConfig();
   const secret = process.env.TELEGRAM_WEBHOOK_SECRET?.trim();

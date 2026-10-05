@@ -75,7 +75,7 @@ The owner writes to the feedback bot (spec 0017); Telegram delivers the messages
 route is under `/api`, so the proxy and the language routing leave it alone.
 
 - **AC-14**: The route answers only a request that carries the header `X-Telegram-Bot-Api-Secret-Token` equal to the server
-  variable `TELEGRAM_WEBHOOK_SECRET` (compared in constant time). Anything else gets an empty 404, so the address reveals
+  variable `TELEGRAM_WEBHOOK_SECRET` (compared in constant time). Anything else, and every other method, gets an empty 404, so the address reveals
   nothing; without the variable, or without the bot configured (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`), it is a 404 for
   everybody.
 - **AC-15**: Only the owner is obeyed: the update's chat id and the sender's id must both equal `TELEGRAM_CHAT_ID`. A message
@@ -154,6 +154,7 @@ environment settings (those stay environment variables); per-flag analytics; a v
 | AC-14, AC-15, AC-16 | `src/lib/telegram-webhook.test.ts` (the secret comparison, what an update is, who is the owner, the duplicate memory); `src/proxy.test.ts` (the proxy skips `/api/telegram`) |
 | AC-17 to AC-22, AC-24 | `src/lib/flag-commands.test.ts` (every command, refusal, the 60 seconds, the help, the order of database and answer, the log lines), `src/lib/log.test.ts` |
 | AC-17, AC-23 | `tests/flag-admin-database.test.ts` (against the local database: only `service_role` may call the functions, they are `security definer` with an empty `search_path`, idempotent, email lookup, `no_account`, `no_flag`, `bad_mode`; and the real route with the real database, only the message to Telegram caught: `/flags`, `/allow`, `/deny`, `/flag` and `/confirm`) |
-| AC-14, AC-26 | `e2e/telegram-webhook.spec.ts` (on the test server the route is an empty 404) |
+| AC-14, AC-26 | `e2e/telegram-webhook.spec.ts` (on the test server the route is an empty 404, for every method) |
+| AC-23 (the key) | `tests/service-role-key.test.ts` (only the webhook route imports the service client) |
 | AC-26 | `tests/telegram-webhook-script.test.ts` and `tests/telegram-check.test.ts` (the scripts against a fake Telegram API on localhost; the token and the secret are never printed), `tests/test-server-env.test.ts` (the test server has no secret or key) |
 | AC-26 (the real bot) | manual (it needs the real bot and the production site): `npm run telegram:webhook -- set`, then `/flags`, `/flag friends allowlist` and `/flags` again from the phone. Last checked: never recorded. |
