@@ -4,9 +4,11 @@
 # skipped (AC-12).
 #
 # Needs the repository secrets DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS and SUPABASE_DB_URL (setup: deploy/README.md);
-# TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are optional (a failure message). Without the first three the run ends
-# with a notice, so this file can be merged before they exist. Secrets are only ever referenced in a step's `env`,
-# never printed: no `set -x`, no echo of them.
+# TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are optional (a failure message). BACKUP_PUBLIC_KEY (the certificate the
+# pre-migration dump is encrypted to, spec 0012) is needed only by a deploy that has a migration to apply: without it
+# that deploy stops at the backup step, before the migration, and a deploy without a migration is unaffected.
+# Without the first three the run ends with a notice, so this file can be merged before they exist. Secrets are only
+# ever referenced in a step's `env`, never printed: no `set -x`, no echo of them.
 name: Deploy
 
 on:
@@ -188,9 +190,11 @@ jobs:
         timeout-minutes: 10
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_PUBLIC_KEY: ${{ secrets.BACKUP_PUBLIC_KEY }}
         uses: ./.github/actions/dump-user-data
         with:
           db-url: ${{ env.SUPABASE_DB_URL }}
+          encryption-cert: ${{ env.BACKUP_PUBLIC_KEY }}
           artifact-name: pre-migration-${{ env.TARGET_SHA7 }}
           retention-days: 30
 

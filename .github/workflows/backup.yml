@@ -1,9 +1,10 @@
 # Spec 0012. Weekly dump of the data users entered (accounts and stamps) from the production
-# database, kept as a workflow artifact for 90 days. The dump itself, its check and the upload are the composite
-# action .github/actions/dump-user-data, which the deploy workflow uses too (spec 0026). Restore steps:
-# spec 0012.
-# Needs the repository secret SUPABASE_DB_URL (session pooler connection string); without it the
-# run succeeds with a notice. The secret is only ever referenced, never printed: no `set -x`.
+# database, kept as an ENCRYPTED workflow artifact for 90 days (the artifacts of a public repository can be downloaded
+# by everyone). The dump itself, its check, its encryption and the upload are the composite action
+# .github/actions/dump-user-data, which the deploy workflow uses too (spec 0026). Restore steps: spec 0012.
+# Needs the repository secrets SUPABASE_DB_URL (session pooler connection string) and BACKUP_PUBLIC_KEY (the public
+# certificate the dump is encrypted to); without them the run succeeds with a notice. The secrets are only ever
+# referenced, never printed: no `set -x`.
 name: Backup
 
 on:
@@ -21,11 +22,11 @@ jobs:
     timeout-minutes: 20
     env:
       # A step's `if` can't read secrets, so only whether it is set goes into a variable.
-      CONFIGURED: ${{ secrets.SUPABASE_DB_URL != '' }}
+      CONFIGURED: ${{ secrets.SUPABASE_DB_URL != '' && secrets.BACKUP_PUBLIC_KEY != '' }}
     steps:
       - name: Notice when the secret is missing
         if: env.CONFIGURED != 'true'
-        run: echo "::notice title=Backup skipped::Add the repository secret SUPABASE_DB_URL (the Supabase session pooler connection string, percent-encoded) under Settings, Secrets and variables, Actions."
+        run: echo "::notice title=Backup skipped::Add the repository secrets SUPABASE_DB_URL (the Supabase session pooler connection string, percent-encoded) and BACKUP_PUBLIC_KEY (the public certificate the dump is encrypted to, spec 0012) under Settings, Secrets and variables, Actions."
 
       - uses: actions/checkout@v7
         if: env.CONFIGURED == 'true'
@@ -39,8 +40,10 @@ jobs:
         if: env.CONFIGURED == 'true'
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_PUBLIC_KEY: ${{ secrets.BACKUP_PUBLIC_KEY }}
         uses: ./.github/actions/dump-user-data
         with:
           db-url: ${{ env.SUPABASE_DB_URL }}
+          encryption-cert: ${{ env.BACKUP_PUBLIC_KEY }}
           artifact-name: user-data-backup
           retention-days: 90

@@ -40,13 +40,13 @@ Also on 2026-10-03: the owner gave the author a standing permission to merge the
 is green and the fresh review is done (`CLAUDE.md`, spec 0021 AC-6). With no approval gate, such a merge is a deploy.
 
 Taken on 2026-10-04 (the owner may overrule): the backup before a migration (AC-14) stores the dump as a workflow
-artifact, not encrypted and without a new secret (the repository is private with one owner); it dumps only the six
+artifact, encrypted to the owner's public certificate since 2026-10-05 (spec 0012 AC-6: a public repository's artifacts are open to everyone); it dumps only the six
 user-data tables, because the schema and the reference data come back from git (migrations and seeds); and it is taken
 only when a migration is missing, so a deploy that changes no schema is as fast as before. Restore: spec 0012, Notes.
 
-Secrets (repository secrets, used by `deploy.yml` only; `SUPABASE_DB_URL` is also used by `backup.yml`): `DEPLOY_SSH_KEY` (private key), `DEPLOY_KNOWN_HOSTS`
-(the droplet's host key line, from `ssh-keyscan`), `SUPABASE_DB_URL` (exists), `TELEGRAM_BOT_TOKEN` and
-`TELEGRAM_CHAT_ID` (optional).
+Secrets (repository secrets, used by `deploy.yml` only; `SUPABASE_DB_URL` and `BACKUP_PUBLIC_KEY` are also used by `backup.yml`): `DEPLOY_SSH_KEY` (private key), `DEPLOY_KNOWN_HOSTS`
+(the droplet's host key line, from `ssh-keyscan`), `SUPABASE_DB_URL` (exists), `BACKUP_PUBLIC_KEY` (the certificate the backup is encrypted to, spec 0012 AC-6),
+`TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (optional).
 
 ## Behaviour
 
@@ -94,7 +94,9 @@ Secrets (repository secrets, used by `deploy.yml` only; `SUPABASE_DB_URL` is als
   (`--dry-run`, which writes `missing=true|false` to the step's output), so one place knows. A deploy with no missing
   migration takes no dump; a dry run of the deploy says that a dump would be taken and takes none. A dump that fails
   or does not pass its check fails its step, so the deploy stops before any migration runs, and the failure is
-  reported like any failed step (AC-9). The dump is not encrypted (spec 0012, Notes).
+  reported like any failed step (AC-9). The dump is encrypted to the certificate in the repository secret `BACKUP_PUBLIC_KEY`
+  (spec 0012 AC-6); without it the backup step fails, so a deploy that has a migration to apply stops before applying it,
+  while a deploy without a migration needs no certificate and the secret is not among the ones whose absence skips the run.
 
 ### The code
 
