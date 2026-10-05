@@ -305,6 +305,16 @@ describe("spec 0001: retired stamps", () => {
   const visible = (stamped: [string, string][], own: [string, string][] = []) =>
     [...retiredVisibleKeys(retired(), places(), new Map(stamped), new Map(own))];
 
+  it("AC-25: a stamp on a retired row is no month's stamp: the monthly counts ignore it", () => {
+    const rows = lineWithRetired();
+    const retiredId = rows[4].id;
+    const stamps = [
+      { checkpoint_id: rows[0].id, stamped_on: "2014-06-01" },
+      { checkpoint_id: retiredId, stamped_on: "2014-06-02" },
+    ];
+    expect(stampsPerMonth(stamps, buildPlaces(rows))).toEqual([{ month: "2014-06", count: 1 }]);
+  });
+
   it("AC-23: a stamp the user holds is always listed, whatever their dates", () => {
     expect(visible([], [["R", "2026-01-01"]])).toEqual(["R"]);
   });

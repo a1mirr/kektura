@@ -19,7 +19,7 @@ walked before it is shown as missing it.
 - **AC-1**: Checkpoint rows that share a `place_key` (alternative stamps `_1`/`_2`/`_3` at one place)
   form one place. The place sits at the km of its furthest-along variant (the MTSZ table measures
   to it). Its label is `<stage>.<stage_seq>`, falling back to `seq`; its key falls back to `code`,
-  then `id`. Places keep the order of their first variant. Today: 220 rows = 161 places.
+  then `id`. Places keep the order of their first variant. Today: 220 rows = 161 places (retired rows, AC-22, are not places).
 - **AC-2**: A place is stamped when any of its variants is stamped.
 
 ### Walked stretches and stats
@@ -154,10 +154,10 @@ stage is AC-12 to AC-15); moving extra stamps into the stage's place list; chang
 | AC-3, AC-4, AC-7 on the real dashboard | `e2e/stamping.spec.ts` |
 | AC-5 (localized labels) | `e2e/account.spec.ts` (the month label on the account page's axis and in the tooltip, in the default language and in English, each the way `Intl` writes it for that language) |
 | AC-8, AC-9 | `src/components/StageSection.test.tsx` |
-| AC-22, AC-23 | `src/lib/progress.test.ts` (a retired row is no place and no neighbour; the rows read; listed with a stamp, by the earlier neighbour's date, on and after the retirement day, one neighbour, none) |
+| AC-22, AC-23 | `src/lib/progress.test.ts` (a retired row is no place and no neighbour; the rows read; listed with a stamp, by the earlier neighbour's date, on and after the retirement day, one neighbour, none; the monthly counts ignore a stamp on one) |
 | AC-24 | `src/components/RetiredRow.test.tsx` (hidden by default, the checkbox shows it, remembered, storage refusing) |
 | AC-25 | `src/components/RetiredStampControl.test.tsx` (no default day, disabled until a real day before the retirement, the date field keeps to it, the remove button), `e2e/retired-stamps.spec.ts` (the count, km, stage totals and "Stamp stage" ignore it; the collected line and the stage mark) |
-| AC-26, AC-27 | `e2e/retired-stamps.spec.ts` (the note, badge, link, approximate position, the replacing stamp's line; 320 and 375 px in English and German) |
+| AC-26, AC-27 | `e2e/retired-stamps.spec.ts` (the note, badge, link, approximate position, the replacing stamp's line; 320 and 375 px in English, Hungarian, German and Russian) |
 | AC-16, AC-17, AC-18, AC-20 | `src/lib/progress.test.ts` (the earliest date of the variants; the later neighbour decides, on and after the date, one neighbour, none; a stamped place never waived; the stretch across a waived place and the opposite case; a waived place is done for its stage but no stamp), `src/lib/friends.test.ts` and `src/lib/compare.test.ts` (the same on a friend's page) |
 | AC-19 | `src/components/RequiredFrom.test.tsx` (the date in the page's language, hint and badge, the button that opens the note and Escape, the tolerance sentence), `src/lib/new-stamps.test.ts` (which stamps carry the tolerance) |
 | AC-17, AC-18, AC-19, AC-20, AC-21 on the real dashboard | `e2e/stamp-required.spec.ts` (a walk before the date: badge, "2 / 161", the km across the place, a later stamp changes nothing; a walk after it: the stamp is needed; the tolerance note; a friend's page with the waiver as theirs; 320 and 375 px in English and German) |

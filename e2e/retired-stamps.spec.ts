@@ -132,7 +132,7 @@ test.describe("spec 0001: retired stamps", () => {
       await page.goto("/en/dashboard");
       await expandAllStages(page); // the open stages and the toggle are remembered across languages
       await page.getByLabel("Show retired stamps").check();
-      for (const locale of ["en", "de", "ru"]) {
+      for (const locale of ["en", "hu", "de", "ru"]) {
         await page.goto(`/${locale}/dashboard`);
         await expect(row(page)).toBeVisible();
         const { scroll, viewport } = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, viewport: window.innerWidth }));

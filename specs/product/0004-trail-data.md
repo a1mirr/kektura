@@ -90,7 +90,7 @@ older ones say nothing of it. A stamp introduced before 2014 has no published da
 without a stage); add its entry to `okt-stamp-dates.json` under the seed's code; run the checks below; list the change in the changelog (spec
 0018 AC-7). The new row gets a new id and the others keep theirs (AC-12); the labels after it shift (AC-13).
 
-**Places and variants.** 220 checkpoint rows form 161 places, the official count.
+**Places and variants.** 220 current checkpoint rows form 161 places, the official count (retired rows, AC-14, come on top).
 - Alternative stamps at one place (`_1`/`_2`/`_3`) share a `place_key`, and stamping one stamps them
   all.
 - `_B`/`_C` points are separate places.

@@ -19,7 +19,7 @@ Google account and without touching real data. Production keeps Google sign-in o
 ## Behaviour
 
 - **AC-1**: `npm run testdb:start` starts the local Supabase with every migration in
-  `supabase/migrations` and both seeds (220 checkpoints = 161 places, 72 extra stamps);
+  `supabase/migrations` and both seeds (220 current checkpoints = 161 places, plus the retired stamps, 72 extra stamps);
   `npm run testdb:reset` rebuilds it from scratch; `npm run testdb:stop` stops it.
 - **AC-2**: `npm run dev:test` serves the app against the local Supabase (URL and keys read from
   `supabase status`), with the dummy login switched on. It can run next to the normal dev server.
@@ -68,7 +68,7 @@ an explicit allowance for that project's URL). Tests of the map canvas (WebGL cl
 
 | AC | Test |
 | --- | --- |
-| AC-1 | `tests/database-rules.test.ts` (the migrations and both seeds leave 220 checkpoints, 161 places and 72 extra stamps); CI's `e2e` job starts the stack with `supabase start` and every E2E run uses it |
+| AC-1 | `tests/database-rules.test.ts` (the migrations and both seeds leave 220 current checkpoints, 161 places, one retired stamp and 72 extra stamps); CI's `e2e` job starts the stack with `supabase start` and every E2E run uses it |
 | AC-2 | manual (it starts a dev server): `npm run testdb:start`, `npm run dev:test`, open http://localhost:3001. Last checked: never recorded. |
 | AC-3 | `e2e/auth.spec.ts` |
 | AC-4 | `src/lib/test-login.test.ts`; `tests/smoke-test.test.ts` and the deploy workflow's smoke test (spec 0026 AC-8): after every deploy a POST to `/auth/test-login` on the public address must answer 404 |
