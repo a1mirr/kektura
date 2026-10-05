@@ -251,6 +251,9 @@ describe("spec 0026: migrations", () => {
       const stderr = 'psql:0002_more.sql:3: ERROR:  duplicate key value violates unique constraint "users_email_key"\nDETAIL:  Key (email)=(someone@example.hu) already exists.';
       const psql = () => ({ status: 3, stdout: "", stderr });
       expect(dropDetails(stderr)).toBe('psql:0002_more.sql:3: ERROR:  duplicate key value violates unique constraint "users_email_key"');
+      // a value with a newline in it continues the DETAIL part; the next label ends it
+      const multi = "ERROR:  new row violates check constraint \"c\"\nDETAIL:  Failing row contains (1, first line\nsecond line +36 30 123 4567).\nCONTEXT:  SQL statement \"x\"\nSTATEMENT:  alter table t add check (true);";
+      expect(dropDetails(multi)).toBe("ERROR:  new row violates check constraint \"c\"\nCONTEXT:  SQL statement \"x\"\nSTATEMENT:  alter table t add check (true);");
       const fail = fakeDb({ applied: ["0001_init.sql"] });
       const wrapped = (args: string[]) => (args.includes("-f") ? psql() : fail.psql(args));
       expect(() => run({ psql: wrapped })).toThrow(/duplicate key value violates unique constraint/);

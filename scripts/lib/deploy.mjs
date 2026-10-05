@@ -47,11 +47,20 @@ export function baselineFiles(files, baseline) {
   return files.filter((file) => file <= baseline);
 }
 
-/** `text` without psql's `DETAIL:` lines, which quote the values of the row that failed (AC-13: a public repository's logs are public). */
+/**
+ * `text` without psql's `DETAIL:` part, which quotes the values of the row that failed (AC-13: a public repository's
+ * logs are public). A value can hold newlines, so the part runs from the `DETAIL:` line to the next line that starts
+ * with one of psql's other labels (or to the end).
+ */
 export function dropDetails(text) {
+  let inDetail = false;
   return text
     .split("\n")
-    .filter((line) => !/^\s*DETAIL:/.test(line))
+    .filter((line) => {
+      if (/^\s*DETAIL:/.test(line)) inDetail = true;
+      else if (/^\s*(HINT|CONTEXT|QUERY|LOCATION|STATEMENT|LINE \d+|psql:[^\n]*|ERROR|WARNING|NOTICE):/.test(line)) inDetail = false;
+      return !inDetail;
+    })
     .join("\n");
 }
 
