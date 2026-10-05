@@ -45,7 +45,8 @@ after it must have its stamp in the book, one who passed earlier is not missing 
   away: the **later** of the two dates (the one date there is, when only one side has a stamped place). If it is before
   `requiredFrom` the place is waived; on or after it, the stamp is required and the place blocks its stretches like any
   unstamped place. With no stamped place on either side nothing is waived. A stamped place is never waived, so stamping it later (on any
-  date) takes nothing away.
+  date) takes nothing away from it. The rule reads the neighbours' dates, so a late stamp (or a changed date, spec 0016) on a
+  neighbour can make an adjacent new place required again.
 - **AC-18**: A waived place is not a neighbour of a stretch: the stretch runs across it, from the stamped place before it to the one
   after, so the walked ranges, km, percent and the map's blue line are the same as before the place existed. A stretch whose
   neighbours were stamped on or after the date still needs the new stamp.
@@ -60,8 +61,8 @@ after it must have its stamp in the book, one who passed earlier is not missing 
   stage's progress counts a waived place as done, so a stage whose places are all stamped or waived is complete; the row still shows
   it as not stamped, with the badge of AC-19. The stage's button follows the stamps alone: with a waived place unstamped it still reads
   "Stamp stage" and marks it (AC-7).
-- **AC-21**: The date, hint, badge and note wrap under the place's name at 375 px and 320 px, in every language, and never widen
-  the page.
+- **AC-21**: The date, hint, badge and note wrap under the place's name at 375 px and 320 px and never widen the page (the
+  text uses `overflow-wrap: anywhere`; checked in English and German).
 
 ### Stages
 

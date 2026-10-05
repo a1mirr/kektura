@@ -139,7 +139,7 @@ page's "Send request" is a plain form that posts to a server action ending in a 
   dashboard; the km walked by both is the intersection of the two sets of stretches, only me or only them what is left of one set, and
   neither the rest of the trail. The four figures add up to the trail's total km exactly: three are rounded to 0.1 (spec 0001 AC-4)
   and the fourth is the total minus them (never negative).
-- **AC-24**: A stage stands as "both complete" (both have all its places), "only me" (I have all, they do not), "only
+- **AC-24**: A stage stands as "both complete" (both have all its places, a place they were not missing counting as had, AC-25), "only me" (I have all, they do not), "only
   them", "neither started" (neither has any) or "partly", in this order, so a stage with one place that only I stamped is
   "only me". The page shows each person's count of the stage's places.
 
