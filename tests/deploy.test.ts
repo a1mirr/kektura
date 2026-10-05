@@ -35,6 +35,14 @@ describe("spec 0020: deployment files", () => {
     expect(hook).not.toMatch(/npm run build\s*\|\|/);
   });
 
+  it("AC-5: the build gets a heap limit larger than the default on a 1 GB server, which the swap backs", () => {
+    const hook = read("deploy/post-receive");
+    expect(hook).toMatch(/^NODE_OPTIONS=--max-old-space-size=(\d+) npm run build$/m);
+    const heap = Number(/--max-old-space-size=(\d+)/.exec(hook)![1]);
+    expect(heap).toBeGreaterThanOrEqual(1024);
+    expect(heap).toBeLessThanOrEqual(1024 + 2048); // RAM plus the swap that server-setup.sh creates
+  });
+
   it("AC-5: only a push to main is deployed", () => {
     const hook = read("deploy/post-receive");
     expect(hook).toContain('"$ref" = "refs/heads/main"');

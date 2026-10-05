@@ -36,7 +36,9 @@ deploy a broken build.
   space and log clean-up, safe to run again), `ssh-gate.sh` (the forced command of the deploy key, spec 0026 AC-7) and `README.md` (how production is built, the environment
   variables, how to deploy, roll back and read logs).
 - **AC-5**: The deploy hook stops at the first failing step (`set -euo pipefail`), so a failed install or
-  build never reloads the running app; it deploys only pushes to `main`.
+  build never reloads the running app; it deploys only pushes to `main`. It builds with
+  `NODE_OPTIONS=--max-old-space-size=1536`: the server has 1 GB of RAM and 2 GB of swap, and Node's default heap limit
+  there is too small for the type check of `next build`.
 - **AC-6**: The repository root holds no server scripts: there is one Caddy configuration, `deploy/Caddyfile`
   (HTTPS), and what the earlier ad-hoc setup scripts did is in the README.
 
