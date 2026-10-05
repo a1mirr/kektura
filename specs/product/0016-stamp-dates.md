@@ -60,6 +60,11 @@ user's own day. A date is only ever saved when it is a real, complete one, never
   another tab edited it), unless the user is in the middle of changing it: what they are typing is never
   overwritten.
 
+- **AC-13**: A retired stamp (spec 0001 AC-22) is dated on its own and strictly: it has no "today" default, the date a user collects it with and
+  the date of `setStampDate` must be a valid stamp date (AC-2) before its `retired_on` (spec 0002 AC-17), and a request that mixes
+  it with other stamps is refused whole. Its date field's last day is the day before it retired: the calendar picker stops there and a later
+  day typed in is never sent (it is restored on leaving the field).
+
 ## Out of scope
 
 Notes on a stamp; a time of day; editing many dates at once; a database check on the date range (it would

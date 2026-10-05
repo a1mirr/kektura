@@ -12,6 +12,7 @@ export default function StageSection({
   kmText,
   done,
   total,
+  mark,
   actions,
   children,
 }: {
@@ -21,6 +22,7 @@ export default function StageSection({
   kmText: string;
   done: number;
   total: number;
+  mark?: string; // a short note next to the count, e.g. the retired stamps the user collected in the stage
   actions?: React.ReactNode;
   children: React.ReactNode;
 }) {
@@ -88,6 +90,7 @@ export default function StageSection({
           </span>
           <span className="shrink-0 text-sm tabular-nums text-stone-600">
             {done}/{total}
+            {mark && <span className="ml-1 text-xs text-stone-500">{mark}</span>}
           </span>
         </button>
         {actions}

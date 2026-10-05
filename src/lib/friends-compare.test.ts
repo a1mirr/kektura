@@ -15,6 +15,10 @@ const checkpoints: Checkpoint[] = [0, 10, 20].map((km, i) => ({
   lng: 16,
   km_from_start: km,
   required_from: null,
+  retired_on: null,
+  replaced_by: null,
+  after_place_key: null,
+  position_approximate: false,
 }));
 
 vi.mock("./dashboard-data", () => ({ getReferenceData: async () => ({ checkpoints, extras: [] }) }));

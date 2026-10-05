@@ -64,6 +64,12 @@ Row-level security (`supabase/migrations`) is the real boundary: every user-tabl
 - **AC-16**: The user's stamps are never cached across users: they are read through the cookie-based client under
   RLS.
 
+- **AC-17**: A retired stamp (spec 0001 AC-22) has no "today". The actions read `retired_on` of the rows they are asked about: collecting a
+  retired stamp (`setPlacesStamped`, `stamped: true`) needs a `date` that is a valid stamp date (spec 0016 AC-2) before `retired_on`,
+  and a date on or after it, a missing date or an out-of-range one is refused as `failed` without a write (and without logging what was sent). Unlike
+  the lenient date of spec 0016 AC-3, which is ignored for a current stamp. A request that mixes a retired stamp with others is refused
+  as a whole. Taking a retired stamp away needs no date.
+
 ## Out of scope
 
 Notes; photo uploads; offline stamping and a queue of pending stamps; optimistic stats.
@@ -94,6 +100,7 @@ Notes; photo uploads; offline stamping and a queue of pending stamps; optimistic
 | AC-9, AC-10, AC-11 (buttons) | `src/components/ActionButton.test.tsx` |
 | AC-10, AC-11 (map popup) | `e2e/map.spec.ts` (a refused save keeps the popup open with the error and a working button, the next try marks the stamp; an expired session sends the visitor to the landing page) |
 | AC-12 | spec 0016 (`StampDateInput.test.tsx`, `e2e/stamp-dates.spec.ts`) |
+| AC-17 | `src/app/[locale]/dashboard/actions.test.ts` (a day before it retired creates the stamp; the retirement day, a later day, none and an out-of-range day are refused without a write; a mixed request; removing needs no date) |
 | AC-15, AC-16 | `src/lib/dashboard-data.test.ts` (mocked clients: reference data via the cookie-less client under a tag and a one-day revalidation, never cached when the read fails; stamps via the cookie client); `e2e/stamping.spec.ts` (against the production build and the real database: after the first load, four stamp actions and four reloads add at most three cache fills (3 x 72 rows) to the read counter of `extra_stamps`, which only the cached reference data reads; without the cache they would add eight) |
 | AC-9, AC-13, AC-14 | `src/components/ActionButton.test.tsx` (label and style flip while pending, revert on `failed` with the error, revert and refresh on `unauthorized`); `e2e/stamping.spec.ts` (with the server's answer held back: the button has flipped and is disabled, the stats are unchanged and there is no date field yet; after the answer all three are updated) |
 | AC-14 | `e2e/stamping.spec.ts` and the other dashboard E2E specs (stats, counters and map come from the server's answer); `actions.test.ts` (the actions call `refresh()`) |

@@ -67,7 +67,7 @@ describe("spec 0004: adding a stamp to the seed", () => {
         `select 'stamps_after:' || (${stamps});`,
         "select 'seq_after:' || seq from public.checkpoints where code = 'OKTPH_50_1';",
         "select 'new:' || count(*) from public.checkpoints where code = 'OKTPH_TEST_NEW';",
-        "select 'total:' || count(*) from public.checkpoints;",
+        "select 'total:' || count(*) from public.checkpoints where retired_on is null;",
         "rollback;",
       ].join("\n"),
     );

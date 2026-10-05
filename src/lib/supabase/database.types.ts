@@ -10,13 +10,13 @@ export type Database = {
           Tables: {
             "checkpoints": {
                   Row: {
-                    "code": string | null,"description": string | null,"elevation_m": number | null,"id": number,"km_from_start": number,"lat": number | null,"lng": number | null,"name": string,"place_key": string | null,"required_from": string | null,"seq": number,"stage": number | null,"stage_seq": number | null
+                    "after_place_key": string | null,"code": string | null,"description": string | null,"elevation_m": number | null,"id": number,"km_from_start": number,"lat": number | null,"lng": number | null,"name": string,"place_key": string | null,"position_approximate": boolean,"replaced_by": string | null,"required_from": string | null,"retired_on": string | null,"seq": number,"stage": number | null,"stage_seq": number | null
                   }
                   Insert: {
-                    "code"?: string | null,"description"?: string | null,"elevation_m"?: number | null,"id"?: number,"km_from_start"?: number,"lat"?: number | null,"lng"?: number | null,"name": string,"place_key"?: string | null,"required_from"?: string | null,"seq": number,"stage"?: number | null,"stage_seq"?: number | null
+                    "after_place_key"?: string | null,"code"?: string | null,"description"?: string | null,"elevation_m"?: number | null,"id"?: number,"km_from_start"?: number,"lat"?: number | null,"lng"?: number | null,"name": string,"place_key"?: string | null,"position_approximate"?: boolean,"replaced_by"?: string | null,"required_from"?: string | null,"retired_on"?: string | null,"seq": number,"stage"?: number | null,"stage_seq"?: number | null
                   }
                   Update: {
-                    "code"?: string | null,"description"?: string | null,"elevation_m"?: number | null,"id"?: number,"km_from_start"?: number,"lat"?: number | null,"lng"?: number | null,"name"?: string,"place_key"?: string | null,"required_from"?: string | null,"seq"?: number,"stage"?: number | null,"stage_seq"?: number | null
+                    "after_place_key"?: string | null,"code"?: string | null,"description"?: string | null,"elevation_m"?: number | null,"id"?: number,"km_from_start"?: number,"lat"?: number | null,"lng"?: number | null,"name"?: string,"place_key"?: string | null,"position_approximate"?: boolean,"replaced_by"?: string | null,"required_from"?: string | null,"retired_on"?: string | null,"seq"?: number,"stage"?: number | null,"stage_seq"?: number | null
                   }
                   Relationships: [
                     

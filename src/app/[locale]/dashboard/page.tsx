@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
@@ -8,21 +9,25 @@ import { flagOn } from "@/lib/feature-flags-server";
 import { createClient } from "@/lib/supabase/server";
 import {
   buildPlaces,
+  buildRetired,
   buildStages,
   countDone,
-  placeKeyOf,
   progressSummary,
+  retiredVisibleKeys,
   stageStampKeys,
   stampedPlaceKeys,
   waivedPlaceKeys,
   walkedRanges,
   findStageForKm,
 } from "@/lib/progress";
-import { maxStampDate } from "@/lib/stamp-date";
+import { dayBefore, maxStampDate } from "@/lib/stamp-date";
+import { buildMapPoints } from "@/lib/map-data";
 import { hasToleranceNote, requiredNote } from "@/lib/new-stamps";
 import LocateButton from "@/components/LocateButton";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import RequiredFrom from "@/components/RequiredFrom";
+import RetiredRow from "@/components/RetiredRow";
+import RetiredStampControl from "@/components/RetiredStampControl";
 import ExtraStampButton from "@/components/ExtraStampButton";
 import StageControls from "@/components/StageControls";
 import StageSection from "@/components/StageSection";
@@ -71,6 +76,11 @@ export default async function Dashboard({
   const stages = buildStages(placeList, stagesData.stages);
   const stampedPlaces = stampedPlaceKeys(placeList, stamps);
   const waived = waivedPlaceKeys(placeList, stampedPlaces);
+  // Retired stamps (spec 0001 AC-22 to AC-26) are no places: they never reach the count, the km, the stages' totals or the map.
+  const retiredList = buildRetired(checkpoints);
+  const stampedRetired = stampedPlaceKeys(retiredList, stamps);
+  const listedRetired = retiredVisibleKeys(retiredList, placeList, stampedPlaces, stampedRetired);
+  const retiredReplacedBy = new Map(retiredList.flatMap((r) => (r.replacedBy ? [[r.replacedBy, r] as const] : [])));
   const doneRanges = walkedRanges(placeList, stampedPlaces, waived);
   const summary = progressSummary(placeList, doneRanges);
 
@@ -82,21 +92,14 @@ export default async function Dashboard({
 
   const requiredFrom = new Map(placeList.map((p) => [p.key, p.requiredFrom]));
   const dateText = (iso: string) => format.dateTime(new Date(`${iso}T00:00:00Z`), { dateStyle: "long", timeZone: "UTC" });
-  const mapPoints = checkpoints
-    .filter((c) => c.lat != null && c.lng != null)
-    .map((c) => {
-      const key = placeKeyOf(c);
-      const from = requiredFrom.get(key);
-      return {
-        placeKey: key,
-        name: c.name,
-        lat: Number(c.lat),
-        lng: Number(c.lng),
-        km: placeKm.get(key)!,
-        stamped: stampedPlaces.has(key),
-        note: requiredNote(from ?? null, waived.has(key), { requiredFrom: (date) => t("requiredFrom", { date }), notRequired: t("notRequired") }, dateText),
-      };
-    });
+  const mapPoints = buildMapPoints(checkpoints, placeKm, stampedPlaces, (key) =>
+    requiredNote(
+      requiredFrom.get(key) ?? null,
+      waived.has(key),
+      { requiredFrom: (date) => t("requiredFrom", { date }), notRequired: t("notRequired") },
+      dateText,
+    ),
+  );
 
   const cards = [
     { label: t("stamps"), value: `${stampedPlaces.size} / ${placeList.length}` },
@@ -147,7 +150,7 @@ export default async function Dashboard({
           <div className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm text-stone-500">{t("stageHint")}</p>
-              <StageControls />
+              <StageControls withRetired={retiredList.length > 0} />
             </div>
             {stages.map((stage) => {
               const { stage: n, meta, places: list } = stage;
@@ -156,6 +159,51 @@ export default async function Dashboard({
               // button follows the stamps alone, so "Stamp stage" still marks a waived place.
               const done = countDone(list, stampedPlaces, waived);
               const stageExtras = extraListWithStage.filter((e) => e.stage === n);
+              const stageRetired = retiredList.filter((r) => r.stage === n);
+              const retiredCollected = stageRetired.filter((r) => stampedRetired.has(r.key)).length;
+              const placeKeys = new Set(list.map((p) => p.key));
+              const retiredRow = (r: (typeof retiredList)[number]) => {
+                const until = dayBefore(r.retiredOn);
+                const replacement = r.replacedBy ? list.find((p) => p.key === r.replacedBy) : undefined;
+                const [before, after] = t("retiredReplacedBy", { place: "\u2063" }).split("\u2063");
+                return (
+                  <RetiredRow key={r.key} id={`place-${r.key}`} listed={listedRetired.has(r.key)}>
+                    <div className="min-w-0 flex-1 basis-40">
+                      <div>
+                        <span className="mr-2 inline-block min-w-10 text-stone-400" aria-hidden>
+                          –
+                        </span>
+                        {r.name}
+                        <span className="ml-2 rounded bg-stone-200 px-1.5 py-0.5 text-xs font-medium text-stone-700">{t("retiredBadge")}</span>
+                      </div>
+                      <p className="mt-1 text-xs text-stone-600 [overflow-wrap:anywhere]">
+                        {t("retiredNote", { date: dateText(until) })}
+                        {replacement && (
+                          <>
+                            {" "}
+                            {before}
+                            <a href={`#place-${replacement.key}`} className="text-blue-700 underline">
+                              {replacement.name}
+                            </a>
+                            {after}
+                          </>
+                        )}
+                        {r.approximate && ` ${t("retiredApprox")}`}
+                      </p>
+                    </div>
+                    <div className="ml-auto flex flex-wrap items-center justify-end gap-1">
+                      <RetiredStampControl
+                        placeKey={r.key}
+                        name={r.name}
+                        stamped={stampedRetired.has(r.key)}
+                        date={stampedRetired.get(r.key)}
+                        latest={until}
+                        latestText={dateText(until)}
+                      />
+                    </div>
+                  </RetiredRow>
+                );
+              };
               return (
                 <StageSection
                   key={n}
@@ -165,6 +213,7 @@ export default async function Dashboard({
                   kmText={meta ? t("kmValue", { km: format.number(meta.km) }) : ""}
                   done={done}
                   total={list.length}
+                  mark={retiredCollected > 0 ? t("retiredMark", { count: retiredCollected }) : undefined}
                   actions={
                     <div className="ml-auto flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
                       {stageExtras.length > 0 && (
@@ -181,10 +230,10 @@ export default async function Dashboard({
                   }
                 >
                   {list.map((p) => (
+                    <Fragment key={p.key}>
                     <li
                       id={`place-${p.key}`}
                       data-stage={p.stage}
-                      key={p.key}
                       className="flex scroll-mt-24 flex-wrap items-start justify-between gap-x-2 gap-y-1 px-4 py-3"
                     >
                       <div className="min-w-0 flex-1 basis-40">
@@ -195,6 +244,14 @@ export default async function Dashboard({
                         </div>
                         {p.requiredFrom && (
                           <RequiredFrom requiredFrom={p.requiredFrom} waived={waived.has(p.key)} tolerance={hasToleranceNote(p)} />
+                        )}
+                        {retiredReplacedBy.has(p.key) && (
+                          <p className="mt-1 text-xs text-stone-600 [overflow-wrap:anywhere]">
+                            {t("replacesRetired", {
+                              name: retiredReplacedBy.get(p.key)!.name,
+                              date: dateText(dayBefore(retiredReplacedBy.get(p.key)!.retiredOn)),
+                            })}
+                          </p>
                         )}
                         <StampDescriptions descriptions={p.variants.map((v) => localizedDescription(v.code, v.description, locale))} />
                       </div>
@@ -214,7 +271,13 @@ export default async function Dashboard({
                         />
                       </div>
                     </li>
+                    {stageRetired.filter((r) => r.afterKey === p.key).map(retiredRow)}
+                    </Fragment>
                   ))}
+                  {stageRetired.filter((r) => !r.afterKey || !placeKeys.has(r.afterKey)).map(retiredRow)}
+                  {retiredCollected > 0 && (
+                    <li className="px-4 py-2 text-sm text-stone-600">{t("retiredCollected", { count: retiredCollected })}</li>
+                  )}
                 </StageSection>
               );
             })}

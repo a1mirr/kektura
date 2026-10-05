@@ -14,10 +14,10 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     date: "2026-10-05",
     title: {
-      en: "New stamps are required only from their official date",
-      ru: "Новые печати обязательны только с официальной даты",
-      hu: "Az új bélyegzők csak a hivatalos dátumuktól kötelezők",
-      de: "Neue Stempel sind erst ab ihrem offiziellen Datum erforderlich",
+      en: "New stamps from their official date, and retired stamps kept",
+      ru: "Новые печати с официальной даты и сохранённые упразднённые печати",
+      hu: "Új bélyegzők a hivatalos dátumtól, és megőrzött megszűnt bélyegzők",
+      de: "Neue Stempel ab ihrem offiziellen Datum und behaltene eingestellte Stempel",
     },
     changes: [
       {
@@ -27,6 +27,15 @@ export const CHANGELOG: ChangelogEntry[] = [
           ru: "Печать, которую МТСЗ добавил позже (Вёрчверёш, Локо-пихенё, Надь-ньугодо, Чобанц, Энч, Бадачонь, Тепке и другие), теперь обязательна только с даты, объявленной МТСЗ. Если вы прошли это место раньше, вам её не недостаёт: участок по-прежнему засчитывается в километры и этап, а у места написано «Для вашего прохождения не требуется». У каждой новой печати показана дата, с которой она обязательна, а по нажатию на дату открывается короткое пояснение. Страница друга работает по тому же правилу.",
           hu: "Az MTSZ által később felvett bélyegző (Vércverés, Lokó-pihenő, Nagy-nyugodó, Csobánc, Encs, Badacsony, Tepke és mások) mostantól csak az MTSZ által közölt naptól kötelező. Ha előtte jártál ott, nem hiányzik: a szakasz továbbra is beleszámít a kilométereidbe és a szakaszba, a helynél pedig ez áll: „A te túrádhoz nem kötelező”. Minden új bélyegzőnél látszik, melyik naptól kötelező, a dátumra koppintva pedig rövid magyarázat nyílik. A barátod oldala ugyanezt a szabályt követi.",
           de: "Ein Stempel, den der MTSZ später ergänzt hat (Vércverés, Lokó-pihenő, Nagy-nyugodó, Csobánc, Encs, Badacsony, Tepke und weitere), ist jetzt erst ab dem vom MTSZ angekündigten Tag erforderlich. Wenn du vorher dort vorbeigekommen bist, fehlt er dir nicht: Der Abschnitt zählt weiter zu deinen Kilometern und zur Etappe, und der Ort trägt den Hinweis „Für deine Wanderung nicht erforderlich“. Jeder neue Stempel zeigt das Datum, ab dem er erforderlich ist, und beim Antippen des Datums erscheint eine kurze Erklärung. Die Seite eines Freundes folgt derselben Regel.",
+        },
+      },
+      {
+        kind: "new",
+        text: {
+          en: "A stamp that no longer exists (for now Nyírjesi-erdészház, replaced by Vércverés in 2014) is kept as a \"retired stamp\" instead of disappearing together with your stamp on it. If you walked past before it retired, it shows in the stage list with a short note, and you can add it with the day you collected it; \"Show retired stamps\" lists all of them. Retired stamps do not count towards the 161, your kilometres or a stage, and a friend's page does not show them.",
+          ru: "Печать, которой больше нет (пока это Нирьеши-эрдёшхаз, замещённый Вёрчверёшем в 2014 году), теперь хранится как «упразднённая печать» и не исчезает вместе с вашей отметкой. Если вы прошли это место до её упразднения, она показана в списке этапа с короткой пометкой, и её можно добавить с датой, когда вы её собрали; «Показывать упразднённые печати» выводит все такие печати. Упразднённые печати не входят в 161, километры и этап, а на странице друга их не видно.",
+          hu: "A már nem létező bélyegző (egyelőre a Nyírjesi-erdészház, amelyet 2014-ben a Vércverés váltott fel) „megszűnt bélyegzőként” megmarad, és nem tűnik el a rajta lévő bélyegzéseddel együtt. Ha a megszűnése előtt jártál ott, megjelenik a szakasz listájában egy rövid megjegyzéssel, és hozzáadhatod a begyűjtés napjával; a „Megszűnt bélyegzők mutatása” mindet listázza. A megszűnt bélyegzők nem számítanak bele a 161-be, a kilométerekbe és a szakaszba, a barátod oldalán pedig nem látszanak.",
+          de: "Ein Stempel, den es nicht mehr gibt (vorerst das Nyírjesi-erdészház, 2014 durch Vércverés ersetzt), bleibt als „eingestellter Stempel“ erhalten und verschwindet nicht mit deinem Eintrag darauf. Wenn du vor seiner Einstellung dort vorbeigekommen bist, steht er mit einer kurzen Notiz in der Etappenliste, und du kannst ihn mit dem Tag eintragen, an dem du ihn gesammelt hast; „Eingestellte Stempel anzeigen“ listet alle. Eingestellte Stempel zählen nicht zu den 161, zu deinen Kilometern oder zu einer Etappe, und auf der Seite eines Freundes erscheinen sie nicht.",
         },
       },
     ],

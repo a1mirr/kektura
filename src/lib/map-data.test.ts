@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { extrasData, placesData, restaurantsData } from "./map-data";
+import { buildMapPoints, extrasData, placesData, restaurantsData } from "./map-data";
+import type { Checkpoint } from "./progress";
 
 describe("spec 0003: GeoJSON built for the map", () => {
   it("AC-17: places become points as [lng, lat] with kind 'place' and their place key", () => {
@@ -63,5 +64,28 @@ describe("spec 0003: GeoJSON built for the map", () => {
     expect(placesData([]).features).toEqual([]);
     expect(extrasData([]).features).toEqual([]);
     expect(restaurantsData([]).features).toEqual([]);
+  });
+});
+
+const row = (over: Partial<Checkpoint>): Checkpoint => ({
+  id: 1, seq: 1, stage: 1, stage_seq: 1, code: "A", place_key: "A", name: "A", description: null, lat: 47, lng: 16, km_from_start: 0,
+  required_from: null, retired_on: null, replaced_by: null, after_place_key: null, position_approximate: false, ...over,
+});
+
+describe("spec 0003: the map's points", () => {
+  it("AC-23: a retired stamp is never a point, even with coordinates; a current stamp without coordinates is none either", () => {
+    const rows = [
+      row({ id: 1, code: "A", place_key: "A" }),
+      row({ id: 2, code: "OLD", place_key: "OLD", name: "Old", lat: 47.5, lng: 19.9, stage_seq: null, retired_on: "2014-11-21", after_place_key: "A" }),
+      row({ id: 3, code: "B", place_key: "B", lat: null, lng: null }),
+    ];
+    const points = buildMapPoints(rows, new Map([["A", 5]]), new Set(["A"]), () => undefined);
+    expect(points.map((p) => p.placeKey)).toEqual(["A"]);
+    expect(points[0]).toMatchObject({ km: 5, stamped: true });
+  });
+
+  it("AC-22: the note of each place comes from its key", () => {
+    const [p] = buildMapPoints([row({})], new Map([["A", 1]]), new Set<string>(), (key) => `note ${key}`);
+    expect(p.note).toBe("note A");
   });
 });

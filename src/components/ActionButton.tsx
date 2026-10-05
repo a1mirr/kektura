@@ -15,12 +15,14 @@ export default function ActionButton({
   doneLabel,
   todoLabel,
   accent = "blue",
+  ariaLabel,
 }: {
   action: () => Promise<ActionResult>;
   done: boolean;
   doneLabel: string; // shown while `done` (the undo label)
   todoLabel: string; // shown while not `done`
   accent?: "blue" | "amber";
+  ariaLabel?: string; // the accessible name, when the visible label alone does not say what it acts on
 }) {
   const t = useTranslations("dashboard");
   const { pending, failed, run } = useStampAction();
@@ -38,6 +40,7 @@ export default function ActionButton({
       <button
         type="button"
         disabled={pending}
+        aria-label={ariaLabel}
         onClick={() => run(action, () => setShownDone(!done))}
         className={`shrink-0 rounded px-3 py-1 text-sm disabled:opacity-50 ${
           shownDone ? "bg-stone-200 hover:bg-stone-300" : primary

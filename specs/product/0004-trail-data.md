@@ -2,7 +2,7 @@
 
 Status: Done
 Owner code: `scripts/build-data.mjs`, `scripts/lib/geo.mjs`, `scripts/data/okt-stages.json`,
-`scripts/data/okt-stamp-dates.json`, `scripts/lib/stamp-dates.mjs`; generated
+`scripts/data/okt-stamp-dates.json`, `scripts/lib/stamp-dates.mjs`, `scripts/data/okt-retired-stamps.json`, `scripts/lib/retired-stamps.mjs`; generated
 `supabase/seed.sql`, `supabase/seed_extra.sql`, `public/data/okt-*.json`
 
 ## Goal
@@ -37,6 +37,17 @@ and safe to regenerate whenever MTSZ (or heyjoe.hu) publishes a new file.
 - **AC-11**: `build-data.mjs` writes the file's dates into the seed (`checkpoints.required_from`, spec 0001 AC-16) as the last
   statements of its transaction, one block that clears every date the file no longer has and sets the file's, and fails when a
   code is not in the stamps file. A place's dates are the same after every regeneration.
+- **AC-14**: `scripts/data/okt-retired-stamps.json` lists the stamps that no longer exist (spec 0001 AC-22): a code of its own that is no current stamp's, the
+  name, the current place it followed (`after_place_key`), the day it retired, the place that replaced it, optional coordinates (kept for the record: a retired
+  stamp is never a map marker), the address of the official publication that gives the retirement and, for whatever is not from an official source,
+  `assumed`: `code` (the MTSZ does not publish the old code), `position` (where it sat) or `coordinates`. A `position` assumption sets the row's
+  `position_approximate`, which the list says (spec 0001 AC-26). `build-data.mjs` writes the rows into the seed, outside the trail order (spec 0001
+  AC-22), and fails when what they point at is not a current place or a code is a current stamp's. Their codes are in the list of codes the cleanup keeps, so a
+  seed never deletes a retired row (AC-9), and running it again changes nothing about them.
+- **AC-15**: A stamp that becomes retired keeps every user's stamp on it: when the new source no longer lists a code and the retired file does, the row stays
+  (it becomes a retired row), and the stamps on it keep their id, date and row; they are not moved to another variant of the place (AC-9 moves stamps only off
+  rows that are really dropped). Structure: the columns `retired_on`, `replaced_by`, `after_place_key`, `position_approximate` of a current row are empty
+  (a check), and no two retired rows share a `place_key`.
 - **AC-12**: Adding a stamp never changes what a user has. A seed regenerated with a place put into the middle of a stage keeps every
   existing code's database `id` and every `user_stamps` row pointing at the same checkpoint with the same date; only `seq`,
   `stage_seq` and `km_from_start` of the places after it move.
@@ -108,6 +119,9 @@ exists in any open source (MTSZ owns it), so don't scrape for it; the plan is us
 | AC-9 | `tests/seed-cleanup.test.ts` (against the local database, each drill in a transaction that is rolled back: both committed seeds are one `begin` ... `commit`; a stamp on a dropped code moves, with its date, to the remaining variant of the place; an extra stamp that came back under a new code keeps its users' stamps; a place that is gone, and a row without a code, take their stamps with them) |
 | AC-10, AC-11 | `tests/trail-data.test.ts` (the file's codes, dates and sources; the seed carries the generator's block for the file) |
 | AC-10 (the dates are the ones the MTSZ published) | manual (it needs the live kektura.hu posts): open the three sources named in the file and compare each code's date and the tolerance sentence of the 2025 and 2026 posts. Last checked: 2026-10-05 (all 15 codes and dates matched). |
+| AC-14 | `tests/trail-data.test.ts` (the file's codes, days, sources, what it points at, `assumed`; the seed carries the generator's block, before the cleanup, and keeps its codes), `tests/retired-stamps-database.test.ts` (running the seed again changes nothing and deletes nothing; the row sits outside the trail order; the check and the unique key), `tests/seed-cleanup.test.ts` (the cleanup leaves the retired row) |
+| AC-14 (the sources) | manual (it needs the live kektura.hu page): open the source named in the file and read the retirement day and the replacing stamp. Last checked: 2026-10-05 (Nyírjesi-erdészház, replaced by Vércverés, 2014-11-21 matched; the MTSZ publishes no code and no position, hence `assumed`). |
+| AC-15 | `tests/retired-stamps-database.test.ts` (a code the new source no longer lists but the retired file does: the row stays, retired, and the stamp keeps its id and date and is not moved) |
 | AC-12 | `tests/stamp-dates-database.test.ts` (against the local database, in a transaction that is rolled back: a seed with a place inserted mid-stage keeps every id and every stamp with its date and shifts the places after it) |
 | AC-13 | `tests/labels.test.ts` (a source scan: a label is never a key, id, link, anchor or stored value; a place key is never label-shaped); `src/lib/trail-facts.ts` and `tests/trail-data.test.ts` (the counts come from the data, 0015 AC-2) |
 | AC-9 (a real source file) | manual (it needs the downloaded GPX files): after regenerating, read the seed's `begin` ... `commit` block and run its cleanup as a read-only query first (codes not in the new list, stamps that would move) before applying it to production. Last checked: 2026-10-04 (the seeds were regenerated from the files of 2026-09-24: production already held exactly their rows, so the cleanup had nothing to remove). |

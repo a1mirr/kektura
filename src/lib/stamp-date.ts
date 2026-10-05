@@ -33,3 +33,6 @@ export function newStampDate(now: Date = new Date()): string | undefined {
   const today = localToday(now);
   return isValidStampDate(today, now) ? today : undefined;
 }
+
+// The calendar day before `date` (YYYY-MM-DD): the last day a retired stamp could still be collected.
+export const dayBefore = (date: string): string => new Date(Date.parse(`${date}T00:00:00Z`) - DAY_MS).toISOString().slice(0, 10);
