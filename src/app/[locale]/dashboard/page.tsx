@@ -152,7 +152,7 @@ export default async function Dashboard({
             {stages.map((stage) => {
               const { stage: n, meta, places: list } = stage;
               const keys = stageStampKeys(stage);
-              // A place the user was not missing (spec 0001 AC-14) counts as done for the stage, shown apart from a stamp.
+              // A place the user was not missing (spec 0001 AC-17) counts as done for the stage, shown apart from a stamp.
               const done = countDone(list, stampedPlaces, waived);
               const stageExtras = extraListWithStage.filter((e) => e.stage === n);
               return (

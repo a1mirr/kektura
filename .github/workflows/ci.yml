@@ -103,7 +103,7 @@ jobs:
       # The database rules of specs 0024, 0002, 0006, 0004 and 0035 (they skip themselves without a local Supabase, so only here
       # do they run).
       - name: Database rule tests
-        run: npx vitest run tests/friends-migration.test.ts tests/database-rules.test.ts tests/seed-cleanup.test.ts tests/feature-flags-database.test.ts tests/flag-admin-database.test.ts
+        run: npx vitest run tests/friends-migration.test.ts tests/database-rules.test.ts tests/seed-cleanup.test.ts tests/feature-flags-database.test.ts tests/flag-admin-database.test.ts tests/stamp-dates-database.test.ts
       # Spec 0007 AC-6: the browser download and Next's incremental build cache survive between runs. A miss
       # only costs time.
       - name: Playwright version

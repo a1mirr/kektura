@@ -55,6 +55,27 @@ test.describe("spec 0001: stamps required from a date", () => {
     await expect(stat(page, "Kilometres")).toHaveText(kmBetweenNeighbours());
   });
 
+  test("AC-19, AC-20: a friend's page shows the date and the waiver as theirs, with their figures", async ({ page, browser }) => {
+    // The viewer and a friend who shares with them: an accepted friendship made in the database (the invite flow is spec 0024's).
+    const viewer = await signInAsNewUser(page);
+    const friendPage = await (await browser.newContext()).newPage();
+    const friend = await signInAsNewUser(friendPage);
+    stampNeighbours(friend, "2014-06-01");
+    const id = (email: string) => psql(`select id from auth.users where email = '${email}'`);
+    psql(
+      `insert into public.friendships (user_id, friend_id, status, user_is_sharing, friend_is_sharing) values ('${id(viewer)}', '${id(friend)}', 'accepted', true, true)`,
+    );
+
+    await page.goto(`/en/friends/${id(friend)}`);
+    await expect(stat(page, "Stamps")).toHaveText("2 / 161"); // the waived place is no stamp
+    await expect(stat(page, "Kilometres")).toHaveText(kmBetweenNeighbours()); // the stretch across it is walked
+    const row = page.locator("#place-OKTPH_103");
+    await expect(row).toContainText("Stamp required from November 21, 2014");
+    await expect(row).toContainText("Not required for their walk");
+    await expect(row).not.toContainText("Not required for your walk");
+    await friendPage.context().close();
+  });
+
   test("AC-19: a stamp the MTSZ announced a tolerance for says so in its explanation", async ({ page }) => {
     await signInAsNewUser(page);
     await page.goto("/en/dashboard");
