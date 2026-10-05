@@ -110,7 +110,8 @@ leftovers of a merged change are cleaned up.
 ## Out of scope
 
 - The hook protects only clones that installed it; the ruleset (AC-11) is what binds everybody.
-- `git push --no-verify` skips every git hook. That stays available as the owner's escape hatch.
+- `git push --no-verify` skips the local hook only; `main` on GitHub can still only be changed through a pull request, because the
+  ruleset (AC-11) refuses everything else, the owner included, until the ruleset itself is edited.
 - Opening the pull request is not part of the hook; `gh` does it (AC-6), and `git push -u origin <topic>` also
   prints GitHub's link for it.
 

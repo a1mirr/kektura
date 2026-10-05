@@ -117,6 +117,7 @@ describe("spec 0021: pull requests only", () => {
     expect(claude).toContain("gh pr merge <n> --merge --match-head-commit <full-sha>");
     expect(claude).toMatch(/on the owner's standing permission \(given in chat on 2026-10-03, revocable\) for pull requests you wrote, once CI is green and the fresh-context review is done/);
     expect(claude).toContain("never `--admin`");
+    expect(claude).toContain("merge `origin/main` into the branch"); // GitHub refuses the merge of a branch that is behind (spec 0021 AC-11)
     expect(claude).toContain("Delete the pull request's branch after the merge, remote and local");
     expect(claude).toContain("git merge-base --is-ancestor origin/<topic> origin/main");
     expect(claude).toContain("Delete only branches of pull requests you merged");

@@ -33,7 +33,7 @@ jobs:
         with:
           fetch-depth: 2
       # Spec 0007 AC-10: `code_changed` is false for a pull request that changes only Markdown, and the end-to-end job
-      # then does not run. A step of this job, so that no extra job is billed for it.
+      # then does not run. A step of this job, not a job of its own.
       - name: Does the change touch more than Markdown
         id: changes
         run: node scripts/ci-changes.mjs
