@@ -146,8 +146,9 @@ pm2 restart kektura
 (Issue #87, "0060".) The deploy's smoke test runs once, after a deploy; between deploys an external uptime service watches
 the site. It is not part of the repository and is set up by the owner in the service's own account: no service is
 required (UptimeRobot and Better Stack are examples), and the free tiers of such services change, so check what a
-free account allows before relying on it. A GitHub Actions cron was tried and dropped: every 15 minutes is about
-2,880 billed minutes a month against 2,000 on the Free plan for private repositories, which would stop CI and deploys.
+free account allows before relying on it. A GitHub Actions cron was tried and dropped while the repository was private (every 15 minutes is about
+2,880 billed minutes a month against 2,000 on the Free plan, which would stop CI and deploys). The repository is public now and its
+minutes are free, but a scheduled workflow is not guaranteed to start on time, so an outside service is still the better watcher.
 
 - **What to monitor**: a plain HTTP check of the site's main pages, `https://kektura-tracker.com/en` and
   `https://kektura-tracker.com/ru`, expecting a 200 answer. Nothing deeper is needed: the smoke test's other checks

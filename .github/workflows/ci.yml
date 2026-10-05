@@ -64,20 +64,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
-  # Spec 0007 AC-11: a pull request whose base branch has moved on is flagged. GitHub's "require branches to be up to
-  # date" setting is not available for a private repository on the free plan, so this shows the state of the last run
-  # and the author checks again, live, just before merging (spec 0021 AC-6). A push to the pull request runs it again.
-  up-to-date:
-    name: Up to date with main
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - run: node scripts/check-up-to-date.mjs
-
   e2e:
     name: End-to-end tests
     # AC-10: after the cheap job (a failure there stops this one: `if` without a status function implies success()), and

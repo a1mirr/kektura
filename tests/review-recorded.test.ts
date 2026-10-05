@@ -261,7 +261,7 @@ describe("spec 0022: Review recorded", () => {
 
     it("is named in CLAUDE.md step 7 among the jobs that must be green, and in the pull request template", () => {
       const claude = read("CLAUDE.md");
-      expect(claude).toMatch(/CI's jobs: "Typecheck, lint, unit tests", "End-to-end tests", "Up to date with main" and, for a pull request that is not Dependabot's, "Review recorded"/);
+      expect(claude).toMatch(/CI's jobs: "Typecheck, lint, unit tests", "End-to-end tests" and, for a pull request that is not Dependabot's, "Review recorded"/);
       expect(read(".github/pull_request_template.md")).toMatch(/Review recorded/);
     });
   });
