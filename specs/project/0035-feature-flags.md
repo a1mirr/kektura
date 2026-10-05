@@ -32,8 +32,9 @@ switch them from the phone by writing to the Telegram bot that already brings th
   an `off` flag changes nothing). `resolveFlags` gives every declared flag for one viewer: a flag with no stored row, or
   with a mode the code does not know, has its default, and stored keys that are not declared are ignored.
 - **AC-4**: The server reads the flags once per request (React `cache`; `flagOn` in `src/lib/feature-flags-server.ts`)
-  as the viewer, and pages and actions use the plain boolean. The browser never receives the flag tables, anybody's id
-  or a flag that is off for the viewer. `flagOn` awaits `connection()` before it does anything else, so a page that asks for a flag
+  as the viewer, and pages and actions use the plain boolean. The browser never receives the flag tables or anybody's
+  id; a client component gets a flag only as a plain boolean prop that holds the viewer's own state (a feature that is
+  off for the viewer is not rendered at all, or is told it is off). `flagOn` awaits `connection()` before it does anything else, so a page that asks for a flag
   renders per request and a build never freezes an answer; nothing may catch what `connection()` raises while a page
   is prerendered, or the defaults would be baked into the page.
 
