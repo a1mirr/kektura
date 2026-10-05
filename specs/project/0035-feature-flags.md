@@ -29,8 +29,9 @@ Which flags exist is declared in code; how each one is switched is stored in the
   with a mode the code does not know, has its default, and stored keys that are not declared are ignored.
 - **AC-4**: The server reads the flags once per request (React `cache`; `flagOn` in `src/lib/feature-flags-server.ts`)
   as the viewer, and pages and actions use the plain boolean. The browser never receives the flag tables, anybody's id
-  or a flag that is off for the viewer. Reading the session makes a page that asks for a flag render per request, so
-  a build never freezes an answer.
+  or a flag that is off for the viewer. `flagOn` awaits `connection()` before it does anything else, so a page that asks for a flag
+  renders per request and a build never freezes an answer; nothing may catch what `connection()` raises while a page
+  is prerendered, or the defaults would be baked into the page.
 
 ### A flag that is off is off
 
