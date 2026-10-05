@@ -40,9 +40,8 @@ Everything it says is true of the app today.
   - while the friends feature is on (spec 0024: the `friends` flag, spec 0035): what a connected friend can see (display name,
     official stamps, kilometres, stages; no dates or extra stamps) and that sharing can be stopped on the
     Friends page. With the feature off this paragraph is not shown.
-- **AC-6**: The page makes no claim that isn't true today. In particular it doesn't call the app open
-  source (the repository is private) or a progressive web app (no manifest or service worker). Whoever
-  makes either true edits this AC and its test.
+- **AC-6**: The page makes no claim that isn't true today. In particular it doesn't call the app a progressive web app (no manifest or service worker) or open
+  source, a claim whoever adds it backs with the repository's licence and then edits this AC and its test.
 - **AC-7**: The page text has the same keys in every locale (`tests/messages.test.ts`); each
   locale reads naturally and uses the app's own terms (`ru`: печати, этап, участок; `hu`: bélyegzőhely,
   szakasz; `de`: Stempelstelle, Etappe).
@@ -50,7 +49,7 @@ Everything it says is true of the app today.
 
 ## Out of scope
 
-A link to the source code (the repository is private); a version number (the changelog page has the
+A link to the source code; a version number (the changelog page has the
 history); legal terms, a cookie banner and a formal privacy policy (the page describes; it isn't a legal
 document).
 

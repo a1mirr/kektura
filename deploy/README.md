@@ -63,9 +63,10 @@ The webhook listens for messages and for taps on the panel's buttons: after a re
 2. when a migration is missing (the migration script's own dry run says so), **backs up the user data first**: the
    six tables of the weekly backup (spec 0012) are dumped by the same action
    (`.github/actions/dump-user-data`) into the workflow artifact `pre-migration-<sha7>` of that run, kept 30 days
-   and not encrypted; a dump that fails or does not pass its check stops the deploy before any migration runs. A
-   deploy with no migration takes no dump. To restore after a bad migration see spec 0012 ("After a bad
-   migration"). It needs no new secret (`SUPABASE_DB_URL` is the one the weekly backup uses). The upload never
+   and encrypted to the public certificate in the repository secret `BACKUP_PUBLIC_KEY` (the artifacts of a public
+   repository are open to everyone; how to make the key pair: spec 0012, Notes); a dump that fails or does not pass its
+   check, or a missing certificate, stops the deploy before any migration runs. A deploy with no migration takes no
+   dump and needs no certificate. To restore after a bad migration see spec 0012 ("After a bad migration"). The upload never
    overwrites, so re-running the failed jobs of a run that already stored its backup fails at the upload: start a new
    run by hand instead (Deploy, Run workflow, `dry_run` unticked);
 3. applies the **migrations** production is missing (`scripts/migrate-production.mjs`, name order, each file in
@@ -82,9 +83,9 @@ something the app uses takes two merges, the second after the first has deployed
 
 ### One-time setup
 
-**Done on 2026-10-03**: the key is installed on the droplet, the three secrets are set and the baseline
+**Done on 2026-10-03**: the key is installed on the droplet, the three deploy secrets are set and the baseline
 `0024_friends.sql` is recorded (by a first real run that also deployed and passed the smoke test). Repeat the steps only
-to rotate the key. Until the three secrets in step 5 exist, the workflow ends with a notice and deploys nothing.
+to rotate the key. Until the three deploy secrets of step 5 (`DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS`, `SUPABASE_DB_URL`) exist, the workflow ends with a notice and deploys nothing.
 
 1. On your computer: `ssh-keygen -t ed25519 -N "" -C github-actions-deploy -f gha-deploy` (two files: the private
    key `gha-deploy` and the public key `gha-deploy.pub`).
@@ -95,12 +96,12 @@ to rotate the key. Until the three secrets in step 5 exist, the workflow ends wi
    `restrict,command="/home/a1mirr/bin/deploy-gate" ssh-ed25519 AAAA... github-actions-deploy`
 4. Check from your computer: `GIT_SSH_COMMAND="ssh -i gha-deploy -o IdentitiesOnly=yes" git ls-remote a1mirr@188.166.117.212:~/kektura.git`
    lists the refs, and `ssh -i gha-deploy -o IdentitiesOnly=yes a1mirr@188.166.117.212` is refused with the gate's message.
-5. In GitHub, Settings, Secrets and variables, Actions, add repository secrets: `DEPLOY_SSH_KEY` (the whole private
+5. In GitHub, Settings, Secrets and variables, Actions, add repository secrets: `BACKUP_PUBLIC_KEY` (the backup certificate, see above), `DEPLOY_SSH_KEY` (the whole private
    key file), `DEPLOY_KNOWN_HOSTS` (the output of `ssh-keyscan -t ed25519 188.166.117.212`; compare its fingerprint
    with `ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub` on the server) and `SUPABASE_DB_URL` (it exists for the
    backup: the session pooler string of the `postgres` role, which can change the schema). Optional:
    `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (the same bot as the feedback form) for failure messages.
-6. Delete the two key files from your computer.
+6. Delete the two deploy key files (`gha-deploy` and `gha-deploy.pub`) from your computer. Keep the backup private key (`backup-private.pem`, spec 0012, Notes): without it no backup can be opened.
 7. **First run**, because the migration script never guesses what production has: check in Supabase that production
    has every file in `supabase/migrations/` (today the newest is `0024_friends.sql`). Then run Deploy by hand with
    `dry_run` ticked and `baseline` set to that file name and read the summary; run it again with `dry_run` unticked:
