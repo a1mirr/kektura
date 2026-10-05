@@ -1,11 +1,14 @@
 import { expect, test, type Page } from "@playwright/test";
 import { setFeatureFlag, signInAsNewUser } from "./helpers";
 
-// Spec 0035 AC-5, AC-6, AC-11: the `friends` flag in each state, for a signed-in user, a user on the allowlist and
-// a signed-out visitor. Flags are global, so the tests run one after the other (this file is its own Playwright
-// project, after the others) and leave the flag on, as the other tests expect.
+// Spec 0035 AC-5, AC-6, AC-11: the `friends` and `restaurants` flags in each state, for a signed-in user, a user on the
+// allowlist and a signed-out visitor. Flags are global, so the tests run one after the other (this file is its own
+// Playwright project, after the others) and leave the flags on, as the other tests expect.
 test.describe.configure({ mode: "serial" });
-test.afterAll(() => setFeatureFlag("friends", "on"));
+test.afterAll(() => {
+  setFeatureFlag("friends", "on");
+  setFeatureFlag("restaurants", "on");
+});
 
 const friendsLink = (page: Page) => page.locator("header").getByRole("link", { name: "Friends" });
 
@@ -67,5 +70,61 @@ test.describe("spec 0035: a flag that is off is off", () => {
     setFeatureFlag("friends", "on");
     await page.goto("/en/friends");
     await expect(page.getByLabel("Your name (shown to friends)")).not.toHaveValue("Flagged");
+  });
+});
+
+test.describe("spec 0035: the restaurants flag", () => {
+  const canvas = (page: Page) => page.locator(".maplibregl-canvas");
+  const checkbox = (page: Page) => page.getByLabel(/^Show restaurants \(\d+\)$/);
+
+  // Opens the dashboard and waits for the map (created after hydration); returns the requests for the data file.
+  async function openMap(page: Page) {
+    const fetched: string[] = [];
+    page.on("request", (request) => {
+      if (request.url().endsWith("/data/restaurants.json")) fetched.push(request.url());
+    });
+    await page.goto("/en/dashboard");
+    await expect(canvas(page)).toBeVisible();
+    await expect(page.getByLabel("Walked stretches")).toBeVisible();
+    return fetched;
+  }
+
+  test("AC-5, AC-6: off hides the checkbox, fetches nothing and drops the About credit; on shows them on the next request", async ({ page }) => {
+    await signInAsNewUser(page);
+    // The dashboard that sign-in lands on loads the data once the map has hydrated: wait for that (the flag is on), so
+    // its request cannot be mistaken for one made while the flag is off.
+    await expect(checkbox(page)).toBeVisible();
+    setFeatureFlag("restaurants", "off");
+
+    const fetchedOff = await openMap(page);
+    await expect(checkbox(page)).toHaveCount(0);
+    await page.waitForTimeout(500); // a late request would show up here
+    expect(fetchedOff).toEqual([]);
+    await page.goto("/en/about");
+    await expect(page.getByRole("link", { name: "etteremhet.hu" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "heyjoe.hu" })).toBeVisible(); // the other credits stay
+
+    setFeatureFlag("restaurants", "on"); // no deploy, no restart, no cache to clear
+    const fetchedOn = await openMap(page);
+    await expect(checkbox(page)).toBeVisible();
+    expect(fetchedOn).toHaveLength(1);
+    await page.goto("/en/about");
+    await expect(page.getByRole("link", { name: "etteremhet.hu" })).toBeVisible();
+  });
+
+  test("AC-5: an allowlist shows the layer to the listed user only", async ({ page, browser }) => {
+    const email = await signInAsNewUser(page);
+    const other = await (await browser.newContext()).newPage();
+    await signInAsNewUser(other);
+    await expect(checkbox(page)).toBeVisible(); // the first dashboards have loaded their data (the flag is on)
+    await expect(checkbox(other)).toBeVisible();
+
+    setFeatureFlag("restaurants", "allowlist", [email]);
+    expect(await openMap(page)).toHaveLength(1);
+    await expect(checkbox(page)).toBeVisible();
+    const fetchedByOther = await openMap(other);
+    await expect(checkbox(other)).toHaveCount(0);
+    await other.waitForTimeout(500);
+    expect(fetchedByOther).toEqual([]);
   });
 });

@@ -2,6 +2,7 @@
 
 Status: Done
 Owner code: `src/lib/feature-flags.ts`, `src/lib/feature-flags-server.ts`, `supabase/migrations/0060_feature_flags.sql`,
+`supabase/migrations/0110_restaurants_flag.sql`,
 `e2e/feature-flags.spec.ts`, `e2e/helpers.ts`, `playwright.config.ts`, `src/app/api/telegram/route.ts`, `src/lib/flag-commands.ts`,
 `src/lib/telegram-webhook.ts`, `src/lib/supabase/service.ts`, `scripts/telegram-webhook.mjs`,
 `supabase/migrations/0062_flag_admin.sql`, `supabase/migrations/0108_flag_admin_buttons.sql`, `src/lib/telegram.ts`
@@ -31,8 +32,9 @@ switch them from the phone by writing to the Telegram bot that already brings th
   an `off` flag changes nothing). `resolveFlags` gives every declared flag for one viewer: a flag with no stored row, or
   with a mode the code does not know, has its default, and stored keys that are not declared are ignored.
 - **AC-4**: The server reads the flags once per request (React `cache`; `flagOn` in `src/lib/feature-flags-server.ts`)
-  as the viewer, and pages and actions use the plain boolean. The browser never receives the flag tables, anybody's id
-  or a flag that is off for the viewer. `flagOn` awaits `connection()` before it does anything else, so a page that asks for a flag
+  as the viewer, and pages and actions use the plain boolean. The browser never receives the flag tables or anybody's
+  id; a client component gets a flag only as a plain boolean prop that holds the viewer's own state (a feature that is
+  off for the viewer is not rendered at all, or is told it is off). `flagOn` awaits `connection()` before it does anything else, so a page that asks for a flag
   renders per request and a build never freezes an answer; nothing may catch what `connection()` raises while a page
   is prerendered, or the defaults would be baked into the page.
 
@@ -66,8 +68,8 @@ switch them from the phone by writing to the Telegram bot that already brings th
 - **AC-11**: End-to-end tests switch a flag in the local database with `setFeatureFlag` (`e2e/helpers.ts`). Flags are
   global, so the tests that switch a declared one are `e2e/feature-flags.spec.ts`, which is its own Playwright
   project (`flags`) that starts after the others have finished, runs its tests one after the other and leaves the
-  flag as the other tests expect it (`on`). They check each state of `friends`, for a signed-in user, a listed user and
-  a signed-out visitor.
+  flags as the other tests expect them (`on`). They check each state of `friends`, for a signed-in user, a listed user and
+  a signed-out visitor, and of `restaurants`, for a user and a listed user.
 
 ### Switching from Telegram
 
@@ -155,7 +157,8 @@ environment settings (those stay environment variables); per-flag analytics; a v
 
 ## Notes
 
-- Flags today: `friends` (spec 0024; `on` in production, which the migration that adds the tables records). A flag
+- Flags today: `friends` (spec 0024; `on` in production, which the migration that adds the tables records) and
+  `restaurants` (the restaurants layer of the dashboard's map, spec 0003 AC-21; `on`, which its migration records). A flag
   is declared together with the feature it hides, never ahead of it.
 - `feature_flags_for_me()` returns the mode and a `listed` bit instead of the enabled keys, so the rules of AC-3 live
   in one place that unit tests reach without a database. The mode of a stored flag is not secret.
@@ -182,6 +185,7 @@ environment settings (those stay environment variables); per-flag analytics; a v
 | AC-1, AC-2, AC-3, AC-9 | `src/lib/feature-flags.test.ts`, `src/lib/feature-flags-server.test.ts` |
 | AC-4 (waiting for a request first, a plain boolean), AC-8 (the call), AC-9 (the log line) | `src/lib/feature-flags-server.test.ts`, `src/lib/log.test.ts`; that it is read once per request is React's `cache`, which does nothing outside a render, so no test can show it |
 | AC-5 | `src/app/[locale]/(pages)/friends/actions.test.ts` (`disabled` before anything is touched), `e2e/feature-flags.spec.ts` (the pages, the link and the paragraph, and an action called while the flag turns off) |
+| AC-5 (restaurants) | `src/components/trail-map/useRestaurants.test.tsx` (nothing is fetched while it is off), `e2e/feature-flags.spec.ts` (no checkbox, no request for `restaurants.json` and no About credit while off, all three back on the next request, and an allowlist) |
 | AC-6, AC-11 | `e2e/feature-flags.spec.ts` |
 | AC-7, AC-8, AC-12, AC-13 | `tests/feature-flags-database.test.ts` (against the local database, run by CI's end-to-end job) |
 | AC-10 | manual (the Supabase dashboard is a web UI): change a row of `feature_flags` there and reload the page. Last checked: never recorded. The Telegram way is AC-14 to AC-26. |

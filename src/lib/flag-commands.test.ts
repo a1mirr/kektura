@@ -224,13 +224,13 @@ describe("spec 0035: the flag panel and its buttons", () => {
   it("AC-27: /flags comes with a row of off, allowlist and on for every flag, the current mode marked", async () => {
     const { store } = fakeStore([{ key: "friends", mode: "on", users: 0 }]);
     const reply = await createFlagBot({ store, now }).handle("/flags");
-    expect(reply.keyboard).toEqual([
-      [
-        { text: "off", callback_data: "m:friends:off:on" },
-        { text: "allowlist", callback_data: "m:friends:allowlist:on" },
-        { text: "● on", callback_data: "m:friends:on:on" },
-      ],
+    expect(reply.keyboard).toHaveLength(FLAG_KEYS.length); // no flag has users here, so one row each
+    expect(reply.keyboard?.[FLAG_KEYS.indexOf("friends")]).toEqual([
+      { text: "off", callback_data: "m:friends:off:on" },
+      { text: "allowlist", callback_data: "m:friends:allowlist:on" },
+      { text: "● on", callback_data: "m:friends:on:on" },
     ]);
+    for (const key of FLAG_KEYS) expect(buttons(reply).filter((b) => b.callback_data.startsWith(`m:${key}:`))).toHaveLength(3);
   });
 
   it("AC-27: a flag on an allowlist, or with users, gets a button that opens the list", async () => {
