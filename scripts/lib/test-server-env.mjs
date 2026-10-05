@@ -4,8 +4,9 @@
 // Secrets of real services. Next merges .env.local into the server's environment, and a variable that is
 // already set (even to "") wins over it, so blanking them here keeps tests away from the real service:
 // without it every E2E run posts its feedback to the developer's real Telegram (spec 0017 AC-4 sends only
-// when both are non-empty).
-export const BLANKED_SECRETS = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"];
+// when both are non-empty). The webhook secret and the service role key go too: the webhook (spec 0035) is then
+// a 404 on the test server, and a test server on the local database never holds a production key.
+export const BLANKED_SECRETS = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "TELEGRAM_WEBHOOK_SECRET", "SUPABASE_SERVICE_ROLE_KEY"];
 
 export function testServerEnv(base, local, e2e) {
   return {

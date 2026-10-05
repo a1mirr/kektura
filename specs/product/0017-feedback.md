@@ -42,7 +42,8 @@ the rest.
   generic error; after a success the form clears and can be used again.
 - **AC-9**: `npm run telegram:check` verifies the setup from the command line: it loads `.env.local`,
   checks the token with `getMe`, sends a test message, and with `--find-chat-id` lists the chats that
-  recently wrote to the bot, so the chat id can be copied.
+  recently wrote to the bot, so the chat id can be copied. It also says whether the webhook of the flag commands
+  (spec 0035) is registered, and where it points.
 - **AC-10**: Unexpected input to the server action (not a string, an array, ...) is a clean `invalid`
   result, never a thrown error.
 

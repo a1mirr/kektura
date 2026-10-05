@@ -12,6 +12,7 @@ const script = fileURLToPath(new URL("../scripts/telegram-check.mjs", import.met
 let server: http.Server;
 let base: string;
 let updates: unknown[] = [];
+let webhook: Record<string, unknown> = {};
 const received: { method: string; body: Record<string, unknown> }[] = [];
 
 beforeAll(async () => {
@@ -26,7 +27,7 @@ beforeAll(async () => {
         return res.end(JSON.stringify({ ok: false, description: "Unauthorized" }));
       }
       received.push({ method: match[2], body: raw ? JSON.parse(raw) : {} });
-      const result = match[2] === "getMe" ? { username: "kektura_test_bot" } : match[2] === "getUpdates" ? updates : {};
+      const result = match[2] === "getMe" ? { username: "kektura_test_bot" } : match[2] === "getUpdates" ? updates : match[2] === "getWebhookInfo" ? webhook : {};
       res.end(JSON.stringify({ ok: true, result }));
     });
   });
@@ -57,7 +58,8 @@ describe("spec 0017: npm run telegram:check", () => {
     expect(code).toBe(0);
     expect(out).toContain("Token OK: the bot is @kektura_test_bot.");
     expect(out).toContain("Test message sent");
-    expect(received.map((r) => r.method)).toEqual(["getMe", "sendMessage"]);
+    expect(received.map((r) => r.method)).toEqual(["getMe", "sendMessage", "getWebhookInfo"]);
+    expect(out).toContain("Flag commands: no webhook registered");
     expect(received[1].body.chat_id).toBe("42");
     expect(out).not.toContain(SECRET);
   });
@@ -92,5 +94,16 @@ describe("spec 0017: npm run telegram:check", () => {
     expect(unreachable.code).toBe(1);
     expect(unreachable.out).toContain("Could not reach Telegram");
     expect(unreachable.out).not.toContain(SECRET);
+  });
+});
+
+describe("spec 0035: npm run telegram:check and the webhook", () => {
+  it("AC-26: it also says where the webhook of the flag commands points, when there is one", async () => {
+    webhook = { url: "https://site.test/api/telegram" };
+    const { code, out } = await run({ TELEGRAM_BOT_TOKEN: SECRET, TELEGRAM_CHAT_ID: "42" });
+    webhook = {};
+    expect(code).toBe(0);
+    expect(out).toContain("Flag commands: webhook registered (https://site.test/api/telegram).");
+    expect(out).not.toContain(SECRET);
   });
 });

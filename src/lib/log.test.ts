@@ -3,6 +3,7 @@ import {
   logAccountDeletionError,
   logFeedbackError,
   logFeatureFlagsError,
+  logFlagChange,
   logFeedbackNotifyFailure,
   logFriendsError,
   logStampActionError,
@@ -103,5 +104,18 @@ describe("spec 0035: feature flag log line", () => {
   it("AC-9: one line with the code and message, nothing else", () => {
     logFeatureFlagsError({ code: "57014", message: "timeout", details: "secret", hint: "secret" });
     expect(lineOf(errorLog)).toBe('[feature-flags] lookup failed code=57014 message="timeout"');
+  });
+});
+
+describe("spec 0035: flag change log lines", () => {
+  it("AC-24: a change is one info line, a failure one error line with the error code and message", () => {
+    const info = vi.spyOn(console, "info").mockImplementation(() => {});
+    logFlagChange("friends", "on", "ok");
+    expect(info).toHaveBeenCalledWith("[feature-flags] change key=friends change=on result=ok");
+    logFlagChange("friends", "allow", "no_account");
+    expect(info).toHaveBeenLastCalledWith("[feature-flags] change key=friends change=allow result=no_account");
+    logFlagChange("friends", "off", "failed", { code: "42501", message: "denied", details: "secret" });
+    expect(lineOf(errorLog)).toBe('[feature-flags] change key=friends change=off result=failed code=42501 message="denied"');
+    info.mockRestore();
   });
 });

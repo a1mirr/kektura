@@ -149,7 +149,18 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "approve_request":
+            "admin_list_feature_flags":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "key": string,"mode": string,"users": number
+            }[]
+                           },
+"admin_set_feature_flag":
+{ Args: { "p_key": string,"p_mode": string }; Returns: string
+                           },
+"admin_set_feature_flag_user":
+{ Args: { "p_allowed": boolean,"p_email": string,"p_key": string }; Returns: string
+                           },
+"approve_request":
 { Args: { "requester_id": string }; Returns: undefined
                            },
 "default_display_name":
