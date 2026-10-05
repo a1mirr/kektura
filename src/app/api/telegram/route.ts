@@ -1,11 +1,11 @@
 import { createFlagBot, type FlagAdminStore } from "@/lib/flag-commands";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { createServiceClient } from "@/lib/supabase/service";
-import { sendTelegramMessage, telegramConfig } from "@/lib/telegram";
-import { createSeenUpdates, isOwner, MAX_UPDATE_BYTES, parseUpdate, secretMatches } from "@/lib/telegram-webhook";
+import { answerTelegramCallback, editTelegramMessage, sendTelegramMessage, telegramConfig } from "@/lib/telegram";
+import { createSeenUpdates, isOwner, MAX_UPDATE_BYTES, parseCallback, parseUpdate, secretMatches } from "@/lib/telegram-webhook";
 
-// The Telegram webhook (spec 0035 AC-14 to AC-25): the owner switches feature flags by writing to the feedback bot.
-// Under /api, so the proxy (and the language routing) leaves it alone.
+// The Telegram webhook (spec 0035 AC-14 to AC-32): the owner switches feature flags by writing to the feedback bot and
+// by tapping the buttons of its panel. Under /api, so the proxy (and the language routing) leaves it alone.
 
 const seen = createSeenUpdates();
 const limiter = createRateLimiter({ limit: 30, windowMs: 60_000 });
@@ -16,7 +16,7 @@ function database() {
   return supabase;
 }
 
-// What the commands run against: the service role client, through the functions of migration 0062 (AC-23).
+// What the commands run against: the service role client, through the functions of migrations 0062 and 0108 (AC-23, AC-33).
 const store: FlagAdminStore = {
   async list() {
     const { data, error } = await database().rpc("admin_list_feature_flags");
@@ -32,6 +32,17 @@ const store: FlagAdminStore = {
     const { data, error } = await database().rpc("admin_set_feature_flag_user", { p_key: key, p_email: email, p_allowed: allowed });
     if (error) throw error;
     if (data !== "ok" && data !== "no_account" && data !== "no_flag") throw new Error("the database refused the change");
+    return data;
+  },
+  async listUsers(key) {
+    const { data, error } = await database().rpc("admin_list_feature_flag_users", { p_key: key });
+    if (error) throw error;
+    return data.map((row) => ({ id: row.user_id, name: row.display_name }));
+  },
+  async removeUser(key, userId) {
+    const { data, error } = await database().rpc("admin_remove_feature_flag_user", { p_key: key, p_user_id: userId });
+    if (error) throw error;
+    if (data !== "ok" && data !== "not_listed") throw new Error("the database refused the change");
     return data;
   },
 };
@@ -60,12 +71,26 @@ export async function POST(request: Request): Promise<Response> {
   // From here on Telegram always gets a 200, whatever the command did, so it does not retry (AC-16).
   try {
     if (Number(request.headers.get("content-length") ?? 0) > MAX_UPDATE_BYTES) return empty(200);
-    const update = parseUpdate(await request.text());
+    const body = await request.text();
+    const message = parseUpdate(body);
+    const tap = message ? null : parseCallback(body);
+    const update = message ?? tap;
     if (!update || !seen.first(update.updateId) || !isOwner(update, config.chatId) || !limiter.allow("owner")) return empty(200);
 
-    const reply = createServiceClient() ? await bot.handle(update.text) : NOT_CONFIGURED;
-    // The answer goes out after the database has accepted the change (AC-22). Its failure is only a missing reply.
-    await sendTelegramMessage(reply, config);
+    const configured = createServiceClient() !== null;
+    if (message) {
+      const reply = configured ? await bot.handle(message.text) : { text: NOT_CONFIGURED };
+      // The answer goes out after the database has accepted the change (AC-22). Its failure is only a missing reply.
+      await sendTelegramMessage(reply.text, config, { keyboard: reply.keyboard });
+    } else if (tap) {
+      const { reply, notice } = configured ? await bot.press(tap.data) : { reply: undefined, notice: "Not configured" };
+      // The panel is edited after the database accepted the change, and every tap is answered so the button stops spinning (AC-30).
+      try {
+        if (reply) await editTelegramMessage(tap.messageId, reply.text, config, { keyboard: reply.keyboard });
+      } finally {
+        await answerTelegramCallback(tap.callbackId, notice, config);
+      }
+    }
   } catch {
     // Never thrown to Telegram, never logged: an error here could carry the message text.
   }

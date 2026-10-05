@@ -4,7 +4,7 @@ Status: Done
 Owner code: `src/lib/feature-flags.ts`, `src/lib/feature-flags-server.ts`, `supabase/migrations/0060_feature_flags.sql`,
 `e2e/feature-flags.spec.ts`, `e2e/helpers.ts`, `playwright.config.ts`, `src/app/api/telegram/route.ts`, `src/lib/flag-commands.ts`,
 `src/lib/telegram-webhook.ts`, `src/lib/supabase/service.ts`, `scripts/telegram-webhook.mjs`,
-`supabase/migrations/0062_flag_admin.sql`
+`supabase/migrations/0062_flag_admin.sql`, `supabase/migrations/0108_flag_admin_buttons.sql`, `src/lib/telegram.ts`
 
 ## Goal
 
@@ -12,7 +12,7 @@ An unfinished or risky feature can be merged and deployed to production while st
 for the developer, for chosen testers and for everybody, without a deploy (the server is small and a deploy takes
 minutes). A flag is temporary: once its feature is live for everyone, the flag, its checks and its rows are deleted.
 Which flags exist is declared in code; how each one is switched is stored in the database. The developer can look at and
-switch them from the phone by writing to the Telegram bot that already brings the feedback.
+switch them from the phone by writing to the Telegram bot that already brings the feedback, or by tapping the buttons of its panel.
 
 ## Behaviour
 
@@ -71,7 +71,8 @@ switch them from the phone by writing to the Telegram bot that already brings th
 
 ### Switching from Telegram
 
-The owner writes to the feedback bot (spec 0017); Telegram delivers the messages to `POST /api/telegram`, a webhook. The
+The owner writes to the feedback bot (spec 0017) and taps the buttons under its messages; Telegram delivers both to
+`POST /api/telegram`, a webhook. The
 route is under `/api`, so the proxy and the language routing leave it alone.
 
 - **AC-14**: The route answers only a request that carries the header `X-Telegram-Bot-Api-Secret-Token` equal to the server
@@ -83,7 +84,7 @@ route is under `/api`, so the proxy and the language routing leave it alone.
 - **AC-16**: A valid update is answered with 200 at once, whatever the command did, so Telegram does not retry; an update
   id that was already handled is ignored (Telegram can deliver one twice). A body over 16 KB, one that is not JSON and an
   update without a text message are ignored with a 200 too.
-- **AC-17**: `/flags` lists every declared flag with its description and its mode (`off`, `allowlist`, `on`; a flag with
+- **AC-17**: `/flags` answers with the panel (AC-27) whose text lists every declared flag with its description and its mode (`off`, `allowlist`, `on`; a flag with
   no row shows its default) and, for an allowlist, how many users it holds. Stored keys that are not declared are not listed.
 - **AC-18**: `/flag <key> <off|allowlist|on>` sets the mode of a declared flag and answers with the new state. An undeclared
   key, or a mode that does not exist, is refused with the valid ones and nothing changes.
@@ -94,14 +95,15 @@ route is under `/api`, so the proxy and the language routing leave it alone.
 - **AC-20**: Switching a flag to `on` (everybody, signed-out visitors included) is not done at once: the bot asks for
   `/confirm`, which does it within 60 seconds. Anything else, including a late `/confirm` and a second one, cancels, and
   is itself carried out as the command it is. Turning a flag `off` or to `allowlist` never asks.
-- **AC-21**: Anything else the owner writes, including another command, gets a short help text listing the commands. A bot
+- **AC-21**: Anything else the owner writes, including another command, gets a short help text listing the commands and
+  saying that `/flags` has buttons. A bot
   name after the command, as Telegram adds it in a group (`/flag@bot`), is ignored. The texts are English, the owner's own
   tool, and are not part of the three-language rule.
 - **AC-22**: A change takes effect on the next request to the site (AC-6), and the answer to the owner is sent after the
   database has accepted it, never before. A refused or failed change answers that nothing was changed; the route never
   throws, and without `SUPABASE_SERVICE_ROLE_KEY` the answer says the commands are not configured.
 - **AC-23**: The tables are changed only through `security definer` functions with an empty `search_path`
-  (`admin_list_feature_flags`, `admin_set_feature_flag`, `admin_set_feature_flag_user`) that only `service_role` may call;
+  (`admin_list_feature_flags`, `admin_set_feature_flag`, `admin_set_feature_flag_user`, and AC-33's) that only `service_role` may call;
   the route calls them with the service role key (`SUPABASE_SERVICE_ROLE_KEY`, server-only, used by this route alone). Setting
   a mode or an allowlist entry again changes nothing more, and a mode that does not exist is refused.
 - **AC-24**: Each change is logged as one `[feature-flags] change` line: the flag, what was asked (`off`, `allowlist`, `on`,
@@ -110,15 +112,45 @@ route is under `/api`, so the proxy and the language routing leave it alone.
 - **AC-25**: Commands are rate limited to 30 a minute: the owner can type fast, a leaked secret cannot hammer the
   database. The rest are ignored.
 - **AC-26**: `npm run telegram:webhook -- set|info|delete` registers, shows or removes the webhook at Telegram for the
-  production address (`SITE_URL`, https) with the secret token and for messages only, and never prints the token or the
-  secret. `npm run telegram:check` (spec 0017 AC-9) says whether the webhook is registered.
+  production address (`SITE_URL`, https) with the secret token and for messages and taps on buttons only (`allowed_updates`), and never prints the
+  token or the secret. `npm run telegram:check` (spec 0017 AC-9) says whether the webhook is registered.
   `deploy/README.md` documents the two new server variables and the steps, and `.env.example` names them. The test server
   never has either variable (spec 0006 AC-7), so the route is a 404 there.
+
+### The panel and its buttons
+
+`/flags` is a panel: one message the bot edits in place as the owner taps. Typed commands (AC-18 to AC-20) work next to it.
+
+- **AC-27**: Under the list of AC-17, `/flags` carries a row of three buttons for every declared flag, `off`, `allowlist`
+  and `on`, with the current mode marked (`● `), and, for a flag that is on an allowlist or has users on one, a button
+  with the number of its users that opens the list (AC-29).
+- **AC-28**: A mode button knows the mode the panel showed. Tapping it re-reads the flag first: when the flag is in another
+  mode now (changed in the dashboard, or from another message), nothing is applied and the panel is shown as it is with
+  a note; tapping the mode the flag has only answers that it already has it. Otherwise `off` and `allowlist` are applied
+  and the message shows the new state, and `on` asks for confirmation exactly like `/flag <key> on` (AC-20: the typed
+  `/confirm` within 60 seconds), with a `Back` button. A tap cancels a pending `/confirm` like any other message.
+- **AC-29**: The allowlist button opens the flag's users by display name (never email or id), at most 20, with "and N
+  more" for the rest and a note that `/allow` adds one, each with a `Remove` button, and a `Back` button to the panel.
+  Removing takes the user off and shows the refreshed list; a user who is no longer listed only gets the refreshed list.
+- **AC-30**: A tap is obeyed only when its chat and its sender are the owner (AC-15). Update ids that were handled, and
+  taps beyond the 30 a minute of AC-25 (shared with the messages), are ignored. Every other tap is answered to
+  Telegram, with a short notice or none, so the button stops spinning, also data that is not ours (another flag,
+  a mode or an id that does not exist, extra parts), which changes nothing; the panel is edited after the database has
+  accepted the change; a failed Telegram edit never stops the answer or turns into anything but a 200; a failed
+  change says so; without the service role key the tap is answered that it is not configured.
+- **AC-31**: The data of a button is `m:<key>:<mode>:<shown mode>`, `u:<key>`, `d:<key>:<user id>` or `p`, at most 64
+  bytes (Telegram's limit) for every declared flag.
+- **AC-32**: A change from a button is logged as the same one `[feature-flags] change` line as a typed one (AC-24), a
+  removal as `deny`, never a name, an email or an id.
+- **AC-33**: Two more `security definer` functions with an empty `search_path` that only `service_role` may call: `admin_list_feature_flag_users`
+  (a flag's allowlist as user id and display name, at most 100) and `admin_remove_feature_flag_user` (removes one user by
+  id: `ok`, or `not_listed` and nothing changes).
 
 ## Out of scope
 
 An admin screen; anything but flags in the Telegram bot (deploying, logs, database queries), more than one owner or a team
-chat, buttons, creating or deleting a flag (they are declared in code); percentage rollouts or A/B experiments; a switch users flip themselves; flags for build-time or
+chat, Confirm and Cancel buttons for switching `on` (the typed `/confirm` stays), a permanent keyboard under the text box,
+adding users by button, creating or deleting a flag (they are declared in code); percentage rollouts or A/B experiments; a switch users flip themselves; flags for build-time or
 environment settings (those stay environment variables); per-flag analytics; a visible "beta" marker.
 
 ## Notes
@@ -131,6 +163,9 @@ environment settings (those stay environment variables); per-flag analytics; a v
   makes the feature permanent. The registry should stay short.
 - The feature flag tables are not part of the weekly backup (spec 0012 AC-1): migrations seed them and the developer
   sets them.
+- A button of an old panel is harmless: it carries the mode it was shown with and is refused when the flag has moved on
+  (AC-28). The webhook has to be registered again (`npm run telegram:webhook -- set`) after a release that adds a kind of
+  update to listen to, as buttons did (`callback_query`).
 - The webhook keeps its duplicate memory, its rate limit and a pending `/confirm` in the memory of the one server process:
   a restart forgets them, which only costs a repeated `/confirm`.
 - Telegram refuses `getUpdates` while a webhook is registered, so `telegram:check -- --find-chat-id` needs
@@ -157,4 +192,7 @@ environment settings (those stay environment variables); per-flag analytics; a v
 | AC-14, AC-26 | `e2e/telegram-webhook.spec.ts` (on the test server the route is an empty 404, for every method) |
 | AC-23 (the key) | `tests/service-role-key.test.ts` (only the webhook route imports the service client) |
 | AC-26 | `tests/telegram-webhook-script.test.ts` and `tests/telegram-check.test.ts` (the scripts against a fake Telegram API on localhost; the token and the secret are never printed), `tests/test-server-env.test.ts` (the test server has no secret or key) |
-| AC-26 (the real bot) | manual (it needs the real bot and the production site): `npm run telegram:webhook -- set`, then `/flags`, `/flag friends allowlist` and `/flags` again from the phone. Last checked: never recorded. |
+| AC-27 to AC-32 | `src/lib/flag-commands.test.ts` (the panel, every kind of tap, stale and unknown data, the 64 bytes, the log lines), `src/app/api/telegram/route.test.ts` (taps through the route: owner, duplicates, order of database, edit and answer, the limit), `src/lib/telegram-buttons.test.ts` and `src/lib/telegram-callback.test.ts` (the Bot API calls and reading a tap) |
+| AC-28 to AC-30, AC-33 | `tests/flag-admin-database.test.ts` (the two functions, and taps through the real route against the real database) |
+| AC-26 (the real bot) | manual (it needs the real bot and the production site): `npm run telegram:webhook -- set`, then `/flags`, `/flag friends allowlist` and `/flags` again from the phone. Last checked: 2026-10-05, by the owner: `/flags` answered from the real bot; the other commands were not tried. |
+| AC-27 to AC-30 (the real buttons) | manual (it needs the real bot and its webhook registered for taps): from the phone, `/flags`, tap `allowlist` and then `friends` back to `on` (and `/confirm`), open a list and tap `Back`. Last checked: never recorded. |

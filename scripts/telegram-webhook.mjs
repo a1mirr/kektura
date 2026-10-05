@@ -68,7 +68,7 @@ async function main() {
   if (!secret) throw new Problem("TELEGRAM_WEBHOOK_SECRET is not set. A secret of your own, 1 to 256 characters of A-Z a-z 0-9 _ -.");
   if (!/^[\w-]{1,256}$/.test(secret)) throw new Problem("TELEGRAM_WEBHOOK_SECRET may only hold A-Z a-z 0-9 _ - (1 to 256 characters).");
   if (!site || !/^https:\/\//.test(site)) throw new Problem("SITE_URL must be the public https address of the site, e.g. https://kektura-tracker.com.");
-  await call("setWebhook", { url: `${site}/api/telegram`, secret_token: secret, allowed_updates: ["message"] });
+  await call("setWebhook", { url: `${site}/api/telegram`, secret_token: secret, allowed_updates: ["message", "callback_query"] });
   console.log(`Webhook registered for ${site}/api/telegram.`);
 }
 

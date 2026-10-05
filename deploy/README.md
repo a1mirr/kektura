@@ -35,7 +35,7 @@ Spec 0035: the owner writes to the feedback bot to look at and switch feature fl
 2. From a checkout that has the same values for `TELEGRAM_BOT_TOKEN` and `TELEGRAM_WEBHOOK_SECRET` and `SITE_URL=https://kektura-tracker.com` in its `.env.local`: `npm run telegram:webhook -- set`, then `npm run telegram:check`, which says where the webhook points.
 3. Send `/flags` to the bot.
 
-`npm run telegram:webhook -- info` shows where Telegram sends the messages and the last error it had; `-- delete` stops it. While a webhook is registered Telegram refuses `getUpdates`, so `npm run telegram:check -- --find-chat-id` needs `-- delete` first.
+The webhook listens for messages and for taps on the panel's buttons: after a release that adds a kind of update, as buttons did, run `-- set` again. `npm run telegram:webhook -- info` shows where Telegram sends the messages and the last error it had; `-- delete` stops it. While a webhook is registered Telegram refuses `getUpdates`, so `npm run telegram:check -- --find-chat-id` needs `-- delete` first.
 
 ## First-time setup
 

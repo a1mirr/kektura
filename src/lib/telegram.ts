@@ -1,4 +1,5 @@
-// Telegram Bot API client for the feedback notifications (spec 0017). Only `sendMessage` is needed.
+// Telegram Bot API client: the feedback notifications (spec 0017) and the flag panel's messages, edits and answers to
+// taps (spec 0035).
 //
 // The request URL contains the bot token, so nothing here ever returns or logs the URL, a fetch error
 // object or a response body: failures are reduced to a short reason.
@@ -18,19 +19,21 @@ export function telegramConfig(env: Record<string, string | undefined> = process
 
 export type TelegramResult = { ok: true } | { ok: false; reason: string };
 
-export async function sendTelegramMessage(
-  text: string,
+// A button under a message (spec 0035 AC-27): its text and the data Telegram sends back when it is tapped.
+export type InlineButton = { text: string; callback_data: string };
+export type InlineKeyboard = InlineButton[][];
+
+type CallOptions = { fetchImpl?: typeof fetch; timeoutMs?: number };
+
+// One Bot API call. Nothing here returns or logs the URL (it holds the token), a fetch error object or the answer.
+async function callApi(
+  method: string,
+  body: Record<string, unknown>,
   config: TelegramConfig,
-  { fetchImpl = fetch, timeoutMs = 4000 }: { fetchImpl?: typeof fetch; timeoutMs?: number } = {},
+  { fetchImpl = fetch, timeoutMs = 4000 }: CallOptions = {},
 ): Promise<TelegramResult> {
-  const body = {
-    chat_id: config.chatId,
-    // Plain text on purpose: no parse_mode, so the sender's text can't be read as markup.
-    text: text.length > TELEGRAM_MAX_TEXT ? `${text.slice(0, TELEGRAM_MAX_TEXT - 1)}…` : text,
-    disable_web_page_preview: true,
-  };
   try {
-    const response = await fetchImpl(`${config.apiBase ?? DEFAULT_API}/bot${config.token}/sendMessage`, {
+    const response = await fetchImpl(`${config.apiBase ?? DEFAULT_API}/bot${config.token}/${method}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
@@ -40,4 +43,56 @@ export async function sendTelegramMessage(
   } catch (error) {
     return { ok: false, reason: error instanceof Error && error.name === "TimeoutError" ? "timeout" : "network" };
   }
+}
+
+// Plain text on purpose: no parse_mode, so the sender's text can't be read as markup.
+const cut = (text: string) => (text.length > TELEGRAM_MAX_TEXT ? `${text.slice(0, TELEGRAM_MAX_TEXT - 1)}…` : text);
+
+export function sendTelegramMessage(
+  text: string,
+  config: TelegramConfig,
+  { keyboard, ...options }: CallOptions & { keyboard?: InlineKeyboard } = {},
+): Promise<TelegramResult> {
+  return callApi(
+    "sendMessage",
+    {
+      chat_id: config.chatId,
+      text: cut(text),
+      disable_web_page_preview: true,
+      ...(keyboard ? { reply_markup: { inline_keyboard: keyboard } } : {}),
+    },
+    config,
+    options,
+  );
+}
+
+// Replaces the text and the buttons of a message the bot sent (the panel the owner tapped).
+export function editTelegramMessage(
+  messageId: number,
+  text: string,
+  config: TelegramConfig,
+  { keyboard, ...options }: CallOptions & { keyboard?: InlineKeyboard } = {},
+): Promise<TelegramResult> {
+  return callApi(
+    "editMessageText",
+    {
+      chat_id: config.chatId,
+      message_id: messageId,
+      text: cut(text),
+      disable_web_page_preview: true,
+      reply_markup: { inline_keyboard: keyboard ?? [] },
+    },
+    config,
+    options,
+  );
+}
+
+// Every tap has to be answered, or the button keeps spinning; the optional text is a short notice at the top.
+export function answerTelegramCallback(
+  callbackId: string,
+  text: string | undefined,
+  config: TelegramConfig,
+  options: CallOptions = {},
+): Promise<TelegramResult> {
+  return callApi("answerCallbackQuery", { callback_query_id: callbackId, ...(text ? { text: text.slice(0, 200) } : {}) }, config, options);
 }

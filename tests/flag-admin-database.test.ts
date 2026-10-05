@@ -12,10 +12,20 @@ type Client = SupabaseClient<Database>;
 
 // The route is the real one, against the real database; only the message to Telegram is caught.
 const sent = vi.hoisted(() => [] as string[]);
+const edited = vi.hoisted(() => [] as { messageId: number; text: string; callbacks: string[] }[]);
+const answered = vi.hoisted(() => [] as { id: string; text: string | undefined }[]);
 vi.mock("@/lib/telegram", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/telegram")>()),
   sendTelegramMessage: async (text: string) => {
     sent.push(text);
+    return { ok: true };
+  },
+  editTelegramMessage: async (messageId: number, text: string, _config: unknown, options: { keyboard?: { callback_data: string }[][] } = {}) => {
+    edited.push({ messageId, text, callbacks: (options.keyboard ?? []).flat().map((button) => button.callback_data) });
+    return { ok: true };
+  },
+  answerTelegramCallback: async (id: string, text: string | undefined) => {
+    answered.push({ id, text });
     return { ok: true };
   },
 }));
@@ -59,9 +69,18 @@ describe("spec 0035: the flag functions of the Telegram webhook", () => {
       expect((await who.rpc("admin_list_feature_flags")).error?.code).toBe("42501");
       expect((await who.rpc("admin_set_feature_flag", { p_key: flag("a"), p_mode: "on" })).error?.code).toBe("42501");
       expect((await who.rpc("admin_set_feature_flag_user", { p_key: flag("a"), p_email: ana.email, p_allowed: true })).error?.code).toBe("42501");
+      expect((await who.rpc("admin_list_feature_flag_users", { p_key: "friends" })).error?.code).toBe("42501");
+      expect((await who.rpc("admin_remove_feature_flag_user", { p_key: "friends", p_user_id: ana.id })).error?.code).toBe("42501");
     }
     expect(mode(flag("a"))).toBe("");
-    for (const fn of ["admin_list_feature_flags()", "admin_set_feature_flag(text, text)", "admin_set_feature_flag_user(text, text, boolean)"]) {
+    const functions = [
+      "admin_list_feature_flags()",
+      "admin_set_feature_flag(text, text)",
+      "admin_set_feature_flag_user(text, text, boolean)",
+      "admin_list_feature_flag_users(text)",
+      "admin_remove_feature_flag_user(text, uuid)",
+    ];
+    for (const fn of functions) {
       const can = (role: string) => psql(`select has_function_privilege('${role}', 'public.${fn}', 'execute')`);
       expect([can("anon"), can("authenticated"), can("service_role")], fn).toEqual(["f", "f", "t"]);
     }
@@ -72,7 +91,7 @@ describe("spec 0035: the flag functions of the Telegram webhook", () => {
     const rows = psql(
       "select prosecdef || '|' || proconfig::text from pg_proc where proname like 'admin_%feature_flag%' and pronamespace = 'public'::regnamespace",
     ).split("\n");
-    expect(rows).toHaveLength(3);
+    expect(rows).toHaveLength(5);
     for (const row of rows) expect(row).toBe('true|{"search_path=\\"\\""}');
   });
 
@@ -129,8 +148,27 @@ describe("spec 0035: the flag functions of the Telegram webhook", () => {
   });
 });
 
+describe("spec 0035: the allowlist functions of the flag panel", () => {
+  it("AC-33: a flag's allowlist is listed by display name, never email, and a user is removed by id, once", async (ctx) => {
+    if (!local) return ctx.skip();
+    await service.rpc("admin_set_feature_flag", { p_key: flag("p"), p_mode: "allowlist" });
+    await service.rpc("admin_set_feature_flag_user", { p_key: flag("p"), p_email: ana.email, p_allowed: true });
+    const { data } = await service.rpc("admin_list_feature_flag_users", { p_key: flag("p") });
+    const name = psql(`select display_name from public.profiles where id = '${ana.id}'`);
+    expect(data).toEqual([{ user_id: ana.id, display_name: name }]);
+    expect(JSON.stringify(data)).not.toContain(ana.email);
+    expect((await service.rpc("admin_list_feature_flag_users", { p_key: flag("nobody") })).data).toEqual([]);
+
+    expect((await service.rpc("admin_remove_feature_flag_user", { p_key: flag("p"), p_user_id: ana.id })).data).toBe("ok");
+    expect(listed(flag("p"))).toBe("0");
+    expect((await service.rpc("admin_remove_feature_flag_user", { p_key: flag("p"), p_user_id: ana.id })).data).toBe("not_listed");
+    expect((await service.rpc("admin_remove_feature_flag_user", { p_key: flag("nobody"), p_user_id: ana.id })).data).toBe("not_listed");
+  });
+});
+
 describe("spec 0035: the Telegram webhook against the database", () => {
   let post: (text: string) => Promise<Response>;
+  let POST: (request: Request) => Promise<Response>;
 
   beforeAll(async () => {
     if (!local) return;
@@ -139,7 +177,7 @@ describe("spec 0035: the Telegram webhook against the database", () => {
     vi.stubEnv("TELEGRAM_BOT_TOKEN", "123:token");
     vi.stubEnv("TELEGRAM_CHAT_ID", "42");
     vi.stubEnv("TELEGRAM_WEBHOOK_SECRET", "hook-secret");
-    const { POST } = await import("../src/app/api/telegram/route");
+    ({ POST } = await import("../src/app/api/telegram/route"));
     let id = 1;
     post = (text) =>
       POST(
@@ -172,6 +210,49 @@ describe("spec 0035: the Telegram webhook against the database", () => {
     if (!local) return ctx.skip();
     expect(await reply("/flag friends on")).toMatch(/Send \/confirm/);
     expect(await reply("/confirm")).toBe("friends is now on.");
+    expect(psql("select mode from public.feature_flags where key = 'friends'")).toBe("on");
+  });
+
+  let tapId = 1000;
+  const tap = async (data: string) => {
+    edited.length = 0;
+    answered.length = 0;
+    const response = await POST(
+      new Request("http://localhost/api/telegram", {
+        method: "POST",
+        headers: { "x-telegram-bot-api-secret-token": "hook-secret" },
+        body: JSON.stringify({ update_id: tapId++, callback_query: { id: `cb-${tapId}`, data, from: { id: 42 }, message: { message_id: 7, chat: { id: 42 } } } }),
+      }),
+    );
+    expect(response.status).toBe(200);
+  };
+
+  it("AC-28, AC-29, AC-30: the panel's buttons reach the real functions: the allowlist is opened by name, a user removed, a mode tapped", async (ctx) => {
+    if (!local) return ctx.skip();
+    const name = psql(`select display_name from public.profiles where id = '${ana.id}'`);
+    expect(await reply(`/allow friends ${ana.email}`)).toMatch(/added to the allowlist/);
+
+    await tap("u:friends");
+    expect(edited).toHaveLength(1);
+    expect(edited[0].messageId).toBe(7);
+    expect(edited[0].text).toContain("on the allowlist.");
+    expect(edited[0].callbacks).toContain(`d:friends:${ana.id}`);
+    expect(JSON.stringify(edited)).not.toContain(ana.email);
+    expect(name).not.toBe("");
+
+    await tap(`d:friends:${ana.id}`);
+    expect(edited[0].text).toMatch(/^Removed./);
+    expect(answered[0].text).toBe("Removed.");
+    expect(psql(`select count(*) from public.feature_flag_users where key = 'friends' and user_id = '${ana.id}'`)).toBe("0");
+
+    await tap(`d:friends:${ana.id}`);
+    expect(answered[0].text).toBe("That user was not on the list any more.");
+
+    // friends is on: tapping the mode it has is only a notice, and a panel that claims another mode is refreshed.
+    await tap("m:friends:on:on");
+    expect(answered[0].text).toBe("friends is already on");
+    await tap("m:friends:off:off");
+    expect(answered[0].text).toBe("Changed since: nothing applied");
     expect(psql("select mode from public.feature_flags where key = 'friends'")).toBe("on");
   });
 });
