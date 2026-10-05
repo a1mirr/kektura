@@ -40,7 +40,7 @@ Also on 2026-10-03: the owner gave the author a standing permission to merge the
 is green and the fresh review is done (`CLAUDE.md`, spec 0021 AC-6). With no approval gate, such a merge is a deploy.
 
 Taken on 2026-10-04 (the owner may overrule): the backup before a migration (AC-14) stores the dump as a workflow
-artifact, encrypted to the owner's public certificate since 2026-10-05 (spec 0012 AC-6: a public repository's artifacts are open to everyone); it dumps only the six
+artifact, encrypted to the owner's public certificate (spec 0012 AC-6: a public repository's artifacts are open to everyone); it dumps only the six
 user-data tables, because the schema and the reference data come back from git (migrations and seeds); and it is taken
 only when a migration is missing, so a deploy that changes no schema is as fast as before. Restore: spec 0012, Notes.
 

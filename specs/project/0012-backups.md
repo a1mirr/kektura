@@ -38,10 +38,11 @@ every GitHub user, so a dump is only ever stored encrypted (AC-6).
   every GitHub user, and the dump holds emails and Google profile data. After the check, the action encrypts every dump
   file to the owner's public X.509 certificate (the repository secret `BACKUP_PUBLIC_KEY`, passed in by the caller;
   `openssl cms -encrypt`, AES-256), deletes the plaintext and uploads only the folder of `.sql.cms` files. Only the
-  owner's private key, which is never in GitHub, opens them. A missing or malformed certificate (a private key instead
-  of a certificate, say) fails the step with a message, so nothing is uploaded: the weekly workflow skips itself with
-  the notice of AC-2 instead, and a deploy that has a migration to apply stops at its backup step, before the
-  migration (spec 0026 AC-14), while one without a migration needs no certificate.
+  owner's private key, which is never in GitHub, opens them. A malformed certificate (a private key instead
+  of a certificate, say) or an empty one fails the step with a message, so nothing is uploaded. The weekly workflow
+  skips itself with the notice of AC-2 when the secret is not set at all, and fails at the encryption step when it is
+  set to something that is not a certificate; a deploy that has a migration to apply stops at its backup step, before
+  the migration (spec 0026 AC-14), while one without a migration needs no certificate.
 
 ## Out of scope
 
@@ -60,6 +61,8 @@ paper (without it the backups cannot be opened, and it must never be in the repo
 ```
 openssl req -x509 -newkey rsa:4096 -nodes -keyout backup-private.pem -out backup-cert.pem -days 36500 -subj "/CN=kektura-backup"
 ```
+
+(In Git Bash on Windows write `-subj "//CN=kektura-backup"`: MSYS would otherwise turn the subject into a path.)
 
 The dump holds the users' Google profile data (`raw_user_meta_data`, email) and, for password users, password hashes.
 
@@ -119,9 +122,9 @@ identical before and after for all six tables:
 
 The dump contained exactly those six tables. Earlier drills (four tables) also showed stamp notes with quotes, a
 backslash, a newline and non-ASCII characters surviving, and a restored password user signing in and seeing their
-stamps through PostgREST with RLS. Repeat the drill after any change to the dump steps or to the tables. On 2026-10-05, when
-the encryption step (AC-6) was added, the database part was not repeated (the dump and the load are unchanged); the step's
-own script was run for real by `tests/backup-workflow.test.ts` and a dump came back byte for byte after `openssl cms -decrypt -binary`.
+stamps through PostgREST with RLS. Repeat the drill after any change to the dump steps or to the tables. The drill covers the dump and the load, which
+the encryption step (AC-6) does not touch; the step's own script is run for real by `tests/backup-workflow.test.ts`, and a dump
+comes back byte for byte after `openssl cms -decrypt -binary`.
 
 **Verified on GitHub** on 2026-10-04: a manual run of the workflow against production succeeded in 1 m 19 s
 (the runner's Docker pulled the CLI's `pg_dump` image, the session pooler connection worked, the check step
@@ -138,5 +141,5 @@ no-secret path ends green with the notice (it can't be run without removing the 
 | AC-6 | `tests/backup-workflow.test.ts` (only the folder of encrypted files is uploaded, after the check; the certificate is read in the encryption step's `env` only; the step run for real with openssl: only `.sql.cms` files are left, the plaintext is gone, the private key restores the dump byte for byte, and a missing, malformed or private-key certificate fails it with nothing to upload; the deploy does not skip itself for a missing certificate and its backup step is not optional) |
 | AC-6 (on GitHub) | manual (it needs a real run and the owner's private key): the Backup workflow, run by hand with `BACKUP_PUBLIC_KEY` set, stores `user-data-backup` holding one `.sql.cms` file that the private key decrypts to a dump that ends with `PostgreSQL database dump complete`. Last checked: never recorded. |
 | AC-4 | manual (it restores into a database): the restore drill in Notes. Last checked: 2026-10-04. |
-| AC-5 | `tests/backup-workflow.test.ts` (the action is composite with the three inputs, the connection string is read only in the dump step's `env`, the dump and its lists exist only in the action, both callers pass only the connection string, the artifact name and the retention) |
+| AC-5 | `tests/backup-workflow.test.ts` (the action is composite with the four inputs, the connection string is read only in the dump step's `env`, the dump and its lists exist only in the action, both callers pass only the connection string, the certificate, the artifact name and the retention) |
 | AC-5 (on GitHub) | manual (it needs a real run): the Backup workflow, run by hand, still stores `user-data-backup` now that the dump is in the action, and a Deploy run that applies a migration stores `pre-migration-<sha7>` (both callers hand the connection string over as `db-url: ${{ env.SUPABASE_DB_URL }}`, which only a real run shows to work). Last checked: never recorded. |

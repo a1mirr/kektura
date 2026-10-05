@@ -83,9 +83,9 @@ something the app uses takes two merges, the second after the first has deployed
 
 ### One-time setup
 
-**Done on 2026-10-03**: the key is installed on the droplet, the three secrets are set and the baseline
+**Done on 2026-10-03**: the key is installed on the droplet, the three deploy secrets are set and the baseline
 `0024_friends.sql` is recorded (by a first real run that also deployed and passed the smoke test). Repeat the steps only
-to rotate the key. Until the three secrets in step 5 exist, the workflow ends with a notice and deploys nothing.
+to rotate the key. Until the three deploy secrets of step 5 (`DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS`, `SUPABASE_DB_URL`) exist, the workflow ends with a notice and deploys nothing.
 
 1. On your computer: `ssh-keygen -t ed25519 -N "" -C github-actions-deploy -f gha-deploy` (two files: the private
    key `gha-deploy` and the public key `gha-deploy.pub`).

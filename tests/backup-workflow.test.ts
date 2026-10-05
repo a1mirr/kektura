@@ -109,7 +109,7 @@ describe("spec 0012: the backup workflow", () => {
 });
 
 describe("spec 0012 AC-5: one dump action for every workflow that takes a dump", () => {
-  it("AC-5: is a composite action under .github/actions that takes the connection string, the artifact name and the retention", () => {
+  it("AC-5: is a composite action under .github/actions that takes the connection string, the certificate, the artifact name and the retention", () => {
     expect(action).toMatch(/^runs:\n {2}using: composite/m);
     for (const input of ["db-url", "artifact-name", "retention-days", "encryption-cert"]) {
       expect(action, input).toMatch(new RegExp(`^ {2}${input}:\\n {4}description: .*\\n {4}required: true`, "m"));
@@ -214,7 +214,7 @@ describe("spec 0012 AC-6: the dump is encrypted before it is stored", () => {
   function makeKey(dir: string) {
     const cert = path.join(dir, "cert.pem");
     const key = path.join(dir, "key.pem");
-    const made = spawnSync("openssl", ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", key, "-out", cert, "-days", "2", "-subj", "//CN=test"], { encoding: "utf8" });
+    const made = spawnSync("openssl", ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", key, "-out", cert, "-days", "2", "-subj", "/CN=test"], { encoding: "utf8" });
     expect(made.status, made.stderr).toBe(0);
     return { cert: fs.readFileSync(cert, "utf8"), key };
   }
