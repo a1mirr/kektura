@@ -149,10 +149,18 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "admin_list_feature_flags":
+            "admin_list_feature_flag_users":
+{ Args: { "p_key": string }; Returns: {
+              "display_name": string,"user_id": string
+            }[]
+                           },
+"admin_list_feature_flags":
 { Args: Record<PropertyKey, never>; Returns: {
               "key": string,"mode": string,"users": number
             }[]
+                           },
+"admin_remove_feature_flag_user":
+{ Args: { "p_key": string,"p_user_id": string }; Returns: string
                            },
 "admin_set_feature_flag":
 { Args: { "p_key": string,"p_mode": string }; Returns: string

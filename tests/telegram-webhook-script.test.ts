@@ -53,13 +53,13 @@ function run(env: Record<string, string>, ...args: string[]) {
 const full = { TELEGRAM_BOT_TOKEN: TOKEN, TELEGRAM_WEBHOOK_SECRET: HOOK_SECRET, SITE_URL: "https://site.test/" };
 
 describe("spec 0035: npm run telegram:webhook", () => {
-  it("AC-26: set registers the site's address with the secret and for messages only, and prints neither secret", async () => {
+  it("AC-26: set registers the site's address with the secret and for messages and taps on buttons only, and prints neither secret", async () => {
     received.length = 0;
     const { code, out } = await run(full, "set");
     expect(code).toBe(0);
     expect(out).toContain("Webhook registered for https://site.test/api/telegram.");
     expect(received).toEqual([
-      { method: "setWebhook", body: { url: "https://site.test/api/telegram", secret_token: HOOK_SECRET, allowed_updates: ["message"] } },
+      { method: "setWebhook", body: { url: "https://site.test/api/telegram", secret_token: HOOK_SECRET, allowed_updates: ["message", "callback_query"] } },
     ]);
     expect(out).not.toContain(TOKEN);
     expect(out).not.toContain(HOOK_SECRET);

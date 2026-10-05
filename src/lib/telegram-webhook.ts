@@ -33,7 +33,7 @@ export function parseUpdate(body: string): TelegramUpdate | null {
 
 // Only the owner is obeyed: the chat and the sender must both be the configured chat id (in a private chat they are
 // the same number). Anyone can find the bot and write to it.
-export const isOwner = (update: TelegramUpdate, ownerChatId: string): boolean =>
+export const isOwner = (update: { chatId: string; fromId: string }, ownerChatId: string): boolean =>
   update.chatId === ownerChatId && update.fromId === ownerChatId;
 
 // Remembers the last update ids, because Telegram can deliver the same one twice.
@@ -47,5 +47,30 @@ export function createSeenUpdates(capacity = 200) {
       if (seen.size > capacity) seen.delete(seen.values().next().value as number);
       return true;
     },
+  };
+}
+
+// A tap on one of the bot's buttons (spec 0035 AC-30): who tapped, which message it was under and the data it carries.
+export type TelegramCallback = { updateId: number; chatId: string; fromId: string; callbackId: string; messageId: number; data: string };
+
+export function parseCallback(body: string): TelegramCallback | null {
+  if (body.length > MAX_UPDATE_BYTES) return null;
+  let json: unknown;
+  try {
+    json = JSON.parse(body);
+  } catch {
+    return null;
+  }
+  const query = (json as { callback_query?: { id?: unknown; data?: unknown; from?: { id?: unknown }; message?: { message_id?: unknown; chat?: { id?: unknown } } } })?.callback_query;
+  const updateId = (json as { update_id?: unknown })?.update_id;
+  const ids = [updateId, query?.from?.id, query?.message?.chat?.id, query?.message?.message_id];
+  if (typeof query?.id !== "string" || typeof query.data !== "string" || !ids.every((id) => typeof id === "number" && Number.isSafeInteger(id))) return null;
+  return {
+    updateId: updateId as number,
+    chatId: String(query.message!.chat!.id),
+    fromId: String(query.from!.id),
+    callbackId: query.id,
+    messageId: query.message!.message_id as number,
+    data: query.data,
   };
 }
