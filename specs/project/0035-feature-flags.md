@@ -124,8 +124,8 @@ route is under `/api`, so the proxy and the language routing leave it alone.
 `/flags` is a panel: one message the bot edits in place as the owner taps, so it stays usable with any number of flags:
 a list with one button per flag, and a view of one flag. Typed commands (AC-18 to AC-20) work next to it.
 
-- **AC-27**: Under the list of AC-17, `/flags` carries one button for every declared flag, named after it with its mode
-  (`friends: on`). Tapping it replaces the message with that flag's view: its name, mode and description, a row of three buttons,
+- **AC-27**: Under the list of AC-17, `/flags` carries one button for every declared flag, labelled as its line of that
+  list is (`friends: on`). Tapping it replaces the message with that flag's view: its name, mode and description, a row of three buttons,
   `off`, `allowlist` and `on`, with the current mode marked (`● `), for a flag that is on an allowlist or has users on one a
   button with the number of its users that opens the list (AC-29), and a `Back` button to the list.
 - **AC-28**: A mode button knows the mode the view showed. Tapping it re-reads the flag first: when the flag is in another
