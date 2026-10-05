@@ -120,7 +120,7 @@ Only for a rollback or when the workflow is broken. The workflow does the same t
    fails: `insert into public.applied_migrations (file_name) values ('0031_x.sql');` (the file name as in
    `supabase/migrations/`).
 2. `git push production main`. Only pushes to `main` deploy; other branches are just stored.
-3. The hook checks out `main`, runs `npm ci`, `npm run build`, then `pm2 reload kektura`. It stops at the
+3. The hook checks out `main`, runs `npm ci`, `npm run build` (with `NODE_OPTIONS=--max-old-space-size=1536`: the default heap of about 480 MB runs out on this 1 GB server), then `pm2 reload kektura`. It stops at the
    first failing step, so a failed install or build never reloads the app. The build takes minutes on this
    server.
 

@@ -32,7 +32,9 @@ echo "Installing dependencies..."
 npm ci || npm install
 
 echo "Building Next.js app..."
-npm run build
+# The server has 1 GB of RAM and 2 GB of swap: Node's default heap limit there (about 480 MB) is too small for the
+# type check of `next build`, so the build gets a larger one that the swap can back.
+NODE_OPTIONS=--max-old-space-size=1536 npm run build
 
 echo "Restarting PM2..."
 # HOSTNAME is the server's public address (see deploy/README.md, "Notes").
