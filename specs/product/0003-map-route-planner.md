@@ -55,7 +55,8 @@ From `public/data/okt-hops.json`: 160 hops between neighbouring places, from the
   extra stamp it also switches the extra-stamps layer on.
 - **AC-14**: Restaurants (`public/data/restaurants.json`: within 5 km of the trail, built by
   `scripts/build-restaurants.mjs` from an etteremhet.hu results page): hover shows name and distance,
-  click pins a popup with a link to the restaurant's page.
+  click pins a popup with a link to the restaurant's page. If the data cannot be loaded the layer simply stays
+  unavailable (no checkbox, no error).
 - **AC-15**: Popup contents are built from DOM text nodes, never `innerHTML`, so names in the data can't
   inject markup; restaurant links are only emitted for `https:` URLs.
 - **AC-16**: Updating stamps keeps the map's position and zoom (new data is pushed into the existing
@@ -63,7 +64,8 @@ From `public/data/okt-hops.json`: 160 hops between neighbouring places, from the
 - **AC-21**: The restaurants layer (AC-10, AC-14) is the feature flag `restaurants` (spec 0035). While it is off for the
   viewer the dashboard's map has no restaurants checkbox, never requests `restaurants.json` and its layer stays empty
   (the file itself is public data and stays reachable by its address); the About page does not credit etteremhet.hu for
-  restaurants it does not show (spec 0015 AC-4). It is on in production.
+  restaurants it does not show (spec 0015 AC-4). A page that is open when the flag is switched off loses the layer
+  with its next refresh of the page's data.
 
 ### Comparison map
 

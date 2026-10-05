@@ -116,11 +116,15 @@ test.describe("spec 0035: the restaurants flag", () => {
     const email = await signInAsNewUser(page);
     const other = await (await browser.newContext()).newPage();
     await signInAsNewUser(other);
+    await expect(checkbox(page)).toBeVisible(); // the first dashboards have loaded their data (the flag is on)
+    await expect(checkbox(other)).toBeVisible();
 
     setFeatureFlag("restaurants", "allowlist", [email]);
-    await openMap(page);
+    expect(await openMap(page)).toHaveLength(1);
     await expect(checkbox(page)).toBeVisible();
-    await openMap(other);
+    const fetchedByOther = await openMap(other);
     await expect(checkbox(other)).toHaveCount(0);
+    await other.waitForTimeout(500);
+    expect(fetchedByOther).toEqual([]);
   });
 });

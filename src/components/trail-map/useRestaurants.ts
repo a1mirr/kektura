@@ -11,7 +11,13 @@ export function useRestaurants(mapRef: MapHandleRef, enabled: boolean) {
   const restaurantsRef = useRef<Restaurant[]>([]);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      // Switched off while the page is open: the layer is emptied now, not at the next full load.
+      restaurantsRef.current = [];
+      const { map, ready } = mapRef.current;
+      if (ready && map) (map.getSource("restaurants") as GeoJSONSource | undefined)?.setData(restaurantsData([]));
+      return;
+    }
     let cancelled = false;
     fetch("/data/restaurants.json")
       .then((r) => r.json() as Promise<Restaurant[]>)
@@ -32,5 +38,5 @@ export function useRestaurants(mapRef: MapHandleRef, enabled: boolean) {
     };
   }, [mapRef, enabled]);
 
-  return { restaurants, restaurantsRef };
+  return { restaurants: enabled ? restaurants : [], restaurantsRef };
 }

@@ -13,6 +13,19 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("spec 0003: the restaurants of the trail map", () => {
+  it("AC-21: switching the flag off while the page is open empties the layer and the checkbox's count", async () => {
+    const setData = vi.fn();
+    const ref = { current: { map: { getSource: () => ({ setData }) }, ready: true, route: null } } as unknown as MapHandleRef;
+    const { result, rerender } = renderHook(({ enabled }) => useRestaurants(ref, enabled), { initialProps: { enabled: true } });
+    await waitFor(() => expect(result.current.restaurants).toHaveLength(1));
+    expect(setData).toHaveBeenLastCalledWith(expect.objectContaining({ features: [expect.anything()] }));
+
+    rerender({ enabled: false });
+    expect(result.current.restaurants).toEqual([]);
+    expect(result.current.restaurantsRef.current).toEqual([]);
+    expect(setData).toHaveBeenLastCalledWith(expect.objectContaining({ features: [] }));
+  });
+
   it("AC-14: with the flag on the restaurants are fetched once and handed to the map's seed", async () => {
     const { result } = renderHook(() => useRestaurants(mapRef, true));
     await waitFor(() => expect(result.current.restaurants).toHaveLength(1));
@@ -29,7 +42,7 @@ describe("spec 0003: the restaurants of the trail map", () => {
     expect(result.current.restaurantsRef.current).toEqual([]);
   });
 
-  it("AC-21: a failed fetch leaves the layer unavailable without an error", async () => {
+  it("AC-14: a failed fetch leaves the layer unavailable without an error", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new Error("offline"))));
     const { result } = renderHook(() => useRestaurants(mapRef, true));
     await new Promise((resolve) => setTimeout(resolve, 20));

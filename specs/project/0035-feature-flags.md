@@ -2,6 +2,7 @@
 
 Status: Done
 Owner code: `src/lib/feature-flags.ts`, `src/lib/feature-flags-server.ts`, `supabase/migrations/0060_feature_flags.sql`,
+`supabase/migrations/0110_restaurants_flag.sql`,
 `e2e/feature-flags.spec.ts`, `e2e/helpers.ts`, `playwright.config.ts`, `src/app/api/telegram/route.ts`, `src/lib/flag-commands.ts`,
 `src/lib/telegram-webhook.ts`, `src/lib/supabase/service.ts`, `scripts/telegram-webhook.mjs`,
 `supabase/migrations/0062_flag_admin.sql`, `supabase/migrations/0108_flag_admin_buttons.sql`, `src/lib/telegram.ts`
@@ -66,7 +67,7 @@ switch them from the phone by writing to the Telegram bot that already brings th
 - **AC-11**: End-to-end tests switch a flag in the local database with `setFeatureFlag` (`e2e/helpers.ts`). Flags are
   global, so the tests that switch a declared one are `e2e/feature-flags.spec.ts`, which is its own Playwright
   project (`flags`) that starts after the others have finished, runs its tests one after the other and leaves the
-  flag as the other tests expect it (`on`). They check each state of `friends`, for a signed-in user, a listed user and
+  flags as the other tests expect them (`on`). They check each state of `friends`, for a signed-in user, a listed user and
   a signed-out visitor, and of `restaurants`, for a user and a listed user.
 
 ### Switching from Telegram
