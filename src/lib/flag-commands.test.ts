@@ -46,12 +46,12 @@ beforeEach(() => {
 const text = async (bot: ReturnType<typeof createFlagBot>, message: string) => (await bot.handle(message)).text;
 
 describe("spec 0035: flag commands of the Telegram bot", () => {
-  it("AC-17: /flags lists every declared flag with its description and mode, and an allowlist's size", async () => {
+  it("AC-17: /flags lists every declared flag with its mode, and an allowlist's size, one line each", async () => {
     const { store } = fakeStore([{ key: "friends", mode: "allowlist", users: 2 }]);
     const reply = await text(createFlagBot({ store, now }), "/flags");
     for (const key of FLAG_KEYS) expect(reply).toContain(key);
     expect(reply).toContain("friends: allowlist, 2 users");
-    expect(reply).toContain("Friends: share progress");
+    expect(reply.split("\n")).toHaveLength(FLAG_KEYS.length);
   });
 
   it("AC-17: a flag with no row shows its default, and a stored flag that is not declared is not listed", async () => {
@@ -221,28 +221,40 @@ describe("spec 0035: flag commands of the Telegram bot", () => {
 describe("spec 0035: the flag panel and its buttons", () => {
   const buttons = (reply: { keyboard?: { text: string; callback_data: string }[][] }) => (reply.keyboard ?? []).flat();
 
-  it("AC-27: /flags comes with a row of off, allowlist and on for every flag, the current mode marked", async () => {
+  it("AC-27: /flags comes with one button for every flag, named after it with its mode, and no mode buttons", async () => {
     const { store } = fakeStore([{ key: "friends", mode: "on", users: 0 }]);
     const reply = await createFlagBot({ store, now }).handle("/flags");
-    expect(reply.keyboard).toHaveLength(FLAG_KEYS.length); // no flag has users here, so one row each
-    expect(reply.keyboard?.[FLAG_KEYS.indexOf("friends")]).toEqual([
-      { text: "off", callback_data: "m:friends:off:on" },
-      { text: "allowlist", callback_data: "m:friends:allowlist:on" },
-      { text: "● on", callback_data: "m:friends:on:on" },
+    expect(reply.keyboard).toHaveLength(FLAG_KEYS.length);
+    expect(reply.keyboard?.[FLAG_KEYS.indexOf("friends")]).toEqual([{ text: "friends: on", callback_data: "f:friends" }]);
+    for (const key of FLAG_KEYS) expect(buttons(reply).filter((b) => b.text.startsWith(`${key}:`))).toHaveLength(1);
+    expect(buttons(reply).some((b) => b.callback_data.startsWith("m:"))).toBe(false);
+  });
+
+  it("AC-27: a flag's button opens its view: description, mode, its own three mode buttons and Back to the list", async () => {
+    const { store } = fakeStore([{ key: "friends", mode: "on", users: 0 }]);
+    const { reply, notice } = await createFlagBot({ store, now }).press("f:friends");
+    expect(notice).toBeUndefined();
+    expect(reply?.text).toBe("friends: on\n  Friends: share progress, compare with a friend (spec 0024)");
+    expect(reply?.keyboard).toEqual([
+      [
+        { text: "off", callback_data: "m:friends:off:on" },
+        { text: "allowlist", callback_data: "m:friends:allowlist:on" },
+        { text: "● on", callback_data: "m:friends:on:on" },
+      ],
+      [{ text: "‹ Back", callback_data: "p" }],
     ]);
-    for (const key of FLAG_KEYS) expect(buttons(reply).filter((b) => b.callback_data.startsWith(`m:${key}:`))).toHaveLength(3);
+    expect(buttons(reply!).filter((b) => b.callback_data.includes(":restaurants:"))).toHaveLength(0); // only this flag's buttons
   });
 
   it("AC-27: a flag on an allowlist, or with users, gets a button that opens the list", async () => {
-    const { store } = fakeStore([{ key: "friends", mode: "allowlist", users: 2 }]);
-    expect(buttons(await createFlagBot({ store, now }).handle("/flags"))).toContainEqual({ text: "friends: 2 users", callback_data: "u:friends" });
-    const { store: other } = fakeStore([{ key: "friends", mode: "on", users: 1 }]);
-    expect(buttons(await createFlagBot({ store: other, now }).handle("/flags"))).toContainEqual({ text: "friends: 1 user", callback_data: "u:friends" });
-    const { store: none } = fakeStore([{ key: "friends", mode: "off", users: 0 }]);
-    expect(buttons(await createFlagBot({ store: none, now }).handle("/flags")).map((b) => b.callback_data)).not.toContain("u:friends");
+    const open = async (row: { key: string; mode: string; users: number }) =>
+      buttons((await createFlagBot({ store: fakeStore([row]).store, now }).press("f:friends")).reply!);
+    expect(await open({ key: "friends", mode: "allowlist", users: 2 })).toContainEqual({ text: "friends: 2 users", callback_data: "u:friends" });
+    expect(await open({ key: "friends", mode: "on", users: 1 })).toContainEqual({ text: "friends: 1 user", callback_data: "u:friends" });
+    expect((await open({ key: "friends", mode: "off", users: 0 })).map((b) => b.callback_data)).not.toContain("u:friends");
   });
 
-  it("AC-28: tapping off or allowlist applies it and shows the panel with the new state", async () => {
+  it("AC-28: tapping off or allowlist applies it and shows that flag's view with the new state", async () => {
     const { store, calls } = fakeStore([{ key: "friends", mode: "on", users: 0 }]);
     const bot = createFlagBot({ store, now });
     const { reply, notice } = await bot.press("m:friends:off:on");
@@ -261,12 +273,12 @@ describe("spec 0035: the flag panel and its buttons", () => {
     expect(calls).toEqual([]);
     expect(reply?.text).toMatch(/everybody, signed-out visitors included.*\/confirm within 60 seconds/);
     expect(notice).toBe("Send /confirm");
-    expect(buttons(reply!)).toEqual([{ text: "‹ Back", callback_data: "p" }]);
+    expect(buttons(reply!)).toEqual([{ text: "‹ Back", callback_data: "f:friends" }]);
     expect(await text(bot, "/confirm")).toBe("friends is now on.");
     expect(calls).toEqual(["mode friends on"]);
   });
 
-  it("AC-28: a tap on a panel that is out of date changes nothing and shows the panel as it is", async () => {
+  it("AC-28: a tap on a view that is out of date changes nothing and shows the flag's view as it is", async () => {
     const { store, calls } = fakeStore([{ key: "friends", mode: "allowlist", users: 0 }]);
     const { reply, notice } = await createFlagBot({ store, now }).press("m:friends:off:on"); // shown while it was on
     expect(calls).toEqual([]);
@@ -298,7 +310,7 @@ describe("spec 0035: the flag panel and its buttons", () => {
     expect(buttons(reply!)).toEqual([
       { text: "Remove Ana", callback_data: `d:friends:${ANA}` },
       { text: "Remove Bob", callback_data: `d:friends:${BOB}` },
-      { text: "‹ Back", callback_data: "p" },
+      { text: "‹ Back", callback_data: "f:friends" },
     ]);
   });
 
@@ -322,15 +334,17 @@ describe("spec 0035: the flag panel and its buttons", () => {
     expect(calls).toEqual([`remove friends ${ANA}`, `remove friends ${ANA}`]);
   });
 
-  it("AC-29: Back shows the panel", async () => {
+  it("AC-29: Back from a flag's view shows the list again", async () => {
     const { store } = fakeStore([{ key: "friends", mode: "on", users: 0 }]);
-    expect((await createFlagBot({ store, now }).press("p")).reply?.text).toContain("friends: on");
+    const { reply } = await createFlagBot({ store, now }).press("p");
+    expect(reply?.text).toContain("friends: on");
+    expect(buttons(reply!)).toHaveLength(FLAG_KEYS.length);
   });
 
   it("AC-30: data that is not one of ours is ignored: another flag, a bad mode or id, extra parts, nothing", async () => {
     const { store, calls } = fakeStore([{ key: "friends", mode: "on", users: 0 }]);
     const bot = createFlagBot({ store, now });
-    for (const data of ["", "x", "m:nope:off:on", "m:friends:half:on", "m:friends:off", "m:friends:off:on:extra", "u:nope", "u:friends:x", "d:friends:not-a-uuid", `d:friends:${ANA}:x`, "p:friends", "d:friends"]) {
+    for (const data of ["", "x", "m:nope:off:on", "m:friends:half:on", "m:friends:off", "m:friends:off:on:extra", "f:nope", "f:friends:x", "f", "u:nope", "u:friends:x", "d:friends:not-a-uuid", `d:friends:${ANA}:x`, "p:friends", "d:friends"]) {
       expect(await bot.press(data), data).toEqual({});
     }
     expect(calls).toEqual([]);
@@ -355,7 +369,7 @@ describe("spec 0035: the flag panel and its buttons", () => {
 
   it("AC-31: every button's data is at most 64 bytes, for the longest user id, the longest mode and every declared flag", () => {
     for (const key of FLAG_KEYS) {
-      for (const data of [callbackData.mode(key, "allowlist", "allowlist"), callbackData.users(key), callbackData.remove(key, ANA), callbackData.panel]) {
+      for (const data of [callbackData.flag(key), callbackData.mode(key, "allowlist", "allowlist"), callbackData.users(key), callbackData.remove(key, ANA), callbackData.panel]) {
         expect(new TextEncoder().encode(data).length, `${key}: ${data}`).toBeLessThanOrEqual(MAX_CALLBACK_BYTES);
       }
     }

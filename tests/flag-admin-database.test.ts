@@ -232,6 +232,9 @@ describe("spec 0035: the Telegram webhook against the database", () => {
     const name = psql(`select display_name from public.profiles where id = '${ana.id}'`);
     expect(await reply(`/allow friends ${ana.email}`)).toMatch(/added to the allowlist/);
 
+    await tap("f:friends");
+    expect(edited[0].callbacks).toEqual(expect.arrayContaining(["m:friends:off:on", "m:friends:allowlist:on", "m:friends:on:on", "u:friends", "p"]));
+
     await tap("u:friends");
     expect(edited).toHaveLength(1);
     expect(edited[0].messageId).toBe(7);
