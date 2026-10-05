@@ -106,7 +106,7 @@ route is under `/api`, so the proxy and the language routing leave it alone.
   a mode or an allowlist entry again changes nothing more, and a mode that does not exist is refused.
 - **AC-24**: Each change is logged as one `[feature-flags] change` line: the flag, what was asked (`off`, `allowlist`, `on`,
   `allow`, `deny`) and the result (`ok`, `no_account`, `failed` with the error's code and message), never the email, the
-  user id, the bot token, the secret, the key or the message text (spec 0008's rules).
+  user id, the bot token, the webhook secret, the service role key or the message text (spec 0008's rules).
 - **AC-25**: Commands are rate limited to 30 a minute: the owner can type fast, a leaked secret cannot hammer the
   database. The rest are ignored.
 - **AC-26**: `npm run telegram:webhook -- set|info|delete` registers, shows or removes the webhook at Telegram for the
@@ -153,7 +153,7 @@ environment settings (those stay environment variables); per-flag analytics; a v
 | AC-14, AC-15, AC-16, AC-22, AC-24, AC-25 | `src/app/api/telegram/route.test.ts` (the route with a mocked service client and a mocked `sendTelegramMessage`: secret, owner, duplicates, odd bodies, the order of database and answer, the rate limit, what is logged) |
 | AC-14, AC-15, AC-16 | `src/lib/telegram-webhook.test.ts` (the secret comparison, what an update is, who is the owner, the duplicate memory); `src/proxy.test.ts` (the proxy skips `/api/telegram`) |
 | AC-17 to AC-22, AC-24 | `src/lib/flag-commands.test.ts` (every command, refusal, the 60 seconds, the help, the order of database and answer, the log lines), `src/lib/log.test.ts` |
-| AC-17, AC-23 | `tests/flag-admin-database.test.ts` (against the local database: only `service_role` may call the functions, they are `security definer` with an empty `search_path`, idempotent, email lookup, `no_account`, `no_flag`, `bad_mode`) |
+| AC-17, AC-23 | `tests/flag-admin-database.test.ts` (against the local database: only `service_role` may call the functions, they are `security definer` with an empty `search_path`, idempotent, email lookup, `no_account`, `no_flag`, `bad_mode`; and the real route with the real database, only the message to Telegram caught: `/flags`, `/allow`, `/deny`, `/flag` and `/confirm`) |
 | AC-14, AC-26 | `e2e/telegram-webhook.spec.ts` (on the test server the route is an empty 404) |
 | AC-26 | `tests/telegram-webhook-script.test.ts` and `tests/telegram-check.test.ts` (the scripts against a fake Telegram API on localhost; the token and the secret are never printed), `tests/test-server-env.test.ts` (the test server has no secret or key) |
 | AC-26 (the real bot) | manual (it needs the real bot and the production site): `npm run telegram:webhook -- set`, then `/flags`, `/flag friends allowlist` and `/flags` again from the phone. Last checked: never recorded. |

@@ -85,8 +85,9 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
         return `No account has the email ${email}. Nothing was changed.`;
       }
       logFlagChange(key, change, "ok");
-      const mode = (await store.list()).find((row) => row.key === key)?.mode ?? FLAGS[key].default;
-      const note = allowed && mode !== "allowlist" ? ` The flag is ${mode}, so this has no effect until it is set to allowlist.` : "";
+      // The change is done: failing to read the mode back only costs the note, never the answer.
+      const mode = await store.list().then((rows) => rows.find((row) => row.key === key)?.mode ?? FLAGS[key].default, () => null);
+      const note = allowed && mode && mode !== "allowlist" ? ` The flag is ${mode}, so this has no effect until it is set to allowlist.` : "";
       return `${email} ${allowed ? "added to" : "removed from"} the allowlist of ${key}.${note}`;
     } catch (error) {
       logFlagChange(key, change, "failed", error);

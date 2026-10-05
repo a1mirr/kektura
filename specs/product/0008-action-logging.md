@@ -31,7 +31,7 @@ is the single place to hook one in later.
 
 ## Notes
 
-Line formats (one `console.error` / `console.warn` call, one string argument each):
+Line formats (one `console.error` / `console.warn` call, or `console.info` for a flag change that went through, one string argument each):
 
 ```
 [stamp-action] action=setPlacesStamped stage=write user=<uuid> code=42501 message="..."
@@ -50,7 +50,7 @@ Line formats (one `console.error` / `console.warn` call, one string argument eac
   Only `code` (a short identifier) and `message` of the error are read: a Supabase error's `details`
   and `hint` can quote row values, so they are never logged. A thrown value that isn't an `Error`-like
   object with a `message` is logged as the constant `unknown error`, never stringified.
-- Not logged, on purpose: a missing session, a successful action, and place keys that match no
+- Not logged, on purpose: a missing session, a successful action (except a flag change from the Telegram bot, spec 0035 AC-24, which is logged either way), and place keys that match no
   checkpoint (0002 AC-5): that is a bare `failed` without a database error, and AC-3 limits warnings
   to rejected input (0002 AC-1).
 - `refresh()` (not `revalidatePath`: spec 0002, notes) throwing after a successful write counts as an `exception` (the client already

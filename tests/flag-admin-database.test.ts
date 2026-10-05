@@ -4,11 +4,21 @@
 // nobody may do). Each test works on flags of its own (`dbtest-...`), never on the declared ones.
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { localSupabase, psql } from "../e2e/local-db";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Client = SupabaseClient<Database>;
+
+// The route is the real one, against the real database; only the message to Telegram is caught.
+const sent = vi.hoisted(() => [] as string[]);
+vi.mock("@/lib/telegram", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/telegram")>()),
+  sendTelegramMessage: async (text: string) => {
+    sent.push(text);
+    return { ok: true };
+  },
+}));
 
 let local: ReturnType<typeof localSupabase> | undefined;
 let service: Client;
@@ -116,5 +126,52 @@ describe("spec 0035: the flag functions of the Telegram webhook", () => {
     const { data } = await service.rpc("admin_list_feature_flags");
     expect(data?.find((row) => row.key === flag("l"))).toEqual({ key: flag("l"), mode: "allowlist", users: 1 });
     expect(data?.map((row) => row.key)).toContain("friends");
+  });
+});
+
+describe("spec 0035: the Telegram webhook against the database", () => {
+  let post: (text: string) => Promise<Response>;
+
+  beforeAll(async () => {
+    if (!local) return;
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", local.url);
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", local.serviceKey);
+    vi.stubEnv("TELEGRAM_BOT_TOKEN", "123:token");
+    vi.stubEnv("TELEGRAM_CHAT_ID", "42");
+    vi.stubEnv("TELEGRAM_WEBHOOK_SECRET", "hook-secret");
+    const { POST } = await import("../src/app/api/telegram/route");
+    let id = 1;
+    post = (text) =>
+      POST(
+        new Request("http://localhost/api/telegram", {
+          method: "POST",
+          headers: { "x-telegram-bot-api-secret-token": "hook-secret" },
+          body: JSON.stringify({ update_id: id++, message: { text, chat: { id: 42 }, from: { id: 42 } } }),
+        }),
+      );
+  });
+
+  const reply = async (text: string) => {
+    sent.length = 0;
+    expect((await post(text)).status).toBe(200);
+    return sent.join("\n");
+  };
+
+  it("AC-17, AC-19, AC-22: /flags, /allow and /deny reach the real functions, and the answers follow what the database did", async (ctx) => {
+    if (!local) return ctx.skip();
+    expect(await reply("/flags")).toMatch(/^friends: on\n/);
+    // friends is on for everybody, so listing a user changes nothing visible; the allowlist row is the proof.
+    expect(await reply(`/allow friends ${ana.email}`)).toMatch(/added to the allowlist of friends\. The flag is on, so this has no effect/);
+    expect(psql(`select count(*) from public.feature_flag_users where key = 'friends' and user_id = '${ana.id}'`)).toBe("1");
+    expect(await reply(`/deny friends ${ana.email}`)).toMatch(/removed from the allowlist of friends\./);
+    expect(psql(`select count(*) from public.feature_flag_users where key = 'friends' and user_id = '${ana.id}'`)).toBe("0");
+    expect(await reply("/allow friends nobody@kektura.test")).toMatch(/No account has the email/);
+  });
+
+  it("AC-20, AC-22: /flag friends on asks, and /confirm sets the stored mode (here it already is on, so nothing else changes)", async (ctx) => {
+    if (!local) return ctx.skip();
+    expect(await reply("/flag friends on")).toMatch(/Send \/confirm/);
+    expect(await reply("/confirm")).toBe("friends is now on.");
+    expect(psql("select mode from public.feature_flags where key = 'friends'")).toBe("on");
   });
 });

@@ -77,6 +77,16 @@ describe("spec 0035: flag commands of the Telegram bot", () => {
     expect(await createFlagBot({ store, now }).handle("/allow friends ana@example.com")).toMatch(/The flag is off, so this has no effect/);
   });
 
+  it("AC-19, AC-22: when the change is done but the mode cannot be read back, it is still reported as done, once in the log", async () => {
+    const { store } = fakeStore([{ key: "friends", mode: "allowlist", users: 0 }]);
+    store.list = vi.fn(async () => {
+      throw new Error("down");
+    });
+    expect(await createFlagBot({ store, now }).handle("/allow friends ana@example.com")).toBe("ana@example.com added to the allowlist of friends.");
+    expect(console.info).toHaveBeenCalledTimes(1);
+    expect(console.error).not.toHaveBeenCalled();
+  });
+
   it("AC-19: a flag with no row first gets its default mode, then the user", async () => {
     const { store, calls } = fakeStore();
     const reply = await createFlagBot({ store, now }).handle("/allow friends ana@example.com");
