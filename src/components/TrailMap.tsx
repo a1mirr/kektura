@@ -26,10 +26,13 @@ export default function TrailMap({
   points,
   extras = [],
   doneRanges,
+  withRestaurants = false,
 }: {
   points: MapPoint[];
   extras?: MapExtra[];
   doneRanges: KmRange[];
+  // The `restaurants` flag (spec 0035), read on the server: without it the layer has no data and no toggle.
+  withRestaurants?: boolean;
 }) {
   const t = useTranslations("dashboard");
   const router = useRouter();
@@ -41,7 +44,7 @@ export default function TrailMap({
 
   const toggles = useLayerToggles(mapRef);
   const fullscreen = useFullscreen(wrapper, mapRef);
-  const { restaurants, restaurantsRef } = useRestaurants(mapRef);
+  const { restaurants, restaurantsRef } = useRestaurants(mapRef, withRestaurants);
   const planner = useRoutePlanner(mapRef, latest, points);
   const refreshRoute = useMapData(mapRef, latest, inputs, toggles.values.showDone, planner.refreshSegment);
 

@@ -60,6 +60,10 @@ From `public/data/okt-hops.json`: 160 hops between neighbouring places, from the
   inject markup; restaurant links are only emitted for `https:` URLs.
 - **AC-16**: Updating stamps keeps the map's position and zoom (new data is pushed into the existing
   map, not a new one).
+- **AC-21**: The restaurants layer (AC-10, AC-14) is the feature flag `restaurants` (spec 0035). While it is off for the
+  viewer the dashboard's map has no restaurants checkbox, never requests `restaurants.json` and its layer stays empty
+  (the file itself is public data and stays reachable by its address); the About page does not credit etteremhet.hu for
+  restaurants it does not show (spec 0015 AC-4). It is on in production.
 
 ### Comparison map
 
@@ -110,6 +114,7 @@ Routing off the trail; replacing MapLibre.
 | AC-2 (line colours, toggle), AC-3 (amber highlight, fit) | manual (the map is WebGL pixels that E2E cannot read): see the checklist below. Last checked: never recorded. |
 | AC-4 ... AC-8 | `src/lib/route-stats.test.ts` |
 | Table totals | `tests/trail-data.test.ts` (0004 AC-6) |
+| AC-14, AC-21 | `src/components/trail-map/useRestaurants.test.tsx` (fetched once while the flag is on, nothing while it is off), `e2e/feature-flags.spec.ts` (the checkbox, the request and the About credit in each state) |
 | AC-9, AC-10, AC-11, AC-13, AC-16 | `e2e/map.spec.ts` (the detailed route is requested once on first need and again after a failed load on the next zoom change; toggles and their persistence; fullscreen; 📍 on a place and on an extra stamp, which switches that layer on; stamping from the list keeps the stamp's label where it was on the map) |
 | AC-18, AC-19, AC-20 | `src/lib/compare-map.test.ts` (the lines and points of each view), `src/lib/map-layers.test.ts` (the layers: a style per state), `e2e/friends-compare.spec.ts` (the switch and the legend; a click on a place, aimed from the map's fit to the trail, opens its stage, flashes a row of the list and opens no popup); the hover text and the point's key and number: `src/lib/compare-map.test.ts`, `src/lib/friends-compare.test.ts`; the row reveal itself: `src/lib/map-reveal.test.ts` (AC-12) |
 | AC-18, AC-19, AC-20 (colours and line styles on the canvas, hover, the detailed route) | manual (the map is WebGL pixels that E2E cannot read): see the checklist below. Last checked: never recorded. |

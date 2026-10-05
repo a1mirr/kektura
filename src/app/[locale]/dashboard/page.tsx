@@ -48,8 +48,9 @@ export default async function Dashboard({
   if (!user) return redirect({ href: "/", locale });
 
   // Reference data comes from a shared server cache; only the user's own stamps hit the database (spec 0002 AC-15, AC-16).
-  const [showFriends, { checkpoints, extras: extraList, stamps, extraStamps }] = await Promise.all([
+  const [showFriends, showRestaurants, { checkpoints, extras: extraList, stamps, extraStamps }] = await Promise.all([
     flagOn("friends"),
+    flagOn("restaurants"),
     loadDashboardData(supabase),
   ]);
   const extraDone = new Map(extraStamps.map((s) => [s.extra_id, s.stamped_on]));
@@ -124,7 +125,7 @@ export default async function Dashboard({
       {mapPoints.length > 0 && (
         <section className="rounded-lg bg-white p-4 shadow-sm">
           <h2 className="mb-2 font-semibold">{t("map")}</h2>
-          <TrailMapLoader points={mapPoints} extras={mapExtras} doneRanges={doneRanges} />
+          <TrailMapLoader points={mapPoints} extras={mapExtras} doneRanges={doneRanges} withRestaurants={showRestaurants} />
           <p className="mt-2 text-sm text-stone-500">{t("mapLegend")}</p>
         </section>
       )}

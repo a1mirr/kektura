@@ -13,10 +13,12 @@ export default function TrailMapLoader({
   points,
   extras,
   doneRanges,
+  withRestaurants,
 }: {
   points: MapPoint[];
   extras: MapExtra[];
   doneRanges: [number, number][];
+  withRestaurants: boolean;
 }) {
-  return <TrailMap points={points} extras={extras} doneRanges={doneRanges} />;
+  return <TrailMap points={points} extras={extras} doneRanges={doneRanges} withRestaurants={withRestaurants} />;
 }

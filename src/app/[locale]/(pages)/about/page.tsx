@@ -16,7 +16,8 @@ const SOURCES = [
   { name: "kektura.hu (MTSZ)", href: "https://www.kektura.hu/okt-szakaszok", text: "sourceMtsz" },
   { name: "heyjoe.hu", href: "https://heyjoe.hu", text: "sourceHeyjoe" },
   { name: "OpenStreetMap", href: "https://www.openstreetmap.org/copyright", text: "sourceOsm" },
-  { name: "etteremhet.hu", href: "https://www.etteremhet.hu", text: "sourceEtteremhet" },
+  // Credited only while the restaurants layer is shown (flag `restaurants`, spec 0015 AC-4).
+  { name: "etteremhet.hu", href: "https://www.etteremhet.hu", text: "sourceEtteremhet", flag: "restaurants" },
 ] as const;
 
 const link = "text-blue-600 hover:underline";
@@ -34,7 +35,8 @@ export default async function AboutPage({ params }: Props) {
   setRequestLocale(locale);
   const t = await getTranslations("about");
   const format = await getFormatter();
-  const showFriends = await flagOn("friends");
+  const [showFriends, showRestaurants] = await Promise.all([flagOn("friends"), flagOn("restaurants")]);
+  const sources = SOURCES.filter((s) => !("flag" in s) || showRestaurants);
 
   const facts = [
     { label: t("factsStages"), value: format.number(TRAIL_FACTS.stages) },
@@ -78,7 +80,7 @@ export default async function AboutPage({ params }: Props) {
           {t("sourcesTitle")}
         </h2>
         <ul className="list-disc space-y-1 pl-5 text-stone-700">
-          {SOURCES.map((s) => (
+          {sources.map((s) => (
             <li key={s.href}>
               <a href={s.href} target="_blank" rel="noopener noreferrer" className={link}>
                 {s.name}
