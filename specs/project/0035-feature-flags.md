@@ -110,8 +110,8 @@ route is under `/api`, so the proxy and the language routing leave it alone.
 - **AC-25**: Commands are rate limited to 30 a minute: the owner can type fast, a leaked secret cannot hammer the
   database. The rest are ignored.
 - **AC-26**: `npm run telegram:webhook -- set|info|delete` registers, shows or removes the webhook at Telegram for the
-  production address (`SITE_URL`, https) with the secret token and for messages only, and prints only what Telegram answers,
-  never the token or the secret. `npm run telegram:check` (spec 0017 AC-9) says whether the webhook is registered.
+  production address (`SITE_URL`, https) with the secret token and for messages only, and never prints the token or the
+  secret. `npm run telegram:check` (spec 0017 AC-9) says whether the webhook is registered.
   `deploy/README.md` documents the two new server variables and the steps, and `.env.example` names them. The test server
   never has either variable (spec 0006 AC-7), so the route is a 404 there.
 
