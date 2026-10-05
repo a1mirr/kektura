@@ -38,4 +38,4 @@ revoke execute on function public.feature_flags_for_me() from public;
 grant execute on function public.feature_flags_for_me() to anon, authenticated;
 
 -- Friends (spec 0024) is on in production, where it was switched on by an environment variable until now.
-insert into public.feature_flags (key, mode) values ('friends', 'on'), ('restaurants', 'off');
+insert into public.feature_flags (key, mode) values ('friends', 'on');

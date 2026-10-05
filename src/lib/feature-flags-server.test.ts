@@ -44,7 +44,7 @@ describe("spec 0035: reading the flags on the server", () => {
     mockRpc.mockRejectedValue(new Error("network down"));
     expect(await flagOn("friends")).toBe(false);
     mockCreateClient.mockRejectedValue(new Error("no request"));
-    expect(await flagOn("restaurants")).toBe(false);
+    expect(await flagOn("friends")).toBe(false);
     expect(console.error).toHaveBeenCalledTimes(2);
   });
 });

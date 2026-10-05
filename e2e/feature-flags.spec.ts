@@ -61,7 +61,9 @@ test.describe("spec 0035: a flag that is off is off", () => {
     await page.getByLabel("Your name (shown to friends)").fill("Flagged");
     setFeatureFlag("friends", "off"); // switched off while the page is open: the action must check for itself
     await page.getByRole("button", { name: "Save" }).click();
-    await expect(page).not.toHaveURL(/ok=/);
+    // The refused action sends the page back with its reason, and the page itself is a 404 now: wait for that, so the
+    // flag goes back on only after the action has been answered.
+    await expect(page).toHaveURL(/\/en\/friends\?error=disabled$/);
     setFeatureFlag("friends", "on");
     await page.goto("/en/friends");
     await expect(page.getByLabel("Your name (shown to friends)")).not.toHaveValue("Flagged");

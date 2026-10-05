@@ -73,8 +73,8 @@ environment settings (those stay environment variables); per-flag analytics; a v
 
 ## Notes
 
-- Flags today: `friends` (spec 0024; `on` in production, which the migration that adds the tables records) and
-  `restaurants` (declared for the restaurants layer, which is not built; `off`).
+- Flags today: `friends` (spec 0024; `on` in production, which the migration that adds the tables records). A flag
+  is declared together with the feature it hides, never ahead of it.
 - `feature_flags_for_me()` returns the mode and a `listed` bit instead of the enabled keys, so the rules of AC-3 live
   in one place that unit tests reach without a database. The mode of a stored flag is not secret.
 - A flag that is on for everybody has done its job: delete the flag, its checks and its rows in the pull request that
@@ -88,7 +88,7 @@ environment settings (those stay environment variables); per-flag analytics; a v
 | AC | Test |
 | --- | --- |
 | AC-1, AC-2, AC-3, AC-9 | `src/lib/feature-flags.test.ts`, `src/lib/feature-flags-server.test.ts` |
-| AC-4, AC-8 (the call), AC-9 (the log line) | `src/lib/feature-flags-server.test.ts`, `src/lib/log.test.ts` |
+| AC-4 (waiting for a request first, a plain boolean), AC-8 (the call), AC-9 (the log line) | `src/lib/feature-flags-server.test.ts`, `src/lib/log.test.ts`; that it is read once per request is React's `cache`, which does nothing outside a render, so no test can show it |
 | AC-5 | `src/app/[locale]/(pages)/friends/actions.test.ts` (`disabled` before anything is touched), `e2e/feature-flags.spec.ts` (the pages, the link and the paragraph, and an action called while the flag turns off) |
 | AC-6, AC-11 | `e2e/feature-flags.spec.ts` |
 | AC-7, AC-8, AC-12, AC-13 | `tests/feature-flags-database.test.ts` (against the local database, run by CI's end-to-end job) |

@@ -15,7 +15,6 @@ type FlagDefinition = { description: string; default: FlagMode };
 // A migration inserts a row for a new flag (an allowlist needs one); without a row the default applies.
 export const FLAGS = {
   friends: { description: "Friends: share progress, compare with a friend (spec 0024)", default: "off" },
-  restaurants: { description: "Restaurants near the trail on the map (planned)", default: "off" },
 } as const satisfies Record<string, FlagDefinition>;
 
 export type FlagKey = keyof typeof FLAGS;

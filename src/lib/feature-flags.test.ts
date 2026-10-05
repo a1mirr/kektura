@@ -39,8 +39,8 @@ describe("spec 0035: resolving flags", () => {
   it("AC-3: every declared flag is resolved from its stored row, and a missing row uses the default", () => {
     const flags = resolveFlags([{ key: "friends", mode: "on", listed: false }]);
     expect(flags.friends).toBe(true);
-    expect(flags.restaurants).toBe(isEnabled(FLAGS.restaurants.default, false));
     expect(Object.keys(flags).sort()).toEqual([...FLAG_KEYS].sort());
+    expect(resolveFlags([]).friends).toBe(isEnabled(FLAGS.friends.default, false)); // no row: the default
     expect(resolveFlags([{ key: "friends", mode: "allowlist", listed: true }]).friends).toBe(true);
     expect(resolveFlags([{ key: "friends", mode: "allowlist", listed: false }]).friends).toBe(false);
   });
