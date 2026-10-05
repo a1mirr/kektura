@@ -9,16 +9,20 @@ import { createClient } from "@/lib/supabase/server";
 import {
   buildPlaces,
   buildStages,
+  countDone,
   placeKeyOf,
   progressSummary,
   stageStampKeys,
   stampedPlaceKeys,
+  waivedPlaceKeys,
   walkedRanges,
   findStageForKm,
 } from "@/lib/progress";
 import { maxStampDate } from "@/lib/stamp-date";
+import { hasToleranceNote } from "@/lib/new-stamps";
 import LocateButton from "@/components/LocateButton";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
+import RequiredFrom from "@/components/RequiredFrom";
 import ExtraStampButton from "@/components/ExtraStampButton";
 import StageControls from "@/components/StageControls";
 import StageSection from "@/components/StageSection";
@@ -66,7 +70,8 @@ export default async function Dashboard({
   const placeKm = new Map(placeList.map((p) => [p.key, p.km]));
   const stages = buildStages(placeList, stagesData.stages);
   const stampedPlaces = stampedPlaceKeys(placeList, stamps);
-  const doneRanges = walkedRanges(placeList, stampedPlaces);
+  const waived = waivedPlaceKeys(placeList, stampedPlaces);
+  const doneRanges = walkedRanges(placeList, stampedPlaces, waived);
   const summary = progressSummary(placeList, doneRanges);
 
   const extraListWithStage = extraList.map((e) => ({
@@ -75,10 +80,13 @@ export default async function Dashboard({
   }));
 
 
+  const requiredFrom = new Map(placeList.map((p) => [p.key, p.requiredFrom]));
+  const dateText = (iso: string) => format.dateTime(new Date(`${iso}T00:00:00Z`), { dateStyle: "long", timeZone: "UTC" });
   const mapPoints = checkpoints
     .filter((c) => c.lat != null && c.lng != null)
     .map((c) => {
       const key = placeKeyOf(c);
+      const from = requiredFrom.get(key);
       return {
         placeKey: key,
         name: c.name,
@@ -86,6 +94,7 @@ export default async function Dashboard({
         lng: Number(c.lng),
         km: placeKm.get(key)!,
         stamped: stampedPlaces.has(key),
+        ...(from ? { note: [t("requiredFrom", { date: dateText(from) }), waived.has(key) ? t("notRequired") : null].filter(Boolean).join(" · ") } : {}),
       };
     });
 
@@ -143,7 +152,8 @@ export default async function Dashboard({
             {stages.map((stage) => {
               const { stage: n, meta, places: list } = stage;
               const keys = stageStampKeys(stage);
-              const done = list.filter((p) => stampedPlaces.has(p.key)).length;
+              // A place the user was not missing (spec 0001 AC-14) counts as done for the stage, shown apart from a stamp.
+              const done = countDone(list, stampedPlaces, waived);
               const stageExtras = extraListWithStage.filter((e) => e.stage === n);
               return (
                 <StageSection
@@ -182,6 +192,9 @@ export default async function Dashboard({
                           {p.name}
                           <span className="ml-2 text-sm text-stone-500">{t("kmValue", { km: format.number(p.km) })}</span>
                         </div>
+                        {p.requiredFrom && (
+                          <RequiredFrom requiredFrom={p.requiredFrom} waived={waived.has(p.key)} tolerance={hasToleranceNote(p)} />
+                        )}
                         <StampDescriptions descriptions={p.variants.map((v) => localizedDescription(v.code, v.description, locale))} />
                       </div>
                       <div className="ml-auto flex flex-wrap items-center justify-end gap-1">

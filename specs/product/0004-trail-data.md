@@ -1,7 +1,8 @@
 # 0004: Generated trail data and seeds
 
 Status: Done
-Owner code: `scripts/build-data.mjs`, `scripts/lib/geo.mjs`, `scripts/data/okt-stages.json`; generated
+Owner code: `scripts/build-data.mjs`, `scripts/lib/geo.mjs`, `scripts/data/okt-stages.json`,
+`scripts/data/okt-stamp-dates.json`, `scripts/lib/stamp-dates.mjs`; generated
 `supabase/seed.sql`, `supabase/seed_extra.sql`, `public/data/okt-*.json`
 
 ## Goal
@@ -27,6 +28,23 @@ and safe to regenerate whenever MTSZ (or heyjoe.hu) publishes a new file.
   row move to the remaining variants of the same place (extra stamps: same name) first; a place that
   is gone entirely takes its stamps with it. Each seed runs in one transaction.
 
+- **AC-10**: `scripts/data/okt-stamp-dates.json` holds the MTSZ's published dates for new stamps: one entry per stamp
+  code with its `required_from` date, the address of the publication that gives it and, only where that publication
+  says so, `tolerance_note: true`. Every code is one of the seed's (the **current** code: the MTSZ renames codes, so an
+  announcement is matched to its place by name and position), appears once, has a real `YYYY-MM-DD` date, and its source is
+  an `https://www.kektura.hu/` or `https://www.mtsz.org/` address. Dates are entered exactly as published, never guessed
+  and never from a third party; a source that gives only a month is not entered until the day is found.
+- **AC-11**: `build-data.mjs` writes the file's dates into the seed (`checkpoints.required_from`, spec 0001 AC-16) as the last
+  statements of its transaction, one block that clears every date the file no longer has and sets the file's, and fails when a
+  code is not in the stamps file. A place's dates are the same after every regeneration.
+- **AC-12**: Adding a stamp never changes what a user has. A seed regenerated with a place put into the middle of a stage keeps every
+  existing code's database `id` and every `user_stamps` row pointing at the same checkpoint with the same date; only `seq`,
+  `stage_seq` and `km_from_start` of the places after it move.
+- **AC-13**: The number a place is shown with (`<stage>.<stage_seq>`, e.g. 19.6) is display only: it moves when a stamp is added
+  before the place, so no URL, anchor, stored value, message or React key is built from it (rows are addressed by `place_key`, stages by their
+  number), and a place key never looks like a label. The counts the app shows (161 places, the stage totals) come from the data, never
+  from a constant.
+
 ## Out of scope
 
 Downloading the source files (done by hand from kektura.hu / heyjoe.hu); stamp artwork.
@@ -44,12 +62,22 @@ Downloading the source files (done by hand from kektura.hu / heyjoe.hu); stamp a
 **Regenerating.** Run `node scripts/build-data.mjs <stamps.gpx> <route.gpx> [okt_pecsetek.gpx]`. It
 writes `supabase/seed.sql`, `public/data/okt-route.json`, `okt-route-detail.json`, `okt-hops.json`
 and, with the third argument, `supabase/seed_extra.sql`. Never edit those by hand. Then:
-1. Run `npm test` (this spec's checks).
+1. Run `npm test` (this spec's checks, the dates file included).
 2. Run `npm run testdb:reset` and `npm run e2e`.
 3. Apply the seeds to production.
 4. Expire the dashboard's cached reference data (spec 0002 AC-15): delete `.next/cache/fetch-cache` on the
    server and restart PM2 (`deploy/README.md`, "After the seeds change"). Until then the old places are
    served for up to 24 hours.
+
+**New stamps.** The MTSZ announces each new stamp with the day it is required from (news posts and the list "Az elmúlt évek
+új Kéktúra-bélyegzőhelyeinek listája" on kektura.hu, since 2014). `okt-stamp-dates.json` copies those days: the rule that uses them is spec 0001
+AC-17. The announcements of 2025 and 2026 state a one-month tolerance during the inspection of a booklet, which is the `tolerance_note` flag;
+older ones say nothing of it. A stamp introduced before 2014 has no published date and is required from the beginning. A stamp that replaced another
+(Vércverés for Nyírjesi-erdészház, 2014-11-21) is a new stamp like any other. The generated seed has no Nyírjesi row.
+
+**Adding a stamp** is one recipe: regenerate from the new GPX files; add the new place to `okt-stages.json` (the build fails on a place
+without a stage); add its entry to `okt-stamp-dates.json` under the seed's code; run the checks below; list the change in the changelog (spec
+0018 AC-7). The new row gets a new id and the others keep theirs (AC-12); the labels after it shift (AC-13).
 
 **Places and variants.** 220 checkpoint rows form 161 places, the official count.
 - Alternative stamps at one place (`_1`/`_2`/`_3`) share a `place_key`, and stamping one stamps them
@@ -78,4 +106,7 @@ exists in any open source (MTSZ owns it), so don't scrape for it; the plan is us
 | --- | --- |
 | AC-1 ... AC-8 | `tests/trail-data.test.ts` |
 | AC-9 | `tests/seed-cleanup.test.ts` (against the local database, each drill in a transaction that is rolled back: both committed seeds are one `begin` ... `commit`; a stamp on a dropped code moves, with its date, to the remaining variant of the place; an extra stamp that came back under a new code keeps its users' stamps; a place that is gone, and a row without a code, take their stamps with them) |
+| AC-10, AC-11 | `tests/trail-data.test.ts` (the file's codes, dates and sources; the seed carries the generator's block for the file) |
+| AC-12 | `tests/stamp-dates-database.test.ts` (against the local database, in a transaction that is rolled back: a seed with a place inserted mid-stage keeps every id and every stamp with its date and shifts the places after it) |
+| AC-13 | `tests/labels.test.ts` (a source scan: a label is never a key, id, link, anchor or stored value; a place key is never label-shaped); `src/lib/trail-facts.ts` and `tests/trail-data.test.ts` (the counts come from the data, 0015 AC-2) |
 | AC-9 (a real source file) | manual (it needs the downloaded GPX files): after regenerating, read the seed's `begin` ... `commit` block and run its cleanup as a read-only query first (codes not in the new list, stamps that would move) before applying it to production. Last checked: 2026-10-04 (the seeds were regenerated from the files of 2026-09-24: production already held exactly their rows, so the cleanup had nothing to remove). |

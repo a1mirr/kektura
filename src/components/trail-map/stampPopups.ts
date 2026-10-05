@@ -68,7 +68,7 @@ export function attachStampPopups(
     if (kind === "place") {
       const point = latest.current.points.find((p) => p.placeKey === key);
       const stamped = point?.stamped ?? false;
-      if (point) subtitle = t("kmFromStart", { km: point.km.toFixed(1) });
+      if (point) subtitle = [t("kmFromStart", { km: point.km.toFixed(1) }), point.note].filter(Boolean).join(" · ");
       actions.push(
         {
           label: t("routeFromHere"),

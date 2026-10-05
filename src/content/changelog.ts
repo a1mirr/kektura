@@ -12,6 +12,26 @@ export type ChangelogEntry = { date: string; title: Localized; changes: Change[]
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-05",
+    title: {
+      en: "New stamps are required only from their official date",
+      ru: "Новые печати обязательны только с официальной даты",
+      hu: "Az új bélyegzők csak a hivatalos dátumuktól kötelezők",
+      de: "Neue Stempel sind erst ab ihrem offiziellen Datum erforderlich",
+    },
+    changes: [
+      {
+        kind: "improved",
+        text: {
+          en: "A stamp the MTSZ added later (Vércverés, Lokó-pihenő, Nagy-nyugodó, Csobánc, Encs, Badacsony, Tepke and others) is now required only from the day the MTSZ announced. If you walked past before that day, you are not missing it: the stretch still counts towards your kilometres and the stage, and the place says \"Not required for your walk\". Every new stamp shows the date it is required from, with a short explanation when you tap the date. A friend's page follows the same rule.",
+          ru: "Печать, которую МТСЗ добавил позже (Вёрчверёш, Локо-пихенё, Надь-ньугодо, Чобанц, Энч, Бадачонь, Тепке и другие), теперь обязательна только с даты, объявленной МТСЗ. Если вы прошли это место раньше, вам её не недостаёт: участок по-прежнему засчитывается в километры и этап, а у места написано «Для вашего прохождения не требуется». У каждой новой печати показана дата, с которой она обязательна, а по нажатию на дату открывается короткое пояснение. Страница друга работает по тому же правилу.",
+          hu: "Az MTSZ által később felvett bélyegző (Vércverés, Lokó-pihenő, Nagy-nyugodó, Csobánc, Encs, Badacsony, Tepke és mások) mostantól csak az MTSZ által közölt naptól kötelező. Ha előtte jártál ott, nem hiányzik: a szakasz továbbra is beleszámít a kilométereidbe és a szakaszba, a helynél pedig ez áll: „A te túrádhoz nem kötelező”. Minden új bélyegzőnél látszik, melyik naptól kötelező, a dátumra koppintva pedig rövid magyarázat nyílik. A barátod oldala ugyanezt a szabályt követi.",
+          de: "Ein Stempel, den der MTSZ später ergänzt hat (Vércverés, Lokó-pihenő, Nagy-nyugodó, Csobánc, Encs, Badacsony, Tepke und weitere), ist jetzt erst ab dem vom MTSZ angekündigten Tag erforderlich. Wenn du vorher dort vorbeigekommen bist, fehlt er dir nicht: Der Abschnitt zählt weiter zu deinen Kilometern und zur Etappe, und der Ort trägt den Hinweis „Für deine Wanderung nicht erforderlich“. Jeder neue Stempel zeigt das Datum, ab dem er erforderlich ist, und beim Antippen des Datums erscheint eine kurze Erklärung. Die Seite eines Freundes folgt derselben Regel.",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-10-04",
     title: {
       en: "Friends, German, Hungarian by default, a language menu and a logo",

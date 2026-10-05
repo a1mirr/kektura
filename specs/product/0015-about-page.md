@@ -20,7 +20,7 @@ Everything it says is true of the app today.
 - **AC-3**: "How your progress is counted" explains, in four short points:
   1. stamps can be collected in any order;
   2. a stretch between two neighbouring places counts as walked only when both are stamped, and the
-     blue line, the kilometres and the percentage all come from those stretches (spec 0001 AC-3);
+     blue line, the kilometres and the percentage all come from those stretches (spec 0001 AC-3), except that a stamp the MTSZ added later is required only from its official date (spec 0001 AC-17);
   3. alternative stamps at one place: collecting any of them marks the place (0001 AC-1, AC-2);
   4. extra stamps are tracked separately and never count towards the official places (0002 AC-8).
 - **AC-4**: "Data and credits" names each source with a link that opens in a new tab

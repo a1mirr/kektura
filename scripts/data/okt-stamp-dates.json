@@ -1,0 +1,19 @@
+{
+  "stamps": [
+    { "code": "OKTPH_103", "place": "Vércverés (replaced Nyírjesi-erdészház)", "required_from": "2014-11-21", "source": "https://www.kektura.hu/hir/az-elmult-evek-uj-kektura-belyegzohelyeinek-listaja" },
+    { "code": "OKTPH_84_B", "place": "Lokó-pihenő (the MTSZ list prints OKTPH_85_2)", "required_from": "2017-05-26", "source": "https://www.kektura.hu/hir/az-elmult-evek-uj-kektura-belyegzohelyeinek-listaja" },
+    { "code": "OKTPH_142", "place": "Nagy-nyugodó", "required_from": "2017-06-11", "source": "https://www.kektura.hu/hir/az-elmult-evek-uj-kektura-belyegzohelyeinek-listaja" },
+    { "code": "OKTPH_31_B", "place": "Csobánc", "required_from": "2017-10-27", "source": "https://www.kektura.hu/hir/az-elmult-evek-uj-kektura-belyegzohelyeinek-listaja" },
+    { "code": "OKTPH_132_B_1", "place": "Encs", "required_from": "2022-05-01", "source": "https://www.kektura.hu/hir/az-elmult-evek-uj-kektura-belyegzohelyeinek-listaja" },
+    { "code": "OKTPH_132_B_2", "place": "Encs", "required_from": "2022-05-01", "source": "https://www.kektura.hu/hir/az-elmult-evek-uj-kektura-belyegzohelyeinek-listaja" },
+    { "code": "OKTPH_30_B", "place": "Badacsony", "required_from": "2025-05-08", "source": "https://www.kektura.hu/hir/uj-belyegzok-a-kekturan", "tolerance_note": true },
+    { "code": "OKTPH_63_C", "place": "Nagy-Gete", "required_from": "2025-05-08", "source": "https://www.kektura.hu/hir/uj-belyegzok-a-kekturan", "tolerance_note": true },
+    { "code": "OKTPH_80_B", "place": "Julianus-kilátó", "required_from": "2025-05-08", "source": "https://www.kektura.hu/hir/uj-belyegzok-a-kekturan", "tolerance_note": true },
+    { "code": "OKTPH_83_B", "place": "Csóványos", "required_from": "2025-05-08", "source": "https://www.kektura.hu/hir/uj-belyegzok-a-kekturan", "tolerance_note": true },
+    { "code": "OKTPH_86_B", "place": "Naszály", "required_from": "2025-05-08", "source": "https://www.kektura.hu/hir/uj-belyegzok-a-kekturan", "tolerance_note": true },
+    { "code": "OKTPH_128_B", "place": "Irota", "required_from": "2025-05-08", "source": "https://www.kektura.hu/hir/uj-belyegzok-a-kekturan", "tolerance_note": true },
+    { "code": "OKTPH_147_B", "place": "Nagy-Milic", "required_from": "2025-05-08", "source": "https://www.kektura.hu/hir/uj-belyegzok-a-kekturan", "tolerance_note": true },
+    { "code": "OKTPH_97_B", "place": "Tepke", "required_from": "2026-06-11", "source": "https://www.kektura.hu/hir/hat-uj-belyegzovel-bovul-a-kektura-2026-ban", "tolerance_note": true },
+    { "code": "OKTPH_126_B", "place": "Martonyi kolostorrom (the MTSZ post prints OKTHP_126_B)", "required_from": "2026-06-11", "source": "https://www.kektura.hu/hir/hat-uj-belyegzovel-bovul-a-kektura-2026-ban", "tolerance_note": true }
+  ]
+}

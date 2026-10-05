@@ -6,9 +6,11 @@ import { getReferenceData } from "./dashboard-data";
 import {
   buildPlaces,
   buildStages,
+  countDone,
   progressSummary,
   placeKeyOf,
   stampedPlaceKeys,
+  waivedPlaceKeys,
   walkedRanges,
   type Checkpoint,
   type StageMeta,
@@ -23,19 +25,23 @@ export type Friend = {
   status: "pending" | "accepted";
   isRequester: boolean;
   stampIds: number[]; // what the friend shares with me: empty while pending or switched off
+  waivedKeys: string[]; // the places the friend was not missing when they walked past (spec 0001 AC-17), never their dates
 };
 
 // Everything the signed-in user `uid` has with other people: one row per friendship or pending request.
 export async function getFriends(supabase: SupabaseClient<Database>, uid: string): Promise<Friend[]> {
-  const [{ data: profiles }, { data: friendships }, { data: stamps }] = await Promise.all([
+  const [{ data: profiles }, { data: friendships }, { data: stamps }, { data: waived }] = await Promise.all([
     supabase.from("profiles").select("id, display_name"),
     supabase.from("friendships").select("*"),
     supabase.rpc("get_friend_stamps"),
+    supabase.rpc("get_friend_waived_places"),
   ]);
 
   const names = new Map(profiles?.map((p) => [p.id, p.display_name]));
   const stampIds = new Map<string, number[]>();
   for (const s of stamps ?? []) stampIds.set(s.friend_id, [...(stampIds.get(s.friend_id) ?? []), s.checkpoint_id]);
+  const waivedKeys = new Map<string, string[]>();
+  for (const w of waived ?? []) waivedKeys.set(w.friend_id, [...(waivedKeys.get(w.friend_id) ?? []), w.place_key]);
 
   return (friendships ?? []).map((f) => {
     const isRequester = f.user_id === uid;
@@ -48,24 +54,28 @@ export async function getFriends(supabase: SupabaseClient<Database>, uid: string
       status: f.status as Friend["status"],
       isRequester,
       stampIds: stampIds.get(id) ?? [],
+      waivedKeys: waivedKeys.get(id) ?? [],
     };
   });
 }
 
 // Spec 0024 AC-8: a friend's numbers come from the same functions as the owner's dashboard (progress.ts),
-// computed from the stamped checkpoint ids. A stage is completed when all of its places are stamped.
-export function summarizeFriend(checkpoints: Checkpoint[], checkpointIds: number[], stagesMeta: StageMeta[]) {
+// computed from the stamped checkpoint ids. The friend's dates are not shared, so the places they were not missing
+// (`waivedKeys`, spec 0001 AC-17) are decided by the database and come with the stamps. A stage is completed when all
+// of its places are stamped or waived.
+export function summarizeFriend(checkpoints: Checkpoint[], checkpointIds: number[], stagesMeta: StageMeta[], waivedKeys: string[] = []) {
   const places = buildPlaces(checkpoints);
   const stampedKeys = stampedPlaceKeys(places, checkpointIds.map((id) => ({ checkpoint_id: id, stamped_on: "" })));
-  const summary = progressSummary(places, walkedRanges(places, stampedKeys));
+  const waived = new Set(waivedKeys);
+  const summary = progressSummary(places, walkedRanges(places, stampedKeys, waived));
   const stages = buildStages(places, stagesMeta);
-  const completedStages = stages.filter((s) => s.places.every((p) => stampedKeys.has(p.key))).length;
-  return { summary, places, stages, stampedKeys, completedStages };
+  const completedStages = stages.filter((s) => countDone(s.places, stampedKeys, waived) === s.places.length).length;
+  return { summary, places, stages, stampedKeys, waived, completedStages };
 }
 
 export async function getFriendProgress(friend: Friend) {
   const { checkpoints } = await getReferenceData();
-  return summarizeFriend(checkpoints, friend.stampIds, stagesData.stages);
+  return summarizeFriend(checkpoints, friend.stampIds, stagesData.stages, friend.waivedKeys);
 }
 
 // Spec 0024 AC-22: the friend's progress next to the signed-in user's own. The only database read besides the friend's
@@ -76,7 +86,10 @@ export async function compareWithFriend(supabase: SupabaseClient<Database>, frie
     supabase.from("user_stamps").select("checkpoint_id, stamped_on"),
   ]);
   const mine = stampedPlaceKeys(progress.places, stamps ?? []);
-  const comparison = compareProgress(progress.places, mine, progress.stampedKeys, progress.stages);
+  const comparison = compareProgress(progress.places, mine, progress.stampedKeys, progress.stages, {
+    mine: waivedPlaceKeys(progress.places, mine),
+    theirs: progress.waived,
+  });
   // One point per variant of a place with coordinates, like the dashboard's map.
   const points: ComparePoint[] = progress.places.flatMap((p) =>
     p.variants

@@ -10,13 +10,13 @@ export type Database = {
           Tables: {
             "checkpoints": {
                   Row: {
-                    "code": string | null,"description": string | null,"elevation_m": number | null,"id": number,"km_from_start": number,"lat": number | null,"lng": number | null,"name": string,"place_key": string | null,"seq": number,"stage": number | null,"stage_seq": number | null
+                    "code": string | null,"description": string | null,"elevation_m": number | null,"id": number,"km_from_start": number,"lat": number | null,"lng": number | null,"name": string,"place_key": string | null,"required_from": string | null,"seq": number,"stage": number | null,"stage_seq": number | null
                   }
                   Insert: {
-                    "code"?: string | null,"description"?: string | null,"elevation_m"?: number | null,"id"?: number,"km_from_start"?: number,"lat"?: number | null,"lng"?: number | null,"name": string,"place_key"?: string | null,"seq": number,"stage"?: number | null,"stage_seq"?: number | null
+                    "code"?: string | null,"description"?: string | null,"elevation_m"?: number | null,"id"?: number,"km_from_start"?: number,"lat"?: number | null,"lng"?: number | null,"name": string,"place_key"?: string | null,"required_from"?: string | null,"seq": number,"stage"?: number | null,"stage_seq"?: number | null
                   }
                   Update: {
-                    "code"?: string | null,"description"?: string | null,"elevation_m"?: number | null,"id"?: number,"km_from_start"?: number,"lat"?: number | null,"lng"?: number | null,"name"?: string,"place_key"?: string | null,"seq"?: number,"stage"?: number | null,"stage_seq"?: number | null
+                    "code"?: string | null,"description"?: string | null,"elevation_m"?: number | null,"id"?: number,"km_from_start"?: number,"lat"?: number | null,"lng"?: number | null,"name"?: string,"place_key"?: string | null,"required_from"?: string | null,"seq"?: number,"stage"?: number | null,"stage_seq"?: number | null
                   }
                   Relationships: [
                     
@@ -185,6 +185,11 @@ isOneToOne: false
 "get_friend_stamps":
 { Args: Record<PropertyKey, never>; Returns: {
               "checkpoint_id": number,"friend_id": string
+            }[]
+                           },
+"get_friend_waived_places":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "friend_id": string,"place_key": string
             }[]
                            },
 "get_inviter_info":

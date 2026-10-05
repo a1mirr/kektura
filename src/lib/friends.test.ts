@@ -8,12 +8,13 @@ import { buildPlaces, progressSummary, stampedPlaceKeys, walkedRanges, type Chec
 // Every message file (tests/messages.test.ts pins them to the routing's languages).
 const languages = Object.values(messageFiles) as (typeof import("../../messages/en.json"))[];
 
-function fakeSupabase(profiles: any[], friendships: any[], stamps: any[]) {
+function fakeSupabase(profiles: any[], friendships: any[], stamps: any[], waived: any[] = []) {
   return {
     from: (table: string) => ({
       select: () => Promise.resolve({ data: table === "profiles" ? profiles : friendships }),
     }),
-    rpc: (name: string) => Promise.resolve({ data: name === "get_friend_stamps" ? stamps : [] }),
+    rpc: (name: string) =>
+      Promise.resolve({ data: name === "get_friend_stamps" ? stamps : name === "get_friend_waived_places" ? waived : [] }),
   } as any;
 }
 
@@ -30,6 +31,7 @@ const checkpoints: Checkpoint[] = [0, 10, 20, 30].map((km, i) => ({
   lat: 47,
   lng: 16,
   km_from_start: km,
+  required_from: null,
 }));
 const stagesMeta: StageMeta[] = [
   { stage: 1, start: "A", end: "B", km: 10 },
@@ -67,6 +69,16 @@ describe("spec 0024: friends list", () => {
     expect(friends.find((f) => f.id === "u3")!.stampIds).toEqual([]);
   });
 
+  it("AC-25: the places a friend was not missing come from get_friend_waived_places, place keys only, no dates", async () => {
+    const waived = [{ friend_id: "u2", place_key: "P1" }, { friend_id: "u2", place_key: "P3" }];
+    const friends = await getFriends(fakeSupabase(profiles, friendships, [], waived), "u1");
+    expect(friends.find((f) => f.id === "u2")!.waivedKeys).toEqual(["P1", "P3"]);
+    expect(friends.find((f) => f.id === "u3")!.waivedKeys).toEqual([]);
+    expect(Object.keys(friends[0]).sort()).toEqual(
+      ["displayName", "friendIsSharing", "id", "isRequester", "isSharing", "stampIds", "status", "waivedKeys"].sort(),
+    );
+  });
+
   it("AC-1: a display name is 1 to 40 characters without control characters", () => {
     expect(isValidDisplayName("Anna")).toBe(true);
     expect(isValidDisplayName("  Anna  ")).toBe(true);
@@ -101,6 +113,23 @@ describe("spec 0024: a friend's numbers", () => {
     expect(summarizeFriend(checkpoints, [1, 11], stagesMeta).completedStages).toBe(1);
     expect(summarizeFriend(checkpoints, [1, 11, 21, 31], stagesMeta).completedStages).toBe(2);
     expect(summarizeFriend(checkpoints, [21, 31], stagesMeta).completedStages).toBe(1);
+  });
+});
+
+describe("spec 0024: a friend's numbers with a place they were not missing", () => {
+  // P0 (km 0), P1 (10), P2 (20), P3 (30); P2 is a new stamp the friend walked past before it was required.
+  const withNew = checkpoints.map((c) => (c.place_key === "P2" ? { ...c, required_from: "2025-05-08" } : c));
+
+  it("AC-25: the stretch runs across the waived place and the stage is complete, as on the friend's own dashboard", () => {
+    const friend = summarizeFriend(withNew, [11, 31], stagesMeta, ["P2"]); // P1 and P3 stamped
+    expect(friend.summary.doneKm).toBe(20); // P1 to P3
+    expect(friend.completedStages).toBe(1); // stage 2 is P2 + P3
+    expect([...friend.stampedKeys.keys()]).toEqual(["P1", "P3"]); // P2 is not a stamp: the count of stamps does not move
+    expect([...friend.waived]).toEqual(["P2"]);
+    // Without the waiver the same stamps give 0 km and no stage.
+    const strict = summarizeFriend(withNew, [11, 31], stagesMeta);
+    expect(strict.summary.doneKm).toBe(0);
+    expect(strict.completedStages).toBe(0);
   });
 });
 

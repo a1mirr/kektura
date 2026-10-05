@@ -8,6 +8,8 @@ export type MapPoint = {
   lng: number;
   km: number;
   stamped: boolean;
+  // Spec 0003 AC-22: what the popup adds under the km for a new stamp (the date it is required from, whether it is waived).
+  note?: string;
 };
 
 export type MapExtra = {
