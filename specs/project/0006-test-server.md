@@ -36,7 +36,7 @@ Google account and without touching real data. Production keeps Google sign-in o
   never reused by mistake). Every test signs in as a fresh user, so tests are independent and run
   in parallel, except the tests that switch a declared feature flag for everybody, which run as their own project after the rest (spec 0035 AC-11). How they sign in is AC-8 and AC-9.
 - **AC-7**: The test server never sends feedback to the real Telegram bot. `scripts/test-env.mjs` blanks
-  `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` for every server it starts (`dev:test`, `build:e2e`,
+  `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (and the flag commands' `TELEGRAM_WEBHOOK_SECRET` and `SUPABASE_SERVICE_ROLE_KEY`, spec 0035 AC-26) for every server it starts (`dev:test`, `build:e2e`,
   `start:e2e`, CI), even when `.env.local` holds the real bot, so feedback submitted by a manual test
   or an E2E run is only stored in the local database and never sent to the developer's Telegram
   (spec 0017 AC-4 sends only when both are set).

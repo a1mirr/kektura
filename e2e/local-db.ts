@@ -3,7 +3,7 @@
 import { execFileSync, execSync } from "node:child_process";
 import type { APIRequestContext } from "@playwright/test";
 
-type LocalStatus = { API_URL: string; ANON_KEY?: string; PUBLISHABLE_KEY?: string };
+type LocalStatus = { API_URL: string; ANON_KEY?: string; PUBLISHABLE_KEY?: string; SERVICE_ROLE_KEY?: string; SECRET_KEY?: string };
 
 let status: LocalStatus | undefined;
 
@@ -13,7 +13,7 @@ export function localSupabase() {
     const out = execSync("npx supabase status -o json", { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
     status = JSON.parse(out.slice(out.indexOf("{"), out.lastIndexOf("}") + 1)) as LocalStatus;
   }
-  return { url: status.API_URL, anonKey: (status.ANON_KEY ?? status.PUBLISHABLE_KEY)! };
+  return { url: status.API_URL, anonKey: (status.ANON_KEY ?? status.PUBLISHABLE_KEY)!, serviceKey: (status.SERVICE_ROLE_KEY ?? status.SECRET_KEY)! };
 }
 
 // REST call as the anonymous role (the public key, no user session). Goes through Playwright's request

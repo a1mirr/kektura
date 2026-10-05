@@ -74,3 +74,17 @@ export function logFeatureFlagsError(error: unknown): void {
   const { code, message } = describeError(error);
   console.error(`[feature-flags] lookup failed code=${code ?? "-"} message=${quote(message)}`);
 }
+
+// A flag change made from the Telegram bot (spec 0035 AC-24): the flag, what was asked and what happened, one line.
+// Never the email, the user id, the message text or the bot token; a failure adds the error's code and message.
+export type FlagChange = "off" | "allowlist" | "on" | "allow" | "deny";
+export type FlagChangeResult = "ok" | "no_account" | "failed";
+
+export function logFlagChange(key: string, change: FlagChange, result: FlagChangeResult, error?: unknown): void {
+  if (result !== "failed") {
+    console.info(`[feature-flags] change key=${key} change=${change} result=${result}`);
+    return;
+  }
+  const { code, message } = describeError(error);
+  console.error(`[feature-flags] change key=${key} change=${change} result=failed code=${code ?? "-"} message=${quote(message)}`);
+}

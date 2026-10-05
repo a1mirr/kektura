@@ -9,7 +9,7 @@ describe("spec 0005: proxy matcher", () => {
     expect(matches(path)).toBe(true);
   });
 
-  it.each(["/auth/callback", "/_next/static/chunk.js", "/data/okt-route.json", "/maplibre/maplibre-gl-worker.mjs", "/favicon.ico"])(
+  it.each(["/auth/callback", "/api/telegram", "/_next/static/chunk.js", "/data/okt-route.json", "/maplibre/maplibre-gl-worker.mjs", "/favicon.ico"])(
     "AC-1: skips %s",
     (path) => {
       expect(matches(path)).toBe(false);

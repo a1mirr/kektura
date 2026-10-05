@@ -1,4 +1,5 @@
-// Checks the Telegram setup of the feedback form (spec 0017 AC-9).
+// Checks the Telegram setup of the feedback form (spec 0017 AC-9) and whether the webhook of the flag commands is
+// registered (spec 0035 AC-26).
 //
 //   npm run telegram:check                   verify the token, send a test message to TELEGRAM_CHAT_ID
 //   npm run telegram:check -- --find-chat-id list the chats that recently wrote to the bot
@@ -57,6 +58,7 @@ async function main() {
 
   if (findChatId) {
     const chats = new Map();
+    // Telegram refuses getUpdates while a webhook is registered: `npm run telegram:webhook -- delete` first.
     for (const update of await call("getUpdates")) {
       const chat = (update.message ?? update.channel_post ?? update.edited_message)?.chat;
       if (chat) chats.set(chat.id, chat);
@@ -72,6 +74,12 @@ async function main() {
     if (!chatId) throw new Problem("TELEGRAM_CHAT_ID is not set. Run: npm run telegram:check -- --find-chat-id");
     await call("sendMessage", { chat_id: chatId, text: "Kéktúra tracker: Telegram notifications work." });
     console.log("Test message sent. Feedback from the site will arrive in that chat.");
+    const hook = await call("getWebhookInfo").catch(() => null);
+    console.log(
+      hook?.url
+        ? `Flag commands: webhook registered (${hook.url}).`
+        : "Flag commands: no webhook registered (npm run telegram:webhook -- set).",
+    );
   }
 }
 

@@ -22,9 +22,20 @@ In `~/kektura_app/.env.local` on the server (never committed; `.env.example` has
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | the app | public values, compiled into the build: **rebuild** after changing them |
 | `SITE_URL` | redirects (spec 0020) | `https://kektura-tracker.com`; optional, without it the proxy's forwarded headers are used |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | feedback notifications (spec 0017) | secrets; server-only. Check with `npm run telegram:check` |
+| `TELEGRAM_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY` | flag commands from the Telegram bot (spec 0035) | secrets; server-only. The first is a string of your own (A-Z a-z 0-9 _ -, up to 256 characters) that Telegram sends back with every update; the second is the Supabase project's service role (secret) key, used by `/api/telegram` only. Without the first, `/api/telegram` answers 404; without the second, the bot says the commands are not configured |
 
 Never set `TEST_LOGIN` here: it switches on the dummy login (the app also requires a localhost database).
-Server-only values (`SITE_URL`, `TELEGRAM_*`) take effect with `pm2 restart kektura --update-env`.
+Server-only values (`SITE_URL`, `TELEGRAM_*`, `SUPABASE_SERVICE_ROLE_KEY`) take effect with `pm2 restart kektura --update-env`.
+
+## Flag commands from Telegram
+
+Spec 0035: the owner writes to the feedback bot to look at and switch feature flags (`/flags`, `/flag friends allowlist`, `/allow friends me@example.com`; anything else shows the help). Once, after a deploy that has the route:
+
+1. Add `TELEGRAM_WEBHOOK_SECRET` and `SUPABASE_SERVICE_ROLE_KEY` to `~/kektura_app/.env.local` (the `.env.example` comment says what they are), then `pm2 restart kektura --update-env`.
+2. From a checkout that has the same values for `TELEGRAM_BOT_TOKEN` and `TELEGRAM_WEBHOOK_SECRET` and `SITE_URL=https://kektura-tracker.com` in its `.env.local`: `npm run telegram:webhook -- set`, then `npm run telegram:check`, which says where the webhook points.
+3. Send `/flags` to the bot.
+
+`npm run telegram:webhook -- info` shows where Telegram sends the messages and the last error it had; `-- delete` stops it. While a webhook is registered Telegram refuses `getUpdates`, so `npm run telegram:check -- --find-chat-id` needs `-- delete` first.
 
 ## First-time setup
 

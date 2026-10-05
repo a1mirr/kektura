@@ -22,7 +22,7 @@ Each one is logged on the server instead, so production problems can be found in
 - **AC-4**: What the client receives doesn't change.
 - **AC-5**: The other server actions that turn errors into a result log through the same file, one line each, under their
   own tag and by the same rules as AC-2: `[feedback]` (spec 0017), `[account-delete]` (spec 0014), `[friends]` (spec
-  0024) and `[feature-flags]` (spec 0035). Which failures each logs is in its own spec; the line formats are below.
+  0024) and `[feature-flags]` (spec 0035: a failed lookup, and each change from the Telegram bot). Which failures each logs is in its own spec; the line formats are below.
 
 ## Out of scope
 
@@ -41,6 +41,7 @@ Line formats (one `console.error` / `console.warn` call, one string argument eac
 [account-delete] stage=rpc user=<uuid> code=- message="..."
 [friends] action=sendRequest code=- message="..."
 [feature-flags] lookup failed code=- message="..."
+[feature-flags] change key=friends change=on result=ok
 ```
 
 - `user` is `unknown` when the failure happens before the session is known (creating the client or
@@ -61,4 +62,4 @@ Line formats (one `console.error` / `console.warn` call, one string argument eac
 | --- | --- |
 | AC-1 ... AC-4 | `src/app/[locale]/dashboard/actions.test.ts`, `describe("spec 0008: ...")` (spies on `console.error` / `console.warn`; the AC-2 test checks that the user's email, the place keys and the error's `details` / `hint` are absent) |
 | AC-1 ... AC-3 (line format, one-line guarantee, non-Error values) | `src/lib/log.test.ts` |
-| AC-5 | `src/lib/log.test.ts` (the `[feedback]`, `[account-delete]` and `[feature-flags]` lines), the actions' own tests (`feedback/actions.test.ts`, `account/actions.test.ts`, `friends/actions.test.ts`) |
+| AC-5 | `src/lib/log.test.ts` (the `[feedback]`, `[account-delete]` and `[feature-flags]` lines, spec 0035 AC-24), the actions' own tests (`feedback/actions.test.ts`, `account/actions.test.ts`, `friends/actions.test.ts`) |

@@ -57,6 +57,11 @@ describe("spec 0006: test server environment", () => {
     expect(script).toMatch(/\bspawn\(.*\benv\b.*\);/);
   });
 
+  it("AC-7: the webhook secret and the service role key of the flag commands are blanked too (spec 0035 AC-26)", () => {
+    const shell = { ...withoutTelegram(), TELEGRAM_WEBHOOK_SECRET: "s", SUPABASE_SERVICE_ROLE_KEY: "k" };
+    expect(testServerEnv(shell, local, true)).toMatchObject({ TELEGRAM_WEBHOOK_SECRET: "", SUPABASE_SERVICE_ROLE_KEY: "" });
+  });
+
   it("AC-7: the rest of the test server's environment is unchanged: local Supabase, dummy login, own build folder", () => {
     expect(testServerEnv({ KEEP: "me" }, local, true)).toMatchObject({
       KEEP: "me",
