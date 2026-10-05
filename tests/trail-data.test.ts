@@ -111,3 +111,40 @@ describe("spec 0004: extra stamps (seed_extra.sql)", () => {
     expect(new Set(codes).size).toBe(codes.length);
   });
 });
+
+// scripts/data/okt-stamp-dates.json: the MTSZ's dates for new stamps
+const datesFile = JSON.parse(read("scripts/data/okt-stamp-dates.json")) as {
+  stamps: { code: string; place?: string; required_from?: string; source: string; tolerance_note?: unknown }[];
+};
+
+describe("spec 0004: the dates of new stamps (okt-stamp-dates.json)", () => {
+  const seedCodes = new Set(seedRows.map((r) => r.code));
+  const isRealDate = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s) && new Date(`${s}T00:00:00Z`).toISOString().slice(0, 10) === s;
+
+  it("AC-10: every entry names a code of the seed, once", () => {
+    expect(datesFile.stamps.length).toBeGreaterThan(0);
+    const codes = datesFile.stamps.map((e) => e.code);
+    for (const code of codes) expect(seedCodes, code).toContain(code);
+    expect(new Set(codes).size).toBe(codes.length);
+  });
+
+  it("AC-10: every date is a real calendar day, from the MTSZ's own site, and a tolerance flag is a boolean", () => {
+    for (const e of datesFile.stamps) {
+      expect(isRealDate(e.required_from ?? ""), `${e.code}: ${e.required_from}`).toBe(true);
+      expect(e.source, e.code).toMatch(/^https:\/\/www\.(kektura\.hu|mtsz\.org)\//);
+      if ("tolerance_note" in e) expect(typeof e.tolerance_note, e.code).toBe("boolean");
+    }
+  });
+
+  it("AC-11: the seed carries exactly the file's dates, in the block the generator writes", async () => {
+    const { readStampDates, stampDatesSql } = (await import("../scripts/lib/stamp-dates.mjs")) as {
+      readStampDates: () => unknown[];
+      stampDatesSql: (entries: unknown[]) => string;
+    };
+    const block = stampDatesSql(readStampDates());
+    expect(read("supabase/seed.sql")).toContain(`\n${block}\ncommit;`);
+    // ... and a date reaches the right row only: the block names every code of the file and no other
+    const named = [...block.matchAll(/\('(OKTPH_[0-9A-Za-z_]+)', '\d{4}-\d{2}-\d{2}'\)/g)].map((m) => m[1]).sort();
+    expect(named).toEqual(datesFile.stamps.map((e) => e.code).sort());
+  });
+});

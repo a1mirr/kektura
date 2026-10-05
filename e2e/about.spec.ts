@@ -29,6 +29,7 @@ test.describe("spec 0015: about page", () => {
     const points = page.getByRole("region", { name: "How your progress is counted" }).getByRole("listitem");
     await expect(points).toHaveCount(4);
     await expect(points.nth(1)).toContainText("only when both of its stamps are collected");
+    await expect(points.nth(1)).toContainText("required only from its official date"); // spec 0001 AC-17
   });
 
   test("AC-4: every source link is https and opens safely in a new tab", async ({ page }) => {

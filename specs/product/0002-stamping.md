@@ -58,7 +58,8 @@ Row-level security (`supabase/migrations`) is the real boundary: every user-tabl
 - **AC-15**: The reference data (`checkpoints`, `extra_stamps`; RLS lets everyone read them) is read through a
   cookie-less Supabase client and cached on the server across requests and users, with a revalidation time of at
   most one day and a cache tag (`reference-data`) that can expire it on demand. Per request, the dashboard only
-  queries the signed-in user's own `user_stamps` and `user_extra_stamps`. A failed reference read is not cached,
+  queries the signed-in user's own `user_stamps` and `user_extra_stamps`. The cache key carries a version, bumped when the shape of the rows changes (a new column), so rows cached
+  before a deploy are never served to the code that expects the column. A failed reference read is not cached,
   and the dashboard shows the localized error boundary (`error.tsx`) rather than an empty list.
 - **AC-16**: The user's stamps are never cached across users: they are read through the cookie-based client under
   RLS.

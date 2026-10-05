@@ -84,7 +84,7 @@ describe("spec 0007: the CI workflow", () => {
     expect(e2e).toContain("name: End-to-end tests");
     expect(e2e).toContain("runs-on: ubuntu-latest");
     expect(step(e2e, "Start local Supabase")).toMatch(/npx supabase start -x /);
-    expect(step(e2e, "Database rule tests")).toContain("npx vitest run tests/friends-migration.test.ts tests/database-rules.test.ts tests/seed-cleanup.test.ts tests/feature-flags-database.test.ts tests/flag-admin-database.test.ts");
+    expect(step(e2e, "Database rule tests")).toContain("npx vitest run tests/friends-migration.test.ts tests/database-rules.test.ts tests/seed-cleanup.test.ts tests/feature-flags-database.test.ts tests/flag-admin-database.test.ts tests/stamp-dates-database.test.ts");
     expect(e2e).toContain("npx playwright install --with-deps chromium");
     expect(e2e).toMatch(/- run: npm run e2e\b/);
     const upload = step(e2e, "Upload Playwright report");

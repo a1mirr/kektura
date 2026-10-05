@@ -58,6 +58,12 @@ describe("spec 0002: dashboard data", () => {
     expect(cacheOptions.calls).toHaveLength(1); // the only cached read is the reference data
   });
 
+  it("AC-15: the cache key carries a version, so rows cached before a deploy that changed their shape are not served to the new code", () => {
+    const { keyParts } = cacheOptions.calls[0];
+    expect(keyParts.length).toBeGreaterThan(1);
+    expect(keyParts.at(-1)).toMatch(/^v\d+$/);
+  });
+
   it("AC-15: a failed reference read throws, so an empty result is never cached", async () => {
     const pub = fakeClient({ checkpoints: { error: { message: "boom" } }, extra_stamps: { data: extras } });
     vi.mocked(createPublicClient).mockReturnValue(pub.client);

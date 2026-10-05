@@ -8,6 +8,7 @@
 //         public/data/okt-hops.json and, with the 3rd arg, supabase/seed_extra.sql
 import fs from "node:fs";
 import { attr, flatMeters, nearestVertex, readTrack } from "./lib/geo.mjs";
+import { readStampDates, stampDatesSql } from "./lib/stamp-dates.mjs";
 
 const [stampsPath, routePath] = process.argv.slice(2);
 if (!stampsPath || !routePath) {
@@ -165,6 +166,11 @@ if (new Set([hopList[0].a, ...hopList.map((h) => h.b)]).size !== placeNames.size
 fs.writeFileSync("public/data/okt-hops.json", JSON.stringify(hopList));
 console.log(`public/data/okt-hops.json: ${hopList.length} hops (${hopList.filter((h) => h.ferry).length} ferry)`);
 
+// The MTSZ's dates for new stamps: every code must be one of the seed's, or the date would silently go nowhere.
+const stampDates = readStampDates();
+const unknownDates = stampDates.filter((e) => !waypoints.some((w) => w.code === e.code));
+if (unknownDates.length) throw new Error("okt-stamp-dates.json has codes the stamps file lacks: " + unknownDates.map((e) => e.code).join(", "));
+
 const q = (s) => `'${String(s).replace(/'/g, "''")}'`;
 // Temp table of the codes a seed file contains, so it can drop rows the source no longer has.
 const codesTable = (codes) =>
@@ -199,6 +205,7 @@ on conflict (user_id, checkpoint_id) do nothing;
 
 delete from public.checkpoints where code is null or code not in (select code from seed_codes);
 
+${stampDatesSql(stampDates)}
 commit;
 `;
 fs.writeFileSync("supabase/seed.sql", sql);

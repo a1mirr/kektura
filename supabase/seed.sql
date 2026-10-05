@@ -244,4 +244,10 @@ on conflict (user_id, checkpoint_id) do nothing;
 
 delete from public.checkpoints where code is null or code not in (select code from seed_codes);
 
+-- Dates from which a new stamp is required (scripts/data/okt-stamp-dates.json).
+update public.checkpoints set required_from = null where required_from is not null and code <> all (array['OKTPH_103', 'OKTPH_126_B', 'OKTPH_128_B', 'OKTPH_132_B_1', 'OKTPH_132_B_2', 'OKTPH_142', 'OKTPH_147_B', 'OKTPH_30_B', 'OKTPH_31_B', 'OKTPH_63_C', 'OKTPH_80_B', 'OKTPH_83_B', 'OKTPH_84_B', 'OKTPH_86_B', 'OKTPH_97_B']);
+update public.checkpoints c set required_from = d.required_from::date
+from (values ('OKTPH_103', '2014-11-21'), ('OKTPH_126_B', '2026-06-11'), ('OKTPH_128_B', '2025-05-08'), ('OKTPH_132_B_1', '2022-05-01'), ('OKTPH_132_B_2', '2022-05-01'), ('OKTPH_142', '2017-06-11'), ('OKTPH_147_B', '2025-05-08'), ('OKTPH_30_B', '2025-05-08'), ('OKTPH_31_B', '2017-10-27'), ('OKTPH_63_C', '2025-05-08'), ('OKTPH_80_B', '2025-05-08'), ('OKTPH_83_B', '2025-05-08'), ('OKTPH_84_B', '2017-05-26'), ('OKTPH_86_B', '2025-05-08'), ('OKTPH_97_B', '2026-06-11')) as d(code, required_from)
+where c.code = d.code and c.required_from is distinct from d.required_from::date;
+
 commit;

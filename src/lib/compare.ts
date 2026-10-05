@@ -99,7 +99,17 @@ export function stageState(me: number, them: number, total: number): StageState 
 
 // `mine` and `theirs` are the place keys each stamped (a place with several variants counts once, spec 0001 AC-1);
 // the walked stretches come from the rule of spec 0001 AC-3, so the comparison never disagrees with a dashboard.
-export function compareProgress(places: Place[], mine: Stamped, theirs: Stamped, stages: Stage[]): Comparison {
+// `waived` are the places each was not missing (spec 0001 AC-17): they are not counted as stamped, but a stage with
+// only stamped and waived places is complete and the stretch runs across them.
+export function compareProgress(
+  places: Place[],
+  mine: Stamped,
+  theirs: Stamped,
+  stages: Stage[],
+  waived: { mine?: Stamped; theirs?: Stamped } = {},
+): Comparison {
+  const mineWaived = waived.mine ?? { has: () => false };
+  const theirsWaived = waived.theirs ?? { has: () => false };
   const placeWho = new Map<string, Who>();
   const counts: Record<Who, number> = { both: 0, me: 0, them: 0, neither: 0 };
   for (const p of places) {
@@ -110,8 +120,8 @@ export function compareProgress(places: Place[], mine: Stamped, theirs: Stamped,
     counts[who]++;
   }
 
-  const myRanges = walkedRanges(places, mine);
-  const theirRanges = walkedRanges(places, theirs);
+  const myRanges = walkedRanges(places, mine, mineWaived);
+  const theirRanges = walkedRanges(places, theirs, theirsWaived);
   const both = intersectRanges(myRanges, theirRanges);
   const me = subtractRanges(myRanges, theirRanges);
   const them = subtractRanges(theirRanges, myRanges);
@@ -128,8 +138,8 @@ export function compareProgress(places: Place[], mine: Stamped, theirs: Stamped,
     ),
     ranges: { both, me, them, neither, mine: myRanges, theirs: theirRanges },
     stages: stages.map((s) => {
-      const a = s.places.filter((p) => mine.has(p.key)).length;
-      const b = s.places.filter((p) => theirs.has(p.key)).length;
+      const a = s.places.filter((p) => mine.has(p.key) || mineWaived.has(p.key)).length;
+      const b = s.places.filter((p) => theirs.has(p.key) || theirsWaived.has(p.key)).length;
       return { stage: s.stage, me: a, them: b, total: s.places.length, state: stageState(a, b, s.places.length) };
     }),
   };

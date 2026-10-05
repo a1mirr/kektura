@@ -4,7 +4,7 @@ import type { Tables } from "@/lib/supabase/database.types";
 
 export type Checkpoint = Pick<
   Tables<"checkpoints">,
-  "id" | "seq" | "stage" | "stage_seq" | "code" | "place_key" | "name" | "description" | "lat" | "lng" | "km_from_start"
+  "id" | "seq" | "stage" | "stage_seq" | "code" | "place_key" | "name" | "description" | "lat" | "lng" | "km_from_start" | "required_from"
 >;
 
 export type StampRow = Pick<Tables<"user_stamps">, "checkpoint_id" | "stamped_on">;
@@ -17,6 +17,8 @@ export type Place = {
   label: string;
   name: string;
   km: number;
+  // The first day the place's stamp is required (the MTSZ's date for a new stamp); null: from the beginning.
+  requiredFrom: string | null;
   variants: Checkpoint[];
 };
 
@@ -47,10 +49,13 @@ export function buildPlaces(checkpoints: Checkpoint[]): Place[] {
       p.variants.push(c);
       // A place sits at its furthest-along variant: the MTSZ table lengths measure to it.
       p.km = Math.max(p.km, km);
+      // The earliest of the variants' dates; a variant without one means "from the beginning".
+      if (c.required_from == null) p.requiredFrom = null;
+      else if (p.requiredFrom !== null && c.required_from < p.requiredFrom) p.requiredFrom = c.required_from;
     } else {
       // "<stage>.<n>" per the official 27 sections; falls back to the trail order if unset.
       const label = c.stage != null && c.stage_seq != null ? `${c.stage}.${c.stage_seq}` : String(c.seq);
-      places.set(key, { key, seq: c.seq, stage: c.stage ?? 0, label, name: c.name, km, variants: [c] });
+      places.set(key, { key, seq: c.seq, stage: c.stage ?? 0, label, name: c.name, km, requiredFrom: c.required_from ?? null, variants: [c] });
     }
   }
   return [...places.values()];
@@ -70,10 +75,42 @@ export function stampedPlaceKeys(places: Place[], stamps: StampRow[]): Map<strin
   return result;
 }
 
+const byTrailOrder = (a: Place, b: Place) => a.km - b.km || a.seq - b.seq;
+
+// Places a user is not missing: the stamp was not required yet when they walked past (spec 0001 AC-17). The walk is
+// read from the stamp dates of the nearest stamped places on either side, in trail order; the later of the two
+// (the only one there is, with a single neighbour) is the day the place was walked. A place is waived when it has no
+// stamp, has a `requiredFrom` and that day is before it. Nothing is waived without a stamped neighbour.
+export function waivedPlaceKeys(places: Place[], stampedOn: ReadonlyMap<string, string>): Set<string> {
+  const ordered = [...places].sort(byTrailOrder);
+  const before: (string | null)[] = [];
+  let last: string | null = null;
+  for (const p of ordered) {
+    before.push(last);
+    last = stampedOn.get(p.key) ?? last;
+  }
+  const waived = new Set<string>();
+  last = null;
+  for (let i = ordered.length - 1; i >= 0; i--) {
+    const p = ordered[i];
+    const walkedOn = [before[i], last].filter((d): d is string => d !== null).sort().at(-1);
+    if (p.requiredFrom !== null && !stampedOn.has(p.key) && walkedOn !== undefined && walkedOn < p.requiredFrom) {
+      waived.add(p.key);
+    }
+    last = stampedOn.get(p.key) ?? last;
+  }
+  return waived;
+}
+
 // Stamps can be collected in any order. A stretch counts as walked only when BOTH of its neighbouring
-// places (in trail order) are stamped; touching stretches merge into one range.
-export function walkedRanges(places: Place[], stamped: { has: (key: string) => boolean }): KmRange[] {
-  const ordered = [...places].sort((a, b) => a.km - b.km || a.seq - b.seq);
+// places (in trail order) are stamped; touching stretches merge into one range. A waived place (waivedPlaceKeys)
+// is not a neighbour: the stretch runs across it, from the stamped place before it to the one after.
+export function walkedRanges(
+  places: Place[],
+  stamped: { has: (key: string) => boolean },
+  waived: { has: (key: string) => boolean } = { has: () => false },
+): KmRange[] {
+  const ordered = places.filter((p) => !waived.has(p.key)).sort(byTrailOrder);
   const ranges: KmRange[] = [];
   for (let i = 0; i < ordered.length - 1; i++) {
     const a = ordered[i];
@@ -85,6 +122,11 @@ export function walkedRanges(places: Place[], stamped: { has: (key: string) => b
   }
   return ranges;
 }
+
+// How many of `places` are done for a stage: stamped, or waived (the stage can be complete without a stamp the user was
+// not missing, spec 0001 AC-20).
+export const countDone = (places: Place[], stamped: { has: (key: string) => boolean }, waived: { has: (key: string) => boolean }) =>
+  places.filter((p) => stamped.has(p.key) || waived.has(p.key)).length;
 
 const round1 = (km: number) => Math.round(km * 10) / 10;
 

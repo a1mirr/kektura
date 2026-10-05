@@ -88,6 +88,9 @@ geometry (AC-9) and the layer code with the dashboard's map, and is read-only. I
 
 ### Structure
 
+- **AC-22**: The popup of a place that has a `requiredFrom` (spec 0001 AC-16) adds under its km "Stamp required from <date>" and, when
+  the user walked it before then (spec 0001 AC-17), "Not required for your walk", in the page's language. A place that was always
+  required has no such line.
 - **AC-17**: `TrailMap.tsx` is a composition of focused hooks and modules (`src/components/trail-map/`: map
   creation with its sources and layers, stamp and restaurant popups, route planner state, fullscreen, layer
   toggles with persistence, data and focus listeners) and of pure helpers in `src/lib/map-*.ts` (popup DOM builders,
@@ -121,6 +124,7 @@ Routing off the trail; replacing MapLibre.
 | AC-18, AC-19, AC-20 | `src/lib/compare-map.test.ts` (the lines and points of each view), `src/lib/map-layers.test.ts` (the layers: a style per state), `e2e/friends-compare.spec.ts` (the switch and the legend; a click on a place, aimed from the map's fit to the trail, opens its stage, flashes a row of the list and opens no popup); the hover text and the point's key and number: `src/lib/compare-map.test.ts`, `src/lib/friends-compare.test.ts`; the row reveal itself: `src/lib/map-reveal.test.ts` (AC-12) |
 | AC-18, AC-19, AC-20 (colours and line styles on the canvas, hover, the detailed route) | manual (the map is WebGL pixels that E2E cannot read): see the checklist below. Last checked: never recorded. |
 | AC-17 | `src/lib/map-storage.test.ts`, `map-data.test.ts`, `map-layers.test.ts`, `map-popups.test.ts`, `map-reveal.test.ts` (the pure helpers); `tests/map-structure.test.ts` (no file of the map code is over 300 lines) |
+| AC-22 | `src/components/trail-map/stampPopups.test.ts` (a fake map: the popup of a new stamp carries the note, one that was always required does not), `src/lib/new-stamps.test.ts` (the note: the date, the waiver, nothing for an always required place) |
 | AC-4, AC-8, AC-12 (route from / to, mark and unmark) | `e2e/map.spec.ts`: two stamps picked through their popups show the stretch's numbers; a failed save keeps the popup open, the next save marks the stamp, and the popup of a marked stamp unmarks it |
 | AC-14 (restaurants), AC-12 (hover names, "Show in list" in a collapsed stage), AC-13 (the flight to zoom 12 or more), AC-9 (the line looks more detailed) | manual (canvas hover, click and pixels): see the checklist below; AC-15 popup builders: `src/lib/map-popups.test.ts`; the reveal of a list row: `src/lib/map-reveal.test.ts`. Last checked: never recorded. |
 

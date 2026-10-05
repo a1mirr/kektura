@@ -7,9 +7,12 @@ import { createClient } from '@/lib/supabase/server';
 import { flagOn } from '@/lib/feature-flags-server';
 import { Link, redirect } from '@/i18n/navigation';
 import CompareSection from '@/components/CompareSection';
+import RequiredFrom from '@/components/RequiredFrom';
 import StageControls from '@/components/StageControls';
 import StageSection from '@/components/StageSection';
 import StampDescriptions from '@/components/StampDescriptions';
+import { hasToleranceNote } from '@/lib/new-stamps';
+import { countDone } from '@/lib/progress';
 import { localizedDescription } from '@/lib/stamp-description';
 
 export default async function FriendPage({
@@ -35,7 +38,7 @@ export default async function FriendPage({
   }
 
   const { progress, comparison, points } = await compareWithFriend(supabase, friend);
-  const { summary, places, stages, stampedKeys } = progress;
+  const { summary, places, stages, stampedKeys, waived } = progress;
   const t = await getTranslations('dashboard');
   const format = await getFormatter();
 
@@ -74,7 +77,7 @@ export default async function FriendPage({
           </div>
           {stages.map((stage) => {
             const { stage: n, meta, places: list } = stage;
-            const done = list.filter((p) => stampedKeys.has(p.key)).length;
+            const done = countDone(list, stampedKeys, waived);
             return (
               <StageSection
                 key={n}
@@ -98,6 +101,9 @@ export default async function FriendPage({
                         {p.name}
                         <span className="ml-2 text-sm text-stone-500">{t("kmValue", { km: format.number(p.km) })}</span>
                       </div>
+                      {p.requiredFrom && (
+                        <RequiredFrom requiredFrom={p.requiredFrom} waived={waived.has(p.key)} tolerance={hasToleranceNote(p)} who="friend" />
+                      )}
                       <StampDescriptions descriptions={p.variants.map((v) => localizedDescription(v.code, v.description, locale))} />
                     </div>
                     <div className="flex shrink-0 items-center gap-1">

@@ -26,6 +26,7 @@ function cp(key: string, km: number, stage: number): Checkpoint {
     lat: 47,
     lng: 16,
     km_from_start: km,
+    required_from: null,
   };
 }
 
@@ -149,6 +150,20 @@ describe("spec 0024: comparing two people's progress", () => {
     expect(c.ranges.theirs).toEqual(walkedRanges(places, new Set(["A", "B", "C"])));
     expect(c.ranges.both).toEqual([]);
     expect(c.km.both).toBe(0);
+  });
+});
+
+describe("spec 0024: comparing with places someone was not missing", () => {
+  it("AC-25: the stretch runs across a place a person was not missing, and a stage with only stamped and waived places is theirs", () => {
+    const { places, stages } = trail();
+    // B is a new stamp I walked past before it was required: A and C are stamped, B is waived.
+    const c = compareProgress(places, new Set(["A", "C"]), new Set(["A", "B", "C"]), stages, { mine: new Set(["B"]) });
+    expect(c.ranges.mine).toEqual([[0, 20]]);
+    expect(c.ranges.both).toEqual([[0, 20]]);
+    expect(c.places).toEqual({ both: 2, me: 0, them: 1, neither: 2 }); // B is only theirs: waived is not a stamp
+    expect(c.stages[0]).toMatchObject({ stage: 1, me: 3, them: 3, state: "both" });
+    // Without the waiver the same stamps do not complete the stage.
+    expect(compareProgress(places, new Set(["A", "C"]), new Set(["A", "B", "C"]), stages).stages[0].state).toBe("them");
   });
 });
 

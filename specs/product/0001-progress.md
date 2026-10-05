@@ -2,13 +2,14 @@
 
 Status: Done
 Owner code: `src/lib/progress.ts`, `src/app/[locale]/dashboard/page.tsx`, `src/components/StageSection.tsx`,
-`src/components/StampDescriptions.tsx`
+`src/components/StampDescriptions.tsx`, `src/components/RequiredFrom.tsx`, `src/lib/new-stamps.ts`
 
 ## Goal
 
 Turn a user's stamps into progress along the Országos Kéktúra: which stamping places are done, which
 stretches count as walked, how many km that is, and the per-stage view of the list, including which stage each
-extra stamp belongs to.
+extra stamp belongs to. A stamp the MTSZ put up later is required only from its official date, so nobody who
+walked before it is shown as missing it.
 
 ## Behaviour
 
@@ -23,13 +24,45 @@ extra stamp belongs to.
 ### Walked stretches and stats
 
 - **AC-3**: Stamps can be collected in any order. The stretch between two neighbouring places (in
-  km order) counts as walked only when both are stamped. Touching stretches merge into one range.
+  km order) counts as walked only when both are stamped; a place the user was not missing (AC-17) is not a
+  neighbour, the stretch runs across it (AC-18). Touching stretches merge into one range.
   The map's blue line and the km/percent stats both come from these ranges.
 - **AC-4**: Total km = last place km - first place km; walked km = sum of the ranges; remaining =
   total - walked (never negative); percent = walked / total, rounded. Kilometres are rounded to
   0.1. With no places everything is 0.
 - **AC-5**: "Stamps per month" counts places, not variant rows, each in the month of its earliest
   stamp (`stamped_on`), oldest month first. Month labels and the tooltip are localized.
+
+### Stamps required from a date
+
+The MTSZ publishes the day on which each new stamp became required (spec 0004 AC-10): a hiker who passes the place on or
+after it must have its stamp in the book, one who passed earlier is not missing anything.
+
+- **AC-16**: A place has an optional `requiredFrom` date (`YYYY-MM-DD`; `checkpoints.required_from`, filled by the seed): the
+  earliest of its variants' dates. A place with no date, or any variant without one, is required from the beginning.
+- **AC-17**: A place with a `requiredFrom` that the user has not stamped is **waived** when the user walked past it before that
+  day. The day is read from the stamp dates (spec 0016) of the nearest stamped places on either side of it in trail order, however far
+  away: the **later** of the two dates (the one date there is, when only one side has a stamped place). If it is before
+  `requiredFrom` the place is waived; on or after it, the stamp is required and the place blocks its stretches like any
+  unstamped place. With no stamped place on either side nothing is waived. A stamped place is never waived, so stamping it later (on any
+  date) takes nothing away from it. The rule reads the neighbours' dates, so a late stamp (or a changed date, spec 0016) on a
+  neighbour can make an adjacent new place required again.
+- **AC-18**: A waived place is not a neighbour of a stretch: the stretch runs across it, from the stamped place before it to the one
+  after, so the walked ranges, km, percent and the map's blue line are the same as before the place existed. A stretch whose
+  neighbours were stamped on or after the date still needs the new stamp.
+- **AC-19**: Every place with a `requiredFrom` shows, in its row (also on a friend's page, spec 0024 AC-7), "Stamp required from
+  <date>" in the page's language, a short hint ("New stamp: needed if you walked this stretch from that day on"; on a friend's page worded for them) or, when the place is
+  waived, the badge "Not required for your walk" in the hint's place (on a friend's page: "Not required for their walk"), which is words, not colour alone. The date is a
+  button, reachable by tap and keyboard, that opens a note: "This stamp became required on that day; a hiker who walked earlier is
+  not missing it." For a stamp the MTSZ announced a one-month tolerance for (`tolerance_note` in the dates file, spec 0004 AC-10:
+  the announcements of 2025 and 2026) the note adds that the MTSZ allows a month after the date when a booklet is inspected. The stats
+  do not apply that tolerance. Escape closes the note. Without JavaScript the note is plain text (`<noscript>`).
+- **AC-20**: The count "N / 161" (and the friend's) counts stamps only and keeps its denominator: a waived place is not a stamp. A
+  stage's progress counts a waived place as done, so a stage whose places are all stamped or waived is complete; the row still shows
+  it as not stamped, with the badge of AC-19. The stage's button follows the stamps alone: with a waived place unstamped it still reads
+  "Stamp stage" and marks it (AC-7).
+- **AC-21**: The date, hint, badge and note wrap under the place's name at 375 px and 320 px and never widen the page (the
+  text uses `overflow-wrap: anywhere`; checked in English and German).
 
 ### Stages
 
@@ -74,7 +107,8 @@ extra stamp belongs to.
 
 ## Out of scope
 
-Elevation-based stats; walked time; stamps outside the official 161 (stamping extra stamps is spec 0002; their
+Retired stamps (a stamp that no longer exists) and stamps that moved; letting a user declare that they walked a place before it
+was required; applying the MTSZ's one-month tolerance in the figures (AC-19 only says it); elevation-based stats; walked time; stamps outside the official 161 (stamping extra stamps is spec 0002; their
 stage is AC-12 to AC-15); moving extra stamps into the stage's place list; changing the count of 161.
 
 ## Coverage
@@ -86,6 +120,9 @@ stage is AC-12 to AC-15); moving extra stamps into the stage's place list; chang
 | AC-3, AC-4, AC-7 on the real dashboard | `e2e/stamping.spec.ts` |
 | AC-5 (localized labels) | `e2e/account.spec.ts` (the month label on the account page's axis and in the tooltip, in the default language and in English, each the way `Intl` writes it for that language) |
 | AC-8, AC-9 | `src/components/StageSection.test.tsx` |
+| AC-16, AC-17, AC-18, AC-20 | `src/lib/progress.test.ts` (the earliest date of the variants; the later neighbour decides, on and after the date, one neighbour, none; a stamped place never waived; the stretch across a waived place and the opposite case; a waived place is done for its stage but no stamp), `src/lib/friends.test.ts` and `src/lib/compare.test.ts` (the same on a friend's page) |
+| AC-19 | `src/components/RequiredFrom.test.tsx` (the date in the page's language, hint and badge, the button that opens the note and Escape, the tolerance sentence), `src/lib/new-stamps.test.ts` (which stamps carry the tolerance) |
+| AC-17, AC-18, AC-19, AC-20, AC-21 on the real dashboard | `e2e/stamp-required.spec.ts` (a walk before the date: badge, "2 / 161", the km across the place, a later stamp changes nothing; a walk after it: the stamp is needed; the tolerance note; a friend's page with the waiver as theirs; 320 and 375 px in English and German) |
 | AC-10 | `src/components/StampDescriptions.test.tsx` (every description rendered, no truncation classes), `e2e/stamping.spec.ts` (dashboard) and `e2e/friends.spec.ts` (a friend's page): nothing clipped or sticking out of its row at 375 px |
 | AC-11 | `e2e/stamping.spec.ts` (375 px in the default language and in German: no sideways scroll with every stage collapsed, expanded, and with a stamped place and extra stamp) |
 | AC-11 (own line, right-aligned) | `e2e/stamping.spec.ts` (at 375 px a stamped row's controls start below the text and end at the row's right padding) |

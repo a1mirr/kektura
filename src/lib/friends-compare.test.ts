@@ -14,6 +14,7 @@ const checkpoints: Checkpoint[] = [0, 10, 20].map((km, i) => ({
   lat: 47 + i,
   lng: 16,
   km_from_start: km,
+  required_from: null,
 }));
 
 vi.mock("./dashboard-data", () => ({ getReferenceData: async () => ({ checkpoints, extras: [] }) }));
@@ -46,6 +47,7 @@ const friend: Friend = {
   status: "accepted",
   isRequester: true,
   stampIds: [11, 21], // P1 and P2: ids are km + 1
+  waivedKeys: [],
 };
 
 describe("spec 0024: comparing with a friend", () => {

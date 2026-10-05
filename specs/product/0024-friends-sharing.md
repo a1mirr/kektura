@@ -47,7 +47,9 @@ sharing at any moment. Ships behind the feature flag `friends` (AC-15).
 
 - **AC-7**: `/friends` lists the friends with, for each, the summary: official places stamped of 161, km
   walked, stages completed and the display name. Selecting a friend opens a read-only page with their
-  stage-by-stage progress. It shows no stamp dates, no notes and no extra stamps.
+  stage-by-stage progress. It shows no stamp dates, no notes and no extra stamps. The places a friend was not missing because
+  they walked past before a new stamp was required (spec 0001 AC-17) count as done for their stage and make their stretches
+  walked, as on their own dashboard, but they are no stamp (AC-25).
 - **AC-8**: A friend's numbers are computed by the same functions as the owner's dashboard
   (`src/lib/progress.ts`), from the friend's stamped place ids, so the two never disagree.
 - **AC-9**: Each user controls their side: per friend, a switch "show my progress to this friend". When it
@@ -67,7 +69,8 @@ sharing at any moment. Ships behind the feature flag `friends` (AC-15).
 - **AC-12**: `profiles` and `friendships` have row level security enabled. A user's
   stamps stay unreadable to everyone but themselves (spec 0002); a friend's progress is read only through
   `security definer` functions (empty `search_path`, executable by `authenticated` only, revoked from `anon`)
-  that check the friendship and the friend's sharing switch, and return nothing else than each friend's id and their stamped place ids.
+  that check the friendship and the friend's sharing switch, and return nothing else than each friend's id and their stamped place ids
+  (`get_friend_stamps`) or the keys of their waived places (`get_friend_waived_places`, AC-25).
   Someone who is not an accepted friend, or whose sharing switch towards me is off, simply does not appear in
   the answer: there is no way to ask about a particular user.
   Nobody writes `profiles` or `friendships` directly: creating, approving, ignoring, removing and switching
@@ -117,6 +120,12 @@ page's "Send request" is a plain form that posts to a server action ending in a 
   the page with its answer (AC-18), the confirmation of AC-19 still opens (the browser toggles a `<details>`), and Cancel,
   which needs JavaScript, is not drawn.
 
+- **AC-25**: A friend's dates are not shared, so the places they were not missing (spec 0001 AC-17) are decided by the database from their own
+  stamp dates and only their place keys leave it, never a date: `get_friend_waived_places()` returns `(friend_id, place_key)` for every accepted
+  friend who shares with the caller, by the rule of `waivedPlaceKeys` in `src/lib/progress.ts` (the same answer for the same stamps). It is
+  executable by signed-in users only. That set tells a friend that the other walked a place before its date; that is all of the dates that
+  is shared. A friend's figures (AC-8), their stage completion (AC-7) and the comparison of AC-22 to AC-24 use it.
+
 ### Comparing with a friend
 
 - **AC-22**: A friend's page (only for an accepted friend who shares, AC-9: anyone else still ends on the 404, and nothing
@@ -130,7 +139,7 @@ page's "Send request" is a plain form that posts to a server action ending in a 
   dashboard; the km walked by both is the intersection of the two sets of stretches, only me or only them what is left of one set, and
   neither the rest of the trail. The four figures add up to the trail's total km exactly: three are rounded to 0.1 (spec 0001 AC-4)
   and the fourth is the total minus them (never negative).
-- **AC-24**: A stage stands as "both complete" (both have all its places), "only me" (I have all, they do not), "only
+- **AC-24**: A stage stands as "both complete" (both have all its places, a place they were not missing counting as had, AC-25), "only me" (I have all, they do not), "only
   them", "neither started" (neither has any) or "partly", in this order, so a stage with one place that only I stamped is
   "only me". The page shows each person's count of the stage's places.
 
@@ -172,6 +181,7 @@ route plan.
 | AC-6 | `tests/friends-migration.test.ts` (a removed friend needs a new approval; friends never read the token) |
 | AC-7 | `src/lib/friends.test.ts` (completed stages), `e2e/friends.spec.ts` (list, friend page, signed-out redirect) |
 | AC-8 | `src/lib/friends.test.ts` (equal to `progress.ts`), `e2e/friends.spec.ts` (same numbers as the dashboard) |
+| AC-25 | `tests/stamp-dates-database.test.ts` (the database function answers exactly what `waivedPlaceKeys` does, in five spreads of dates over the whole trail; nothing for a pending or not sharing friend; not callable by `anon`), `src/lib/friends.test.ts` (only place keys per friend; the figures and stage completion with a waived place), `src/lib/compare.test.ts` (the comparison with one) |
 | AC-9, AC-10 | `tests/friends-migration.test.ts`, `e2e/friends.spec.ts` |
 | AC-11 | `e2e/friends.spec.ts` (delete the account, the friend's list is empty) |
 | AC-12 | `tests/friends-migration.test.ts` (forged friendship, direct writes, token column, anon, the trigger function); Supabase advisors after applying |
