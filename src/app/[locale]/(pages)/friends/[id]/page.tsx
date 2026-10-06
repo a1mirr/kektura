@@ -101,7 +101,7 @@ export default async function FriendPage({
                   >
                     <div className="min-w-0">
                       <div>
-                        <span className="mr-2 inline-block min-w-10 text-stone-400 tabular-nums">{p.label}</span>
+                        <span className="mr-2 inline-block min-w-10 text-stone-500 tabular-nums">{p.label}</span>
                         {p.name}
                         <span className="ml-2 text-sm text-stone-500">{t("kmValue", { km: format.number(p.km) })}</span>
                       </div>

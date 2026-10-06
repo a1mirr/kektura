@@ -8,7 +8,7 @@ export default async function SignOutButton() {
   return (
     <form action="/auth/sign-out" method="post">
       <input type="hidden" name="locale" value={locale} />
-      <button type="submit" className="text-sm text-stone-600 hover:underline">
+      <button type="submit" className="-mr-3 min-h-11 px-3 text-sm text-stone-600 hover:underline">
         {t("signOut")}
       </button>
     </form>

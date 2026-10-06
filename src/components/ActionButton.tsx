@@ -28,7 +28,7 @@ export default function ActionButton({
   const { pending, failed, run } = useStampAction();
   const [shownDone, setShownDone] = useOptimistic(done);
   const primary =
-    accent === "amber" ? "bg-amber-600 text-white hover:bg-amber-700" : "bg-blue-600 text-white hover:bg-blue-700";
+    accent === "amber" ? "bg-amber-700 text-white hover:bg-amber-800" : "bg-blue-600 text-white hover:bg-blue-700";
 
   return (
     <>

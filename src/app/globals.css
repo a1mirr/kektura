@@ -20,6 +20,11 @@
   }
 }
 
+/* The map's attribution links are underlined: a link inside text must not rely on its colour alone (axe: link-in-text-block). */
+.maplibregl-map .maplibregl-ctrl-attrib a {
+  text-decoration: underline;
+}
+
 /* Row highlight when jumping from the map to the list */
 @keyframes row-flash {
   from { background-color: #bfdbfe; }

@@ -23,7 +23,7 @@ export default async function TestLoginForm({ locale, next = "/dashboard" }: { l
           className="rounded border border-stone-300 bg-white px-2 py-1"
         />
       </label>
-      <button type="submit" className="rounded-lg bg-amber-600 px-4 py-2 font-medium text-white hover:bg-amber-700">
+      <button type="submit" className="rounded-lg bg-amber-700 px-4 py-2 font-medium text-white hover:bg-amber-800">
         {t("testLoginButton")}
       </button>
       <p className="text-xs text-stone-500">{t("testLoginNote")}</p>
