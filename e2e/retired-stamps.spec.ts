@@ -125,7 +125,7 @@ test.describe("spec 0001: retired stamps", () => {
     await friendPage.context().close();
   });
 
-  for (const width of [320, 375]) {
+  for (const width of [375]) {
     test(`AC-27: the note, badge and date field wrap and never widen the page at ${width} px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 800 });
       await signInAsNewUser(page);

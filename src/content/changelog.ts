@@ -14,10 +14,10 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     date: "2026-10-06",
     title: {
-      en: "Retired stamps are kept",
-      ru: "Упразднённые печати сохраняются",
-      hu: "A megszűnt bélyegzők megmaradnak",
-      de: "Eingestellte Stempel bleiben erhalten",
+      en: "Retired stamps are kept, and wide screens are used properly",
+      ru: "Упразднённые печати сохраняются, а широкие экраны используются как следует",
+      hu: "A megszűnt bélyegzők megmaradnak, a széles képernyők pedig jobban kihasználtak",
+      de: "Eingestellte Stempel bleiben erhalten, und breite Bildschirme werden besser genutzt",
     },
     changes: [
       {
@@ -27,6 +27,15 @@ export const CHANGELOG: ChangelogEntry[] = [
           ru: "Печать, которой больше нет (пока это Нирьеши-эрдёшхаз, замещённый Вёрчверёшем в 2014 году), теперь хранится как «упразднённая печать» и не исчезает вместе с вашей отметкой. Если вы прошли это место до её упразднения, она показана в списке этапа с короткой пометкой, и её можно добавить с датой, когда вы её собрали; «Показывать упразднённые печати» выводит все такие печати. Упразднённые печати не входят в 161, километры и этап, а на странице друга их не видно.",
           hu: "A már nem létező bélyegző (egyelőre a Nyírjesi-erdészház, amelyet 2014-ben a Vércverés váltott fel) „megszűnt bélyegzőként” megmarad, és nem tűnik el a rajta lévő bélyegzéseddel együtt. Ha a megszűnése előtt jártál ott, megjelenik a szakasz listájában egy rövid megjegyzéssel, és hozzáadhatod a begyűjtés napjával; a „Megszűnt bélyegzők mutatása” mindet listázza. A megszűnt bélyegzők nem számítanak bele a 161-be, a kilométerekbe és a szakaszba, a barátod oldalán pedig nem látszanak.",
           de: "Ein Stempel, den es nicht mehr gibt (vorerst das Nyírjesi-erdészház, 2014 durch Vércverés ersetzt), bleibt als „eingestellter Stempel“ erhalten und verschwindet nicht mit deinem Eintrag darauf. Wenn du vor seiner Einstellung dort vorbeigekommen bist, steht er mit einer kurzen Notiz in der Etappenliste, und du kannst ihn mit dem Tag eintragen, an dem du ihn gesammelt hast; „Eingestellte Stempel anzeigen“ listet alle. Eingestellte Stempel zählen nicht zu den 161, zu deinen Kilometern oder zu einer Etappe, und auf der Seite eines Freundes erscheinen sie nicht.",
+        },
+      },
+      {
+        kind: "improved",
+        text: {
+          en: "On a computer screen the logo, the page and the footer now share one width and line up at the left edge instead of the logo sitting at the far corner of the window. From 1024 px My progress has two columns: your figures are on the left with the map, which stays in view while the list of stages scrolls on the right. A friend's page puts the comparison next to the stage list, and the Friends page puts your name and invite link next to your friends. The long pages (About, Changelog, Useful links, Feedback) keep a comfortable line length. Phones look the same, except that the page margin is a little narrower, and layouts narrower than 375 px are no longer guaranteed.",
+          ru: "На экране компьютера логотип, страница и подвал теперь имеют одну ширину и выровнены по левому краю, а логотип больше не прижат к дальнему углу окна. От 1024 px в «Моём прогрессе» две колонки: слева ваши цифры и карта, которая остаётся на виду, пока справа прокручивается список этапов. На странице друга сравнение стоит рядом со списком этапов, а на странице «Друзья» ваше имя и ссылка-приглашение стоят рядом со списком друзей. Длинные страницы («О приложении», «История изменений», «Полезные ссылки», «Обратная связь») сохраняют удобную длину строки. На телефонах всё выглядит так же, только поля страницы стали немного уже, а работа на экранах уже 375 px больше не гарантируется.",
+          hu: "Számítógép képernyőjén a logó, az oldal és a lábléc mostantól egy szélességű, és a bal szélen igazodik, a logó pedig nem ül az ablak távoli sarkában. 1024 px-től a Haladásom oldalnak két oszlopa van: balra kerülnek a számaid és a térkép, amely szem előtt marad, amíg jobbra a szakaszok listája görgethető. A barát oldalán az összehasonlítás a szakaszlista mellett áll, a Barátok oldalon pedig a neved és a meghívó link a barátaid listája mellett. A hosszú oldalak (Névjegy, Változások, Hasznos linkek, Visszajelzés) kényelmes sorhosszt tartanak. Telefonon minden ugyanúgy néz ki, csak az oldal margója lett kissé keskenyebb, a 375 px-nél keskenyebb képernyőkre pedig már nem vállalunk garanciát.",
+          de: "Auf einem Computerbildschirm haben Logo, Seite und Fußzeile jetzt eine gemeinsame Breite und stehen am linken Rand bündig, das Logo sitzt nicht mehr in der fernen Ecke des Fensters. Ab 1024 px hat „Mein Fortschritt“ zwei Spalten: Links stehen deine Zahlen und die Karte, die im Blick bleibt, während die Etappenliste rechts scrollt. Auf der Seite eines Freundes steht der Vergleich neben der Etappenliste, und auf der Freunde-Seite stehen dein Name und der Einladungslink neben deinen Freunden. Die langen Seiten (Über das Projekt, Änderungen, Nützliche Links, Feedback) behalten eine angenehme Zeilenlänge. Auf dem Handy sieht alles gleich aus, nur der Seitenrand ist etwas schmaler, und Bildschirme schmaler als 375 px werden nicht mehr garantiert.",
         },
       },
     ],

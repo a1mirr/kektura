@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { flagOn } from "@/lib/feature-flags-server";
 import { TRAIL_FACTS } from "@/lib/trail-facts";
+import PageShell from "@/components/PageShell";
 
 // See spec 0015. Everything the page says has to be true of the app today.
 
@@ -45,7 +46,7 @@ export default async function AboutPage({ params }: Props) {
   ];
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-8">
+    <PageShell variant="reading">
       <h1 className="mb-4 text-2xl font-bold text-blue-700">{t("title")}</h1>
       <p className="text-stone-700">{t("description")}</p>
 
@@ -126,6 +127,6 @@ export default async function AboutPage({ params }: Props) {
           })}
         </p>
       </section>
-    </main>
+    </PageShell>
   );
 }

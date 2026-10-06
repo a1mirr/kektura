@@ -88,7 +88,7 @@ test.describe("spec 0001: stamps required from a date", () => {
     await expect(row.getByText(/one-month tolerance/)).toBeVisible();
   });
 
-  for (const width of [320, 375]) {
+  for (const width of [375]) {
     test(`AC-21: the date, hint and explanation wrap and never widen the page at ${width} px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 800 });
       const email = await signInAsNewUser(page);

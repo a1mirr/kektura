@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import FriendActionButton from "@/components/FriendActionButton";
+import PageShell from "@/components/PageShell";
 import SignInButton from "@/components/SignInButton";
 import TestLoginForm from "@/components/TestLoginForm";
 import { routing } from "@/i18n/routing";
@@ -10,8 +11,6 @@ import { friendsPath } from "@/lib/friends-input";
 import { createClient } from "@/lib/supabase/server";
 import { testLoginEnabled } from "@/lib/test-login";
 import { sendRequest } from "../../actions";
-
-const card = "mx-auto mt-16 max-w-md space-y-6 rounded-xl border p-6 text-center";
 
 export default async function InvitePage({
   params,
@@ -34,36 +33,36 @@ export default async function InvitePage({
   if (!user) {
     const next = `/friends/invite/${token}`;
     return (
-      <div className={card}>
+      <PageShell variant="card">
         <h1 className="text-2xl font-bold">{t("inviteSignIn")}</h1>
         <div className="flex flex-col items-center gap-4">
           <SignInButton next={next} />
           {testLoginEnabled() && <TestLoginForm locale={locale} next={next} />}
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   const { data: inviter } = await supabase.rpc("get_inviter_info", { token });
   if (!inviter || inviter.length === 0) {
     return (
-      <div className={card}>
+      <PageShell variant="card">
         <h1 className="text-2xl font-bold">{t("invalidToken")}</h1>
-      </div>
+      </PageShell>
     );
   }
   const { display_name: inviterName, is_own: isOwn } = inviter[0];
 
   if (isOwn) {
     return (
-      <div className={card}>
+      <PageShell variant="card">
         <h1 className="text-2xl font-bold">{t("ownLink")}</h1>
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className={card}>
+    <PageShell variant="card">
       <h1 className="text-2xl font-bold [overflow-wrap:anywhere]">{t("inviteFrom", { name: inviterName })}</h1>
       <form
         action={async () => {
@@ -74,6 +73,6 @@ export default async function InvitePage({
       >
         <FriendActionButton tone="primary">{t("sendRequest")}</FriendActionButton>
       </form>
-    </div>
+    </PageShell>
   );
 }

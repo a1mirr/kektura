@@ -86,7 +86,7 @@ export default function TrailMap({
   return (
     <div ref={wrapper} className={fs ? "fixed inset-0 z-50 flex flex-col gap-2 bg-white p-3" : undefined}>
       <div className={fs ? "relative min-h-0 flex-1" : "relative"}>
-        <div ref={container} className={fs ? "h-full w-full rounded-lg" : "h-96 w-full rounded-lg"} />
+        <div ref={container} className={fs ? "h-full w-full rounded-lg" : "map-box w-full rounded-lg"} />
         <button
           type="button"
           onClick={fullscreen.toggle}

@@ -6,6 +6,7 @@ import { routing } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
 import { testLoginEnabled } from "@/lib/test-login";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
+import PageShell from "@/components/PageShell";
 import SignInButton from "@/components/SignInButton";
 import TestLoginForm from "@/components/TestLoginForm";
 
@@ -32,8 +33,8 @@ export default async function Home({
   const t = await getTranslations("home");
 
   return (
-    <main className="relative mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-6 px-6 py-8 text-center">
-      <div className="absolute right-4 top-4">
+    <PageShell variant="hero">
+      <div className="absolute right-4 top-4 sm:right-6">
         <LocaleSwitcher />
       </div>
       <h1 className="text-4xl font-bold text-blue-700">{t("headline")}</h1>
@@ -41,6 +42,6 @@ export default async function Home({
       {error && <p className="text-red-600">{t("authError")}</p>}
       <SignInButton />
       {testLoginEnabled() && <TestLoginForm locale={locale} />}
-    </main>
+    </PageShell>
   );
 }

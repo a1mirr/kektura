@@ -6,7 +6,7 @@ import type { MapExtra, MapPoint } from "./TrailMap";
 // MapLibre needs the browser (WebGL), so it is never rendered on the server.
 const TrailMap = dynamic(() => import("./TrailMap"), {
   ssr: false,
-  loading: () => <div className="h-96 w-full animate-pulse rounded-lg bg-stone-100" />,
+  loading: () => <div className="map-box w-full animate-pulse rounded-lg bg-stone-100" />,
 });
 
 export default function TrailMapLoader({

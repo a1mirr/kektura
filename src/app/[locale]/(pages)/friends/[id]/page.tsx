@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server';
 import { flagOn } from '@/lib/feature-flags-server';
 import { Link, redirect } from '@/i18n/navigation';
 import CompareSection from '@/components/CompareSection';
+import PageShell from '@/components/PageShell';
 import RequiredFrom from '@/components/RequiredFrom';
 import StageControls from '@/components/StageControls';
 import StageSection from '@/components/StageSection';
@@ -50,25 +51,28 @@ export default async function FriendPage({
   ];
 
   return (
-    <main className="mx-auto max-w-3xl space-y-8 px-6 py-8">
-      <header className="flex items-center justify-between gap-4">
-        <h1 className="min-w-0 text-2xl font-bold text-blue-700 [overflow-wrap:anywhere]">{friend.displayName}</h1>
-        <Link href="/friends" className="text-sm text-stone-600 hover:underline">
-          {t("friends")}
-        </Link>
-      </header>
+    <PageShell
+      header={
+        <>
+          <header className="flex items-center justify-between gap-4">
+            <h1 className="min-w-0 text-2xl font-bold text-blue-700 [overflow-wrap:anywhere]">{friend.displayName}</h1>
+            <Link href="/friends" className="text-sm text-stone-600 hover:underline">
+              {t("friends")}
+            </Link>
+          </header>
 
-      <dl className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-4 sm:grid-cols-4">
-        {cards.map((c) => (
-          <div key={c.label} className="min-w-0 rounded-lg bg-white p-3 shadow-sm sm:p-4">
-            <dt className="text-sm text-stone-500">{c.label}</dt>
-            <dd className="text-xl font-semibold sm:text-2xl">{c.value}</dd>
-          </div>
-        ))}
-      </dl>
-
-      <CompareSection comparison={comparison} points={points} />
-
+          <dl className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-4 sm:grid-cols-4">
+            {cards.map((c) => (
+              <div key={c.label} className="min-w-0 rounded-lg bg-white p-3 shadow-sm sm:p-4">
+                <dt className="text-sm text-stone-500">{c.label}</dt>
+                <dd className="text-xl font-semibold sm:text-2xl">{c.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </>
+      }
+      aside={<CompareSection comparison={comparison} points={points} />}
+    >
       <section>
         <h2 className="mb-2 font-semibold">{t("checkpoints")}</h2>
         <div className="space-y-3">
@@ -122,6 +126,6 @@ export default async function FriendPage({
           })}
         </div>
       </section>
-    </main>
+    </PageShell>
   );
 }

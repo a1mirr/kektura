@@ -69,7 +69,7 @@ phone, and "Account" says what is behind the link. Every page also carries the s
 ### Site logo
 
 - **AC-19**: Every page shows the logo, a blue trail blaze, with the name next to it ("Kéktúra tracker",
-  `ru`: Трекер Kéktúra, `hu`: Kéktúra követő) in its top-left corner, and it links to the main page of the page's
+  `ru`: Трекер Kéktúra, `hu`: Kéktúra követő) at the left edge of the page's content width (spec 0036 AC-1), and it links to the main page of the page's
   language (`/ru`, `/en`, `/hu`): for a signed-in user that leads to the dashboard (spec 0005 AC-2), for everybody
   else the landing page. "Every page" is the landing page, dashboard, account, friends pages, About, Changelog,
   Useful links, Feedback, the error page and the 404 page, which has no language in its address and so links
@@ -77,7 +77,7 @@ phone, and "Account" says what is behind the link. Every page also carries the s
   page (which brings its own document): a page does not draw its own, so a new page gets it. It is a link
   named "Kéktúra tracker: home" (translated, containing the visible name), with a visible keyboard focus ring and a
   touch target of at least 44 x 44 px; the mark itself is decorative (empty `alt`). It sits in normal flow above the
-  page content, below the test server banner, and the pages still fit 320 px without sideways scrolling; the map's
+  page content, below the test server banner, and the pages still fit 375 px without sideways scrolling; the map's
   fullscreen view (spec 0003 AC-11), which is positioned, covers it because the logo is not. The mark is the single file `public/logo.svg`, loaded from the site itself. Pages keep
   their own headers, and the About and friends pages have no "back to the tracker" link of their own.
 
@@ -121,5 +121,5 @@ email on the page.
 | AC-13 | `src/app/[locale]/account/actions.test.ts`, `src/lib/log.test.ts` |
 | AC-16 | `e2e/account.spec.ts` (the button sits next to the heading; sign out from the account page, then dashboard and account redirect; in each language: `e2e/languages.spec.ts`), `e2e/auth.spec.ts` |
 | AC-17 | `e2e/account.spec.ts` (with JavaScript disabled) |
-| AC-19 | `tests/site-logo.test.ts` (one component, drawn only by the locale layout and the 404 page, which also covers the error page: the layout wraps its boundary; the SVG is local; empty `alt`; translated names; no back-link keys left), `e2e/site-logo.spec.ts` (every public and signed-in page: link, address, accessible name, 44 px target, top-left, no overflow at 320 and 375 px, focus ring, banner above it, every language, the 404 page) |
+| AC-19 | `tests/site-logo.test.ts` (one component, drawn only by the locale layout and the 404 page, which also covers the error page: the layout wraps its boundary; the SVG is local; empty `alt`; translated names; no back-link keys left), `e2e/site-logo.spec.ts` (every public and signed-in page: link, address, accessible name, 44 px target, at the content's left edge, no overflow at 375 px, focus ring, banner above it, every language, the 404 page) |
 | AC-18 | `tests/messages.test.ts` (the header link, the page title and the About page's link text use the same name in each language, and no key is still called settings), `e2e/languages.spec.ts` (the account link, the page title and the sign-out button in every language), `e2e/about.spec.ts` (link) |

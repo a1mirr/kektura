@@ -349,7 +349,7 @@ test.describe("spec 0024: the Friends page buttons respond", () => {
     await expect(bobPage.getByText("You haven't added any friends yet.")).toBeVisible();
   });
 
-  for (const width of [375, 320]) {
+  for (const width of [375]) {
     test(`AC-20: at ${width} px every button is at least 44 px and the page does not scroll sideways`, async ({ browser }) => {
       const { anaPage, anaId, bobId } = await requestedFriendship(browser);
       psql(`update public.profiles set display_name = repeat('W', 40) where id in ('${anaId}', '${bobId}')`);

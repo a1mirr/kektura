@@ -4,6 +4,20 @@
    scrollbars light even when the OS prefers dark. */
 :root {
   color-scheme: light;
+  /* The one content width of the header strip, the pages and the footer (spec 0036 AC-2): PageShell.tsx. */
+  --page-width: 64rem;
+}
+
+/* The dashboard's map (spec 0003 AC-24): 24 rem tall in one column. From 1024 px it sits in a block that stays in view, so its height
+   follows the window, within 24 rem to 32 rem (a popup needs room) and never over 70 % of the window; the block around it
+   (title, legend, toggles: about 13 rem) normally fits the window. */
+.map-box {
+  height: 24rem;
+}
+@media (min-width: 64rem) {
+  .map-box {
+    height: min(70vh, clamp(24rem, calc(100vh - 16rem), 32rem));
+  }
 }
 
 /* Row highlight when jumping from the map to the list */

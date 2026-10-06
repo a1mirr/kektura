@@ -6,6 +6,7 @@ import { redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
 import { buildPlaces, stampsPerMonth } from "@/lib/progress";
+import PageShell from "@/components/PageShell";
 import SignOutButton from "@/components/SignOutButton";
 import StampsChart from "@/components/StampsChart";
 import DeleteAccountButton from "./DeleteAccountButton";
@@ -47,7 +48,7 @@ export default async function AccountPage({ params }: Props) {
   }));
 
   return (
-    <main className="mx-auto max-w-3xl space-y-8 px-6 py-8">
+    <PageShell spaced>
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-blue-700">{t("title")}</h1>
         <SignOutButton />
@@ -60,9 +61,9 @@ export default async function AccountPage({ params }: Props) {
 
       <section className="rounded-lg bg-white p-4 shadow-sm">
         <h2 className="mb-2 font-semibold text-red-600">{t("dangerZone")}</h2>
-        <p className="mb-4 text-sm text-stone-600">{t("dangerZoneDesc")}</p>
+        <p className="mb-4 max-w-prose text-sm text-stone-600">{t("dangerZoneDesc")}</p>
         <DeleteAccountButton />
       </section>
-    </main>
+    </PageShell>
   );
 }

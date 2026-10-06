@@ -2,15 +2,16 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Locale } from "next-intl";
 import { getTranslations } from "next-intl/server";
+import { pageWidth } from "./PageShell";
 
-// The logo and name in the top-left corner of every page, linking to the main page of the visitor's
+// The logo and name at the left edge of every page's content width (spec 0036 AC-1), linking to the main page of the visitor's
 // language (spec 0014 AC-19). Rendered once by the locale layout and by the 404 page, which has no
 // locale layout: a page never draws its own copy.
 export default async function SiteLogo({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "app" });
 
   return (
-    <header className="px-6 pt-4">
+    <header className={`${pageWidth} pt-4`}>
       <Link
         href={`/${locale}`}
         aria-label={t("home")}

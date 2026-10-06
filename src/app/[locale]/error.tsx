@@ -1,12 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import PageShell from "@/components/PageShell";
 
 export default function ErrorPage({ retry }: { retry: () => void }) {
   const t = useTranslations("error");
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-4 px-6 py-8 text-center">
+    <PageShell variant="hero">
       <h1 className="text-2xl font-bold">{t("title")}</h1>
       <button
         type="button"
@@ -15,6 +16,6 @@ export default function ErrorPage({ retry }: { retry: () => void }) {
       >
         {t("retry")}
       </button>
-    </main>
+    </PageShell>
   );
 }

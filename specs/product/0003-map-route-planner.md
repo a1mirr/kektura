@@ -2,7 +2,7 @@
 
 Status: Done
 Owner code: `src/lib/route-geometry.ts`, `src/lib/route-stats.ts`, `src/components/TrailMap.tsx`, `src/components/trail-map/`, `src/lib/map-*.ts`,
-`src/lib/compare-map.ts`, `src/components/CompareMap.tsx`
+`src/lib/compare-map.ts`, `src/components/CompareMap.tsx`, `src/app/globals.css` (`.map-box`, the dashboard map's height)
 
 ## Goal
 
@@ -46,12 +46,14 @@ From `public/data/okt-hops.json`: 160 hops between neighbouring places, from the
   stamps (with their count) and restaurants (off by default; shown once their data has loaded). Each
   choice persists in localStorage.
 - **AC-11**: The fullscreen button uses the native Fullscreen API with a CSS overlay fallback; Esc or
-  the button leaves it and the page scrolls normally again.
+  the button leaves it and the page scrolls normally again. In the dashboard's two columns (spec 0001 AC-28) the overlay is still the
+  topmost thing on the page, above the positioned controls of the stage list (the date fields' calendar buttons) as well.
 - **AC-12**: Hovering a stamp shows its name. Clicking one opens a popup: route from here, route to
   here, mark/unmark walked (official places and extra stamps; same results as 0002 AC-10, AC-11), and
   show in list. "Show in list" leaves fullscreen, opens the stamp's stage if collapsed, scrolls to its
-  row (`place-<key>` / `extra-<id>`) and flashes it.
-- **AC-13**: The 📍 button in a list row flies the map to that stamp (zoom >= 12) and labels it; for an
+  row (`place-<key>` / `extra-<id>`) and flashes it. In the two columns of spec 0001 AC-28 the row is in the other column, so
+  the map stays where it is, in view.
+- **AC-13**: The 📍 button in a list row flies the map to that stamp (zoom >= 12) and labels it, and scrolls the map into view unless it is fully in view already, in the window and in the sticky block that scrolls inside itself (so in the two columns, with the map in view, the page does not move; when the sticky block is scrolled so that the map is cut off, only the block scrolls back, and the label takes no focus, which would jump the page); for an
   extra stamp it also switches the extra-stamps layer on.
 - **AC-14**: Restaurants (`public/data/restaurants.json`: within 5 km of the trail, built by
   `scripts/build-restaurants.mjs` from an etteremhet.hu results page): hover shows name and distance,
@@ -71,7 +73,7 @@ From `public/data/okt-hops.json`: 160 hops between neighbouring places, from the
 
 The map of a friend's page (spec 0024 AC-22): the trail as two people have walked it. It shares the base map, the
 geometry (AC-9) and the layer code with the dashboard's map, and is read-only. It needs JavaScript: until it has loaded
-(or without JavaScript) a grey placeholder stands in its place, and the cards and the stage list above and below it do not need it.
+(or without JavaScript) a grey placeholder stands in its place, and the cards and the stage list around it do not need it.
 
 - **AC-18**: The trail is drawn by who walked each stretch, in a line style as well as a colour so that colour alone is
   not needed: both solid (green), only me dashed (blue), only them dotted (orange), nobody a thin faint grey line. The
@@ -85,6 +87,18 @@ geometry (AC-9) and the layer code with the dashboard's map, and is read-only. I
   brings its row in the stage list of the page into view and flashes it, opening its stage first if it is collapsed, as "Show
   in list" does on the dashboard's map (AC-12). The map opens no menu and nothing can be stamped, routed or planned from
   it. The detailed route takes over at zoom 9 as on the dashboard (AC-9).
+
+### Size
+
+- **AC-24**: The dashboard's map is 24 rem (384 px) tall in a window narrower than 1024 px. From 1024 px it stands in the sticky block of
+  spec 0001 AC-28 and its height follows the window: the window's height minus 16 rem, at least 24 rem (a popup needs the room) and at
+  most 32 rem, and never more than 70 % of the window (which wins in a window under about 34 rem tall). The cap is chosen so that the block
+  (title, map, legend and toggles) normally fits the window, in English at 1280 x 720, 1440 x 900 and 1024 x 768. That is not a promise
+  for every case: the block is never taller than the window and keeps its own scroll (`overflow-y: auto`), so when its content is taller
+  (the route panel under the map, a very short window, a language whose text wraps more) it scrolls inside itself, and everything in it
+  stays reachable, with no sideways overflow. Fullscreen (AC-11) is unchanged.
+- **AC-25**: The map fits its box at any width and follows it when the window is resized: the canvas is as wide and as tall as the map's
+  container after a resize in either direction, and the container is as wide as the card around it.
 
 ### Structure
 
@@ -122,9 +136,10 @@ Routing off the trail; replacing MapLibre.
 | AC-4 ... AC-8 | `src/lib/route-stats.test.ts` |
 | Table totals | `tests/trail-data.test.ts` (0004 AC-6) |
 | AC-14, AC-21 | `src/components/trail-map/useRestaurants.test.tsx` (fetched once while the flag is on, nothing while it is off), `e2e/feature-flags.spec.ts` (the checkbox, the request and the About credit in each state) |
-| AC-9, AC-10, AC-11, AC-13, AC-16 | `e2e/map.spec.ts` (the detailed route is requested once on first need and again after a failed load on the next zoom change; toggles and their persistence; fullscreen; 📍 on a place and on an extra stamp, which switches that layer on; stamping from the list keeps the stamp's label where it was on the map) |
+| AC-9, AC-10, AC-11, AC-13, AC-16 | `src/lib/map-focus.test.ts` (the 📍 button scrolls the map only when it is not fully in view, the window and the scrolling block both counted), `e2e/map.spec.ts` (a map cut off by its scrolled block comes back into view on 📍; "Show in list" in a stamp's popup, in one column and in two: the row ends in view and flashes, the sticky map stays in view; the detailed route is requested once on first need and again after a failed load on the next zoom change; toggles and their persistence; fullscreen, also in two columns over a stamped row's date controls, with the native Fullscreen API switched off so that only the CSS overlay's stacking decides; 📍 on a place (in one column the map scrolls into view, in two it is in view already) and on an extra stamp, which switches that layer on; stamping from the list keeps the stamp's label where it was on the map) |
 | AC-18, AC-19, AC-20 | `src/lib/compare-map.test.ts` (the lines and points of each view), `src/lib/map-layers.test.ts` (the layers: a style per state), `e2e/friends-compare.spec.ts` (the switch and the legend; a click on a place, aimed from the map's fit to the trail, opens its stage, flashes a row of the list and opens no popup); the hover text and the point's key and number: `src/lib/compare-map.test.ts`, `src/lib/friends-compare.test.ts`; the row reveal itself: `src/lib/map-reveal.test.ts` (AC-12) |
 | AC-18, AC-19, AC-20 (colours and line styles on the canvas, hover, the detailed route) | manual (the map is WebGL pixels that E2E cannot read): see the checklist below. Last checked: never recorded. |
+| AC-24, AC-25 | `e2e/layout.spec.ts` (the height from 1024 px at five window sizes, never over 70 %; the map's block fits the window at 1280 x 720, 1440 x 900 and 1024 x 768 in English, to within 4 px; the canvas follows its container through four window sizes), `e2e/map.spec.ts` (with the route panel shown at 1280 x 720 the block scrolls inside itself, stays in the window and its last control can be reached; in English, Hungarian, German and Russian at 1280 x 720 and 1024 x 768 the block has no sideways overflow, stays in the window and its end can be reached) |
 | AC-17 | `src/lib/map-storage.test.ts`, `map-data.test.ts`, `map-layers.test.ts`, `map-popups.test.ts`, `map-reveal.test.ts` (the pure helpers); `tests/map-structure.test.ts` (no file of the map code is over 300 lines) |
 | AC-23 | `src/lib/map-data.test.ts` (a retired row with coordinates is no point), `src/lib/progress.test.ts` (a retired row is no place; the hops and the route planner are built from places) |
 | AC-22 | `src/components/trail-map/stampPopups.test.ts` (a fake map: the popup of a new stamp carries the note, one that was always required does not), `src/lib/new-stamps.test.ts` (the note: the date, the waiver, nothing for an always required place) |
@@ -135,10 +150,11 @@ Manual checklist (dashboard, `npm run dev:test`, canvas interactions):
 
 - AC-2 visibility: untick "Stamps" and "Walked stretches" (the whole trail turns grey dashed), tick "Show extra stamps" and "Show restaurants"; dots and lines appear and disappear at once, without a reload.
 - AC-3: pick a start and an end through the popups: the stretch between them is highlighted amber and the map fits it; clearing removes it.
-- AC-12: "Show in list" in a collapsed stage opens the stage, scrolls to the row and flashes it; in fullscreen it leaves fullscreen first.
-- AC-9: zoom in past level 9: the line looks visibly more detailed; zoom out and it looks as before (the requests for the detailed file are E2E-tested).
+- AC-12, in one column (a window narrower than 1024 px): "Show in list" in a collapsed stage opens the stage, scrolls to the row and flashes it; in fullscreen it leaves fullscreen first.
+- AC-12, in two columns (1024 px or wider): the same, but the stage list is in the other column: the map stays where it is, in view, while the row scrolls into view beside it and flashes; from fullscreen it still leaves fullscreen first.
+- AC-9: zoom in past level 9: the line looks visibly more detailed; zoom out and it looks as before (the requests for the detailed file are E2E-tested). Check it in both layouts (one column below 1024 px, two columns from it): the map's size differs, not its behaviour.
 - AC-12: hovering a stamp shows its name.
-- AC-13: press 📍 on a row: the map flies there at zoom 12 or more.
+- AC-13: press 📍 on a row: the map flies there at zoom 12 or more; in one column the page scrolls the map into view first, in two columns it is in view already.
 - AC-14: with restaurants on, hover one (name and distance) and click it (pinned popup with an "Open on etteremhet.hu" link that opens in a new tab).
 - AC-18, AC-19: on a friend's page with both of you stamped, the map shows green solid, blue dashed, orange dotted and faint grey stretches; "Mine" and "Theirs" show blue solid and grey dashed, and the dots follow.
 - AC-20: hovering a place on that map shows its number, name and state (the click to the list is E2E-tested); zoom in past level 9 and the line gets more detailed.

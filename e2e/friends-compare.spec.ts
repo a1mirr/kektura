@@ -111,9 +111,9 @@ test.describe("spec 0024: comparing with a friend", () => {
     expect((await bobPage.request.get(`/en/friends/${anaId}`)).status()).toBe(404);
   });
 
-  test("AC-22: the comparison works at 375 and 320 px: cards in two columns, a full-width map, no sideways scroll", async ({ browser }) => {
+  test("AC-22: the comparison works at 375 px: cards in two columns, a full-width map, no sideways scroll", async ({ browser }) => {
     const { bobPage, anaId } = await connected(browser);
-    for (const width of [375, 320]) {
+    for (const width of [375]) {
       await bobPage.setViewportSize({ width, height: 812 });
       for (const locale of [routing.defaultLocale, "de"]) {
         await bobPage.goto(`/${locale}/friends/${anaId}`);

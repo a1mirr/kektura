@@ -6,6 +6,7 @@ import FlashMessage from "@/components/FlashMessage";
 import FriendActionButton from "@/components/FriendActionButton";
 import FriendActionGroup from "@/components/FriendActionGroup";
 import FriendConfirm from "@/components/FriendConfirm";
+import PageShell from "@/components/PageShell";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { flagOn } from "@/lib/feature-flags-server";
@@ -67,81 +68,88 @@ export default async function FriendsPage({
   );
 
   return (
-    <div className="mx-auto max-w-xl space-y-8 p-4">
-      <h1 className="text-2xl font-bold">{t("title")}</h1>
-      {errorKey && <FlashMessage kind="error">{t(`error_${errorKey}`)}</FlashMessage>}
-      {!errorKey && noticeKey && <FlashMessage kind="ok">{t(`ok_${noticeKey}`)}</FlashMessage>}
-
-      <section className="space-y-4">
-        <form
-          className="flex flex-wrap items-end gap-2"
-          action={async (data: FormData) => {
-            "use server";
-            done(locale, await setDisplayName(String(data.get("name") ?? "")), "name");
-          }}
-        >
-          <label className="flex min-w-0 flex-1 basis-48 flex-col gap-1 text-sm text-stone-600">
-            {t("displayNameLabel")}
-            <input
-              name="name"
-              required
-              maxLength={40}
-              defaultValue={profile?.display_name ?? ""}
-              className="min-h-11 w-full rounded border p-2 text-base text-stone-900"
-            />
-          </label>
-          <FriendActionButton>{t("displayNameSave")}</FriendActionButton>
-        </form>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">{t("inviteTitle")}</h2>
-        <FriendActionGroup className="flex flex-wrap items-start gap-2">
-          <input readOnly value={inviteLink} aria-label={t("inviteTitle")} className="min-h-11 min-w-0 flex-1 basis-48 rounded border p-2" />
-          <FriendConfirm label={t("regenerate")} question={t("regenerateConfirm")} cancelLabel={t("cancel")} tone="neutral">
+    <PageShell
+      header={
+        <>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          {errorKey && <FlashMessage kind="error">{t(`error_${errorKey}`)}</FlashMessage>}
+          {!errorKey && noticeKey && <FlashMessage kind="ok">{t(`ok_${noticeKey}`)}</FlashMessage>}
+        </>
+      }
+      aside={
+        <>
+          <section className="space-y-4">
             <form
-              action={async () => {
+              className="flex flex-wrap items-end gap-2"
+              action={async (data: FormData) => {
                 "use server";
-                done(locale, await regenerateInvite(), "regenerated");
+                done(locale, await setDisplayName(String(data.get("name") ?? "")), "name");
               }}
             >
-              <FriendActionButton tone="danger">{t("regenerateYes")}</FriendActionButton>
+              <label className="flex min-w-0 flex-1 basis-48 flex-col gap-1 text-sm text-stone-600">
+                {t("displayNameLabel")}
+                <input
+                  name="name"
+                  required
+                  maxLength={40}
+                  defaultValue={profile?.display_name ?? ""}
+                  className="min-h-11 w-full rounded border p-2 text-base text-stone-900"
+                />
+              </label>
+              <FriendActionButton>{t("displayNameSave")}</FriendActionButton>
             </form>
-          </FriendConfirm>
-        </FriendActionGroup>
-      </section>
+          </section>
 
-      {pending.length > 0 && (
-        <section className="space-y-4">
-          <h2 className="text-xl font-semibold">{t("pendingTitle")}</h2>
-          <ul className="space-y-2">
-            {pending.map((f) => (
-              <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 rounded border p-2">
-                <span className="min-w-0 [overflow-wrap:anywhere]">{f.displayName}</span>
-                <FriendActionGroup className="flex shrink-0 flex-wrap gap-2">
-                  <form
-                    action={async () => {
-                      "use server";
-                      done(locale, await approveRequest(f.id), "approved");
-                    }}
-                  >
-                    <FriendActionButton tone="approve">{t("approve")}</FriendActionButton>
-                  </form>
-                  <form
-                    action={async () => {
-                      "use server";
-                      done(locale, await ignoreRequest(f.id), "ignored");
-                    }}
-                  >
-                    <FriendActionButton tone="danger">{t("ignore")}</FriendActionButton>
-                  </form>
-                </FriendActionGroup>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+          <section className="space-y-4">
+            <h2 className="text-xl font-semibold">{t("inviteTitle")}</h2>
+            <FriendActionGroup className="flex flex-wrap items-start gap-2">
+              <input readOnly value={inviteLink} aria-label={t("inviteTitle")} className="min-h-11 min-w-0 flex-1 basis-48 rounded border p-2" />
+              <FriendConfirm label={t("regenerate")} question={t("regenerateConfirm")} cancelLabel={t("cancel")} tone="neutral">
+                <form
+                  action={async () => {
+                    "use server";
+                    done(locale, await regenerateInvite(), "regenerated");
+                  }}
+                >
+                  <FriendActionButton tone="danger">{t("regenerateYes")}</FriendActionButton>
+                </form>
+              </FriendConfirm>
+            </FriendActionGroup>
+          </section>
 
+          {pending.length > 0 && (
+            <section className="space-y-4">
+              <h2 className="text-xl font-semibold">{t("pendingTitle")}</h2>
+              <ul className="space-y-2">
+                {pending.map((f) => (
+                  <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 rounded border p-2">
+                    <span className="min-w-0 [overflow-wrap:anywhere]">{f.displayName}</span>
+                    <FriendActionGroup className="flex shrink-0 flex-wrap gap-2">
+                      <form
+                        action={async () => {
+                          "use server";
+                          done(locale, await approveRequest(f.id), "approved");
+                        }}
+                      >
+                        <FriendActionButton tone="approve">{t("approve")}</FriendActionButton>
+                      </form>
+                      <form
+                        action={async () => {
+                          "use server";
+                          done(locale, await ignoreRequest(f.id), "ignored");
+                        }}
+                      >
+                        <FriendActionButton tone="danger">{t("ignore")}</FriendActionButton>
+                      </form>
+                    </FriendActionGroup>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </>
+      }
+    >
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">{t("acceptedTitle")}</h2>
         {accepted.length === 0 ? (
@@ -194,6 +202,6 @@ export default async function FriendsPage({
           </ul>
         )}
       </section>
-    </div>
+    </PageShell>
   );
 }
