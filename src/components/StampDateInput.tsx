@@ -19,10 +19,12 @@ const SAVE_DELAY_MS = 700;
 export default function StampDateInput({
   value,
   max,
+  latest,
   onSave,
 }: {
   value: string; // the saved date, as the server has it
   max: string; // the latest date the server accepts (tomorrow, UTC)
+  latest?: string; // a stricter last day, for a retired stamp (spec 0016 AC-13): a later date is never sent
   onSave: (date: string) => Promise<ActionResult>;
 }) {
   const t = useTranslations("dashboard");
@@ -31,6 +33,7 @@ export default function StampDateInput({
   const [saved, setSaved] = useState(value); // the last date known to be saved: from the server or our own save
   const [seen, setSeen] = useState(value); // the last `value` prop we looked at
   const picker = useRef<HTMLInputElement>(null);
+  const valid = useCallback((date: string) => isValidStampDate(date) && (latest === undefined || date <= latest), [latest]);
   const [status, setStatus] = useState<"idle" | "saving" | "failed">("idle");
 
   // Follow the server's date when the prop *changes* (the page refreshed after a save, another tab edited
@@ -74,10 +77,10 @@ export default function StampDateInput({
 
   // Save after a pause. One save at a time: when it ends this runs again for anything typed meanwhile.
   useEffect(() => {
-    if (status === "saving" || draft === saved || !isValidStampDate(draft)) return;
+    if (status === "saving" || draft === saved || !valid(draft)) return;
     const timer = setTimeout(() => void save(draft), SAVE_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [draft, saved, status, save]);
+  }, [draft, saved, status, save, valid]);
 
   // The calendar button (spec 0016 AC-9): the native picker lives in a hidden date input; a pick is one
   // complete date, so it is saved at once instead of after the pause.
@@ -93,7 +96,7 @@ export default function StampDateInput({
   }
 
   function handlePick(date: string) {
-    if (!isValidStampDate(date)) return;
+    if (!valid(date)) return;
     setDraft(date);
     if (status === "failed") setStatus("idle");
     if (date !== saved && status !== "saving") void save(date);
@@ -101,7 +104,7 @@ export default function StampDateInput({
 
   function handleBlur() {
     if (draft === saved) return;
-    if (!isValidStampDate(draft)) setDraft(saved); // empty, incomplete or out of range: back to the saved date
+    if (!valid(draft)) setDraft(saved); // empty, incomplete or out of range: back to the saved date
     else if (status !== "saving") void save(draft); // leaving the field saves at once (and stops the pause)
   }
 
@@ -143,7 +146,7 @@ export default function StampDateInput({
           type="date"
           tabIndex={-1}
           aria-hidden="true"
-          value={isValidStampDate(draft) ? draft : saved}
+          value={valid(draft) ? draft : saved}
           min={MIN_STAMP_DATE}
           max={max}
           onChange={(e) => handlePick(e.target.value)}

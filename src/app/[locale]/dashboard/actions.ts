@@ -59,6 +59,15 @@ const validPlaceKeys = (keys: unknown): keys is string[] =>
 // can't know how far its clock is off, and stamping must not stop working because of it (0016 AC-3).
 const dateForNewRows = (date: string | undefined) => (date !== undefined && isValidStampDate(date) ? date : undefined);
 
+// A retired stamp (spec 0002 AC-17) has no "today": it can only be collected on a day before it retired, and it is dated on its own,
+// never together with others. Null when the request is allowed; the rows' retired dates are what the database says.
+const retiredDateRefused = (rows: { retired_on: string | null }[], date: string | undefined): boolean => {
+  const retiredOn = rows.map((r) => r.retired_on).filter((d): d is string => d != null);
+  if (retiredOn.length === 0) return false;
+  if (retiredOn.length !== rows.length) return true; // mixed with current stamps: refused as a whole
+  return date === undefined || !isValidStampDate(date) || retiredOn.some((on) => date >= on);
+};
+
 // Stamps (or unstamps) places, e.g. one place or a whole stage. Alternative stamps at the same place
 // share a place_key, so stamping one stamps them all. `date` is the stamp date of rows that are created.
 export async function setPlacesStamped(placeKeys: string[], stamped: boolean, date?: string): Promise<ActionResult> {
@@ -72,9 +81,14 @@ export async function setPlacesStamped(placeKeys: string[], stamped: boolean, da
   }
   const stampedOn = dateForNewRows(date);
   return asUser("setPlacesStamped", async ({ supabase, user, fail }) => {
-    const { data: rows, error } = await supabase.from("checkpoints").select("id").in("place_key", placeKeys);
+    const { data: rows, error } = await supabase.from("checkpoints").select("id, retired_on").in("place_key", placeKeys);
     if (error) return fail("read", error);
     if (!rows?.length) return failed;
+    // Taking a retired stamp away is always allowed; collecting one needs a date before it retired (a mixed request is refused whole).
+    if (stamped && retiredDateRefused(rows, date)) {
+      logStampActionInvalidInput("setPlacesStamped");
+      return failed;
+    }
     const ids = rows.map((r) => r.id);
 
     // ignoreDuplicates (ON CONFLICT DO NOTHING): re-stamping keeps the original stamped_on date.
@@ -98,9 +112,13 @@ export async function setStampDate(placeKeys: string[], date: string): Promise<A
     return failed;
   }
   return asUser("setStampDate", async ({ supabase, user, fail }) => {
-    const { data: rows, error } = await supabase.from("checkpoints").select("id").in("place_key", placeKeys);
+    const { data: rows, error } = await supabase.from("checkpoints").select("id, retired_on").in("place_key", placeKeys);
     if (error) return fail("read", error);
     if (!rows?.length) return failed;
+    if (retiredDateRefused(rows, date)) {
+      logStampActionInvalidInput("setStampDate");
+      return failed;
+    }
 
     const { data: updated, error: writeError } = await supabase
       .from("user_stamps")

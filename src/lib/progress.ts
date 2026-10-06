@@ -4,7 +4,7 @@ import type { Tables } from "@/lib/supabase/database.types";
 
 export type Checkpoint = Pick<
   Tables<"checkpoints">,
-  "id" | "seq" | "stage" | "stage_seq" | "code" | "place_key" | "name" | "description" | "lat" | "lng" | "km_from_start" | "required_from"
+  "id" | "seq" | "stage" | "stage_seq" | "code" | "place_key" | "name" | "description" | "lat" | "lng" | "km_from_start" | "required_from" | "retired_on" | "replaced_by" | "after_place_key" | "position_approximate"
 >;
 
 export type StampRow = Pick<Tables<"user_stamps">, "checkpoint_id" | "stamped_on">;
@@ -38,10 +38,20 @@ export type Stage = {
 export const placeKeyOf = (c: Pick<Checkpoint, "place_key" | "code" | "id">) =>
   c.place_key ?? c.code ?? String(c.id);
 
-// Places in the order of their first variant (`checkpoints` sorted by seq).
+// A stamp that no longer exists (spec 0001 AC-22): kept so the people who collected it keep it. It is outside the 161
+// places and the trail order; `afterKey` is the current place it followed, which gives it its position in the stage list.
+export type RetiredStamp = Place & {
+  retiredOn: string; // the first day it is no longer valid
+  replacedBy: string | null; // the place_key of the stamp that replaced it
+  afterKey: string | null;
+  approximate: boolean; // its position is not from an official source
+};
+
+// Places in the order of their first variant (`checkpoints` sorted by seq). Retired rows are not places.
 export function buildPlaces(checkpoints: Checkpoint[]): Place[] {
   const places = new Map<string, Place>();
   for (const c of checkpoints) {
+    if (c.retired_on != null) continue;
     const key = placeKeyOf(c);
     const km = Number(c.km_from_start);
     const p = places.get(key);
@@ -59,6 +69,53 @@ export function buildPlaces(checkpoints: Checkpoint[]): Place[] {
     }
   }
   return [...places.values()];
+}
+
+export function buildRetired(checkpoints: Checkpoint[]): RetiredStamp[] {
+  return checkpoints
+    .filter((c) => c.retired_on != null)
+    .map((c) => ({
+      key: placeKeyOf(c),
+      seq: c.seq,
+      stage: c.stage ?? 0,
+      label: "", // no number in the stage
+      name: c.name,
+      km: Number(c.km_from_start),
+      requiredFrom: null,
+      variants: [c],
+      retiredOn: c.retired_on!,
+      replacedBy: c.replaced_by,
+      afterKey: c.after_place_key,
+      approximate: c.position_approximate,
+    }));
+}
+
+// The retired stamps to list for a user (spec 0001 AC-23): the ones they hold, and the ones they could have collected: they
+// walked past its position before it retired. That is read from the dates of the nearest stamped places on either side of the
+// position (the place it followed counts as before it), the EARLIER of the two: it was collectable if they passed any time before
+// the retirement. With no stamped neighbour and no stamp of its own it is not listed.
+export function retiredVisibleKeys(
+  retired: RetiredStamp[],
+  places: Place[],
+  stampedOn: ReadonlyMap<string, string>,
+  retiredStampedOn: ReadonlyMap<string, string>,
+): Set<string> {
+  const ordered = [...places].sort(byTrailOrder);
+  const visible = new Set<string>();
+  for (const r of retired) {
+    if (retiredStampedOn.has(r.key)) {
+      visible.add(r.key);
+      continue;
+    }
+    const at = ordered.findIndex((p) => p.key === r.afterKey);
+    if (at < 0) continue;
+    const near = (indices: number[]) => indices.map((i) => stampedOn.get(ordered[i].key)).find((d) => d !== undefined);
+    const down = near(Array.from({ length: at + 1 }, (_, k) => at - k));
+    const up = near(Array.from({ length: ordered.length - at - 1 }, (_, k) => at + 1 + k));
+    const earliest = [down, up].filter((d): d is string => d !== undefined).sort()[0];
+    if (earliest !== undefined && earliest < r.retiredOn) visible.add(r.key);
+  }
+  return visible;
 }
 
 // A place is stamped when any of its variants is.

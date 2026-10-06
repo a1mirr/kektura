@@ -126,6 +126,9 @@ page's "Send request" is a plain form that posts to a server action ending in a 
   executable by signed-in users only. That set tells a friend that the other walked a place before its date; that is all of the dates that
   is shared. A friend's figures (AC-8), their stage completion (AC-7) and the comparison of AC-22 to AC-24 use it.
 
+- **AC-26**: A friend's page lists no retired stamp (spec 0001 AC-22) and counts none of them: `get_friend_stamps` and `get_friend_waived_places` leave retired
+  rows out, so a friend's figures stay equal to what their own dashboard counts (AC-8) and the retired stamps they collected are theirs alone.
+
 ### Comparing with a friend
 
 - **AC-22**: A friend's page (only for an accepted friend who shares, AC-9: anyone else still ends on the 404, and nothing
@@ -181,6 +184,7 @@ route plan.
 | AC-6 | `tests/friends-migration.test.ts` (a removed friend needs a new approval; friends never read the token) |
 | AC-7 | `src/lib/friends.test.ts` (completed stages), `e2e/friends.spec.ts` (list, friend page, signed-out redirect) |
 | AC-8 | `src/lib/friends.test.ts` (equal to `progress.ts`), `e2e/friends.spec.ts` (same numbers as the dashboard) |
+| AC-26 | `tests/retired-stamps-database.test.ts` (a friend who collected the retired stamp: neither function returns it) |
 | AC-25 | `tests/stamp-dates-database.test.ts` (the database function answers exactly what `waivedPlaceKeys` does, in five spreads of dates over the whole trail; nothing for a pending or not sharing friend; not callable by `anon`), `src/lib/friends.test.ts` (only place keys per friend; the figures and stage completion with a waived place), `src/lib/compare.test.ts` (the comparison with one) |
 | AC-9, AC-10 | `tests/friends-migration.test.ts`, `e2e/friends.spec.ts` |
 | AC-11 | `e2e/friends.spec.ts` (delete the account, the friend's list is empty) |

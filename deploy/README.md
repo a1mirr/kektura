@@ -141,6 +141,10 @@ rm -rf ~/kektura_app/.next/cache/fetch-cache
 pm2 restart kektura
 ```
 
+A seed that adds a **retired stamp** (`scripts/data/okt-retired-stamps.json`, spec 0004 AC-14) is applied only after the
+code that reads it is live: migration 0076 adds the columns but not the row, because the code running while a deploy is
+applied would show it as a place. Apply the seed's `-- Retired stamps` block (it is idempotent), then clear the cache as above.
+
 ## Watching the site from outside
 
 (Issue #87, "0060".) The deploy's smoke test runs once, after a deploy; between deploys an external uptime service watches

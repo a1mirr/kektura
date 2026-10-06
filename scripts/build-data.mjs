@@ -8,6 +8,7 @@
 //         public/data/okt-hops.json and, with the 3rd arg, supabase/seed_extra.sql
 import fs from "node:fs";
 import { attr, flatMeters, nearestVertex, readTrack } from "./lib/geo.mjs";
+import { readRetiredStamps, retiredStampsSql } from "./lib/retired-stamps.mjs";
 import { readStampDates, stampDatesSql } from "./lib/stamp-dates.mjs";
 
 const [stampsPath, routePath] = process.argv.slice(2);
@@ -171,6 +172,16 @@ const stampDates = readStampDates();
 const unknownDates = stampDates.filter((e) => !waypoints.some((w) => w.code === e.code));
 if (unknownDates.length) throw new Error("okt-stamp-dates.json has codes the stamps file lacks: " + unknownDates.map((e) => e.code).join(", "));
 
+// Retired stamps (spec 0004 AC-14): kept as rows, so what they point at must exist and their code must not be a current stamp's.
+const retired = readRetiredStamps();
+const currentKeys = new Set(waypoints.map((w) => placeKey(w.code)));
+for (const r of retired) {
+  if (waypoints.some((w) => w.code === r.code)) throw new Error(`okt-retired-stamps.json: ${r.code} is a current stamp's code`);
+  for (const key of [r.after_place_key, r.replaced_by].filter(Boolean)) {
+    if (!currentKeys.has(key)) throw new Error(`okt-retired-stamps.json: ${r.code} points at ${key}, which is not a place`);
+  }
+}
+
 const q = (s) => `'${String(s).replace(/'/g, "''")}'`;
 // Temp table of the codes a seed file contains, so it can drop rows the source no longer has.
 const codesTable = (codes) =>
@@ -190,10 +201,12 @@ on conflict (code) do update set
   lat = excluded.lat, lng = excluded.lng, elevation_m = excluded.elevation_m,
   km_from_start = excluded.km_from_start;
 
+${retiredStampsSql(retired)}
 -- Rows this file no longer has (old placeholders without a code, codes MTSZ dropped, e.g. a single
 -- stamp split into _1/_2 variants): users' stamps move to the remaining variants of the same place,
--- then the rows go. A place that is gone entirely takes its stamps with it.
-${codesTable(waypoints.map((w) => w.code))}
+-- then the rows go. A place that is gone entirely takes its stamps with it. A retired stamp's row is never one of them:
+-- its code is in the list, so a stamp that was retired keeps every user's stamp on it (spec 0004 AC-14).
+${codesTable([...waypoints.map((w) => w.code), ...retired.map((r) => r.code)])}
 
 insert into public.user_stamps (user_id, checkpoint_id, stamped_on)
 select s.user_id, keep.id, s.stamped_on

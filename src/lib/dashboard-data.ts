@@ -24,8 +24,8 @@ async function fetchReferenceData() {
 }
 
 export const getReferenceData = // The key's second part changes when the shape of the rows changes (a new column), so the rows cached before a deploy are never
-// served to code that expects the column (v2: checkpoints.required_from, spec 0001 AC-16).
-unstable_cache(fetchReferenceData, ["dashboard-reference-data", "v2"], {
+// served to code that expects the column (v2: checkpoints.required_from, spec 0001 AC-16; v3: the retired columns, AC-22).
+unstable_cache(fetchReferenceData, ["dashboard-reference-data", "v3"], {
   tags: [REFERENCE_DATA_TAG],
   revalidate: REFERENCE_DATA_REVALIDATE_SECONDS,
 });

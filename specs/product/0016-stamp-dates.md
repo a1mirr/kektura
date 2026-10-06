@@ -60,6 +60,11 @@ user's own day. A date is only ever saved when it is a real, complete one, never
   another tab edited it), unless the user is in the middle of changing it: what they are typing is never
   overwritten.
 
+- **AC-13**: A retired stamp (spec 0001 AC-22) is dated on its own and strictly: it has no "today" default, the date a user collects it with and
+  the date of `setStampDate` must be a valid stamp date (AC-2) before its `retired_on` (spec 0002 AC-17), and a request that mixes
+  it with other stamps is refused whole. Its date field's last day is the day before it retired: the calendar picker stops there and a later
+  day typed in is never sent (it is restored on leaving the field).
+
 ## Out of scope
 
 Notes on a stamp; a time of day; editing many dates at once; a database check on the date range (it would
@@ -94,3 +99,5 @@ chart) keep their localized form: this spec covers the fields where a date is en
 | AC-9 (the native picker itself) | manual (native browser UI): click the calendar button in Chrome, Firefox and Safari (also on a phone): the picker opens on the field's date, a day that is picked appears in the field and is saved. Last checked: never recorded. |
 | AC-8 | `src/lib/progress.test.ts` (months from `stamped_on`) |
 | AC-11 | `tests/messages.test.ts` (parity) |
+| AC-13 | `src/app/[locale]/dashboard/actions.test.ts` (a retired stamp's date: before the retirement day, strict, mixed requests refused), `src/components/RetiredStampControl.test.tsx` (the field never sends a later day and restores it) |
+| AC-13 (the calendar picker's last day) | manual (native browser UI, like AC-9's row): open the calendar of a collected retired stamp: days after the day before it retired cannot be picked. Last checked: never recorded. |

@@ -148,3 +148,64 @@ describe("spec 0004: the dates of new stamps (okt-stamp-dates.json)", () => {
     expect(named).toEqual(datesFile.stamps.map((e) => e.code).sort());
   });
 });
+
+// scripts/data/okt-retired-stamps.json: stamps that no longer exist, kept as rows
+const retiredFile = JSON.parse(read("scripts/data/okt-retired-stamps.json")) as {
+  stamps: {
+    code: string;
+    name: string;
+    after_place_key: string;
+    retired_on: string;
+    replaced_by?: string;
+    lat?: number;
+    lng?: number;
+    source: string;
+    assumed?: string[];
+  }[];
+};
+
+describe("spec 0004: retired stamps (okt-retired-stamps.json)", () => {
+  it("AC-14: every entry has a unique code of its own, a real retirement day and an MTSZ source", () => {
+    expect(retiredFile.stamps.length).toBeGreaterThan(0);
+    const codes = retiredFile.stamps.map((e) => e.code);
+    expect(new Set(codes).size).toBe(codes.length);
+    for (const e of retiredFile.stamps) {
+      expect(seedRows.map((r) => r.code), e.code).not.toContain(e.code); // a retired stamp is no current stamp's code
+      expect(e.name, e.code).toBeTruthy();
+      expect(/^\d{4}-\d{2}-\d{2}$/.test(e.retired_on) && new Date(`${e.retired_on}T00:00:00Z`).toISOString().slice(0, 10) === e.retired_on, e.code).toBe(true);
+      expect(e.source, e.code).toMatch(/^https:\/\/www\.(kektura\.hu|mtsz\.org)\//);
+    }
+  });
+
+  it("AC-14: what a retired stamp points at (the place it followed, the one that replaced it) is a current place", () => {
+    for (const e of retiredFile.stamps) {
+      expect(seedPlaces, `${e.code}: after ${e.after_place_key}`).toContain(e.after_place_key);
+      if (e.replaced_by) expect(seedPlaces, `${e.code}: replaced by ${e.replaced_by}`).toContain(e.replaced_by);
+    }
+  });
+
+  it("AC-14: whatever is not from an official source is said so: `assumed` names only what the app can show as approximate", () => {
+    for (const e of retiredFile.stamps) {
+      for (const field of e.assumed ?? []) expect(["code", "position", "coordinates"], `${e.code}: ${field}`).toContain(field);
+      if (e.lat !== undefined || e.lng !== undefined) expect(e.assumed ?? [], `${e.code}: coordinates`).not.toContain("coordinates");
+    }
+  });
+
+  it("AC-14: the seed carries the generator's block for the file, before the cleanup, and lists the codes the cleanup must keep", async () => {
+    const { readRetiredStamps, retiredStampsSql } = (await import("../scripts/lib/retired-stamps.mjs")) as {
+      readRetiredStamps: () => unknown[];
+      retiredStampsSql: (entries: unknown[]) => string;
+    };
+    const seedText = read("supabase/seed.sql");
+    const block = retiredStampsSql(readRetiredStamps());
+    expect(seedText).toContain(`\n${block}\n-- Rows this file no longer has`);
+    const keep = seedText.match(/select unnest\(array\[([^\]]*)\]\) as code/)![1];
+    for (const e of retiredFile.stamps) expect(keep, e.code).toContain(`'${e.code}'`);
+  });
+
+  it("AC-14: the retired rows are not part of the seed's rows of places (they never count in 161)", () => {
+    const retiredCodes = new Set(retiredFile.stamps.map((e) => e.code));
+    for (const r of seedRows) expect(retiredCodes.has(r.code), r.code).toBe(false);
+    expect(seedPlaces.size).toBe(stagePlaceCount);
+  });
+});

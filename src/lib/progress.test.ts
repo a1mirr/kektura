@@ -6,6 +6,8 @@ import {
   stageStampKeys,
   countDone,
   waivedPlaceKeys,
+  buildRetired,
+  retiredVisibleKeys,
   stampedPlaceKeys,
   stampsPerMonth,
   walkedRanges,
@@ -31,6 +33,10 @@ function cp(key: string, km: number, over: Partial<Checkpoint> = {}): Checkpoint
     lng: 16,
     km_from_start: km,
     required_from: null,
+    retired_on: null,
+    replaced_by: null,
+    after_place_key: null,
+    position_approximate: false,
     ...over,
   };
 }
@@ -269,5 +275,67 @@ describe("spec 0001: stamps required from a date", () => {
     expect(countDone(places, stamped, new Set())).toBe(2);
     expect(countDone(places, stamped, new Set(["N"]))).toBe(3);
     expect(countDone(places, stamped, new Set(["N"])) - stamped.size).toBe(1);
+  });
+});
+
+// A retired stamp that followed B (10 km) on the line A..D; it retired on 2014-11-21.
+const retiredRow = (over: Partial<Checkpoint> = {}) =>
+  cp("R", 10, { stage_seq: null, retired_on: "2014-11-21", replaced_by: "C", after_place_key: "B", position_approximate: true, ...over });
+const lineWithRetired = () => [cp("A", 0), cp("B", 10), cp("C", 20), cp("D", 30), retiredRow()];
+
+describe("spec 0001: retired stamps", () => {
+  it("AC-22: a retired row is no place: it does not change the places, their km, the count or the stages", () => {
+    const rows = lineWithRetired();
+    const places = buildPlaces(rows);
+    expect(places.map((p) => p.key)).toEqual(["A", "B", "C", "D"]);
+    expect(progressSummary(places, [])).toEqual(progressSummary(buildPlaces(rows.slice(0, 4)), []));
+    expect(buildStages(places, []).flatMap((s) => s.places.map((p) => p.key))).toEqual(["A", "B", "C", "D"]);
+    // and it is never a neighbour of a stretch
+    expect(walkedRanges(places, new Set(["A", "B", "C", "D"]))).toEqual([[0, 30]]);
+  });
+
+  it("AC-22: buildRetired reads the row: its own key, where it sat, when it retired, what replaced it", () => {
+    const [r] = buildRetired(lineWithRetired());
+    expect(r).toMatchObject({ key: "R", name: "R", afterKey: "B", retiredOn: "2014-11-21", replacedBy: "C", approximate: true });
+    expect(buildRetired([cp("A", 0)])).toEqual([]);
+  });
+
+  const retired = () => buildRetired(lineWithRetired());
+  const places = () => buildPlaces(lineWithRetired());
+  const visible = (stamped: [string, string][], own: [string, string][] = []) =>
+    [...retiredVisibleKeys(retired(), places(), new Map(stamped), new Map(own))];
+
+  it("AC-25: a stamp on a retired row is no month's stamp: the monthly counts ignore it", () => {
+    const rows = lineWithRetired();
+    const retiredId = rows[4].id;
+    const stamps = [
+      { checkpoint_id: rows[0].id, stamped_on: "2014-06-01" },
+      { checkpoint_id: retiredId, stamped_on: "2014-06-02" },
+    ];
+    expect(stampsPerMonth(stamps, buildPlaces(rows))).toEqual([{ month: "2014-06", count: 1 }]);
+  });
+
+  it("AC-23: a stamp the user holds is always listed, whatever their dates", () => {
+    expect(visible([], [["R", "2026-01-01"]])).toEqual(["R"]);
+  });
+
+  it("AC-23: it is listed when the user walked past before it retired: the earlier neighbour's date decides", () => {
+    expect(visible([["B", "2014-06-01"], ["C", "2015-06-01"]])).toEqual(["R"]); // earlier is before: collectable
+    expect(visible([["B", "2015-06-01"], ["C", "2014-06-01"]])).toEqual(["R"]);
+    expect(visible([["B", "2015-06-01"], ["C", "2016-06-01"]])).toEqual([]); // both after
+    expect(visible([["B", "2014-11-21"], ["C", "2014-11-21"]])).toEqual([]); // on the day: no longer valid
+    expect(visible([["B", "2014-11-20"]])).toEqual(["R"]); // one neighbour is enough
+    expect(visible([["C", "2013-01-01"]])).toEqual(["R"]);
+  });
+
+  it("AC-23: the place it followed counts as before it, and the nearest stamped place on each side is read, however far", () => {
+    expect(visible([["B", "2014-01-01"]])).toEqual(["R"]);
+    expect(visible([["A", "2014-01-01"], ["D", "2020-01-01"]])).toEqual(["R"]); // B and C unstamped: A and D
+    expect(visible([["A", "2013-01-01"], ["B", "2020-01-01"]])).toEqual([]); // B is the nearest before: A is not read
+  });
+
+  it("AC-23: with no stamped neighbour and no stamp of its own it is not listed", () => {
+    expect(visible([])).toEqual([]);
+    expect(retiredVisibleKeys([{ ...retired()[0], afterKey: null }], places(), new Map([["B", "2014-01-01"]]), new Map())).toEqual(new Set());
   });
 });

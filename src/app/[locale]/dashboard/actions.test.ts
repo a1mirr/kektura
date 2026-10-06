@@ -13,7 +13,7 @@ type Call = { table: string; op: string; args: unknown[] };
 // checkpoint lookup from `checkpoints`.
 function fakeSupabase({
   user = { id: "user-1" } as { id: string; email?: string } | null,
-  checkpoints = [] as { id: number; place_key: string }[],
+  checkpoints = [] as { id: number; place_key: string; retired_on?: string | null }[],
   readError = null as unknown,
   writeError = null as unknown,
   updatedRows = [{ ok: 1 }] as unknown[], // what `update(...).select()` returns: the rows that were changed
@@ -68,6 +68,7 @@ function useClient(fake: ReturnType<typeof fakeSupabase>) {
   vi.mocked(createClient).mockResolvedValue(fake.client as never);
   return fake;
 }
+const withClient = useClient; // helpers outside `it` callbacks must not look like hooks to the linter
 
 const writes = (calls: Call[]) => calls.filter((c) => c.op === "upsert" || c.op === "delete" || c.op === "update");
 
@@ -474,5 +475,65 @@ describe("spec 0016: setExtraStampDate", () => {
     useClient(fakeSupabase({ writeError: { code: "42501", message: "denied" } }));
     expect(await setExtraStampDate(7, DAY)).toEqual({ ok: false, reason: "failed" });
     expect(errorLog.mock.calls).toEqual([['[stamp-action] action=setExtraStampDate stage=write user=user-1 code=42501 message="denied"']]);
+  });
+});
+
+// A retired stamp (Nyírjesi-erdészház, retired on 2014-11-21) is collected with a date before it retired and on its own.
+const RETIRED = [{ id: 900, place_key: "OKT_RETIRED_NYIRJESI", retired_on: "2014-11-21" }];
+
+describe("spec 0002: retired stamps", () => {
+  const stampRetired = async (date: string | undefined, extra: typeof RETIRED = RETIRED, keys = ["OKT_RETIRED_NYIRJESI"]) => {
+    const { calls } = withClient(fakeSupabase({ checkpoints: [...extra, { id: 4, place_key: "OKTPH_03" }] }));
+    const result = await setPlacesStamped(keys, true, date);
+    return { result, calls };
+  };
+
+  it("AC-17: a retired stamp is created with the date the user gave, when it is before it retired", async () => {
+    const { result, calls } = await stampRetired("2014-11-20");
+    expect(result).toEqual({ ok: true });
+    expect(writes(calls)[0].args[0]).toEqual([{ user_id: "user-1", checkpoint_id: 900, stamped_on: "2014-11-20" }]);
+    expect((await stampRetired("2013-06-01")).result).toEqual({ ok: true });
+  });
+
+  it("AC-17: a date on or after the retirement, or none, or one out of range, is refused without a write", async () => {
+    for (const date of ["2014-11-21", "2014-11-22", "2026-10-05", undefined, "1900-01-01"]) {
+      const { result, calls } = await stampRetired(date);
+      expect(result, String(date)).toEqual({ ok: false, reason: "failed" });
+      expect(writes(calls), String(date)).toEqual([]);
+    }
+    expect(refresh).not.toHaveBeenCalled();
+    expect(warnLog).toHaveBeenCalled(); // a rejected input is logged without the input
+  });
+
+  it("AC-17: a request that mixes a retired stamp with another is refused as a whole", async () => {
+    const { result, calls } = await stampRetired("2014-11-20", RETIRED, ["OKT_RETIRED_NYIRJESI", "OKTPH_03"]);
+    expect(result).toEqual({ ok: false, reason: "failed" });
+    expect(writes(calls)).toEqual([]);
+  });
+
+  it("AC-17: taking a retired stamp away needs no date", async () => {
+    const { calls } = withClient(fakeSupabase({ checkpoints: RETIRED }));
+    expect(await setPlacesStamped(["OKT_RETIRED_NYIRJESI"], false)).toEqual({ ok: true });
+    expect(writes(calls).map((c) => c.op)).toEqual(["delete"]);
+  });
+
+  it("AC-17: a current stamp is not affected: it keeps the default and the lenient date handling", async () => {
+    const { calls } = withClient(fakeSupabase({ checkpoints: [{ id: 4, place_key: "OKTPH_03", retired_on: null }] }));
+    expect(await setPlacesStamped(["OKTPH_03"], true)).toEqual({ ok: true });
+    expect(writes(calls)).toHaveLength(1);
+  });
+
+  it("spec 0016 AC-13: changing the date of a retired stamp follows the same rule", async () => {
+    const run = async (date: string, keys = ["OKT_RETIRED_NYIRJESI"]) => {
+      const { calls } = withClient(fakeSupabase({ checkpoints: [...RETIRED, { id: 4, place_key: "OKTPH_03" }] }));
+      return { result: await setStampDate(keys, date), calls };
+    };
+    expect((await run("2014-11-20")).result).toEqual({ ok: true });
+    for (const date of ["2014-11-21", "2026-10-05"]) {
+      const { result, calls } = await run(date);
+      expect(result, date).toEqual({ ok: false, reason: "failed" });
+      expect(writes(calls)).toEqual([]);
+    }
+    expect((await run("2014-11-20", ["OKT_RETIRED_NYIRJESI", "OKTPH_03"])).result).toEqual({ ok: false, reason: "failed" });
   });
 });

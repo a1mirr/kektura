@@ -1,0 +1,14 @@
+{
+  "stamps": [
+    {
+      "code": "OKT_RETIRED_NYIRJESI",
+      "name": "Nyírjesi-erdészház",
+      "after_place_key": "OKTPH_102",
+      "retired_on": "2014-11-21",
+      "replaced_by": "OKTPH_103",
+      "source": "https://www.kektura.hu/hir/az-elmult-evek-uj-kektura-belyegzohelyeinek-listaja",
+      "assumed": ["code", "position"],
+      "note": "The MTSZ list gives the name, the replacing stamp (Vércverés) and the day, nothing else. The code is our own (the MTSZ code is not published online); the position (after Galyatető) follows a hikers' list of 2014 and the OKT forum, not an MTSZ publication, so the app says it is approximate. No coordinates: a retired stamp is never a map marker."
+    }
+  ]
+}

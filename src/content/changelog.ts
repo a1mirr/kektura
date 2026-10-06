@@ -12,6 +12,26 @@ export type ChangelogEntry = { date: string; title: Localized; changes: Change[]
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-06",
+    title: {
+      en: "Retired stamps are kept",
+      ru: "Упразднённые печати сохраняются",
+      hu: "A megszűnt bélyegzők megmaradnak",
+      de: "Eingestellte Stempel bleiben erhalten",
+    },
+    changes: [
+      {
+        kind: "new",
+        text: {
+          en: "A stamp that no longer exists (for now Nyírjesi-erdészház, replaced by Vércverés in 2014) is kept as a \"retired stamp\" instead of disappearing together with your stamp on it. If you walked past before it retired, it shows in the stage list with a short note, and you can add it with the day you collected it; \"Show retired stamps\" lists all of them. Retired stamps do not count towards the 161, your kilometres or a stage, and a friend's page does not show them.",
+          ru: "Печать, которой больше нет (пока это Нирьеши-эрдёшхаз, замещённый Вёрчверёшем в 2014 году), теперь хранится как «упразднённая печать» и не исчезает вместе с вашей отметкой. Если вы прошли это место до её упразднения, она показана в списке этапа с короткой пометкой, и её можно добавить с датой, когда вы её собрали; «Показывать упразднённые печати» выводит все такие печати. Упразднённые печати не входят в 161, километры и этап, а на странице друга их не видно.",
+          hu: "A már nem létező bélyegző (egyelőre a Nyírjesi-erdészház, amelyet 2014-ben a Vércverés váltott fel) „megszűnt bélyegzőként” megmarad, és nem tűnik el a rajta lévő bélyegzéseddel együtt. Ha a megszűnése előtt jártál ott, megjelenik a szakasz listájában egy rövid megjegyzéssel, és hozzáadhatod a begyűjtés napjával; a „Megszűnt bélyegzők mutatása” mindet listázza. A megszűnt bélyegzők nem számítanak bele a 161-be, a kilométerekbe és a szakaszba, a barátod oldalán pedig nem látszanak.",
+          de: "Ein Stempel, den es nicht mehr gibt (vorerst das Nyírjesi-erdészház, 2014 durch Vércverés ersetzt), bleibt als „eingestellter Stempel“ erhalten und verschwindet nicht mit deinem Eintrag darauf. Wenn du vor seiner Einstellung dort vorbeigekommen bist, steht er mit einer kurzen Notiz in der Etappenliste, und du kannst ihn mit dem Tag eintragen, an dem du ihn gesammelt hast; „Eingestellte Stempel anzeigen“ listet alle. Eingestellte Stempel zählen nicht zu den 161, zu deinen Kilometern oder zu einer Etappe, und auf der Seite eines Freundes erscheinen sie nicht.",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-10-05",
     title: {
       en: "New stamps are required only from their official date",

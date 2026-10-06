@@ -84,9 +84,13 @@ describe("spec 0002: row level security of the stamp tables", () => {
 });
 
 describe("spec 0006: the test database", () => {
-  it("AC-1: the migrations and both seeds leave 220 checkpoints (161 places) and 72 extra stamps", (ctx) => {
+  it("AC-1: the migrations and both seeds leave 220 checkpoints (161 places), one retired stamp and 72 extra stamps", (ctx) => {
     if (!local) return ctx.skip();
-    expect(rows("select count(*) || ',' || count(distinct place_key) from checkpoints")).toBe("220,161");
+    expect(
+      rows(
+        "select count(*) filter (where retired_on is null) || ',' || count(distinct place_key) filter (where retired_on is null) || ',' || count(*) filter (where retired_on is not null) from checkpoints",
+      ),
+    ).toBe("220,161,1");
     expect(rows("select count(*) from extra_stamps")).toBe("72");
   });
 });

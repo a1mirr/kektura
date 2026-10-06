@@ -98,12 +98,14 @@ describe("spec 0004: seeds that clean up after themselves", () => {
         inner(seed),
         `select 'stamps:' || count(*) from public.user_stamps where user_id = '${USER}';`,
         "select 'rows:' || count(*) from public.checkpoints where seq in (9001, 9002);",
-        "select 'total:' || count(*) from public.checkpoints;",
+        "select 'total:' || count(*) from public.checkpoints where retired_on is null;",
+        "select 'retired:' || count(*) from public.checkpoints where retired_on is not null;",
         "rollback;",
       ].join("\n"),
     );
     expect(lines).toContain("stamps:0");
     expect(lines).toContain("rows:0");
     expect(lines).toContain("total:220");
+    expect(lines).toContain("retired:1"); // a retired stamp is never one of the rows the cleanup removes (AC-14)
   });
 });
