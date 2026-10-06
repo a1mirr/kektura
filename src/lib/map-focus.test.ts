@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fullyInView } from "./map-focus";
+import { centeredScrollTop, fullyInView } from "./map-focus";
 
 describe("spec 0003: the 📍 button and the map's place in the window (AC-13)", () => {
   it("AC-13: a map inside the window needs no scrolling", () => {
@@ -12,5 +12,28 @@ describe("spec 0003: the 📍 button and the map's place in the window (AC-13)",
     expect(fullyInView({ top: 400, bottom: 721 }, 720)).toBe(false);
     expect(fullyInView({ top: 900, bottom: 1200 }, 720)).toBe(false);
     expect(fullyInView({ top: -600, bottom: -100 }, 720)).toBe(false);
+  });
+
+  it("AC-13: a map inside the window but cut off by the scrolling block it sits in is not in view", () => {
+    const block = { top: 12, bottom: 700 };
+    expect(fullyInView({ top: 60, bottom: 400 }, 720, block)).toBe(true);
+    expect(fullyInView({ top: 30, bottom: 400 }, 720, block)).toBe(true); // below the block's top edge
+    expect(fullyInView({ top: 0, bottom: 400 }, 720, block)).toBe(false); // clipped at the block's top
+    expect(fullyInView({ top: 300, bottom: 705 }, 720, block)).toBe(false); // clipped at the block's bottom, still inside the window
+  });
+
+  it("AC-13: a block taller than the window never makes a map outside the window count as in view", () => {
+    expect(fullyInView({ top: 400, bottom: 800 }, 720, { top: 16, bottom: 900 })).toBe(false);
+    expect(fullyInView({ top: -20, bottom: 300 }, 720, { top: -100, bottom: 900 })).toBe(false);
+    expect(fullyInView({ top: 100, bottom: 300 }, 720, null)).toBe(true);
+  });
+});
+
+describe("spec 0003: centring the map in the block that scrolls (AC-13)", () => {
+  it("AC-13: scrolls down by what the map's middle is below the block's middle, never above the start", () => {
+    const block = { top: 16, bottom: 584 }; // middle 300
+    expect(centeredScrollTop({ top: 400, bottom: 784 }, block, 0)).toBe(292 + 0); // map middle 592
+    expect(centeredScrollTop({ top: -12, bottom: 372 }, block, 80)).toBe(0); // map middle 180: up by 120, more than the 80 there is
+    expect(centeredScrollTop({ top: 68, bottom: 452 }, block, 0)).toBe(0); // already centred
   });
 });

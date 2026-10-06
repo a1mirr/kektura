@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import { expandAllStages, signInAsNewUser, stat } from "./helpers";
 
 // Spec 0003: the map behaviours the DOM allows. The map is a WebGL canvas, so there
@@ -16,12 +16,24 @@ async function openDashboardWithMap(page: Page) {
   await signInAsNewUser(page);
   // The map is created after hydration, so a visible canvas also means the toggles are interactive.
   await expect(canvas(page)).toBeVisible();
+  // The list -> map listeners are attached when the map has loaded its first tiles, which takes a second or two over the network:
+  // a click on 📍 before that does nothing. The tile requests are done when the network is quiet.
+  await page.waitForLoadState("networkidle");
+}
+
+// A click on 📍 does nothing until the map has loaded and attached its listener (a second or two over the network, more on a busy
+// machine), so it is repeated until the label appears on the map. (`.first()`: the label is the only popup until one is clicked open.)
+async function pressLocate(page: Page, button: Locator) {
+  await expect(async () => {
+    await button.click();
+    await expect(page.locator(".maplibregl-popup").filter({ hasText: /\S/ }).first()).toBeVisible({ timeout: 2_000 });
+  }).toPass({ timeout: 45_000 });
 }
 
 // 📍 on a list row, then a click on the canvas centre until the stamp's popup opens (the fly animation
 // and the smooth scroll have to finish first, so the click is retried).
 async function openStampPopup(page: Page, placeKey: string, action: string) {
-  await page.locator(`#place-${placeKey}`).getByRole("button", { name: "Show on map" }).click();
+  await pressLocate(page, page.locator(`#place-${placeKey}`).getByRole("button", { name: "Show on map" }));
   // The stamp's name label sits on the dot: once it stops moving the fly animation and the scroll are
   // over (a click during the flight would interrupt it and miss the dot).
   const label = page.locator(".maplibregl-popup").filter({ hasText: /\S/ }).last();
@@ -160,6 +172,36 @@ test.describe("spec 0003: the trail map", () => {
     await expectNoSideways(page);
   });
 
+  test("AC-13: the 📍 button brings the map back into view when the block it sits in has been scrolled so that the map is cut off", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 600 }); // short enough that the route panel makes the block scroll over the map
+    await openDashboardWithMap(page);
+    await expandAllStages(page);
+    await openStampPopup(page, "OKTPH_01_DDKPH_01", "Route from here");
+    await page.getByRole("button", { name: "Route from here" }).click();
+    await expect(page.getByText("Now pick the end stamp")).toBeVisible();
+
+    const block = page.locator("[data-sticky-map]");
+    await page.evaluate(() => window.scrollTo(0, 1500)); // the block sticks
+    await block.evaluate((el) => (el.scrollTop = el.scrollHeight));
+    const [blockBox, cutOff] = [(await block.boundingBox())!, (await canvas(page).boundingBox())!];
+    expect(cutOff.y, "the map's top is hidden by the block").toBeLessThan(blockBox.y);
+
+    await page.locator("#place-OKTPH_149").scrollIntoViewIfNeeded();
+    const scrolled = await page.evaluate(() => window.scrollY);
+    await pressLocate(page, page.locator("#place-OKTPH_149").getByRole("button", { name: "Show on map" }));
+    await expect
+      .poll(async () => {
+        const [b, c] = [(await block.boundingBox())!, (await canvas(page).boundingBox())!];
+        return c.y >= b.y && c.y + c.height <= b.y + b.height;
+      }, { message: "the map ends fully inside its block" })
+      .toBe(true);
+    await expect(canvas(page)).toBeInViewport({ ratio: 1 });
+    await page.waitForTimeout(500); // the list did not move: only the block scrolled
+    expect(await page.evaluate(() => window.scrollY)).toBe(scrolled);
+  });
+
   for (const locale of ["en", "hu", "de", "ru"]) {
     for (const [width, height] of [
       [1280, 720],
@@ -204,7 +246,7 @@ test.describe("spec 0003: the trail map", () => {
     await row.scrollIntoViewIfNeeded();
     await expect(canvas(page)).not.toBeInViewport();
 
-    await row.getByRole("button", { name: "Show on map" }).click();
+    await pressLocate(page, row.getByRole("button", { name: "Show on map" }));
     await expect(canvas(page)).toBeInViewport();
     await expect(page.locator(".maplibregl-popup")).toContainText("Hollóháza");
   });
@@ -220,7 +262,7 @@ test.describe("spec 0003: the trail map", () => {
     await expect(canvas(page)).toBeInViewport({ ratio: 1 });
     const before = (await row.boundingBox())!;
 
-    await row.getByRole("button", { name: "Show on map" }).click();
+    await pressLocate(page, row.getByRole("button", { name: "Show on map" }));
     await expect(canvas(page)).toBeInViewport({ ratio: 1 });
     await expect(page.locator(".maplibregl-popup")).toContainText("Hollóháza");
     await page.waitForTimeout(1000); // a smooth scroll of the page would have moved the row by now
@@ -323,7 +365,11 @@ test.describe("spec 0003: the trail map", () => {
     await expandAllStages(page);
     expect(requests).toBe(0); // the overview is enough at the start
 
-    await page.locator("#place-OKTPH_02").getByRole("button", { name: "Show on map" }).click(); // flies to zoom 12 or more
+    const locate = page.locator("#place-OKTPH_02").getByRole("button", { name: "Show on map" });
+    await expect(async () => {
+      await locate.click(); // flies to zoom 12 or more; repeated until the map has loaded and listens
+      expect(requests).toBeGreaterThanOrEqual(1);
+    }).toPass({ timeout: 45_000 });
     await expect.poll(() => requests).toBe(1); // refused: the map stays on the overview
 
     refuse = false;
@@ -340,15 +386,18 @@ test.describe("spec 0003: the trail map", () => {
     await openDashboardWithMap(page);
     const extras = mapSection(page).getByLabel(/^Show extra stamps \(\d+\)$/);
     await expect(extras).not.toBeChecked();
-    await page.locator("#extra-stamps li").first().getByRole("button", { name: "Show on map" }).click();
-    await expect(extras).toBeChecked();
+    const locate = page.locator("#extra-stamps li").first().getByRole("button", { name: "Show on map" });
+    await expect(async () => {
+      await locate.click(); // repeated until the map has loaded and listens
+      await expect(extras).toBeChecked({ timeout: 2_000 });
+    }).toPass({ timeout: 45_000 });
     await expect(canvas(page)).toBeInViewport();
   });
 
   test("AC-16: stamping from the list keeps the map where it is", async ({ page }) => {
     await openDashboardWithMap(page);
     await expandAllStages(page);
-    await page.locator("#place-OKTPH_02").getByRole("button", { name: "Show on map" }).click();
+    await pressLocate(page, page.locator("#place-OKTPH_02").getByRole("button", { name: "Show on map" }));
     const label = page.locator(".maplibregl-popup").filter({ hasText: /\S/ }).last();
     await expect(label).toBeVisible();
     await expect(async () => {
