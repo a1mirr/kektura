@@ -62,7 +62,7 @@ after it must have its stamp in the book, one who passed earlier is not missing 
   stage's progress counts a waived place as done, so a stage whose places are all stamped or waived is complete; the row still shows
   it as not stamped, with the badge of AC-19. The stage's button follows the stamps alone: with a waived place unstamped it still reads
   "Stamp stage" and marks it (AC-7).
-- **AC-21**: The date, hint, badge and note wrap under the place's name at 375 px and 320 px and never widen the page (the
+- **AC-21**: The date, hint, badge and note wrap under the place's name at 375 px and never widen the page (the
   text uses `overflow-wrap: anywhere`; checked in English and German).
 
 ### Retired stamps
@@ -94,7 +94,7 @@ walked before it retired collected it, and it belongs in their record.
   where its position is not from an official source (`position_approximate`) it adds "Its position in the list is approximate."
   The controls' accessible names say "retired" ("Add retired stamp <name>"). The row of the replacing stamp has its own line,
   "Replaces the retired stamp <name> (valid until <the last day>).", so the two rows explain each other.
-- **AC-27**: The notes of AC-26 wrap under the name at 375 px and 320 px, in every language, and the badge and the date field never push
+- **AC-27**: The notes of AC-26 wrap under the name at 375 px, in every language, and the badge and the date field never push
   a control off the screen or widen the page.
 
 ### Stages
@@ -137,6 +137,12 @@ walked before it retired collected it, and it belongs in their record.
   row's controls (show on map, date, stamp / remove) or a stage header's actions don't fit beside the text,
   they wrap onto a further line (by design under the text, right-aligned) instead of widening the
   page.
+- **AC-28**: From 1024 px the dashboard has two columns (spec 0036 owns the page width): the four figures (two by two) and the
+  map on the left, and the stage list and the extra stamps on the right, 5 : 7. The left column stays in view (`position:
+  sticky`, 16 px below the top of the window) while the right one scrolls, and it is never taller than the window, so the map's
+  bottom edge and the layer toggles stay reachable (spec 0003 AC-24). The header row (title, language, links) is above both. Below
+  1024 px the page is one column, in the order figures, map, stage list, extra stamps, and nothing sticks. "Show in list" (spec 0003
+  AC-12), the 📍 buttons and the "go to extra stamps" links keep bringing their row or the map into view in both layouts.
 
 ## Out of scope
 
@@ -157,10 +163,11 @@ stage is AC-12 to AC-15); moving extra stamps into the stage's place list; chang
 | AC-22, AC-23 | `src/lib/progress.test.ts` (a retired row is no place and no neighbour; the rows read; listed with a stamp, by the earlier neighbour's date, on and after the retirement day, one neighbour, none; the monthly counts ignore a stamp on one) |
 | AC-24 | `src/components/RetiredRow.test.tsx` (hidden by default, the checkbox shows it, remembered, storage refusing), `src/components/StageControls.test.tsx` (the checkbox only while there is a retired stamp) |
 | AC-25 | `src/components/RetiredStampControl.test.tsx` (no default day, disabled until a real day before the retirement, the date field keeps to it, the remove button), `e2e/retired-stamps.spec.ts` (the count, km, stage totals and "Stamp stage" ignore it; the collected line and the stage mark) |
-| AC-26, AC-27 | `e2e/retired-stamps.spec.ts` (the note, badge, link, approximate position, the replacing stamp's line; 320 and 375 px in English, Hungarian, German and Russian) |
+| AC-26, AC-27 | `e2e/retired-stamps.spec.ts` (the note, badge, link, approximate position, the replacing stamp's line; 375 px in English, Hungarian, German and Russian) |
 | AC-16, AC-17, AC-18, AC-20 | `src/lib/progress.test.ts` (the earliest date of the variants; the later neighbour decides, on and after the date, one neighbour, none; a stamped place never waived; the stretch across a waived place and the opposite case; a waived place is done for its stage but no stamp), `src/lib/friends.test.ts` and `src/lib/compare.test.ts` (the same on a friend's page) |
 | AC-19 | `src/components/RequiredFrom.test.tsx` (the date in the page's language, hint and badge, the button that opens the note and Escape, the tolerance sentence), `src/lib/new-stamps.test.ts` (which stamps carry the tolerance) |
-| AC-17, AC-18, AC-19, AC-20, AC-21 on the real dashboard | `e2e/stamp-required.spec.ts` (a walk before the date: badge, "2 / 161", the km across the place, a later stamp changes nothing; a walk after it: the stamp is needed; the tolerance note; a friend's page with the waiver as theirs; 320 and 375 px in English and German) |
+| AC-17, AC-18, AC-19, AC-20, AC-21 on the real dashboard | `e2e/stamp-required.spec.ts` (a walk before the date: badge, "2 / 161", the km across the place, a later stamp changes nothing; a walk after it: the stamp is needed; the tolerance note; a friend's page with the waiver as theirs; 375 px in English and German) |
 | AC-10 | `src/components/StampDescriptions.test.tsx` (every description rendered, no truncation classes), `e2e/stamping.spec.ts` (dashboard) and `e2e/friends.spec.ts` (a friend's page): nothing clipped or sticking out of its row at 375 px |
 | AC-11 | `e2e/stamping.spec.ts` (375 px in the default language and in German: no sideways scroll with every stage collapsed, expanded, and with a stamped place and extra stamp) |
+| AC-28 | `e2e/layout.spec.ts` (from 1024 px the aside is left of the list, in two columns of figures, and stays in view after a long scroll with the whole column inside the window; below it one column in the order, nothing sticks, the list as wide as the window; "go to extra stamps" and a stage's rows are still reached at 1280 x 720), `e2e/map.spec.ts` (the 📍 button: in two columns the map is in view already, in one column it scrolls into view), `src/components/PageShell.test.tsx` (the aside, its order and "sticky") |
 | AC-11 (own line, right-aligned) | `e2e/stamping.spec.ts` (at 375 px a stamped row's controls start below the text and end at the row's right padding) |

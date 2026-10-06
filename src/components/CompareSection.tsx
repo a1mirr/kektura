@@ -24,7 +24,7 @@ export default async function CompareSection({ comparison, points }: { compariso
         {t("title")}
       </h2>
 
-      <dl className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-4 sm:grid-cols-4">
+      <dl className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-4 sm:grid-cols-4 lg:grid-cols-[repeat(2,minmax(0,1fr))]">
         {WHO.map((who) => (
           <div key={who} data-who={who} className="min-w-0 rounded-lg bg-white p-3 shadow-sm sm:p-4">
             <dt className="flex items-center gap-2 text-sm text-stone-500">

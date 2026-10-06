@@ -4,6 +4,7 @@ import { hasLocale } from "next-intl";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { CHANGELOG, type ChangeKind } from "@/content/changelog";
+import PageShell from "@/components/PageShell";
 
 // See spec 0018. The entries are data in src/content/changelog.ts.
 
@@ -30,7 +31,7 @@ export default async function ChangelogPage({ params }: Props) {
   const format = await getFormatter();
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-8">
+    <PageShell variant="reading">
       <h1 className="mb-4 text-2xl font-bold text-blue-700">{t("title")}</h1>
       <p className="text-stone-700">{t("intro")}</p>
 
@@ -61,6 +62,6 @@ export default async function ChangelogPage({ params }: Props) {
           </li>
         ))}
       </ol>
-    </main>
+    </PageShell>
   );
 }

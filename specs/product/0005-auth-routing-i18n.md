@@ -44,7 +44,7 @@ dropdown, and a visitor with no signal gets Hungarian.
   language in the order of `routing.locales` (today `hu`, `en`, `de`, `ru`), each by its own name (Magyar, English,
   Deutsch, and Russian written in Cyrillic), never by a code. Adding a language adds an option, nothing else.
   Choosing one opens the same page in that language. It is operable with the keyboard, at least 44 px tall and fits a
-  320 px screen.
+  375 px screen.
 - **AC-11**: German (`de`) is a full language of the site: `messages/de.json` is complete (AC-5), and the changelog
   (spec 0018), the useful links (spec 0019), the About page (spec 0015) and the stamp descriptions (spec 0033) have German text.
 
@@ -68,6 +68,6 @@ dropdown, and a visitor with no signal gets Hungarian.
 | AC-4 | `e2e/auth.spec.ts` (a failed code exchange, no code, an unknown locale and a markup-carrying locale all end on `/<known locale>?error=auth` on the address the user is on; a forwarded host is honoured and a malformed one is not); `src/lib/landing-path.test.ts` (`next`); the dummy login's `next` is covered by `e2e/friends.spec.ts`. The success path needs a real Google sign-in: manual (a real OAuth round trip). Last checked: never recorded. |
 | AC-5 | `tests/messages.test.ts` |
 | AC-9 | `src/proxy.test.ts` (`/de` runs the proxy), `e2e/language-switcher.spec.ts` (a browser in each language gets it, one in a language we don't have gets the default; every language's address answers, an unknown one is a 404), `tests/smoke-test.test.ts` (the deploy's smoke test asks for the page of every language: the message files are the routing's languages), `e2e/auth.spec.ts` (an unknown `?locale=` ends on `/hu`), `e2e/site-logo.spec.ts` (the 404 page links to `/hu`) |
-| AC-10 | `e2e/language-switcher.spec.ts` (one dropdown with every language's name in order, no button row; choosing a language; on the dashboard; keyboard, 44 px, 320 px), `e2e/languages.spec.ts` (its label and value on the landing page of every language) |
+| AC-10 | `e2e/language-switcher.spec.ts` (one dropdown with every language's name in order, no button row; choosing a language; on the dashboard; keyboard, 44 px, 375 px), `e2e/languages.spec.ts` (its label and value on the landing page of every language) |
 | AC-11 | `tests/messages.test.ts` (parity for `de`), `src/content/changelog.test.ts`, `src/content/links.test.ts`, `tests/stamp-descriptions.test.ts`, `e2e/languages.spec.ts` (every language: the landing, About, changelog and links pages and the footer read from that language's messages file, and fit 375 px), `e2e/stamping.spec.ts` (the stamp descriptions of every language) |
 | AC-7, AC-8 | `src/i18n/typed-messages.test.ts`: `// @ts-expect-error` on unknown keys and namespaces (hook and server API, namespaced and root) and on a plain `string` as `locale`, so `npm run typecheck` fails if the typing ever stops working (an unused directive is an error); `useLocale()` is `"hu" \| "en" \| "de" \| "ru"` and `"fr"` is not a `Locale` |

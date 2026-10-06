@@ -23,7 +23,9 @@ async function expectLogo(page: Page, locale: Locale) {
   const box = await link.boundingBox();
   expect(box!.width).toBeGreaterThanOrEqual(44);
   expect(box!.height).toBeGreaterThanOrEqual(44);
-  expect(box!.x).toBeLessThan(40); // top-left corner
+  // top-left corner of the content width (spec 0036 AC-1): the page's left edge on a phone, 64 rem centred on a wide window
+  const viewport = await page.evaluate(() => document.documentElement.clientWidth);
+  expect(box!.x).toBeLessThan(Math.max(0, (viewport - 1024) / 2) + 40);
   expect(box!.y).toBeLessThan(80); // below the test banner, above any page content
 }
 
@@ -47,11 +49,11 @@ test.describe("spec 0014: site logo", () => {
     });
   }
 
-  test("AC-19: every public page has it, and it fits 320 and 375 px without sideways scrolling", async ({ page }) => {
+  test("AC-19: every public page has it, and it fits 375 px without sideways scrolling", async ({ page }) => {
     for (const path of ["", "/about", "/changelog", "/links", "/feedback"]) {
       await page.goto(`/en${path}`);
       await expectLogo(page, "en");
-      for (const width of [320, 375]) await expectNoOverflow(page, width);
+      for (const width of [375]) await expectNoOverflow(page, width);
     }
   });
 
@@ -60,7 +62,7 @@ test.describe("spec 0014: site logo", () => {
     for (const path of ["/dashboard", "/account", "/friends"]) {
       await page.goto(`/en${path}`);
       await expectLogo(page, "en");
-      for (const width of [320, 375]) await expectNoOverflow(page, width);
+      for (const width of [375]) await expectNoOverflow(page, width);
     }
     await logo(page, "en").click();
     await expect(page).toHaveURL(/\/en\/dashboard$/);

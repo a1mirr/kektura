@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import PageShell from "@/components/PageShell";
 import FeedbackForm from "./FeedbackForm";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -21,10 +22,10 @@ export default async function FeedbackPage({ params }: Props) {
   const t = await getTranslations("feedback");
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-8">
+    <PageShell variant="reading">
       <h1 className="mb-4 text-2xl font-bold text-blue-700">{t("title")}</h1>
       <p className="text-stone-700">{t("description")}</p>
       <FeedbackForm />
-    </main>
+    </PageShell>
   );
 }

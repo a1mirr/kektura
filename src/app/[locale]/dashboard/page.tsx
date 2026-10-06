@@ -25,6 +25,7 @@ import { buildMapPoints } from "@/lib/map-data";
 import { hasToleranceNote, requiredNote } from "@/lib/new-stamps";
 import LocateButton from "@/components/LocateButton";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
+import PageShell from "@/components/PageShell";
 import RequiredFrom from "@/components/RequiredFrom";
 import RetiredRow from "@/components/RetiredRow";
 import RetiredStampControl from "@/components/RetiredStampControl";
@@ -109,39 +110,45 @@ export default async function Dashboard({
   ];
 
   return (
-    <main className="mx-auto max-w-3xl space-y-8 px-6 py-8">
-      <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-blue-700">{t("title")}</h1>
-        <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
-          <LocaleSwitcher />
-          {showFriends && (
-            <Link href="/friends" className="text-sm text-stone-600 hover:underline">
-              {t("friends")}
+    <PageShell
+      sticky
+      header={
+        <header className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-blue-700">{t("title")}</h1>
+          <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
+            <LocaleSwitcher />
+            {showFriends && (
+              <Link href="/friends" className="text-sm text-stone-600 hover:underline">
+                {t("friends")}
+              </Link>
+            )}
+            <Link href="/account" className="text-sm text-stone-600 hover:underline">
+              {t("account")}
             </Link>
-          )}
-          <Link href="/account" className="text-sm text-stone-600 hover:underline">
-            {t("account")}
-          </Link>
-        </div>
-      </header>
-
-      <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {cards.map((c) => (
-          <div key={c.label} className="rounded-lg bg-white p-4 shadow-sm">
-            <dt className="text-sm text-stone-500">{c.label}</dt>
-            <dd className="text-2xl font-semibold">{c.value}</dd>
           </div>
-        ))}
-      </dl>
+        </header>
+      }
+      aside={
+        <>
+          <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-2">
+            {cards.map((c) => (
+              <div key={c.label} className="rounded-lg bg-white p-4 shadow-sm">
+                <dt className="text-sm text-stone-500">{c.label}</dt>
+                <dd className="text-2xl font-semibold">{c.value}</dd>
+              </div>
+            ))}
+          </dl>
 
-      {mapPoints.length > 0 && (
-        <section className="rounded-lg bg-white p-4 shadow-sm">
-          <h2 className="mb-2 font-semibold">{t("map")}</h2>
-          <TrailMapLoader points={mapPoints} extras={mapExtras} doneRanges={doneRanges} withRestaurants={showRestaurants} />
-          <p className="mt-2 text-sm text-stone-500">{t("mapLegend")}</p>
-        </section>
-      )}
-
+          {mapPoints.length > 0 && (
+            <section className="rounded-lg bg-white p-4 shadow-sm">
+              <h2 className="mb-2 font-semibold">{t("map")}</h2>
+              <TrailMapLoader points={mapPoints} extras={mapExtras} doneRanges={doneRanges} withRestaurants={showRestaurants} />
+              <p className="mt-2 text-sm text-stone-500">{t("mapLegend")}</p>
+            </section>
+          )}
+        </>
+      }
+    >
       <section>
         <h2 className="mb-2 font-semibold">{t("checkpoints")}</h2>
         {placeList.length === 0 ? (
@@ -322,6 +329,6 @@ export default async function Dashboard({
           </ul>
         </section>
       )}
-    </main>
+    </PageShell>
   );
 }

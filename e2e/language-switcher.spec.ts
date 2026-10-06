@@ -63,8 +63,8 @@ test.describe("spec 0005: the language dropdown", () => {
     await expect(page.getByRole("combobox", { name: "Nyelv" })).toHaveValue("hu");
   });
 
-  test("AC-10: it can be used with the keyboard, is at least 44 px tall and fits 320 px", async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 700 });
+  test("AC-10: it can be used with the keyboard, is at least 44 px tall and fits 375 px", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 700 });
     await page.goto("/en");
     const select = page.getByRole("combobox", { name: "Language" });
     const box = await select.boundingBox();

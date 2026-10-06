@@ -97,9 +97,10 @@ test.describe("spec 0003: the trail map", () => {
     await expect(page.locator("body")).not.toHaveCSS("overflow", "hidden");
   });
 
-  test("AC-13: the 📍 button in a list row scrolls the map into view and labels the stamp", async ({
+  test("AC-13: in one column the 📍 button in a list row scrolls the map into view and labels the stamp", async ({
     page,
   }) => {
+    await page.setViewportSize({ width: 768, height: 720 }); // below 1024 px the map is not sticky (spec 0001 AC-28)
     await openDashboardWithMap(page);
     await expandAllStages(page);
 
@@ -109,6 +110,21 @@ test.describe("spec 0003: the trail map", () => {
 
     await row.getByRole("button", { name: "Show on map" }).click();
     await expect(canvas(page)).toBeInViewport();
+    await expect(page.locator(".maplibregl-popup")).toContainText("Hollóháza");
+  });
+
+  test("AC-13: in two columns the map is in view already, so the 📍 button only flies it to the stamp and labels it", async ({
+    page,
+  }) => {
+    await openDashboardWithMap(page); // the default window is 1280 x 720: two columns, the map sticky
+    await expandAllStages(page);
+
+    const row = page.locator("#place-OKTPH_149");
+    await row.scrollIntoViewIfNeeded();
+    await expect(canvas(page)).toBeInViewport({ ratio: 1 });
+
+    await row.getByRole("button", { name: "Show on map" }).click();
+    await expect(canvas(page)).toBeInViewport({ ratio: 1 });
     await expect(page.locator(".maplibregl-popup")).toContainText("Hollóháza");
   });
 

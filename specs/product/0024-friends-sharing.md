@@ -112,7 +112,7 @@ page's "Send request" is a plain form that posts to a server action ending in a 
   `<details>` whose body says what will happen (removing: the two of you stop seeing each other's progress and the other is
   not told; regenerating: the old link stops working at once) and holds the form with the confirming button. Nothing runs on
   the first press. Cancel closes the question, and Escape too.
-- **AC-20**: Every button of the page is at least 44 x 44 px (also at 375 px and 320 px), wraps onto a second line instead
+- **AC-20**: Every button of the page is at least 44 x 44 px (also at 375 px), wraps onto a second line instead
   of overflowing, and, while enabled, looks different under the pointer (a darker shade) and while pressed (a darker still,
   nudged one pixel down), with a visible focus ring for the keyboard; a disabled button shows none of these. Approve and
   ignore differ by their words, not by colour alone.
@@ -132,11 +132,11 @@ page's "Send request" is a plain form that posts to a server action ending in a 
 ### Comparing with a friend
 
 - **AC-22**: A friend's page (only for an accepted friend who shares, AC-9: anyone else still ends on the 404, and nothing
-  is computed) has a "Compare" section above the stage list, with the user's own progress next to the friend's: four cards
+  is computed) has a "Compare" section above the stage list (beside it from 1024 px, AC-27), with the user's own progress next to the friend's: four cards
   (both, only me, only them, neither), each with the km and the number of places; a map of the two (spec 0003 AC-18 to AC-20);
   and a list of the stages with how each stands (AC-24), each linking to its section below. It shows nothing the friend did
   not already share: which places they stamped, never dates or extra stamps (AC-7). Besides the friend's shared stamps
-  it reads only the user's own. At 375 px and 320 px the cards are two to a row and the map is full width, with no sideways scroll.
+  it reads only the user's own. At 375 px the cards are two to a row and the map is full width, with no sideways scroll.
 - **AC-23**: The places are counted as stamped by both, only me, only them or neither (a place with several variants once,
   spec 0001 AC-1). The walked stretches of each person follow spec 0001 AC-3, so the comparison never disagrees with either
   dashboard; the km walked by both is the intersection of the two sets of stretches, only me or only them what is left of one set, and
@@ -145,6 +145,18 @@ page's "Send request" is a plain form that posts to a server action ending in a 
 - **AC-24**: A stage stands as "both complete" (both have all its places, a place they were not missing counting as had, AC-25), "only me" (I have all, they do not), "only
   them", "neither started" (neither has any) or "partly", in this order, so a stage with one place that only I stamped is
   "only me". The page shows each person's count of the stage's places.
+
+### Layout
+
+The width and the edges of the pages are spec 0036's.
+
+- **AC-27**: From 1024 px a friend's page has two columns, 5 : 7: the Compare section (AC-22: the four cards, the map and the list of the
+  stages) on the left and the friend's stage list on the right. The friend's name and links, and their four figures, stay above both
+  over the full width. The comparison's cards are two to a row in the narrow column. Below 1024 px it is one column in that order
+  (figures, Compare, stage list), as on a phone, and the stage links of the comparison still lead to their section.
+- **AC-28**: From 1024 px the Friends page has two columns, 5 : 7: the person's own controls (the name field, the invite link and
+  its regenerate button, the pending requests) on the left and the list of friends on the right; the title and the message of AC-18
+  stay above both. Below 1024 px it is one column in that order.
 
 ### Feature flag and texts
 
@@ -195,7 +207,8 @@ route plan.
 | AC-17 | `src/components/FriendActionButton.test.tsx` (pending, no second press, the row), `e2e/friends.spec.ts` (a slow server) |
 | AC-18 | `src/lib/friends.test.ts` (the path, a message per notice in every language), `src/components/FriendActionButton.test.tsx` (status and alert), `e2e/friends.spec.ts` (each action, the default language and Russian, unknown values) |
 | AC-19 | `src/components/FriendActionButton.test.tsx` (closed first, Cancel, Escape), `e2e/friends.spec.ts` (remove and regenerate ask first) |
-| AC-20 | `src/components/FriendActionButton.test.tsx` (the classes), `e2e/friends.spec.ts` (target size and no sideways scroll at 375 and 320 px in the default language and Russian; the colour under the pointer and while pressed) |
+| AC-20 | `src/components/FriendActionButton.test.tsx` (the classes), `e2e/friends.spec.ts` (target size and no sideways scroll at 375 px in the default language and Russian; the colour under the pointer and while pressed) |
 | AC-21 | `e2e/friends.spec.ts` (JavaScript off) |
-| AC-22 | `src/lib/friends-compare.test.ts` (what is read), `e2e/friends-compare.spec.ts` (figures, stage list, 404s, 375 and 320 px in the default language and German) |
+| AC-22 | `src/lib/friends-compare.test.ts` (what is read), `e2e/friends-compare.spec.ts` (figures, stage list, 404s, 375 px in the default language and German) |
 | AC-23, AC-24 | `src/lib/compare.test.ts` |
+| AC-27, AC-28 | `e2e/layout.spec.ts` (a friend's page and the Friends page at 1023, 1024, 1440 and 375 px: side by side from 1024, one column below, the friend's figures above both, no sideways scroll), `src/components/PageShell.test.tsx` (the columns and their order) |

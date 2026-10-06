@@ -106,6 +106,7 @@ checks, ships and is run). The headings below only group the index: moving a spe
 | [0017](product/0017-feedback.md) | Feedback form with Telegram notifications | Done |
 | [0018](product/0018-changelog.md) | Changelog page | Done |
 | [0019](product/0019-useful-links.md) | Useful links page | Done |
+| [0036](product/0036-page-layout.md) | Page layout: one 64 rem width and shared edges for the logo, the page and the footer, reading columns, two columns on the dashboard and the friends pages | Done |
 
 #### Platform
 
