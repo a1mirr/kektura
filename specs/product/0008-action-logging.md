@@ -13,7 +13,7 @@ Each one is logged on the server instead, so production problems can be found in
 
 - **AC-1**: When a stamp action fails because of a database error or a thrown exception, the server
   logs exactly one line via `console.error`, prefixed `[stamp-action]`. The line has the action name
-  (`setPlacesStamped`, `setStampDate`, `setExtraStamped` or `setExtraStampDate`), the stage (`read`, `write` or `exception`), the Supabase
+  (`setPlacesStamped`, `setStampDate`, `setStampDates`, `setExtraStamped` or `setExtraStampDate`), the stage (`read`, `write` or `exception`), the Supabase
   error code and message (or the exception's message), and the user id.
 - **AC-2**: Log lines never contain tokens, cookies, emails or request bodies beyond the action name
   and ids.

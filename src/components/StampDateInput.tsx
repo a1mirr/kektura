@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import type { ActionResult } from "@/lib/action-result";
-import { isValidStampDate, MIN_STAMP_DATE } from "@/lib/stamp-date";
+import { isValidStampDate } from "@/lib/stamp-date";
+import CalendarButton from "./CalendarButton";
 
 // The date field of a stamp (spec 0016 AC-5 to AC-12): a yyyy-mm-dd text field, so the date reads
 // the same in every browser, plus a button that opens the browser's calendar.
@@ -32,7 +33,6 @@ export default function StampDateInput({
   const [draft, setDraft] = useState(value);
   const [saved, setSaved] = useState(value); // the last date known to be saved: from the server or our own save
   const [seen, setSeen] = useState(value); // the last `value` prop we looked at
-  const picker = useRef<HTMLInputElement>(null);
   const valid = useCallback((date: string) => isValidStampDate(date) && (latest === undefined || date <= latest), [latest]);
   const [status, setStatus] = useState<"idle" | "saving" | "failed">("idle");
 
@@ -82,19 +82,7 @@ export default function StampDateInput({
     return () => clearTimeout(timer);
   }, [draft, saved, status, save, valid]);
 
-  // The calendar button (spec 0016 AC-9): the native picker lives in a hidden date input; a pick is one
-  // complete date, so it is saved at once instead of after the pause.
-  function openCalendar() {
-    const input = picker.current;
-    if (!input) return;
-    try {
-      if (typeof input.showPicker === "function") input.showPicker();
-      else input.click();
-    } catch {
-      input.click(); // showPicker() throws when the browser refuses (no user gesture, a sandboxed frame)
-    }
-  }
-
+  // A day picked in the calendar (spec 0016 AC-9) is one complete date, so it is saved at once instead of after the pause.
   function handlePick(date: string) {
     if (!valid(date)) return;
     setDraft(date);
@@ -130,29 +118,7 @@ export default function StampDateInput({
         onBlur={handleBlur}
         className="w-28 rounded border border-stone-300 px-2 py-0.5 text-sm tabular-nums"
       />
-      <span className="relative inline-flex">
-        <button
-          type="button"
-          aria-label={t("openCalendar")}
-          onClick={openCalendar}
-          className="rounded p-1 text-stone-500 hover:bg-stone-100 hover:text-stone-800"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z" />
-          </svg>
-        </button>
-        <input
-          ref={picker}
-          type="date"
-          tabIndex={-1}
-          aria-hidden="true"
-          value={valid(draft) ? draft : saved}
-          min={MIN_STAMP_DATE}
-          max={max}
-          onChange={(e) => handlePick(e.target.value)}
-          className="pointer-events-none absolute inset-0 h-full w-full opacity-0"
-        />
-      </span>
+      <CalendarButton value={valid(draft) ? draft : saved} max={max} onPick={handlePick} />
     </>
   );
 }

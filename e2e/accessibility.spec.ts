@@ -45,6 +45,28 @@ const TARGETS: Target[] = [
     },
   },
   {
+    // "Change dates" (spec 0016 AC-14 to AC-21): the mode with its checkboxes, the stage buttons and the bar, one stamp chosen
+    name: "dashboard-change-dates",
+    signedIn: true,
+    skipAtPhone: ["color-contrast"],
+    open: async (page) => {
+      await page.goto("/en/dashboard");
+      await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+      await expandAllStages(page);
+      const row = page.locator("#place-OKTPH_02");
+      await expect(row.getByRole("button", { name: /^(Add stamp|Remove)$/ })).toBeVisible();
+      const add = row.getByRole("button", { name: "Add stamp" });
+      if (await add.count()) await add.click(); // already stamped on the second visit, at the other width
+      await expect(row.getByRole("button", { name: "Remove" })).toBeVisible();
+      await page.getByRole("button", { name: "Change dates" }).click();
+      const bar = page.getByRole("region", { name: "Change the date of several stamps" });
+      await expect(bar).toBeVisible();
+      await row.getByRole("checkbox").check();
+      await bar.getByLabel("New date of the selected stamps").fill("2024-03-05");
+      await expect(bar.getByRole("button", { name: "Apply" })).toBeEnabled();
+    },
+  },
+  {
     name: "account",
     signedIn: true,
     open: async (page) => {

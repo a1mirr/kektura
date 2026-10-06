@@ -6,7 +6,7 @@
 // name, the stage, the user id and the error's own code/message are logged: never tokens, cookies,
 // emails, request input, or the extra `details` / `hint` a Supabase error can carry.
 
-export type StampAction = "setPlacesStamped" | "setStampDate" | "setExtraStamped" | "setExtraStampDate";
+export type StampAction = "setPlacesStamped" | "setStampDate" | "setStampDates" | "setExtraStamped" | "setExtraStampDate";
 // Where it failed: reading the checkpoints, writing the stamps, or something that threw.
 export type StampStage = "read" | "write" | "exception";
 

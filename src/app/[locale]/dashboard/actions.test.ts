@@ -5,7 +5,7 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 
 import { refresh } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { setExtraStampDate, setExtraStamped, setPlacesStamped, setStampDate } from "./actions";
+import { setExtraStampDate, setExtraStamped, setPlacesStamped, setStampDate, setStampDates } from "./actions";
 
 type Call = { table: string; op: string; args: unknown[] };
 
@@ -17,6 +17,7 @@ function fakeSupabase({
   readError = null as unknown,
   writeError = null as unknown,
   updatedRows = [{ ok: 1 }] as unknown[], // what `update(...).select()` returns: the rows that were changed
+  rpcResult = { data: true, error: null } as { data: unknown; error: unknown }, // what a database function answers
 } = {}) {
   const calls: Call[] = [];
   const from = (table: string) => {
@@ -60,7 +61,11 @@ function fakeSupabase({
     };
     return q;
   };
-  const client = { auth: { getUser: vi.fn(async () => ({ data: { user } })) }, from };
+  const rpc = vi.fn(async (name: string, args: unknown) => {
+    calls.push({ table: "rpc", op: name, args: [args] });
+    return rpcResult;
+  });
+  const client = { auth: { getUser: vi.fn(async () => ({ data: { user } })) }, from, rpc };
   return { client, calls };
 }
 
@@ -535,5 +540,93 @@ describe("spec 0002: retired stamps", () => {
       expect(writes(calls)).toEqual([]);
     }
     expect((await run("2014-11-20", ["OKT_RETIRED_NYIRJESI", "OKTPH_03"])).result).toEqual({ ok: false, reason: "failed" });
+  });
+});
+
+describe("spec 0016: setStampDates (many dates at once)", () => {
+  const FAILED = { ok: false, reason: "failed" };
+  const rpcCalls = (calls: Call[]) => calls.filter((c) => c.table === "rpc");
+
+  it("AC-17: sends the places, the extra stamps and the date to the one database function, and refreshes the page", async () => {
+    const { calls } = useClient(fakeSupabase());
+    expect(await setStampDates(["OKTPH_03", "OKTPH_07"], [7, 9], DAY)).toEqual({ ok: true });
+    expect(calls).toEqual([
+      { table: "rpc", op: "set_stamp_dates", args: [{ place_keys: ["OKTPH_03", "OKTPH_07"], extra_ids: [7, 9], new_date: DAY }] },
+    ]);
+    expect(refresh).toHaveBeenCalledOnce();
+  });
+
+  it("AC-17: places alone and extra stamps alone are fine", async () => {
+    const { calls } = useClient(fakeSupabase());
+    expect(await setStampDates(["OKTPH_03"], [], DAY)).toEqual({ ok: true });
+    expect(await setStampDates([], [7], DAY)).toEqual({ ok: true });
+    expect(rpcCalls(calls)).toHaveLength(2);
+  });
+
+  it("AC-17: a request of exactly 500 items goes through, 501 does not", async () => {
+    const { calls } = useClient(fakeSupabase());
+    const places = Array.from({ length: 300 }, (_, i) => `K${i}`);
+    const extras = Array.from({ length: 200 }, (_, i) => i);
+    expect(await setStampDates(places, extras, DAY)).toEqual({ ok: true });
+    expect(await setStampDates(places, [...extras, 200], DAY)).toEqual(FAILED);
+    expect(rpcCalls(calls)).toHaveLength(1);
+  });
+
+  it.each([
+    ["nothing at all", [[], [], DAY]],
+    ["an invalid date", [["OKTPH_03"], [], "2026-02-30"]],
+    ["a date after tomorrow", [["OKTPH_03"], [], "2999-01-01"]],
+    ["a date before the first year of the trail", [["OKTPH_03"], [], "1937-12-31"]],
+    ["an empty date", [["OKTPH_03"], [], ""]],
+    ["another date format", [["OKTPH_03"], [], "2026-9-5"]],
+    ["a place key that is not a string", [[42], [], DAY]],
+    ["an over-long place key", [["x".repeat(65)], [], DAY]],
+    ["an extra id that is not an integer", [[], [1.5], DAY]],
+    ["an extra id that is not a number", [[], ["7"], DAY]],
+    ["places that are not a list", ["OKTPH_03", [], DAY]],
+    ["extras that are not a list", [["OKTPH_03"], 7, DAY]],
+  ])("AC-17: refuses %s without database access, with one warning", async (_, args) => {
+    expect(await setStampDates(...(args as [string[], number[], string]))).toEqual(FAILED);
+    expect(createClient).not.toHaveBeenCalled();
+    expect(warnLog.mock.calls).toEqual([["[stamp-action] invalid input action=setStampDates"]]);
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it("AC-17: without a session it is `unauthorized` and calls nothing", async () => {
+    const { calls } = useClient(fakeSupabase({ user: null }));
+    expect(await setStampDates(["OKTPH_03"], [], DAY)).toEqual({ ok: false, reason: "unauthorized" });
+    expect(calls).toEqual([]);
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it("AC-17: when the function changed nothing (a stamp is gone, or a retired stamp's day) it is `failed`, nothing is refreshed, and it is no error of ours", async () => {
+    useClient(fakeSupabase({ rpcResult: { data: false, error: null } }));
+    expect(await setStampDates(["OKTPH_03"], [7], DAY)).toEqual(FAILED);
+    expect(refresh).not.toHaveBeenCalled();
+    expect(errorLog).not.toHaveBeenCalled();
+    expect(warnLog.mock.calls).toEqual([["[stamp-action] invalid input action=setStampDates"]]);
+  });
+
+  it("AC-17: a database error is `failed` and logged like the other stamp actions, without details or input", async () => {
+    useClient(fakeSupabase({ rpcResult: { data: null, error: dbError("permission denied for function set_stamp_dates") } }));
+    expect(await setStampDates(["OKTPH_03"], [7], DAY)).toEqual(FAILED);
+    expect(errorLog.mock.calls).toEqual([
+      ['[stamp-action] action=setStampDates stage=write user=user-1 code=42501 message="permission denied for function set_stamp_dates"'],
+    ]);
+    const logged = JSON.stringify(errorLog.mock.calls);
+    expect(logged).not.toContain("secret-details");
+    expect(logged).not.toContain("OKTPH_03");
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it("AC-17: never throws", async () => {
+    vi.mocked(createClient).mockRejectedValue(new Error("cookies() unavailable"));
+    await expect(setStampDates(["OKTPH_03"], [], DAY)).resolves.toEqual(FAILED);
+    const broken = fakeSupabase();
+    broken.client.rpc = vi.fn(async () => {
+      throw new Error("socket hang up");
+    });
+    useClient(broken);
+    await expect(setStampDates(["OKTPH_03"], [], DAY)).resolves.toEqual(FAILED);
   });
 });
