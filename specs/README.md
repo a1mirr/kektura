@@ -133,7 +133,7 @@ checks, ships and is run). The headings below only group the index: moving a spe
 | Spec | Area | Status |
 | --- | --- | --- |
 | [0006](project/0006-test-server.md) | Test server with dummy login, E2E tests and how they sign in | Done |
-| [0007](project/0007-ci.md) | CI once per change (Markdown-only pull requests skip E2E), E2E caches and timing report, database tests that fail in CI instead of skipping, generated-types check, Dependabot | Done |
+| [0007](project/0007-ci.md) | CI once per change (Markdown-only pull requests skip E2E), E2E caches and timing report, database tests that fail in CI instead of skipping, generated-types check, security checks (npm audit with an expiring allow-list, gitleaks), Dependabot | Done |
 | [0012](project/0012-backups.md) | Weekly backup of production user data | Done |
 | [0026](project/0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Done |
 | [0035](project/0035-feature-flags.md) | Feature flags: merge a feature dark, switch it on for the developer, testers or everybody without a deploy | Done |
