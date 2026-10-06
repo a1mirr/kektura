@@ -105,7 +105,7 @@ test.describe("spec 0003: the trail map", () => {
     page,
   }) => {
     // Without the native Fullscreen API the CSS overlay is all there is, and it is the overlay that has to win the stacking
-    // against the sticky left column it sits in and against the positioned controls of the right one (the date fields).
+    // against the sticky block it sits in and against the positioned controls of the right one (the date fields).
     await page.addInitScript(() => {
       Object.defineProperty(Element.prototype, "requestFullscreen", { value: undefined, configurable: true });
     });
@@ -136,14 +136,14 @@ test.describe("spec 0003: the trail map", () => {
     expect(at!.y).toBeLessThan(720);
   });
 
-  test("AC-24: with the route panel shown the left column scrolls inside itself and the map stays visible", async ({ page }) => {
+  test("AC-24: with the route panel shown the map's block scrolls inside itself and the map stays visible", async ({ page }) => {
     await openDashboardWithMap(page); // 1280 x 720
     await expandAllStages(page);
     await openStampPopup(page, "OKTPH_01_DDKPH_01", "Route from here");
     await page.getByRole("button", { name: "Route from here" }).click();
     await expect(page.getByText("Now pick the end stamp")).toBeVisible();
 
-    const aside = page.locator("[data-page-aside]");
+    const aside = page.locator("[data-sticky-map]");
     const { scroll, client, overflowY } = await aside.evaluate((el) => ({
       scroll: el.scrollHeight,
       client: el.clientHeight,
@@ -153,7 +153,7 @@ test.describe("spec 0003: the trail map", () => {
     expect(client).toBeLessThanOrEqual(720); // never taller than the window
     await expect(canvas(page)).toBeInViewport();
     expect(scroll).toBeGreaterThanOrEqual(client);
-    // whatever does not fit can be scrolled to: the last control of the column, the layer toggles
+    // whatever does not fit can be scrolled to: the last control of the block, the layer toggles
     await aside.evaluate((el) => (el.scrollTop = el.scrollHeight));
     await expect(page.getByLabel("Walked stretches")).toBeInViewport({ ratio: 1 });
     await expect(page.getByRole("button", { name: "Clear", exact: true })).toBeVisible();
@@ -165,13 +165,13 @@ test.describe("spec 0003: the trail map", () => {
       [1280, 720],
       [1024, 768],
     ]) {
-      test(`AC-24: in ${locale} at ${width} x ${height} nothing of the left column is cut off without a way to scroll to it`, async ({ page }) => {
+      test(`AC-24: in ${locale} at ${width} x ${height} nothing of the map's block is cut off without a way to scroll to it`, async ({ page }) => {
         await signInAsNewUser(page);
         await page.setViewportSize({ width, height });
         await page.goto(`/${locale}/dashboard`);
         await expect(canvas(page)).toBeVisible();
-        const aside = page.locator("[data-page-aside]");
-        await page.evaluate(() => window.scrollTo(0, 1500)); // the column sticks once the page has scrolled
+        const aside = page.locator("[data-sticky-map]");
+        await page.evaluate(() => window.scrollTo(0, 1500)); // the block sticks once the page has scrolled
         await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000);
         const m = await aside.evaluate((el) => {
           const box = el.getBoundingClientRect();
@@ -188,7 +188,7 @@ test.describe("spec 0003: the trail map", () => {
         expect(m.wide, "sideways").toBeLessThanOrEqual(0);
         expect(m.asideInWindow).toBe(true);
         expect(m.tall <= 0 || m.overflowY === "auto", "it fits, or it scrolls").toBe(true);
-        expect(m.lastBottomInside, "the end of the column can be reached").toBe(true);
+        expect(m.lastBottomInside, "the end of the block can be reached").toBe(true);
       });
     }
   }
@@ -218,11 +218,45 @@ test.describe("spec 0003: the trail map", () => {
     const row = page.locator("#place-OKTPH_149");
     await row.scrollIntoViewIfNeeded();
     await expect(canvas(page)).toBeInViewport({ ratio: 1 });
+    const before = (await row.boundingBox())!;
 
     await row.getByRole("button", { name: "Show on map" }).click();
     await expect(canvas(page)).toBeInViewport({ ratio: 1 });
     await expect(page.locator(".maplibregl-popup")).toContainText("Hollóháza");
+    await page.waitForTimeout(1000); // a smooth scroll of the page would have moved the row by now
+    // the map was in view already, so the click must not scroll the list from under the pointer
+    expect((await row.boundingBox())!.y, "the row did not move").toBeCloseTo(before.y, 0);
   });
+
+  for (const [width, layout] of [
+    [1280, "two columns"],
+    [768, "one column"],
+  ] as const) {
+    test(`AC-12: in ${layout} "Show in list" in a stamp's popup brings its row into view and flashes it`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 720 });
+      await openDashboardWithMap(page);
+      await expandAllStages(page);
+      const row = page.locator("#place-OKTPH_149"); // the last stage: far down the list
+      await row.getByRole("button", { name: "Add stamp" }).click(); // a stamped row, with its date controls
+      await expect(row.getByRole("button", { name: "Remove" })).toBeVisible();
+      await openStampPopup(page, "OKTPH_149", "Show in list");
+      if (width >= 1024) {
+        await page.evaluate(() => window.scrollTo(0, 1500)); // the row is far out of view, the sticky map is not
+        await expect(row).not.toBeInViewport();
+        await expect(page.getByRole("button", { name: "Show in list" })).toBeInViewport();
+      }
+      await page.getByRole("button", { name: "Show in list" }).click();
+
+      await expect(row).toBeInViewport({ ratio: 1 });
+      await expect(row).toHaveClass(/flash/);
+      if (width >= 1024) {
+        // two columns: the map did not leave the window while the list moved, and the block stays inside it
+        await expect(canvas(page)).toBeInViewport({ ratio: 1 });
+        const aside = (await page.locator("[data-sticky-map]").boundingBox())!;
+        expect(aside.y + aside.height).toBeLessThanOrEqual(720 + 0.5);
+      }
+    });
+  }
 
   test("AC-4, AC-8, AC-12: picking two stamps shows the stretch's numbers; Clear removes the panel", async ({
     page,

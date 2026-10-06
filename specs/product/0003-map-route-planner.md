@@ -53,7 +53,7 @@ From `public/data/okt-hops.json`: 160 hops between neighbouring places, from the
   show in list. "Show in list" leaves fullscreen, opens the stamp's stage if collapsed, scrolls to its
   row (`place-<key>` / `extra-<id>`) and flashes it. In the two columns of spec 0001 AC-28 the row is in the other column, so
   the map stays where it is, in view.
-- **AC-13**: The 📍 button in a list row flies the map to that stamp (zoom >= 12) and labels it; for an
+- **AC-13**: The 📍 button in a list row flies the map to that stamp (zoom >= 12) and labels it, and scrolls the map into view unless it is fully in view already (so in the sticky two-column layout the page does not move); for an
   extra stamp it also switches the extra-stamps layer on.
 - **AC-14**: Restaurants (`public/data/restaurants.json`: within 5 km of the trail, built by
   `scripts/build-restaurants.mjs` from an etteremhet.hu results page): hover shows name and distance,
@@ -90,13 +90,13 @@ geometry (AC-9) and the layer code with the dashboard's map, and is read-only. I
 
 ### Size
 
-- **AC-24**: The dashboard's map is never taller than 70 % of the window's height, and in a window narrower than 1024 px it is 24 rem
-  (384 px) tall at most. From 1024 px, where it stands in the sticky left column of spec 0001 AC-28, its height follows the window
-  (at least 12 rem, at most 28 rem, the window's height minus 28 rem in between), a cap chosen so that the column (the figures above
-  the map, its legend and toggles below it) normally fits the window, in English at 1280 x 720, 1440 x 900 and 1024 x 768. That is not
-  a promise for every case: the column is never taller than the window and keeps its own scroll (`overflow-y: auto`), so when its
-  content is taller (the route panel under the map, a very short window, a language whose text wraps more) it scrolls inside itself, and
-  everything in it stays reachable, with no sideways overflow. Fullscreen (AC-11) is unchanged.
+- **AC-24**: The dashboard's map is 24 rem (384 px) tall in a window narrower than 1024 px. From 1024 px it stands in the sticky block of
+  spec 0001 AC-28 and its height follows the window: the window's height minus 16 rem, at least 24 rem (a popup needs the room) and at
+  most 32 rem, and never more than 70 % of the window (which wins in a window under about 34 rem tall). The cap is chosen so that the block
+  (title, map, legend and toggles) normally fits the window, in English at 1280 x 720, 1440 x 900 and 1024 x 768. That is not a promise
+  for every case: the block is never taller than the window and keeps its own scroll (`overflow-y: auto`), so when its content is taller
+  (the route panel under the map, a very short window, a language whose text wraps more) it scrolls inside itself, and everything in it
+  stays reachable, with no sideways overflow. Fullscreen (AC-11) is unchanged.
 - **AC-25**: The map fits its box at any width and follows it when the window is resized: the canvas is as wide and as tall as the map's
   container after a resize in either direction, and the container is as wide as the card around it.
 
@@ -136,10 +136,10 @@ Routing off the trail; replacing MapLibre.
 | AC-4 ... AC-8 | `src/lib/route-stats.test.ts` |
 | Table totals | `tests/trail-data.test.ts` (0004 AC-6) |
 | AC-14, AC-21 | `src/components/trail-map/useRestaurants.test.tsx` (fetched once while the flag is on, nothing while it is off), `e2e/feature-flags.spec.ts` (the checkbox, the request and the About credit in each state) |
-| AC-9, AC-10, AC-11, AC-13, AC-16 | `e2e/map.spec.ts` (the detailed route is requested once on first need and again after a failed load on the next zoom change; toggles and their persistence; fullscreen, also in two columns over a stamped row's date controls, with the native Fullscreen API switched off so that only the CSS overlay's stacking decides; 📍 on a place (in one column the map scrolls into view, in two it is in view already) and on an extra stamp, which switches that layer on; stamping from the list keeps the stamp's label where it was on the map) |
+| AC-9, AC-10, AC-11, AC-13, AC-16 | `src/lib/map-focus.test.ts` (the 📍 button scrolls the map only when it is not fully in view), `e2e/map.spec.ts` ("Show in list" in a stamp's popup, in one column and in two: the row ends in view and flashes, the sticky map stays in view; the detailed route is requested once on first need and again after a failed load on the next zoom change; toggles and their persistence; fullscreen, also in two columns over a stamped row's date controls, with the native Fullscreen API switched off so that only the CSS overlay's stacking decides; 📍 on a place (in one column the map scrolls into view, in two it is in view already) and on an extra stamp, which switches that layer on; stamping from the list keeps the stamp's label where it was on the map) |
 | AC-18, AC-19, AC-20 | `src/lib/compare-map.test.ts` (the lines and points of each view), `src/lib/map-layers.test.ts` (the layers: a style per state), `e2e/friends-compare.spec.ts` (the switch and the legend; a click on a place, aimed from the map's fit to the trail, opens its stage, flashes a row of the list and opens no popup); the hover text and the point's key and number: `src/lib/compare-map.test.ts`, `src/lib/friends-compare.test.ts`; the row reveal itself: `src/lib/map-reveal.test.ts` (AC-12) |
 | AC-18, AC-19, AC-20 (colours and line styles on the canvas, hover, the detailed route) | manual (the map is WebGL pixels that E2E cannot read): see the checklist below. Last checked: never recorded. |
-| AC-24, AC-25 | `e2e/layout.spec.ts` (the height at seven window sizes, a phone on its side included, never over 70 %; the left column fits the window at 1280 x 720, 1440 x 900 and 1024 x 768 in English; the canvas follows its container through four window sizes), `e2e/map.spec.ts` (with the route panel shown at 1280 x 720 the column scrolls inside itself, stays in the window and its last control can be reached; in English, Hungarian, German and Russian at 1280 x 720 and 1024 x 768 the column has no sideways overflow, stays in the window and its end can be reached) |
+| AC-24, AC-25 | `e2e/layout.spec.ts` (the height from 1024 px at five window sizes, never over 70 %; the map's block fits the window at 1280 x 720, 1440 x 900 and 1024 x 768 in English, to within 4 px; the canvas follows its container through four window sizes), `e2e/map.spec.ts` (with the route panel shown at 1280 x 720 the block scrolls inside itself, stays in the window and its last control can be reached; in English, Hungarian, German and Russian at 1280 x 720 and 1024 x 768 the block has no sideways overflow, stays in the window and its end can be reached) |
 | AC-17 | `src/lib/map-storage.test.ts`, `map-data.test.ts`, `map-layers.test.ts`, `map-popups.test.ts`, `map-reveal.test.ts` (the pure helpers); `tests/map-structure.test.ts` (no file of the map code is over 300 lines) |
 | AC-23 | `src/lib/map-data.test.ts` (a retired row with coordinates is no point), `src/lib/progress.test.ts` (a retired row is no place; the hops and the route planner are built from places) |
 | AC-22 | `src/components/trail-map/stampPopups.test.ts` (a fake map: the popup of a new stamp carries the note, one that was always required does not), `src/lib/new-stamps.test.ts` (the note: the date, the waiver, nothing for an always required place) |

@@ -14,22 +14,23 @@ export type PageVariant = "wide" | "reading" | "hero" | "card";
 //
 // A wide page made of independent blocks gives `aside` (the left column) next to its children (the right one) and
 // `header` (the title row, above both): from 1024 px they stand side by side, below it they are one column in the DOM's
-// order, header, aside, children (spec 0001 AC-28, spec 0024 AC-27, AC-28). `sticky` keeps the aside in view while the
-// children scroll. A sticky box is a stacking context of its own, so it gets a z-index that lifts it, and the fullscreen map
+// order, header, aside, children (spec 0001 AC-28, spec 0024 AC-27, AC-28). `stretch` makes the aside as tall as the
+// children, so that a block inside it can stick (`lg:sticky`) and stay in view while they scroll: the dashboard's map, spec 0001
+// AC-28. A sticky box is a stacking context of its own, so it takes a z-index (`lg:z-10`) that lifts it, and the fullscreen map
 // (`fixed z-50`) inside it, over the positioned controls of the children (the date fields, spec 0003 AC-11).
 export default function PageShell({
   variant = "wide",
   spaced = false,
   header,
   aside,
-  sticky = false,
+  stretch = false,
   children,
 }: {
   variant?: PageVariant;
   spaced?: boolean;
   header?: ReactNode;
   aside?: ReactNode;
-  sticky?: boolean;
+  stretch?: boolean;
   children: ReactNode;
 }) {
   const gap = spaced ? " space-y-8" : "";
@@ -59,11 +60,8 @@ export default function PageShell({
     return (
       <main data-page="split" className={`${pageWidth} space-y-8 py-8`}>
         {header}
-        <div className="space-y-8 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:gap-8 lg:space-y-0">
-          <div
-            data-page-aside={sticky ? "sticky" : ""}
-            className={`space-y-8${sticky ? " lg:sticky lg:top-4 lg:z-10 lg:-m-1 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:p-1" : ""}`}
-          >
+        <div className={`space-y-8 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-8 lg:space-y-0${stretch ? "" : " lg:items-start"}`}>
+          <div data-page-aside className="space-y-8">
             {aside}
           </div>
           <div className="space-y-8">{children}</div>

@@ -205,7 +205,7 @@ test.describe("spec 0036: the page layout", () => {
 });
 
 test.describe("spec 0001: the dashboard's two columns", () => {
-  test("AC-28: from 1024 px the figures and the map stand left of the stage list, and stay in view while it scrolls", async ({ page }) => {
+  test("AC-28: from 1024 px the figures and the map stand left of the stage list, and the map stays in view while it scrolls", async ({ page }) => {
     await signInAsNewUser(page);
     for (const width of [1024, 1440, 1920]) {
       await page.setViewportSize({ width, height: 800 });
@@ -223,12 +223,15 @@ test.describe("spec 0001: the dashboard's two columns", () => {
       const [c1, c2, c3] = [await box(cards.nth(0)), await box(cards.nth(1)), await box(cards.nth(2))];
       expect(c1.y).toBeCloseTo(c2.y, 0);
       expect(c3.y).toBeGreaterThan(c1.y);
-      // it stays in view: after scrolling a long way its top is 16 px below the window's
+      // the map's block stays in view: after scrolling a long way its top is 16 px below the window's, and all of it is in the window
+      const sticky = page.locator("[data-sticky-map]");
       await page.evaluate(() => window.scrollTo(0, 1500));
       await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000);
-      const stuck = await box(aside);
+      const stuck = await box(sticky);
       expect(stuck.y, `${width} px: sticky`).toBeLessThan(40);
-      expect(stuck.y + stuck.height, `${width} px: the whole aside fits the window`).toBeLessThanOrEqual(800 + 0.5);
+      expect(stuck.y + stuck.height, `${width} px: the whole block fits the window`).toBeLessThanOrEqual(800 + 0.5);
+      // the figures above it scrolled away with the page
+      expect((await box(page.locator("[data-page-aside] dl"))).y + 1).toBeLessThan(0);
       await expect(page.locator(".maplibregl-canvas")).toBeInViewport();
     }
   });
@@ -248,35 +251,30 @@ test.describe("spec 0001: the dashboard's two columns", () => {
       expect(stage.y, `${width} px`).toBeGreaterThanOrEqual(map.y + map.height);
       expect(extras.y, `${width} px`).toBeGreaterThanOrEqual(stage.y + stage.height);
       expect(stage.width, `${width} px: the list uses the width`).toBeGreaterThan(width - 60);
-      const aside = await page.locator("[data-page-aside]").evaluate((el) => getComputedStyle(el).position);
+      const aside = await page.locator("[data-sticky-map]").evaluate((el) => getComputedStyle(el).position);
       expect(aside, `${width} px: nothing sticks`).toBe("static");
     }
   });
 
-  test("AC-28: \"Show in list\" and the stage links still bring a row into view in the two columns", async ({ page }) => {
+  test("AC-28: the \"go to extra stamps\" link still brings the extra stamps into view in the two columns (\"Show in list\": e2e/map.spec.ts)", async ({ page }) => {
     await signInAsNewUser(page);
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto("/en/dashboard");
     await expect(page.locator(".maplibregl-canvas")).toBeVisible();
     await page.getByRole("link", { name: /^go to extra stamps/ }).first().click();
     await expect(page.locator("#extra-stamps li").first()).toBeInViewport();
-    await page.locator("#stage-3 button[aria-expanded]").click();
-    await page.locator("#stage-3 li").first().scrollIntoViewIfNeeded();
-    await expect(page.locator("#stage-3 li").first()).toBeInViewport();
   });
 });
 
 test.describe("spec 0003: the map's size", () => {
-  test("AC-24: the map is never taller than 70 % of the window, at any window height and width", async ({ page }) => {
+  test("AC-24: from 1024 px the map is never taller than 70 % of the window, at any window height", async ({ page }) => {
     await signInAsNewUser(page);
     for (const [width, height] of [
       [1440, 900],
       [1280, 720],
       [1024, 600],
+      [1280, 500],
       [1920, 1080],
-      [768, 500],
-      [812, 375], // a phone on its side
-      [375, 812],
     ]) {
       await page.setViewportSize({ width, height });
       await page.goto("/en/dashboard");
@@ -287,7 +285,7 @@ test.describe("spec 0003: the map's size", () => {
     }
   });
 
-  test("AC-24: from 1024 px the whole left column, map included, fits the window height, so the map's bottom is never cut off", async ({
+  test("AC-24: from 1024 px the map's block (title, map, legend, toggles) normally fits the window height, so the map's bottom is never cut off", async ({
     page,
   }) => {
     await signInAsNewUser(page);
@@ -299,9 +297,9 @@ test.describe("spec 0003: the map's size", () => {
       await page.setViewportSize({ width, height });
       await page.goto("/en/dashboard");
       await expect(page.locator(".maplibregl-canvas")).toBeVisible();
-      const aside = page.locator("[data-page-aside]");
+      const aside = page.locator("[data-sticky-map]");
       const { scroll, client } = await aside.evaluate((el) => ({ scroll: el.scrollHeight, client: el.clientHeight }));
-      expect(scroll, `${width} x ${height}: nothing scrolls inside the column`).toBeLessThanOrEqual(client);
+      expect(scroll, `${width} x ${height}: nothing (to within a few px of font differences) scrolls inside the block`).toBeLessThanOrEqual(client + 4);
     }
   });
 

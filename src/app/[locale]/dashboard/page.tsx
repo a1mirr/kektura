@@ -111,7 +111,7 @@ export default async function Dashboard({
 
   return (
     <PageShell
-      sticky
+      stretch
       header={
         <header className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-blue-700">{t("title")}</h1>
@@ -140,11 +140,18 @@ export default async function Dashboard({
           </dl>
 
           {mapPoints.length > 0 && (
-            <section className="rounded-lg bg-white p-4 shadow-sm">
-              <h2 className="mb-2 font-semibold">{t("map")}</h2>
-              <TrailMapLoader points={mapPoints} extras={mapExtras} doneRanges={doneRanges} withRestaurants={showRestaurants} />
-              <p className="mt-2 text-sm text-stone-500">{t("mapLegend")}</p>
-            </section>
+            // From 1024 px the map's block stays in view while the stage list scrolls (spec 0001 AC-28). A sticky box is a
+            // stacking context, so it has a z-index: the fullscreen map inside it must cover the list's controls (spec 0003 AC-11).
+            <div
+              data-sticky-map
+              className="lg:sticky lg:top-4 lg:z-10 lg:-m-1 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:p-1"
+            >
+              <section className="rounded-lg bg-white p-4 shadow-sm">
+                <h2 className="mb-2 font-semibold">{t("map")}</h2>
+                <TrailMapLoader points={mapPoints} extras={mapExtras} doneRanges={doneRanges} withRestaurants={showRestaurants} />
+                <p className="mt-2 text-sm text-stone-500">{t("mapLegend")}</p>
+              </section>
+            </div>
           )}
         </>
       }

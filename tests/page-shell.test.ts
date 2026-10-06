@@ -55,4 +55,11 @@ describe("spec 0036: the page shell", () => {
   it("AC-2: the side padding is 16 px up to 640 px and 24 px above", () => {
     expect(read("src/components/PageShell.tsx")).toContain('"mx-auto w-full max-w-(--page-width) px-4 sm:px-6"');
   });
+
+  it("spec 0003 AC-11: the dashboard's sticky map block has a z-index, so the fullscreen map inside it covers the list's controls", () => {
+    const dashboard = read("src/app/[locale]/dashboard/page.tsx");
+    const block = /data-sticky-map\s+className="([^"]*)"/.exec(dashboard)?.[1] ?? "";
+    expect(block).toContain("lg:sticky");
+    expect(block).toMatch(/lg:z-\d+/);
+  });
 });

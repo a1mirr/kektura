@@ -51,21 +51,19 @@ describe("spec 0036: PageShell", () => {
     expect(grid.className).toContain("lg:grid-cols-");
   });
 
-  it("spec 0001 AC-28: only a sticky aside sticks", () => {
+  it("spec 0001 AC-28: the aside is as tall as the children only when it is asked to stretch, so a block in it can stick", () => {
     const { rerender } = render(
       <PageShell aside={<p>side</p>}>
         <p>list</p>
       </PageShell>,
     );
-    expect(screen.getByText("side").parentElement!.className).not.toContain("sticky");
+    const grid = () => screen.getByText("side").parentElement!.parentElement!;
+    expect(grid().className).toContain("lg:items-start");
     rerender(
-      <PageShell sticky aside={<p>side</p>}>
+      <PageShell stretch aside={<p>side</p>}>
         <p>list</p>
       </PageShell>,
     );
-    expect(screen.getByText("side").parentElement!.className).toContain("lg:sticky");
-    // a sticky box is a stacking context: it needs a z-index of its own, or the fullscreen map inside it (z-50, local to it)
-    // is painted under positioned controls of the other column (spec 0003 AC-11)
-    expect(screen.getByText("side").parentElement!.className).toContain("lg:z-10");
+    expect(grid().className).not.toContain("lg:items-start");
   });
 });
