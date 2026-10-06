@@ -18,11 +18,20 @@ export default defineConfig({
     locale: "en-US",
     trace: "retain-on-failure",
   },
-  // The flags project switches declared flags for everybody, which the other tests must not see (spec 0035 AC-11), so
-  // it starts only when the rest has finished. Run it alone with `npx playwright test --project flags --no-deps`.
+  // `chromium` runs everything except the tests tagged `@mobile`, which the `mobile` project runs alone, as a phone
+  // (spec 0006 AC-10): Chromium at 375 x 812 with touch and mobile emulation (375 px is the narrowest width the layout
+  // promises, spec 0036). The flags project switches declared flags for everybody, which the other tests must not see
+  // (spec 0035 AC-11), so it starts only when the rest has finished. Run it alone with
+  // `npx playwright test --project flags --no-deps`, the phone tests with `npx playwright test --project mobile`.
   projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] }, testIgnore: "feature-flags.spec.ts" },
-    { name: "flags", use: { ...devices["Desktop Chrome"] }, testMatch: "feature-flags.spec.ts", dependencies: ["chromium"] },
+    { name: "chromium", use: { ...devices["Desktop Chrome"] }, testIgnore: "feature-flags.spec.ts", grepInvert: /@mobile/ },
+    {
+      name: "mobile",
+      use: { ...devices["Pixel 5"], viewport: { width: 375, height: 812 }, hasTouch: true, isMobile: true },
+      testIgnore: "feature-flags.spec.ts",
+      grep: /@mobile/,
+    },
+    { name: "flags", use: { ...devices["Desktop Chrome"] }, testMatch: "feature-flags.spec.ts", dependencies: ["chromium", "mobile"] },
   ],
   webServer: {
     command: "npm run build:e2e && npm run start:e2e",

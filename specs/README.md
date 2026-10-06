@@ -50,7 +50,7 @@ defect: correct it at once when that is small, otherwise open a task issue.
 | Server actions (Supabase mocked) | next to the action, e.g. `src/app/[locale]/dashboard/actions.test.ts` | Node |
 | Client components | `src/components/*.test.tsx`, first line `// @vitest-environment jsdom` | jsdom + Testing Library |
 | Cross-cutting checks (generated data, translations) | `tests/*.test.ts` | Node |
-| User flows through the real app and database | `e2e/*.spec.ts` (Playwright, `npm run e2e`) | Test server (spec 0006) |
+| User flows through the real app and database | `e2e/*.spec.ts` (Playwright, `npm run e2e`); a test tagged `@mobile` runs at 375 px as a phone, and `e2e/accessibility.spec.ts` runs axe | Test server (spec 0006) |
 
 Tests that need the local database (`tests/*-database.test.ts` and the like) ask `requireDatabase` of `e2e/local-db.ts`: they skip, saying why, when it isn't running, and fail where `REQUIRE_LOCAL_DB` is set, which only CI's end-to-end job does ([0007](project/0007-ci.md) AC-12, AC-13).
 
@@ -132,7 +132,7 @@ checks, ships and is run). The headings below only group the index: moving a spe
 
 | Spec | Area | Status |
 | --- | --- | --- |
-| [0006](project/0006-test-server.md) | Test server with dummy login, E2E tests and how they sign in | Done |
+| [0006](project/0006-test-server.md) | Test server with dummy login, E2E tests and how they sign in, the tests at a phone's width (`@mobile`), accessibility checks with axe and their allow-list | Done |
 | [0007](project/0007-ci.md) | CI once per change (Markdown-only pull requests skip E2E), E2E caches and timing report, database tests that fail in CI instead of skipping, generated-types check, security checks (npm audit with an expiring allow-list, gitleaks), Dependabot | Done |
 | [0012](project/0012-backups.md) | Weekly backup of production user data | Done |
 | [0026](project/0026-automatic-deploy.md) | Automatic migrations and deploy after a merge | Done |

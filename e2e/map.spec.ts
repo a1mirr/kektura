@@ -55,6 +55,10 @@ test.describe("spec 0003: the trail map", () => {
     expect(box?.width).toBeGreaterThan(200);
     expect(box?.height).toBeGreaterThan(200);
     await expect(page.locator(".maplibregl-ctrl-attrib")).toContainText("OpenStreetMap");
+    // its links are told apart from the text around them by more than their colour (spec 0006 AC-11: axe's link-in-text-block)
+    const decorations = await page.locator(".maplibregl-ctrl-attrib a").evaluateAll((links) => links.map((a) => getComputedStyle(a).textDecorationLine));
+    expect(decorations.length).toBeGreaterThan(0);
+    expect(decorations.filter((line) => line !== "underline")).toEqual([]);
   });
 
   test("AC-10: layer toggles have their defaults and persist across a reload", async ({ page }) => {

@@ -44,6 +44,25 @@ export async function expandAllStages(page: Page) {
   }).toPass();
 }
 
+// The page does not scroll sideways (spec 0036 AC-5, spec 0006 AC-10): its scroll width is no wider than the window's
+// client width. When it is, the failure names the elements that stick out. Polled, so a page that is still settling
+// (fonts, hydration) gets a moment.
+export async function expectNoSidewaysScroll(page: Page, message: string) {
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const width = document.documentElement.clientWidth;
+          const wide = [...document.body.querySelectorAll("*")]
+            .filter((el) => el.getBoundingClientRect().right > width + 0.5)
+            .map((el) => `<${el.tagName.toLowerCase()} class="${el.className}">`);
+          return document.documentElement.scrollWidth - width > 0 ? wide.join(" | ") || "page wider than the window" : "";
+        }),
+      { message },
+    )
+    .toBe("");
+}
+
 // Spec 0001 AC-10: the ids of the place and extra-stamp rows whose description is cut off, nowrap or sticks
 // out of its row, plus how many descriptions were measured (so a changed selector can't pass vacuously).
 export function measureDescriptions(page: Page) {
