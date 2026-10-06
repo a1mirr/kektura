@@ -78,6 +78,29 @@ describe("spec 0024: friends actions", () => {
     expect(line).toBe('[friends] action=sendRequest code=42501 message="denied"');
   });
 
+  it("spec 0008 AC-6: a thrown error is sent to Telegram as an `exception`, a database error as a `write`", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response("{}", { status: 200 }));
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("TELEGRAM_BOT_TOKEN", "123:SECRET");
+    vi.stubEnv("TELEGRAM_CHAT_ID", "42");
+    vi.stubGlobal("fetch", fetchMock);
+    delete (globalThis as any).__kekturaFailureAlerter; // the rate limit lives on globalThis
+    try {
+      const { sendRequest, approveRequest } = await load();
+      mockRpc.mockRejectedValueOnce(new Error("network down"));
+      expect(await sendRequest("abc")).toEqual({ ok: false, reason: "failed" });
+      mockRpc.mockResolvedValueOnce({ data: null, error: { code: "42501", message: "denied" } });
+      expect(await approveRequest(U2)).toEqual({ ok: false, reason: "failed" });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const lines = fetchMock.mock.calls.map((call) => JSON.parse(String((call[1] as RequestInit).body)).text.split("\n")[1]);
+      expect(lines).toEqual(["[friends] sendRequest exception", "[friends] approveRequest write, code 42501"]);
+    } finally {
+      delete (globalThis as any).__kekturaFailureAlerter;
+      vi.unstubAllEnvs();
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("AC-12: signed out, every action says `unauthorized` and touches nothing", async () => {
     const actions = (await load()) as Record<string, (...a: unknown[]) => Promise<unknown>>;
     mockGetUser.mockResolvedValue({ data: { user: null } });
