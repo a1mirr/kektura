@@ -2,6 +2,7 @@
 // database), against the real local database (`npm run testdb:start`). The tests skip themselves when it isn't
 // running, and fail where CI requires it (`REQUIRE_LOCAL_DB`, spec 0007 AC-12); CI's end-to-end job runs them. They talk to PostgREST the way a browser could, as signed-in users and
 // as an anonymous visitor, so they prove what a malicious client can and cannot do.
+import { execFileSync, spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { beforeAll, describe, expect, it } from "vitest";
@@ -131,6 +132,32 @@ describe("spec 0016: set_stamp_dates (many dates in one transaction)", { timeout
       expect(dates(cleo)).toBe(before);
     }
     expect(dates(dan)).toBe(dates(dan).replaceAll("2026-03-04", "2025-01-01")); // nobody got a new date
+  });
+
+  it("AC-17: a stamp that another transaction deletes while the function runs fails the whole request: it waits for the lock and counts again", async (ctx) => {
+    requireDatabase(ctx, RELATIONS);
+    const cleo = await signUp();
+    stamp(cleo, ["OKTPH_03", "OKTPH_07"], [1], "2025-01-01");
+    const before = dates(cleo);
+    const psqlArgs = ["exec", "-i", "supabase_db_kektura", "psql", "-U", "postgres", "-tA", "-v", "ON_ERROR_STOP=1", "-q"];
+    // Another session removes OKTPH_07 and keeps its transaction open for a while...
+    const other = spawn("docker", psqlArgs);
+    const finished = new Promise<number | null>((resolve) => other.on("close", resolve));
+    other.stdin.end(
+      `begin; delete from user_stamps s using checkpoints c where c.id = s.checkpoint_id and s.user_id = '${cleo.id}' and c.place_key = 'OKTPH_07'; select pg_sleep(4); commit;`,
+    );
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // ...and the function is called meanwhile, as the user. Without the lock it would count the row that is still there, then update
+    // the one that is left and answer true with fewer rows changed.
+    const answer = execFileSync("docker", psqlArgs, {
+      encoding: "utf8",
+      input: `begin; set local role authenticated; select set_config('request.jwt.claims', '{"sub":"${cleo.id}","role":"authenticated"}', true);
+              select 'answer:' || public.set_stamp_dates(array['OKTPH_03', 'OKTPH_07'], array[1], '2026-03-04'); commit;`,
+    });
+    expect(await finished).toBe(0);
+    expect(answer).toContain("answer:f");
+    expect(dates(cleo).split(",").some((e) => e.endsWith("=2026-03-04"))).toBe(false); // nothing changed
+    expect(dates(cleo).split(",").length).toBe(before.split(",").length - 2); // OKTPH_07's two variants are gone, the rest is as it was
   });
 
   it("AC-18: a retired stamp may only get a date before the day it retired; a request with one that is too late changes nothing", async (ctx) => {

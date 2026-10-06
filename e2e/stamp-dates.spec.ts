@@ -349,3 +349,33 @@ test.describe("spec 0016: change many dates at once", () => {
     }
   });
 });
+
+// In two columns the map's block is a sticky stacking context (z-10) holding the fullscreen overlay, and the bar of the mode is a
+// sticky box of the other column: the bar must sit below that block, or it paints over a fullscreen map (spec 0016 AC-21, spec 0003 AC-11).
+test.describe("spec 0016: the bar and the fullscreen map", () => {
+  test("AC-21: at 1280 px the fullscreen map is topmost over the bar of the mode", async ({ page }) => {
+    // Without the native Fullscreen API the CSS overlay is all there is, and it is the overlay that has to win the stacking.
+    await page.addInitScript(() => {
+      Object.defineProperty(Element.prototype, "requestFullscreen", { value: undefined, configurable: true });
+    });
+    await signInAsNewUser(page);
+    await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+    await expandAllStages(page);
+    await enterChangeDates(page);
+    const at = (await bar(page).boundingBox())!;
+    expect(at.y).toBeGreaterThan(0);
+    expect(at.y).toBeLessThan(720); // the bar is in the window, so it could paint over the map
+
+    await page.getByRole("button", { name: "Fullscreen", exact: true }).click();
+    await expect(page.getByRole("button", { name: "Exit fullscreen" })).toBeVisible();
+    const hits = await page.evaluate((box) => {
+      const points = [
+        [box.x + box.width / 2, box.y + box.height / 2],
+        [box.x + 20, box.y + 20],
+        [box.x + box.width - 20, box.y + box.height - 10],
+      ];
+      return points.map(([x, y]) => !!document.elementFromPoint(x, y)?.closest(".fixed.inset-0"));
+    }, at);
+    expect(hits).toEqual([true, true, true]);
+  });
+});

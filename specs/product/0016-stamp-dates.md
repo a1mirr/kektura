@@ -64,7 +64,7 @@ user's own day. A date is only ever saved when it is a real, complete one, never
 - **AC-13**: A retired stamp (spec 0001 AC-22) is dated on its own and strictly: it has no "today" default, the date a user collects it with and
   the date of `setStampDate` must be a valid stamp date (AC-2) before its `retired_on` (spec 0002 AC-17), and a request that mixes
   it with other stamps is refused whole (changing many dates at once has its own rule, AC-18). Its date field's last day is the day before it retired: the calendar picker stops there and a later
-  day typed in is never sent (it is restored on leaving the field). (A date given to many stamps at once has its own rule, AC-18.)
+  day typed in is never sent (it is restored on leaving the field).
 
 ### Changing many dates at once
 
@@ -104,7 +104,7 @@ user's own day. A date is only ever saved when it is a real, complete one, never
   chosen, so a whole stage is dated in two steps; in the mode the same place offers "Select stage" (AC-15). A stage with no stamp has
   neither. Its accessible name says which stage ("Set date: Stage 3").
 - **AC-21**: On a phone the bar is fixed to the bottom of the screen and rides above the on-screen keyboard (the visual viewport's
-  inset); from 1024 px it sticks to the top of the list's column (spec 0036) while the stages scroll. At 375 and 320 px the page does
+  inset); from 1024 px it sticks to the top of the list's column (spec 0036) while the stages scroll, below the map's block, so a fullscreen map covers it (spec 0003 AC-11). At 375 and 320 px the page does
   not scroll sideways and the bar fits; its buttons, the date field and the calendar button, and the checkboxes (their label) are at
   least 44 x 44 px targets. With the keyboard: Tab reaches each checkbox, Space toggles it, Enter in the date field applies.
 - **AC-22**: The texts of the mode (`dashboard.bulk*`) exist in every language with the same placeholders; the count message has
@@ -135,7 +135,7 @@ chart) keep their localized form: this spec covers the fields where a date is en
   so the date couldn't be typed there. The calendar button is the quick way on a phone.
 
 - Many dates are one database function, not two client updates, because the places and the extra stamps are two tables and two
-  requests cannot be one transaction. The function checks everything before it writes, so "nothing" needs no rollback. A request
+  requests cannot be one transaction. The function locks the rows it counts (`for update`) and checks everything before it writes, so "nothing" needs no rollback and a row deleted by another transaction meanwhile makes it answer false instead of changing fewer rows. A request
   with a stamp that vanished meanwhile fails whole and the page is not refreshed: the choice stays, and the stamp drops out of it the
   next time the page is drawn.
 - The mode keeps the stage list calm for visits that do not change dates: the checkboxes exist only while it is on. `BulkCheckbox` reads
@@ -158,8 +158,8 @@ chart) keep their localized form: this spec covers the fields where a date is en
 | AC-13 | `src/app/[locale]/dashboard/actions.test.ts` (a retired stamp's date: before the retirement day, strict, mixed requests refused), `src/components/RetiredStampControl.test.tsx` (the field never sends a later day and restores it) |
 | AC-13 (the calendar picker's last day) | manual (native browser UI, like AC-9's row): open the calendar of a collected retired stamp: days after the day before it retired cannot be picked. Last checked: never recorded. |
 | AC-14, AC-15, AC-16, AC-19, AC-20 | `src/components/BulkDateBar.test.tsx` (the mode, the checkboxes of stamped rows only, leaving it, the server's HTML without the buttons, range and stage and all/clear choices, the bar's Apply states, nothing sent before Apply, pending, success and failure messages), `src/lib/bulk-dates.test.ts` (order of the rows, ranges, the request), `e2e/stamp-dates.spec.ts` (a click, a shift-click, Space, a stage, Enter; one request; the new dates and the chart's new month; Escape and Cancel; a vanished stamp; no JavaScript) |
-| AC-17 | `src/app/[locale]/dashboard/actions.test.ts` (what is sent to the function, the limit of 500, invalid input, `unauthorized`, a refused request, a database error and its log line), `tests/database-rules.test.ts` (the function itself: the caller's rows and every variant only, all or nothing, who may call it, no inserts, security invoker) |
+| AC-17 | `src/app/[locale]/dashboard/actions.test.ts` (what is sent to the function, the limit of 500, invalid input, `unauthorized`, a refused request, a database error and its log line), `tests/database-rules.test.ts` (the function itself: the caller's rows and every variant only, all or nothing, who may call it, no inserts, security invoker, and a stamp deleted by another transaction meanwhile makes it answer false: two sessions) |
 | AC-18 | `src/lib/bulk-dates.test.ts`, `src/components/BulkDateBar.test.tsx` (the bar names the stamps), `tests/database-rules.test.ts` (the function refuses the day it retired or later), `e2e/stamp-dates.spec.ts` |
-| AC-21 | `e2e/mobile.spec.ts` (the mode at 375 and 320 px: no sideways scroll, the bar inside the window at the bottom, targets of 44 px, choosing and applying with taps), `e2e/stamp-dates.spec.ts` (Space and Enter), `e2e/accessibility.spec.ts` (`dashboard-change-dates`, both widths) |
+| AC-21 | `e2e/mobile.spec.ts` (the mode at 375 and 320 px: no sideways scroll, the bar inside the window at the bottom, targets of 44 px, choosing and applying with taps), `e2e/stamp-dates.spec.ts` (Space and Enter; the fullscreen map is topmost over the bar at 1280 px), `e2e/accessibility.spec.ts` (`dashboard-change-dates`, both widths) |
 | AC-21 (the bar above a real keyboard) | manual (a phone's on-screen keyboard cannot be opened by a test): on a phone, open "Change dates", tap the date field and check that the bar stays above the keyboard. Last checked: never recorded. |
 | AC-22 | `tests/messages.test.ts` (parity and placeholders; the plural forms are ICU, read by `BulkDateBar.test.tsx` for English) |

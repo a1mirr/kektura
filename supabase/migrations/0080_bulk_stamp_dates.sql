@@ -7,7 +7,9 @@
 --   - there is no signed-in user, no date, no place or extra stamp, or more than 500 of them together;
 --   - a place has no stamp of the caller, or an extra stamp is not collected (a row removed in another tab);
 --   - a retired stamp (spec 0001 AC-22) would get a date on or after the day it retired (spec 0016 AC-13).
--- The checks come before the writes, so "nothing" needs no rollback.
+-- The checks come before the writes, so "nothing" needs no rollback. The rows that are counted are locked (for update): under
+-- READ COMMITTED a row that another transaction deletes meanwhile would otherwise be counted here and missing from the update, and
+-- the function would answer true with fewer rows changed. With the lock it waits for that transaction and then counts one row less.
 create or replace function public.set_stamp_dates(place_keys text[], extra_ids integer[], new_date date)
 returns boolean
 language plpgsql
@@ -26,10 +28,13 @@ begin
   if cardinality(v_keys) + cardinality(v_extras) not between 1 and 500 then return false; end if;
 
   if (
-    select count(distinct c.place_key)
-    from public.user_stamps s
-    join public.checkpoints c on c.id = s.checkpoint_id
-    where s.user_id = v_uid and c.place_key = any (v_keys)
+    select count(distinct t.place_key) from (
+      select c.place_key
+      from public.user_stamps s
+      join public.checkpoints c on c.id = s.checkpoint_id
+      where s.user_id = v_uid and c.place_key = any (v_keys)
+      for update of s
+    ) t
   ) <> cardinality(v_keys) then
     return false;
   end if;
@@ -42,7 +47,9 @@ begin
   end if;
 
   if (
-    select count(*) from public.user_extra_stamps x where x.user_id = v_uid and x.extra_id = any (v_extras)
+    select count(*) from (
+      select x.extra_id from public.user_extra_stamps x where x.user_id = v_uid and x.extra_id = any (v_extras) for update of x
+    ) t
   ) <> cardinality(v_extras) then
     return false;
   end if;

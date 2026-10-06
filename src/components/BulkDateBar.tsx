@@ -46,6 +46,8 @@ function useKeyboardInset() {
   return inset;
 }
 
+// From 1024 px the bar is sticky at z-5: above the rows' positioned controls (the date fields) and below the map's block of the other
+// column (z-10), which holds the fullscreen map, so the map covers the bar (spec 0016 AC-21, spec 0003 AC-11).
 // Mounted only while the mode is on, so its date and its failure start empty every time the mode opens.
 function Bar({ bulk }: { bulk: BulkApi }) {
   const t = useTranslations("dashboard");
@@ -89,7 +91,7 @@ function Bar({ bulk }: { bulk: BulkApi }) {
       aria-label={t("bulkBar")}
       aria-busy={pending}
       style={{ "--kb": `${inset}px` } as CSSProperties}
-      className="rounded-lg bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-lg ring-1 ring-stone-300 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-(--kb) max-lg:mb-0 max-lg:z-30 max-lg:rounded-b-none lg:sticky lg:top-4 lg:z-20"
+      className="rounded-lg bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-lg ring-1 ring-stone-300 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-(--kb) max-lg:mb-0 max-lg:z-30 max-lg:rounded-b-none lg:sticky lg:top-4 lg:z-5"
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <p role="status" className="text-sm font-semibold tabular-nums">
