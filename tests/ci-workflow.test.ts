@@ -33,9 +33,9 @@ describe("spec 0007: the CI workflow", () => {
   });
 
   describe("AC-9: one run per change", () => {
-    it("is triggered by pull requests and by pushes to main only", () => {
-      expect(ci).toContain("\non:\n  push:\n    branches: [main]\n  pull_request:\n");
-      expect(ci.match(/^ {2}(push|pull_request|workflow_dispatch|schedule|workflow_run|create):/gm)).toEqual(["  push:", "  pull_request:"]);
+    it("is triggered by pull requests, by pushes to main and by the weekly security run, nothing else", () => {
+      expect(ci).toContain('\non:\n  push:\n    branches: [main]\n  pull_request:\n  schedule:\n    - cron: "17 5 * * 1"\n');
+      expect(ci.match(/^ {2}(push|pull_request|workflow_dispatch|schedule|workflow_run|create):/gm)).toEqual(["  push:", "  pull_request:", "  schedule:"]);
     });
 
     it("cancels the earlier run of a pull request when a new push arrives, and never a run on main (grouped by commit)", () => {
@@ -50,6 +50,7 @@ describe("spec 0007: the CI workflow", () => {
       expect(job("check")).toContain("name: Typecheck, lint, unit tests");
       expect(job("e2e")).toContain("name: End-to-end tests");
       expect(job("review")).toContain("name: Review recorded");
+      expect(job("security")).toContain("name: Security checks");
     });
   });
 
@@ -68,14 +69,14 @@ describe("spec 0007: the CI workflow", () => {
     it("the e2e job waits for the check job, runs for every push, and for a pull request only when code changed", () => {
       const e2e = job("e2e");
       expect(e2e).toContain("\n    needs: check\n");
-      expect(e2e).toContain("\n    if: github.event_name != 'pull_request' || needs.check.outputs.code_changed == 'true'\n");
+      expect(e2e).toContain("\n    if: github.event_name != 'schedule' && (github.event_name != 'pull_request' || needs.check.outputs.code_changed == 'true')\n");
       // a status function in the condition would drop the implied success() and let a failed check job start this one
       expect(e2e.slice(0, e2e.indexOf("steps:"))).not.toMatch(/always\(\)|failure\(\)|cancelled\(\)/);
     });
 
-    it("adds no job for it: the detection is a step of the check job (the pull-request-only job Review recorded is the other one)", () => {
+    it("adds no job for it: the detection is a step of the check job (Review recorded and Security checks are jobs of their own, for other reasons)", () => {
       const jobIds = lines.slice(lines.indexOf("jobs:") + 1).filter((line) => /^ {2}[a-z][\w-]*:$/.test(line));
-      expect(jobIds).toEqual(["  check:", "  review:", "  e2e:"]);
+      expect(jobIds).toEqual(["  check:", "  review:", "  e2e:", "  security:"]);
     });
   });
 
@@ -169,6 +170,102 @@ describe("spec 0007: the CI workflow", () => {
       const slowest = step(job("e2e"), "Slowest E2E tests");
       expect(slowest).toContain("if: always()");
       expect(slowest).toContain('node scripts/slowest-tests.mjs e2e-report.json 10 >> "$GITHUB_STEP_SUMMARY"');
+    });
+  });
+});
+
+describe("spec 0007: the security job", () => {
+  const security = job("security");
+  const header = security.slice(0, security.indexOf("steps:"));
+  const scans = security.match(/gitleaks" (git|dir) .*/g) ?? [];
+
+  describe("AC-14: when it runs", () => {
+    it("runs for pull requests, for pushes to main and once a week (a cron expression for one day of the week)", () => {
+      const cron = ci.match(/^ {4}- cron: "([^"]+)"$/m)?.[1] ?? "";
+      expect(cron).toMatch(/^\d{1,2} \d{1,2} \* \* [0-6]$/);
+      // no condition and nothing to wait for: it runs for every trigger of the workflow, the weekly one included
+      expect(header).not.toMatch(/^ {4}if:/m);
+      expect(header).not.toContain("needs:");
+      expect(header).toContain("name: Security checks");
+      expect(header).toContain("runs-on: ubuntu-latest");
+    });
+
+    it("is the only job of the weekly run: the others skip the schedule (and the pull-request-only job never ran for it)", () => {
+      expect(job("check")).toContain("\n    if: github.event_name != 'schedule'\n");
+      expect(job("e2e")).toContain("github.event_name != 'schedule' && ");
+      expect(job("review")).toContain("if: github.event_name == 'pull_request' &&");
+    });
+
+    it("reads the whole history, needs no secret and no permission beyond reading the contents", () => {
+      expect(security).toMatch(/- uses: actions\/checkout@v\d+\s*\n\s+with:\s*\n\s+fetch-depth: 0\b/);
+      expect(security).not.toMatch(/secrets\.|permissions:|GITHUB_TOKEN|GH_TOKEN/);
+      expect(ci).toMatch(/\npermissions:\n {2}contents: read\n/);
+    });
+
+    it("no step of it can fail quietly: no continue-on-error, nothing but npm audit's own status is ignored", () => {
+      expect(security).not.toMatch(/continue-on-error/);
+      expect(security.match(/\|\| true/g)).toHaveLength(1);
+    });
+  });
+
+  describe("AC-15: npm audit and the allow-list", () => {
+    const audit = step(security, "Known vulnerabilities in production dependencies");
+
+    it("runs npm audit for production dependencies at level high, and hands the report to the script that applies the allow-list", () => {
+      expect(audit).toContain('npm audit --omit=dev --audit-level=high --json > "$RUNNER_TEMP/audit-report.json" || true');
+      expect(audit).toContain('node scripts/check-audit.mjs "$RUNNER_TEMP/audit-report.json" .github/audit-allowlist.json');
+      expect(audit.indexOf("npm audit")).toBeLessThan(audit.indexOf("check-audit.mjs"));
+      expect(audit).not.toMatch(/--force|npm audit fix|--include=dev/);
+      expect(fs.existsSync(new URL("../scripts/check-audit.mjs", import.meta.url))).toBe(true);
+      expect(fs.existsSync(new URL("../.github/audit-allowlist.json", import.meta.url))).toBe(true);
+    });
+
+    it("runs even when an earlier step failed, so one run reports both kinds of finding", () => {
+      expect(audit).toContain("if: ${{ !cancelled() }}");
+    });
+  });
+
+  describe("AC-16: gitleaks", () => {
+    const install = step(security, "Install gitleaks");
+
+    it("is a pinned release: a version, the sha256 of its archive, verified before anything is extracted or run", () => {
+      expect(header).toMatch(/\n {6}GITLEAKS_VERSION: "\d+\.\d+\.\d+"\n/);
+      expect(header).toMatch(/\n {6}GITLEAKS_SHA256: "[0-9a-f]{64}"\n/);
+      expect(install).toContain(
+        "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz",
+      );
+      expect(install).toContain("set -euo pipefail");
+      expect(install).toContain('echo "${GITLEAKS_SHA256}  ${archive}" | sha256sum --check --strict');
+      const [download, verify, extract, runIt] = ["curl ", "sha256sum --check", "tar ", 'gitleaks" version'].map((s) => install.indexOf(s));
+      expect(download).toBeGreaterThan(-1);
+      expect(verify).toBeGreaterThan(download);
+      expect(extract).toBeGreaterThan(verify);
+      expect(runIt).toBeGreaterThan(extract);
+      expect(security).not.toMatch(/\/latest\/|releases\/latest|gitleaks-action|@master|@main/);
+    });
+
+    it("keeps the archive and the binary outside the working tree it scans", () => {
+      expect(install).toContain('archive="$RUNNER_TEMP/gitleaks.tar.gz"');
+      expect(install).toContain('--directory "$RUNNER_TEMP" gitleaks');
+    });
+
+    it("scans the git history and the working tree, with the repository's configuration, after it is installed", () => {
+      const history = step(security, "Secrets in the git history");
+      const tree = step(security, "Secrets in the working tree");
+      expect(history).toContain('"$RUNNER_TEMP/gitleaks" git --config .gitleaks.toml');
+      expect(tree).toContain('"$RUNNER_TEMP/gitleaks" dir --config .gitleaks.toml');
+      expect(history.trimEnd().endsWith(" .")).toBe(true);
+      expect(tree.trimEnd().endsWith(" .")).toBe(true);
+      expect(security.indexOf("- name: Secrets in the git history")).toBeGreaterThan(security.indexOf("- name: Install gitleaks"));
+      expect(security.indexOf("- name: Secrets in the working tree")).toBeGreaterThan(security.indexOf("- name: Install gitleaks"));
+      for (const s of [history, tree]) expect(s).toContain("steps.gitleaks.outcome == 'success'"); // not a second error for a missing binary
+      expect(fs.existsSync(new URL("../.gitleaks.toml", import.meta.url))).toBe(true);
+    });
+
+    it("redacts: every scan has --redact, and nothing makes gitleaks or the shell more talkative than that", () => {
+      expect(scans).toHaveLength(2);
+      for (const scan of scans) expect(scan, scan).toContain(" --redact ");
+      expect(security).not.toMatch(/--redact=0|--no-redact|set -x|--log-level[= ](debug|trace)|ACTIONS_STEP_DEBUG|--report-path|--report-format|\btee\b/);
     });
   });
 });

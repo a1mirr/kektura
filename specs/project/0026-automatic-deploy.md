@@ -56,7 +56,8 @@ Secrets (repository secrets, used by `deploy.yml` only; `SUPABASE_DB_URL` and `B
   unit tests" and "End-to-end tests") passed on that commit: the deploy workflow is started by the completion
   of the CI workflow and checks that it succeeded, was a push and was on `main`. Pull requests, other branches
   and forks never reach the deploy job or its secrets. A failed or still running CI never deploys. CI always runs both jobs on a push to `main` (spec 0007 AC-10
-  skips the end-to-end job only for a Markdown-only pull request), so a skipped job never stands in for a passed one.
+  skips the end-to-end job only for a Markdown-only pull request), so a skipped job never stands in for a passed one. The conclusion of the workflow covers every job, so
+  a failing "Security checks" job (spec 0007 AC-14) on `main` stops the deploy as well.
 - **AC-2**: Only one deploy runs at a time. A merge that arrives while one is running waits for it and then
   deploys the newest `main` (the older one is skipped, not run in parallel). The deploy job has the concurrency
   group, not the workflow, so a run whose job is skipped (CI failed on `main`, say) never takes the place of a
@@ -66,7 +67,8 @@ Secrets (repository secrets, used by `deploy.yml` only; `SUPABASE_DB_URL` and `B
 - **AC-3**: A deploy can also be started by hand from the Actions tab (`workflow_dispatch`), only from `main`
   (another branch never reaches the secrets), for the current `main`, with an option `dry_run` (on by default)
   that lists the migrations that would be applied and the commit that would be deployed, and changes nothing.
-  A run that does change something needs a passed CI run on that commit, like a merge does (AC-1).
+  A run that does change something needs a passed CI run of the push on that commit, like a merge does (AC-1); the weekly
+  security run of CI (spec 0007 AC-14) on the same commit does not count.
 
 ### Migrations
 

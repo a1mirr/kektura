@@ -1,14 +1,17 @@
 # Spec 0007. The regression gate on GitHub: the same checks Claude Code's Stop hook runs, plus the
-# end-to-end tests against a local Supabase. Needs no secrets.
+# end-to-end tests against a local Supabase, and the security checks (npm audit, gitleaks). Needs no secrets.
 name: CI
 
 # Once per change (AC-9): a pull request runs on every update (it tests the result of merging into main), a push runs
 # only on main (the merge commit, which the deploy workflow waits for, spec 0026). A branch without a pull request gets
-# no run.
+# no run. A weekly run (AC-14) re-reads the advisories, which appear without any change of ours: it runs only the
+# security job, on the tip of main.
 on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    - cron: "17 5 * * 1"
 
 # A new push to a pull request cancels the run of the one before it; every commit on main is tested, so a run there is
 # grouped by commit and never cancelled.
@@ -22,6 +25,7 @@ permissions:
 jobs:
   check:
     name: Typecheck, lint, unit tests
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
@@ -70,7 +74,7 @@ jobs:
     # skipped for a pull request that changes only Markdown. Every push (to main) runs it, so the deploy workflow always
     # finds both jobs.
     needs: check
-    if: github.event_name != 'pull_request' || needs.check.outputs.code_changed == 'true'
+    if: github.event_name != 'schedule' && (github.event_name != 'pull_request' || needs.check.outputs.code_changed == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -131,3 +135,53 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 14
+
+  # Spec 0007 AC-14 to AC-16: what is free on a private repository. Runs on pull requests, on pushes to main and weekly
+  # (an advisory can appear without any change of ours); needs no secret and no account. It is not "needs: check": it has
+  # nothing to wait for, and it runs on the weekly schedule, when the other jobs do not.
+  security:
+    name: Security checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      # The release is pinned by version and by the sha256 of the archive, which is the one the project publishes in
+      # gitleaks_<version>_checksums.txt (the file, and GitHub's digest of the asset, were compared when it was pinned).
+      # Bump both together; a download that does not match fails the step, and nothing is run from it.
+      GITLEAKS_VERSION: "8.30.1"
+      GITLEAKS_SHA256: "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
+    steps:
+      # The whole history: the scan reads every commit, not only what the pull request adds.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      # The archive and the binary live in the runner's temp folder, outside the working tree that is scanned.
+      - name: Install gitleaks
+        id: gitleaks
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/gitleaks.tar.gz"
+          curl --fail --silent --show-error --location --output "$archive" "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  ${archive}" | sha256sum --check --strict
+          tar --extract --gzip --file "$archive" --directory "$RUNNER_TEMP" gitleaks
+          "$RUNNER_TEMP/gitleaks" version
+      # The report goes to the temp folder too. The exit status of npm audit is not the verdict (it knows no allow-list):
+      # the script reads the report, fails when it is not a report, and fails for an advisory the allow-list does not cover.
+      - name: Known vulnerabilities in production dependencies
+        if: ${{ !cancelled() }}
+        run: |
+          npm audit --omit=dev --audit-level=high --json > "$RUNNER_TEMP/audit-report.json" || true
+          node scripts/check-audit.mjs "$RUNNER_TEMP/audit-report.json" .github/audit-allowlist.json
+      # `--redact` hides the secret in everything gitleaks prints: a finding names the rule, the file, the commit and
+      # the line, never the value.
+      - name: Secrets in the git history
+        if: ${{ !cancelled() && steps.gitleaks.outcome == 'success' }}
+        run: |
+          "$RUNNER_TEMP/gitleaks" git --config .gitleaks.toml --redact --no-banner --verbose .
+      - name: Secrets in the working tree
+        if: ${{ !cancelled() && steps.gitleaks.outcome == 'success' }}
+        run: |
+          "$RUNNER_TEMP/gitleaks" dir --config .gitleaks.toml --redact --no-banner --verbose .

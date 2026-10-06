@@ -31,6 +31,7 @@ describe("spec 0026: the deploy workflow", () => {
       const ci = read(".github/workflows/ci.yml");
       expect(ci).toContain("name: Typecheck, lint, unit tests");
       expect(ci).toContain("name: End-to-end tests");
+      expect(ci).toContain("name: Security checks"); // a failure of it fails the workflow's conclusion, so it stops a deploy too
     });
 
     it("the job runs only for a successful push to main of this very repository (or by hand)", () => {
@@ -177,6 +178,8 @@ describe("spec 0026: the deploy workflow", () => {
       expect(ci).toContain("env.DRY_RUN != 'true'");
       expect(ci).toContain('gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --commit "$TARGET_SHA"');
       expect(ci).toContain('select(.conclusion == "success")');
+      // the weekly run of CI (spec 0007 AC-14) only runs the security job: it never counts as a passed CI
+      expect(ci).toContain("--commit \"$TARGET_SHA\" --event push --json conclusion");
       expect(ci).toContain("exit 1");
       expect(workflow.indexOf("- name: Check that CI passed on this commit")).toBeLessThan(workflow.indexOf("- name: Reach production and decide what to deploy"));
     });

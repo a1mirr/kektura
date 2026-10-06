@@ -146,7 +146,8 @@ jobs:
           git remote add production "$DEPLOY_REMOTE"
           echo "GIT_SSH_COMMAND=ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts" >> "$GITHUB_ENV"
 
-      # A merge is deployed only after CI passed (the trigger sees to that); a run started by hand needs the same.
+      # A merge is deployed only after CI passed (the trigger sees to that); a run started by hand needs the same: a run
+      # of the push, not the weekly security run of the same commit (event schedule), which skips the other jobs.
       - name: Check that CI passed on this commit
         id: ci
         if: env.CONFIGURED == 'true' && github.event_name == 'workflow_dispatch' && env.DRY_RUN != 'true'
@@ -155,7 +156,7 @@ jobs:
         run: |
           set -euo pipefail
           source "$RUNNER_TEMP/gh-retry.sh"
-          passed=$(gh_retry gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --commit "$TARGET_SHA" --json conclusion --jq '[.[] | select(.conclusion == "success")] | length')
+          passed=$(gh_retry gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --commit "$TARGET_SHA" --event push --json conclusion --jq '[.[] | select(.conclusion == "success")] | length')
           if [ "$passed" -lt 1 ]; then
             echo "::error title=CI has not passed on this commit::Wait for CI on ${TARGET_SHA:0:7} to finish and pass, or fix it. A run started by hand deploys only a commit whose CI passed."
             exit 1

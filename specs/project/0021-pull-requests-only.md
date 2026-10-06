@@ -98,7 +98,7 @@ leftovers of a merged change are cleaned up.
   and not from the checkout's HEAD (see Notes for how fresh that is).
 - **AC-11**: GitHub enforces the rule on `main` with the ruleset "Protect main", whose definition is `.github/rulesets/protect-main.json` (the
   owner applies it with `gh api`, see Notes): `main` cannot be deleted or force-pushed; a change reaches it only by a pull request,
-  merged with a merge commit; the checks "Typecheck, lint, unit tests", "End-to-end tests" and "Review recorded" (the job names of
+  merged with a merge commit; the checks "Typecheck, lint, unit tests", "End-to-end tests", "Review recorded" and "Security checks" (the job names of
   `.github/workflows/ci.yml`) must have passed, a skipped one counting as passed (spec 0007 AC-10, spec 0022 AC-5); and the branch
   must be up to date with `main`, so two pull requests that are each green cannot break `main` together. No one can bypass it, and
   no approval is required (one owner: the review count is 0, so the

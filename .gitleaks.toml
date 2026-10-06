@@ -1,0 +1,18 @@
+# Spec 0007 AC-16: the configuration of CI's gitleaks scan (job "Security checks"): the default rules, and one allow-list
+# that names secrets by value. Nothing else is allowed: no paths, no commits, no stopwords, no rule is switched off.
+title = "Kektura tracker"
+
+[extend]
+useDefault = true
+
+# Only the local Supabase demo key that an early test file committed (it stays in the history). Every `supabase start`
+# creates the same key: it is public (the token's issuer is `supabase-demo`) and opens nothing but a local database.
+# It is matched by its whole value (`regexTarget = "secret"`, anchored), so another token, or this one with something
+# added, is still a finding. The test server reads its keys from `supabase status` and commits none, so a new demo key
+# is added here, by value, only when a file really has to contain it.
+[[allowlists]]
+description = "The local Supabase demo anon key"
+regexTarget = "secret"
+regexes = [
+  '''^eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9\.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0$''',
+]
