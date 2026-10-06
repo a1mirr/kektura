@@ -27,7 +27,7 @@ async function run<T>(name: string, limited: boolean, work: (supabase: SupabaseC
     if (limited && !limiter.allow(data.user.id)) return { ok: false, reason: "failed" };
     return await work(supabase);
   } catch (error) {
-    logFriendsError(name, error);
+    logFriendsError(name, error, "exception");
     return { ok: false, reason: "failed" };
   }
 }

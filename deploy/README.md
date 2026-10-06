@@ -21,7 +21,7 @@ In `~/kektura_app/.env.local` on the server (never committed; `.env.example` has
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | the app | public values, compiled into the build: **rebuild** after changing them |
 | `SITE_URL` | redirects (spec 0020) | `https://kektura-tracker.com`; optional, without it the proxy's forwarded headers are used |
-| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | feedback notifications (spec 0017) | secrets; server-only. Check with `npm run telegram:check` |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | feedback notifications (spec 0017) and messages about failed server actions (spec 0008 AC-6 to AC-10: at most one per kind of failure and hour, one summary when everything fails at once; the server log has the details) | secrets; server-only; no extra setting. Check with `npm run telegram:check` |
 | `TELEGRAM_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY` | flag commands from the Telegram bot (spec 0035) | secrets; server-only. The first is a string of your own (A-Z a-z 0-9 _ -, up to 256 characters) that Telegram sends back with every update; the second is the Supabase project's service role (secret) key, used by `/api/telegram` only. Without the first, `/api/telegram` answers 404; without the second, the bot says the commands are not configured |
 
 Never set `TEST_LOGIN` here: it switches on the dummy login (the app also requires a localhost database).

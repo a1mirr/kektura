@@ -58,6 +58,7 @@ Supabase dashboard, table `user_feedback`).
   `NEXT_PUBLIC_`). Locally and on the server they live in `.env.local`; `.env.example` has placeholders.
   Setup: talk to @BotFather (`/newbot`), copy the token, send any message to the new bot, then run
   `npm run telegram:check -- --find-chat-id`.
+- The same bot and chat also carry the messages about failed server actions (spec 0008 AC-6 to AC-10).
 - The Telegram request URL contains the token, so error handling never logs the URL or the underlying
   error object, only a short reason (`http_401`, `timeout`, `network`).
 - The client IP comes from `x-forwarded-for` (set by Caddy in production); without it everyone shares
