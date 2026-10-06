@@ -72,14 +72,16 @@ export function createFailureAlerter({
         for (const [k, t] of lastSent) if (at - t >= ALERT_WINDOW_MS) lastSent.delete(k);
 
         if (at < quietUntil) return;
-        if (lastSent.has(kind)) return;
 
+        // Before the hourly limit: a kind that was already sent still counts as one of the three, and its failure
+        // may be the one that shows the outage.
         if (recent.size >= BURST_KINDS) {
           send(formatOutageAlert(recent.size));
           quietUntil = at + ALERT_WINDOW_MS;
           for (const k of recent.keys()) lastSent.set(k, at);
           return;
         }
+        if (lastSent.has(kind)) return;
         lastSent.set(kind, at);
         send(formatFailureAlert(failure));
       } catch {

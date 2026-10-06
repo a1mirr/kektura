@@ -98,6 +98,22 @@ describe("spec 0008: Telegram messages for failed actions", () => {
     expect(send).toHaveBeenLastCalledWith(formatOutageAlert(3));
   });
 
+  it("AC-8: the summary is sent even when the third kind of the outage was already limited", () => {
+    const { send, report, advance } = setup();
+    const a = stamp;
+    const b = { ...stamp, action: "setExtraStamped" };
+    report(a);
+    report(b);
+    advance(5 * 60_000); // still inside the hour of both, but no longer inside one burst
+    report({ tag: "friends", action: "sendRequest", stage: "write" });
+    report(a);
+    report(b);
+    expect(send).toHaveBeenCalledTimes(4);
+    expect(send).toHaveBeenLastCalledWith(formatOutageAlert(3));
+    report({ tag: "feedback", action: "submitFeedback", stage: "write" });
+    expect(send).toHaveBeenCalledTimes(4); // paused for the hour
+  });
+
   it("AC-9: a `send` that throws never reaches the caller", () => {
     const send = vi.fn(() => {
       throw new Error("boom");

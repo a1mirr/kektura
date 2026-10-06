@@ -35,9 +35,9 @@ chat where the feedback arrives (spec 0017), at most once per kind of failure an
   kind at most one message is sent per hour, counted from the last one sent. The memory of it is the server
   process's (shared by every route of it): a restart forgets it, which at worst sends one more message.
 - **AC-8**: When three different kinds fail within a minute (the database is down, everything fails at once), the third
-  is replaced by one summary message ("3 kinds of server action failures within a minute. Possibly the database is
-  down.") and every other message is paused for an hour. Kinds that were already limited by AC-7 still count towards
-  the three.
+  is answered by one summary message ("3 kinds of server action failures within a minute. Possibly the database is
+  down.") instead of its own, and every other message is paused for an hour. Kinds that were already limited by AC-7
+  still count towards the three, and the summary is sent when one of them is the third.
 - **AC-9**: Sending never changes what an action does: it is not waited for, it has the 4 s timeout of every Telegram
   request (spec 0017 AC-5), and an error, a non-2xx answer or a throw anywhere in it is swallowed: the action returns
   the same result and never throws (spec 0002 AC-6, AC-7). A failed send is logged as one line with only a short reason (`[alerts] telegram notification failed reason=http_401`).
@@ -101,7 +101,7 @@ Line formats (one `console.error` / `console.warn` call, or `console.info` for a
 | AC-1 ... AC-3 (line format, one-line guarantee, non-Error values) | `src/lib/log.test.ts` |
 | AC-5 | `src/lib/log.test.ts` (the `[feedback]`, `[account-delete]` and `[feature-flags]` lines, spec 0035 AC-24), the actions' own tests (`feedback/actions.test.ts`, `account/actions.test.ts`, `friends/actions.test.ts`) |
 | AC-6 ... AC-10 (the rules) | `src/lib/failure-alerts.test.ts` (stages, kinds, the hourly limit, the outage summary, a throwing `send`, the message text) |
-| AC-6, AC-7, AC-8, AC-9, AC-10 (through the log functions) | `src/lib/log.test.ts`, `describe("spec 0008: failures reach Telegram")` (what is sent for each action and the chat and URL it goes to, nothing for the excluded failures, the limit, the summary, a hanging, failing or throwing fetch, no token in a log line, nothing without the config or outside production) |
+| AC-6, AC-7, AC-8, AC-9, AC-10 (through the log functions) | `src/lib/log.test.ts`, `describe("spec 0008: failures reach Telegram")` (what is sent for each action and the chat and URL it goes to, nothing for the excluded failures, the limit, the summary, a hanging, failing or throwing fetch, no token in a log line, nothing without the config or outside production), `friends/actions.test.ts` (a thrown error is sent as `exception`, a database error as `write`) |
 | AC-6 ... AC-10 (the real bot) | manual (it needs the real bot and a production build): see "Checking by hand" below. Last checked: never recorded. |
 
 ### Checking by hand
