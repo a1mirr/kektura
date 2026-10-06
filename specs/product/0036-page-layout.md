@@ -48,7 +48,7 @@ that shows more of the same content instead of centring it.
 - A wide page made of independent blocks gives `PageShell` an `aside` (left column), its children (right column) and a `header`
   above both. The columns start at 1024 px (`lg`), where the content is 976 px wide, 5 : 7. Below it the DOM order (header, aside,
   children) is the order on the screen.
-- The page width is spelled out once: a test fails if `64rem` or `max-w-5xl` appears in another source file.
+- The page width is spelled out once as a value, `--page-width: 64rem` in `globals.css`: a test fails if `64rem` or `max-w-5xl` appears in another source file. The 1024 px at which the columns start is a different thing that happens to be the same number: Tailwind's `lg` breakpoint (64 rem), used by `PageShell` and, because a media query cannot read a variable, written out a second time in `globals.css` for the dashboard map's height (`.map-box`). Those two move together if the breakpoint ever does; the page width does not depend on them.
 
 ## Coverage
 
@@ -58,5 +58,5 @@ that shows more of the same content instead of centring it.
 | AC-2 | `tests/page-shell.test.ts` (every page file uses `PageShell` and has no container of its own; the width is one 64 rem variable taken by the shell, the logo strip and the footer; the paddings), `src/components/PageShell.test.tsx` (every variant is one `<main>` with the shared width) |
 | AC-3 | `e2e/layout.spec.ts` (the column is `65ch` wide and centred on the four pages; the account page's text, not its cards), `src/components/PageShell.test.tsx` |
 | AC-4 | `e2e/layout.spec.ts` (the landing page, the 404 page and the invite page at 1920 px), `src/components/PageShell.test.tsx` |
-| AC-5 | `e2e/layout.spec.ts` (no sideways scroll at the five widths on every page, in English and in the other languages; one column below 1024 px: the dashboard, a friend's page and the Friends page) |
+| AC-5 | `e2e/layout.spec.ts` (shared edges and no sideways scroll: at all five widths on the landing, About, Changelog, Useful links and Feedback pages and, signed in, the dashboard, account and Friends pages, in English, and in Hungarian, German and Russian on the dashboard, Friends, account, About and Changelog pages; at 375, 768 and 1920 px on the 404 page, the invite page signed out and in, and a friend's page; one column below 1024 px: the dashboard, a friend's page and the Friends page). Not tested in a browser: the error page (`error.tsx`), which no flow triggers cheaply; it draws the same `hero` variant as the 404 page and the landing page, and `tests/page-shell.test.ts` checks that it uses the shell. The tests check `scrollWidth`, not every element of a long page in every language |
 | AC-6 | `e2e/layout.spec.ts` (the landing page's footer is on the first screen at every width), `src/components/PageShell.test.tsx` (`flex-1`, no `min-h-screen`), `e2e/footer.spec.ts` |

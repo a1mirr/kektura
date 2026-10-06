@@ -5,6 +5,10 @@ import { expandAllStages, signInAsNewUser, stat } from "./helpers";
 // is no pixel clicking on stamps except through the app's own list -> map flow: the 📍 button flies
 // the map to a stamp and centres it, so a click on the canvas centre hits that stamp's dot.
 
+// The page may not scroll sideways (spec 0036 AC-5).
+const expectNoSideways = async (page: Page) =>
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+
 const canvas = (page: Page) => page.locator(".maplibregl-canvas");
 const mapSection = (page: Page) => page.locator("section", { has: canvas(page) });
 
@@ -96,6 +100,98 @@ test.describe("spec 0003: the trail map", () => {
     await expect(page.getByRole("button", { name: "Fullscreen", exact: true })).toBeVisible();
     await expect(page.locator("body")).not.toHaveCSS("overflow", "hidden");
   });
+
+  test("AC-11: in two columns the fullscreen map is the topmost thing everywhere, over the stamped rows of the other column too", async ({
+    page,
+  }) => {
+    // Without the native Fullscreen API the CSS overlay is all there is, and it is the overlay that has to win the stacking
+    // against the sticky left column it sits in and against the positioned controls of the right one (the date fields).
+    await page.addInitScript(() => {
+      Object.defineProperty(Element.prototype, "requestFullscreen", { value: undefined, configurable: true });
+    });
+    await openDashboardWithMap(page); // the default window is 1280 x 720: two columns
+    await expandAllStages(page);
+    const row = page.locator("#place-OKTPH_01_DDKPH_01");
+    await row.getByRole("button", { name: "Add stamp" }).click();
+    const calendar = row.locator("span.relative.inline-flex"); // the date field's calendar button, a positioned element
+    await expect(calendar).toBeVisible();
+    await calendar.scrollIntoViewIfNeeded();
+
+    await page.getByRole("button", { name: "Fullscreen", exact: true }).click();
+    await expect(page.getByRole("button", { name: "Exit fullscreen" })).toBeVisible();
+    const at = await calendar.boundingBox();
+    const hits = await page.evaluate((box) => {
+      const points = [
+        [box!.x + box!.width / 2, box!.y + box!.height / 2], // right where the calendar button is
+        [2, 2],
+        [innerWidth - 2, 2],
+        [2, innerHeight - 2],
+        [innerWidth - 2, innerHeight - 2],
+        [innerWidth / 2, innerHeight / 2],
+      ];
+      return points.map(([x, y]) => !!document.elementFromPoint(x, y)?.closest(".fixed.inset-0"));
+    }, at);
+    expect(hits).toEqual([true, true, true, true, true, true]);
+    expect(at!.y).toBeGreaterThan(0); // the row's control really was in the window, under the overlay
+    expect(at!.y).toBeLessThan(720);
+  });
+
+  test("AC-24: with the route panel shown the left column scrolls inside itself and the map stays visible", async ({ page }) => {
+    await openDashboardWithMap(page); // 1280 x 720
+    await expandAllStages(page);
+    await openStampPopup(page, "OKTPH_01_DDKPH_01", "Route from here");
+    await page.getByRole("button", { name: "Route from here" }).click();
+    await expect(page.getByText("Now pick the end stamp")).toBeVisible();
+
+    const aside = page.locator("[data-page-aside]");
+    const { scroll, client, overflowY } = await aside.evaluate((el) => ({
+      scroll: el.scrollHeight,
+      client: el.clientHeight,
+      overflowY: getComputedStyle(el).overflowY,
+    }));
+    expect(overflowY).toBe("auto");
+    expect(client).toBeLessThanOrEqual(720); // never taller than the window
+    await expect(canvas(page)).toBeInViewport();
+    expect(scroll).toBeGreaterThanOrEqual(client);
+    // whatever does not fit can be scrolled to: the last control of the column, the layer toggles
+    await aside.evaluate((el) => (el.scrollTop = el.scrollHeight));
+    await expect(page.getByLabel("Walked stretches")).toBeInViewport({ ratio: 1 });
+    await expect(page.getByRole("button", { name: "Clear", exact: true })).toBeVisible();
+    await expectNoSideways(page);
+  });
+
+  for (const locale of ["en", "hu", "de", "ru"]) {
+    for (const [width, height] of [
+      [1280, 720],
+      [1024, 768],
+    ]) {
+      test(`AC-24: in ${locale} at ${width} x ${height} nothing of the left column is cut off without a way to scroll to it`, async ({ page }) => {
+        await signInAsNewUser(page);
+        await page.setViewportSize({ width, height });
+        await page.goto(`/${locale}/dashboard`);
+        await expect(canvas(page)).toBeVisible();
+        const aside = page.locator("[data-page-aside]");
+        await page.evaluate(() => window.scrollTo(0, 1500)); // the column sticks once the page has scrolled
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000);
+        const m = await aside.evaluate((el) => {
+          const box = el.getBoundingClientRect();
+          el.scrollTop = el.scrollHeight;
+          const last = el.lastElementChild!.getBoundingClientRect();
+          return {
+            wide: el.scrollWidth - el.clientWidth, // nothing sticks out sideways
+            tall: el.scrollHeight - el.clientHeight, // above 0: it scrolls
+            overflowY: getComputedStyle(el).overflowY,
+            lastBottomInside: last.bottom <= box.bottom + 1, // after scrolling to the end the last block is in view
+            asideInWindow: box.bottom <= innerHeight + 0.5,
+          };
+        });
+        expect(m.wide, "sideways").toBeLessThanOrEqual(0);
+        expect(m.asideInWindow).toBe(true);
+        expect(m.tall <= 0 || m.overflowY === "auto", "it fits, or it scrolls").toBe(true);
+        expect(m.lastBottomInside, "the end of the column can be reached").toBe(true);
+      });
+    }
+  }
 
   test("AC-13: in one column the 📍 button in a list row scrolls the map into view and labels the stamp", async ({
     page,

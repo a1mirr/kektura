@@ -31,11 +31,11 @@ async function expectNoSidewaysScroll(page: Page, message: string) {
 }
 
 // The logo's strip, the page and the footer: one width, one pair of edges (spec 0036 AC-1).
-async function expectSharedEdges(page: Page, label: string) {
+async function expectSharedEdges(page: Page, label: string, { footer: hasFooter = true } = {}) {
   const width = await clientWidth(page);
   const strip = await box(page.locator("body > header"));
   const main = await box(page.locator("main"));
-  const footer = await box(page.locator("footer nav"));
+  const footer = hasFooter ? await box(page.locator("footer nav")) : strip; // the 404 page has no footer
   const expected = Math.min(PAGE_WIDTH, width);
   for (const [name, b] of Object.entries({ strip, main, footer })) {
     expect(b.width, `${label}: ${name} width`).toBeCloseTo(expected, 0);
@@ -53,6 +53,7 @@ test.describe("spec 0036: the page layout", () => {
   test("AC-1, AC-5: header strip, page and footer share one width and edges, and nothing scrolls sideways, on the public pages", async ({
     page,
   }) => {
+    test.setTimeout(180_000); // a long sweep: every page at five widths
     for (const width of WIDTHS) {
       await page.setViewportSize({ width, height: 900 });
       for (const path of PUBLIC_PAGES) {
@@ -64,6 +65,7 @@ test.describe("spec 0036: the page layout", () => {
   });
 
   test("AC-1, AC-5: the same on the dashboard, account and Friends pages, where the page's own header lies inside the width", async ({ page }) => {
+    test.setTimeout(180_000);
     await signInAsNewUser(page);
     for (const width of WIDTHS) {
       await page.setViewportSize({ width, height: 900 });
@@ -85,6 +87,7 @@ test.describe("spec 0036: the page layout", () => {
   });
 
   test("AC-5: in every other language too nothing scrolls sideways and the edges are shared", async ({ page }) => {
+    test.setTimeout(180_000);
     await signInAsNewUser(page);
     for (const width of WIDTHS) {
       await page.setViewportSize({ width, height: 900 });
@@ -95,6 +98,29 @@ test.describe("spec 0036: the page layout", () => {
           await expectNoSidewaysScroll(page, `sideways scroll at ${width} px on /${locale}${path}`);
         }
       }
+    }
+  });
+
+  test("AC-1, AC-5: the 404 page, the invite page (signed out and signed in) and a friend's page share the edges too and do not scroll sideways", async ({
+    browser,
+  }) => {
+    const { bobPage, anaId } = await connected(browser);
+    const signedOut = await (await browser.newContext()).newPage();
+    for (const width of [375, 768, 1920]) {
+      await signedOut.setViewportSize({ width, height: 900 });
+      await signedOut.goto("/en/no-such-page");
+      await expectSharedEdges(signedOut, `${width} px, the 404 page`, { footer: false });
+      await expectNoSidewaysScroll(signedOut, `sideways scroll at ${width} px on the 404 page`);
+      await signedOut.goto("/en/friends/invite/not-a-real-token");
+      await expectSharedEdges(signedOut, `${width} px, the invite page, signed out`);
+      await expectNoSidewaysScroll(signedOut, `sideways scroll at ${width} px on the invite page, signed out`);
+      await bobPage.setViewportSize({ width, height: 900 });
+      await bobPage.goto("/en/friends/invite/not-a-real-token");
+      await expectSharedEdges(bobPage, `${width} px, the invite page, signed in`);
+      await expectNoSidewaysScroll(bobPage, `sideways scroll at ${width} px on the invite page, signed in`);
+      await bobPage.goto(`/en/friends/${anaId}`);
+      await expectSharedEdges(bobPage, `${width} px, a friend's page`);
+      await expectNoSidewaysScroll(bobPage, `sideways scroll at ${width} px on a friend's page`);
     }
   });
 

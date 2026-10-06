@@ -64,5 +64,8 @@ describe("spec 0036: PageShell", () => {
       </PageShell>,
     );
     expect(screen.getByText("side").parentElement!.className).toContain("lg:sticky");
+    // a sticky box is a stacking context: it needs a z-index of its own, or the fullscreen map inside it (z-50, local to it)
+    // is painted under positioned controls of the other column (spec 0003 AC-11)
+    expect(screen.getByText("side").parentElement!.className).toContain("lg:z-10");
   });
 });
