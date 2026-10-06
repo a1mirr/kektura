@@ -146,7 +146,11 @@ describe("spec 0016: set_stamp_dates (many dates in one transaction)", { timeout
     other.stdin.end(
       `begin; delete from user_stamps s using checkpoints c where c.id = s.checkpoint_id and s.user_id = '${cleo.id}' and c.place_key = 'OKTPH_07'; select pg_sleep(4); commit;`,
     );
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // Wait until that session is asleep inside its transaction, with the delete done (not a fixed pause: a slow runner would be too late).
+    for (let waited = 0; rows("select count(*) from pg_stat_activity where state = 'active' and query like 'select pg_sleep(4)%' and pid <> pg_backend_pid()") !== "1"; waited += 100) {
+      if (waited > 15_000) throw new Error("the first session never got to its sleep");
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
     // ...and the function is called meanwhile, as the user. Without the lock it would count the row that is still there, then update
     // the one that is left and answer true with fewer rows changed.
     const answer = execFileSync("docker", psqlArgs, {

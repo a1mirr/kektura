@@ -604,7 +604,7 @@ describe("spec 0016: setStampDates (many dates at once)", () => {
     expect(await setStampDates(["OKTPH_03"], [7], DAY)).toEqual(FAILED);
     expect(refresh).not.toHaveBeenCalled();
     expect(errorLog).not.toHaveBeenCalled();
-    expect(warnLog.mock.calls).toEqual([["[stamp-action] invalid input action=setStampDates"]]);
+    expect(warnLog.mock.calls).toEqual([["[stamp-action] request refused action=setStampDates"]]); // not "invalid input": the input was fine
   });
 
   it("AC-17: a database error is `failed` and logged like the other stamp actions, without details or input", async () => {

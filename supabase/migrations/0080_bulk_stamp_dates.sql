@@ -1,4 +1,4 @@
--- Task #80 (spec 0016 AC-14 to AC-16): one date for many stamps, all or nothing. Two client updates (places and extra
+-- Task #80 (spec 0016 AC-17 and AC-18, AC-13 for the retirement rule): one date for many stamps, all or nothing. Two client updates (places and extra
 -- stamps) cannot be one transaction, a function can. Additive: nothing the running code uses changes.
 --
 -- security invoker: it runs as the caller, so row level security still decides which rows exist for them, and every

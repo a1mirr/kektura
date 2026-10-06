@@ -20,14 +20,14 @@ chat where the feedback arrives (spec 0017), at most once per kind of failure an
 - **AC-2**: Log lines never contain tokens, cookies, emails or request bodies beyond the action name
   and ids.
 - **AC-3**: Rejected input (0002 AC-1) is logged once with `console.warn` (`[stamp-action] invalid
-  input`) without echoing the input. A missing session (`unauthorized`) is expected and not logged.
+  input`) without echoing the input. A missing session (`unauthorized`) is expected and not logged. A request with valid input that the database refused (`setStampDates`: a stamp that is gone, a retired stamp's day, spec 0016 AC-17) is logged once with `console.warn` (`[stamp-action] request refused action=setStampDates`), also without input or ids.
 - **AC-4**: What the client receives doesn't change.
 - **AC-5**: The other server actions that turn errors into a result log through the same file, one line each, under their
   own tag and by the same rules as AC-2: `[feedback]` (spec 0017), `[account-delete]` (spec 0014), `[friends]` (spec
   0024) and `[feature-flags]` (spec 0035: a failed lookup, and each change from the Telegram bot). Which failures each logs is in its own spec; the line formats are below.
 - **AC-6**: After logging, the stamp actions, feedback, account deletion and friends also send one Telegram message
   for a failure at the `write` or `exception` stage (account deletion's `rpc` counts as `write`; a friends action is
-  a `write` unless something threw around it). Not sent: a failed `read`, a missing session, rejected input, a failed
+  a `write` unless something threw around it). Not sent: a failed `read`, a missing session, rejected input, a request the database refused (AC-3), a failed
   feature flag lookup or flag change, and a Telegram request that failed itself. The message goes to the chat of
   `TELEGRAM_CHAT_ID` through `TELEGRAM_BOT_TOKEN` (spec 0017) and only from a production build with both set: on a
   developer's machine and in the tests nothing is sent.

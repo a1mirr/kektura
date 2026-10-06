@@ -8,6 +8,7 @@ import {
   logFriendsError,
   logStampActionError,
   logStampActionInvalidInput,
+  logStampActionRefused,
 } from "./log";
 
 const errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -55,6 +56,12 @@ describe("spec 0008: log lines", () => {
   it("AC-3: invalid input is a warning with the action name only", () => {
     logStampActionInvalidInput("setExtraStamped");
     expect(lineOf(warnLog)).toBe("[stamp-action] invalid input action=setExtraStamped");
+    expect(errorLog).not.toHaveBeenCalled();
+  });
+
+  it("AC-3: a refused request is a warning of its own, with the action name only", () => {
+    logStampActionRefused("setStampDates");
+    expect(lineOf(warnLog)).toBe("[stamp-action] request refused action=setStampDates");
     expect(errorLog).not.toHaveBeenCalled();
   });
 });
@@ -179,6 +186,7 @@ describe("spec 0008: failures reach Telegram", () => {
     enable();
     logStampActionError("setPlacesStamped", "read", { message: "x" }, "u-1");
     logStampActionInvalidInput("setPlacesStamped");
+    logStampActionRefused("setStampDates");
     logFeatureFlagsError({ message: "x" });
     logFeedbackNotifyFailure("http_500");
     await flush();

@@ -59,11 +59,12 @@ export default function BulkDatesProvider({ items, max, children }: { items: rea
     setAnchor(null);
   }, []);
 
-  // Escape leaves the mode (spec 0016 AC-14).
+  // Escape leaves the mode (spec 0016 AC-14), unless something else took it first: a row's note closes on Escape and says so with
+  // preventDefault, and closing it must not cost the choice.
   useEffect(() => {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") exit();
+      if (e.key === "Escape" && !e.defaultPrevented) exit();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);

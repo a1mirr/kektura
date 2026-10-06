@@ -4,7 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import { refresh } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/action-result";
-import { logStampActionError, logStampActionInvalidInput, type StampAction, type StampStage } from "@/lib/log";
+import { logStampActionError, logStampActionInvalidInput, logStampActionRefused, type StampAction, type StampStage } from "@/lib/log";
 import { MAX_BULK_STAMPS } from "@/lib/bulk-dates";
 import { isCalendarDate, isValidStampDate } from "@/lib/stamp-date";
 
@@ -152,7 +152,7 @@ export async function setStampDates(placeKeys: string[], extraIds: number[], dat
     const { data, error } = await supabase.rpc("set_stamp_dates", { place_keys: placeKeys, extra_ids: extraIds, new_date: date });
     if (error) return fail("write", error);
     if (data !== true) {
-      logStampActionInvalidInput("setStampDates"); // a stamp that is gone, or a retired stamp's day: expected, but worth a line
+      logStampActionRefused("setStampDates"); // a stamp that is gone, or a retired stamp's day: expected, but worth a line
       return failed;
     }
     return ok;

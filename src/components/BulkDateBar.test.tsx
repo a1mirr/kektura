@@ -21,6 +21,7 @@ import BulkCheckbox from "./BulkCheckbox";
 import BulkDateBar from "./BulkDateBar";
 import BulkDatesProvider from "./BulkDatesProvider";
 import BulkStageButton from "./BulkStageButton";
+import RequiredFrom from "./RequiredFrom";
 import StageControls from "./StageControls";
 
 afterEach(() => {
@@ -142,6 +143,86 @@ describe("spec 0016: the mode", () => {
     );
     expect(screen.queryByRole("button", { name: "Change dates" })).toBeNull();
     expect(screen.getByRole("button", { name: "Expand all" })).toBeTruthy();
+  });
+});
+
+describe("spec 0016: the bar above the on-screen keyboard", () => {
+  // A stand-in for window.visualViewport: the part of the layout viewport the keyboard covers is innerHeight - height - offsetTop.
+  function stubViewport(init: { height: number; offsetTop?: number; scale?: number }) {
+    const viewport = Object.assign(new EventTarget(), { width: 375, height: init.height, offsetTop: init.offsetTop ?? 0, scale: init.scale ?? 1 });
+    const add = vi.spyOn(viewport, "addEventListener");
+    const remove = vi.spyOn(viewport, "removeEventListener");
+    Object.defineProperty(window, "visualViewport", { value: viewport, configurable: true });
+    return { viewport, add, remove };
+  }
+  const gap = () => (bar().style.getPropertyValue("--kb") as string) || "";
+  afterEach(() => Reflect.deleteProperty(window, "visualViewport"));
+
+  it("AC-21: the bar's bottom follows the part of the screen the keyboard covers, and its listeners go with the bar", () => {
+    const { viewport, add, remove } = stubViewport({ height: window.innerHeight }); // no keyboard
+    render(<Page />);
+    enter();
+    expect(gap()).toBe("0px");
+    viewport.height = window.innerHeight - 300; // the keyboard opens
+    act(() => void viewport.dispatchEvent(new Event("resize")));
+    expect(gap()).toBe("300px");
+    viewport.offsetTop = 40; // the visual viewport scrolled inside the layout one
+    act(() => void viewport.dispatchEvent(new Event("scroll")));
+    expect(gap()).toBe("260px");
+    viewport.height = window.innerHeight;
+    viewport.offsetTop = 0;
+    act(() => void viewport.dispatchEvent(new Event("resize"))); // the keyboard closes
+    expect(gap()).toBe("0px");
+    const listeners = add.mock.calls.map((c) => c[0]).sort();
+    expect(listeners).toEqual(["resize", "scroll"]);
+    click(screen.getByRole("button", { name: "Cancel" })); // the bar goes: so do its listeners
+    expect(remove.mock.calls.map((c) => c[0]).sort()).toEqual(["resize", "scroll"]);
+    expect(new Set(remove.mock.calls.map((c) => c[1]))).toEqual(new Set(add.mock.calls.map((c) => c[1]))); // the very functions that were added
+  });
+
+  it("AC-21: a pinch-zoomed page (scale above 1.01) gets no gap: the zoomed viewport is not a keyboard", () => {
+    const { viewport } = stubViewport({ height: window.innerHeight - 300, scale: 2 });
+    render(<Page />);
+    enter();
+    expect(gap()).toBe("0px");
+    viewport.scale = 1;
+    act(() => void viewport.dispatchEvent(new Event("resize")));
+    expect(gap()).toBe("300px");
+    viewport.scale = 1.5;
+    act(() => void viewport.dispatchEvent(new Event("resize")));
+    expect(gap()).toBe("0px");
+  });
+
+  it("AC-21: without a visual viewport (an old browser, jsdom) the bar still works with no gap", () => {
+    render(<Page />);
+    enter();
+    expect(gap()).toBe("0px");
+  });
+});
+
+describe("spec 0016: Escape", () => {
+  it("AC-14: Escape that closes a row's open note leaves the mode and the choice alone; the next Escape leaves the mode", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <BulkDatesProvider items={ITEMS} max="2999-01-01">
+          <StageControls />
+          <BulkDateBar />
+          <RequiredFrom requiredFrom="2022-05-01" waived={false} tolerance={false} />
+          <BulkCheckbox id={placeItemId("A")} name="Place A" />
+        </BulkDatesProvider>
+      </NextIntlClientProvider>,
+    );
+    enter();
+    choose("Place A");
+    const note = screen.getByRole("button", { name: /About this date/ });
+    click(note);
+    expect(note.getAttribute("aria-expanded")).toBe("true");
+    act(() => void fireEvent.keyDown(note, { key: "Escape" }));
+    expect(note.getAttribute("aria-expanded")).toBe("false"); // the note is closed...
+    expect(bar()).toBeTruthy(); // ...and the mode and the choice are as they were
+    expect(chosen()).toEqual(["Place A"]);
+    act(() => void fireEvent.keyDown(note, { key: "Escape" })); // nothing open any more: Escape leaves the mode
+    expect(noBar()).toBeNull();
   });
 });
 
