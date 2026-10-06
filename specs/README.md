@@ -115,7 +115,7 @@ checks, ships and is run). The headings below only group the index: moving a spe
 | Spec | Area | Status |
 | --- | --- | --- |
 | [0005](product/0005-auth-routing-i18n.md) | Sign-in, routing, languages (Hungarian default, German), the language dropdown, typed message keys | Done |
-| [0008](product/0008-action-logging.md) | Server-side logging of failed actions | Done |
+| [0008](product/0008-action-logging.md) | Server-side logging of failed actions, and Telegram messages for them | Done |
 | [0020](product/0020-origin-and-deploy.md) | Request origin behind the proxy; deploy files | Done |
 
 ### `project/`

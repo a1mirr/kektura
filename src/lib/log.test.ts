@@ -119,3 +119,132 @@ describe("spec 0035: flag change log lines", () => {
     info.mockRestore();
   });
 });
+
+describe("spec 0008: failures reach Telegram", () => {
+  const fetchMock = vi.fn();
+  const alerts = globalThis as { __kekturaFailureAlerter?: unknown };
+  const enable = () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("TELEGRAM_BOT_TOKEN", "123:SECRET");
+    vi.stubEnv("TELEGRAM_CHAT_ID", "42");
+    vi.stubGlobal("fetch", fetchMock);
+    fetchMock.mockResolvedValue(new Response("{}", { status: 200 }));
+  };
+  const sentTexts = () => fetchMock.mock.calls.map((call) => JSON.parse(String((call[1] as RequestInit).body)).text as string);
+  const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  afterEach(() => {
+    delete alerts.__kekturaFailureAlerter; // the rate limit lives on globalThis
+    fetchMock.mockReset();
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("AC-6: a stamp write failure and an exception are sent to the feedback chat, with the code only", async () => {
+    enable();
+    const error = { code: "42501", message: "key (email)=(hiker@example.com) denied", details: "secret-details", hint: "secret-hint" };
+    logStampActionError("setPlacesStamped", "write", error, "user-secret-id");
+    logStampActionError("setStampDate", "exception", new Error("boom"), "user-secret-id");
+    await flush();
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("https://api.telegram.org/bot123:SECRET/sendMessage");
+    expect(JSON.parse(String(init.body)).chat_id).toBe("42");
+    const texts = sentTexts();
+    expect(texts).toHaveLength(2);
+    expect(texts[0]).toContain("[stamp-action] setPlacesStamped write, code 42501");
+    expect(texts[1]).toContain("[stamp-action] setStampDate exception");
+    expect(texts.join("\n")).not.toMatch(/hiker@example|secret|boom|denied/);
+  });
+
+  it("AC-6: feedback, account deletion and friends failures are sent under their own tags", async () => {
+    enable();
+    logFeedbackError("write", { code: "42501", message: "denied" });
+    logAccountDeletionError("rpc", { message: "x" }, "u-1");
+    await flush();
+    expect(sentTexts().map((t) => t.split("\n")[1])).toEqual([
+      "[feedback] submitFeedback write, code 42501",
+      "[account-delete] deleteAccount write",
+    ]);
+  });
+
+  it("AC-6: a friends action is a write, or an exception when something threw", async () => {
+    enable();
+    logFriendsError("sendRequest", { message: "x" });
+    logFriendsError("setSharing", { message: "x" }, "exception");
+    await flush();
+    expect(sentTexts().map((t) => t.split("\n")[1])).toEqual(["[friends] sendRequest write", "[friends] setSharing exception"]);
+  });
+
+  it("AC-6: a failed read, rejected input, a flag lookup and a failed notification are not sent", async () => {
+    enable();
+    logStampActionError("setPlacesStamped", "read", { message: "x" }, "u-1");
+    logStampActionInvalidInput("setPlacesStamped");
+    logFeatureFlagsError({ message: "x" });
+    logFeedbackNotifyFailure("http_500");
+    await flush();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("AC-7: the same kind is sent once, however often it fails", async () => {
+    enable();
+    for (let i = 0; i < 5; i++) logStampActionError("setPlacesStamped", "write", { message: "x" }, "u-1");
+    await flush();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("AC-8: three kinds failing at once give one summary message", async () => {
+    enable();
+    logStampActionError("setPlacesStamped", "write", { message: "x" }, "u-1");
+    logFeedbackError("write", { message: "x" });
+    logFriendsError("sendRequest", { message: "x" });
+    logAccountDeletionError("rpc", { message: "x" }, "u-1");
+    logFriendsError("setSharing", { message: "x" });
+    await flush();
+    const texts = sentTexts();
+    expect(texts).toHaveLength(3);
+    expect(texts[2]).toContain("3 kinds of server action failures within a minute");
+  });
+
+  it("AC-9: the action never waits for Telegram: a hanging request returns at once", async () => {
+    enable();
+    fetchMock.mockReturnValue(new Promise(() => {}));
+    expect(() => logStampActionError("setPlacesStamped", "write", { message: "x" }, "u-1")).not.toThrow();
+    expect(errorLog).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ["an HTTP error", () => fetchMock.mockResolvedValue(new Response("{}", { status: 502 })), "http_502"],
+    ["a network error", () => fetchMock.mockRejectedValue(new TypeError("fetch failed https://api.telegram.org/bot123:SECRET/x")), "network"],
+  ])("AC-9: %s only logs a short reason, never the token", async (_, arrange, reason) => {
+    enable();
+    arrange();
+    expect(() => logFriendsError("sendRequest", { message: "x" })).not.toThrow();
+    await flush();
+    expect(warnLog.mock.calls).toEqual([[`[alerts] telegram notification failed reason=${reason}`]]);
+    expect(JSON.stringify([...errorLog.mock.calls, ...warnLog.mock.calls])).not.toContain("SECRET");
+  });
+
+  it("AC-9: a fetch that throws synchronously never reaches the action", () => {
+    enable();
+    fetchMock.mockImplementation(() => {
+      throw new Error("sync boom");
+    });
+    expect(() => logStampActionError("setPlacesStamped", "write", { message: "x" }, "u-1")).not.toThrow();
+  });
+
+  it("AC-10: without the bot's token and chat id, or outside a production build, nothing is sent", async () => {
+    enable();
+    vi.stubEnv("TELEGRAM_CHAT_ID", "");
+    logStampActionError("setPlacesStamped", "write", { message: "x" }, "u-1");
+    vi.stubEnv("TELEGRAM_CHAT_ID", "42");
+    vi.stubEnv("NODE_ENV", "development");
+    logStampActionError("setStampDate", "write", { message: "x" }, "u-1");
+    await flush();
+    expect(fetchMock).not.toHaveBeenCalled();
+    // ...and those two did not use up the budget of their kinds.
+    vi.stubEnv("NODE_ENV", "production");
+    logStampActionError("setPlacesStamped", "write", { message: "x" }, "u-1");
+    await flush();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
