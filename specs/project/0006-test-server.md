@@ -52,7 +52,7 @@ Google account and without touching real data. Production keeps Google sign-in o
 - **AC-10**: The suite also runs at a phone's width. Playwright has a second project, `mobile` (Chromium, 375 x 812, touch,
   mobile emulation; 375 px is the narrowest width spec 0036 promises), that runs only the tests tagged `@mobile`, and the
   desktop project `chromium` runs everything else, so no test runs twice. The tagged tests (`e2e/mobile.spec.ts`) cover the
-  landing page with the dummy sign-in, stamping a place on the dashboard, the stage list, the map (a section of the dashboard,
+  landing page with the dummy sign-in, stamping a place on the dashboard, changing the dates of several stamps at once (the bar at 375 and 320 px), the stage list, the map (a section of the dashboard,
   not a page of its own: going fullscreen and leaving it), the Friends page (saving the name) and the account page (signing
   out). Each one asserts that its page does not scroll sideways (`expectNoSidewaysScroll` in `e2e/helpers.ts`, the check
   `e2e/layout.spec.ts` uses too), that the page's main action is visible, lies inside the window and is at least 24 px high
@@ -60,7 +60,7 @@ Google account and without touching real data. Production keeps Google sign-in o
   AC-20), and that tapping it does what it should. The feature-flag project starts only after both projects (AC-6).
 - **AC-11**: The main pages are checked with axe (`@axe-core/playwright`, `e2e/accessibility.spec.ts`), each at a desktop width
   (1280 x 800) and at the phone width (375 x 812): the landing page in every language, the dashboard (every stage open, one place
-  stamped, the map drawn), the account page, the Friends page and the Changelog page. The rules are the WCAG 2.0, 2.1 and 2.2
+  stamped, the map drawn), the dashboard in its "Change dates" mode (one stamp chosen and a date typed), the account page, the Friends page and the Changelog page. The rules are the WCAG 2.0, 2.1 and 2.2
   success criteria of levels A and AA, all of them at both widths except the colour contrast of the dashboard, which is checked at
   the desktop width only (the colours do not change with the width, and the rule is half of the time axe takes on that page). A finding of impact `serious` or `critical` that the allow-list (AC-12) does not name fails
   the test of its page, with the rule, the width and the elements; findings of lower impact are attached to the test as

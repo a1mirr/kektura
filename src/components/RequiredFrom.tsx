@@ -30,7 +30,11 @@ export default function RequiredFrom({
   const [before, after] = t("requiredFrom", { date: MARK }).split(MARK);
 
   return (
-    <div className="mt-1 text-xs text-stone-600 [overflow-wrap:anywhere]" onKeyDown={(e) => e.key === "Escape" && setOpen(false)}>
+    <div className="mt-1 text-xs text-stone-600 [overflow-wrap:anywhere]" onKeyDown={(e) => {
+        if (e.key !== "Escape" || !open) return;
+        e.preventDefault(); // this Escape closed the note: others (the mode of spec 0016 AC-14) leave it alone
+        setOpen(false);
+      }}>
       <p>
         {before}
         <button

@@ -12,6 +12,26 @@ export type ChangelogEntry = { date: string; title: Localized; changes: Change[]
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-07",
+    title: {
+      en: "Change the date of many stamps at once",
+      ru: "Дату можно изменить сразу у многих печатей",
+      hu: "Sok bélyegzés dátuma módosítható egyszerre",
+      de: "Das Datum vieler Stempel auf einmal ändern",
+    },
+    changes: [
+      {
+        kind: "new",
+        text: {
+          en: "Change the date of many stamps at once. Press \"Change dates\" above the list of stages, tick the stamps you collected on the same day (Shift-click ticks a whole range, \"Select stage\" a whole stage, \"Select all\" everything), type a date or pick it in the calendar and press Apply: all of them get that date, or none does if something went wrong. On a stage's header \"Set date\" does the first steps for you. A retired stamp cannot get a date from the day it retired on. The mode needs JavaScript; the date field of each stamp stays as it was.",
+          ru: "Дату можно изменить сразу у многих печатей. Нажмите «Изменить даты» над списком этапов, отметьте печати, собранные в один день (щелчок с Shift отмечает весь диапазон, «Выбрать этап» — весь этап, «Выбрать все» — всё), введите дату или выберите её в календаре и нажмите «Применить»: все отмеченные получат эту дату, а если что-то пойдёт не так, не изменится ни одна. На заголовке этапа «Задать дату» сделает первые шаги за вас. Упразднённой печати нельзя поставить дату начиная со дня её упразднения. Режиму нужен JavaScript; поле даты у каждой печати осталось прежним.",
+          hu: "Sok bélyegzés dátuma módosítható egyszerre. Nyomd meg a „Dátumok módosítása” gombot a szakaszok listája fölött, jelöld ki az ugyanazon a napon begyűjtött bélyegzőket (a Shift-kattintás egy egész tartományt jelöl ki, a „Szakasz kijelölése” egy egész szakaszt, a „Mind kijelöl” mindent), írd be a dátumot vagy válaszd ki a naptárban, és nyomd meg az Alkalmaz gombot: mindegyik megkapja a dátumot, vagy ha valami elromlik, egyik sem. A szakasz fejlécén a „Dátum beállítása” elvégzi helyetted az első lépéseket. A megszűnt bélyegző nem kaphat a megszűnése napjától kezdve dátumot. A módhoz JavaScript kell; az egyes bélyegzők dátummezője a régi maradt.",
+          de: "Das Datum vieler Stempel lässt sich auf einmal ändern. Tippe über der Etappenliste auf „Daten ändern“, hake die Stempel an, die du am selben Tag gesammelt hast (mit Shift-Klick einen ganzen Bereich, mit „Etappe wählen“ eine ganze Etappe, mit „Alle auswählen“ alles), gib ein Datum ein oder wähle es im Kalender und tippe auf Übernehmen: Alle bekommen dieses Datum, oder keiner, wenn etwas schiefgeht. Auf dem Kopf einer Etappe erledigt „Datum setzen“ die ersten Schritte für dich. Ein eingestellter Stempel kann ab dem Tag seiner Einstellung kein Datum bekommen. Der Modus braucht JavaScript; das Datumsfeld jedes Stempels bleibt, wie es war.",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-10-06",
     title: {
       en: "Retired stamps are kept, and wide screens are used properly",

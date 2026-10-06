@@ -217,6 +217,9 @@ isOneToOne: false
                            },
 "set_sharing":
 { Args: { "other_id": string,"sharing": boolean }; Returns: undefined
+                           },
+"set_stamp_dates":
+{ Args: { "extra_ids": (number)[],"new_date": string,"place_keys": (string)[] }; Returns: boolean
                            }
           }
           Enums: {

@@ -4,7 +4,8 @@ import type { User } from "@supabase/supabase-js";
 import { refresh } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/action-result";
-import { logStampActionError, logStampActionInvalidInput, type StampAction, type StampStage } from "@/lib/log";
+import { logStampActionError, logStampActionInvalidInput, logStampActionRefused, type StampAction, type StampStage } from "@/lib/log";
+import { MAX_BULK_STAMPS } from "@/lib/bulk-dates";
 import { isCalendarDate, isValidStampDate } from "@/lib/stamp-date";
 
 // See spec 0002; failures are logged per spec 0008; dates per
@@ -128,6 +129,33 @@ export async function setStampDate(placeKeys: string[], date: string): Promise<A
       .select("checkpoint_id");
     if (writeError) return fail("write", writeError);
     return updated?.length ? ok : failed; // not stamped: nothing to date
+  });
+}
+
+// Changes the date of many stamps at once: places (every variant of each) and extra stamps, all or nothing (spec 0016 AC-17).
+// Update only. One database function does it in one transaction, as the caller (migration 0080); it answers false, and changes
+// nothing, when a row is missing or a retired stamp would get a date from its retirement day on (AC-18).
+export async function setStampDates(placeKeys: string[], extraIds: number[], date: string): Promise<ActionResult> {
+  if (
+    !Array.isArray(placeKeys) ||
+    !Array.isArray(extraIds) ||
+    placeKeys.length + extraIds.length < 1 ||
+    placeKeys.length + extraIds.length > MAX_BULK_STAMPS ||
+    !placeKeys.every((k) => typeof k === "string" && k.length <= 64) ||
+    !extraIds.every((id) => Number.isInteger(id)) ||
+    !isValidStampDate(date)
+  ) {
+    logStampActionInvalidInput("setStampDates");
+    return failed;
+  }
+  return asUser("setStampDates", async ({ supabase, fail }) => {
+    const { data, error } = await supabase.rpc("set_stamp_dates", { place_keys: placeKeys, extra_ids: extraIds, new_date: date });
+    if (error) return fail("write", error);
+    if (data !== true) {
+      logStampActionRefused("setStampDates"); // a stamp that is gone, or a retired stamp's day: expected, but worth a line
+      return failed;
+    }
+    return ok;
   });
 }
 

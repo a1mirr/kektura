@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { expandAllStages, expectNoSidewaysScroll, signInAsNewUser, stat } from "./helpers";
+import { psql } from "./local-db";
 
 // Spec 0006 AC-10: the pages at a phone's width, in the `mobile` project (Chromium, 375 x 812, touch, mobile emulation,
 // see playwright.config.ts). The tag on the describe is what puts these tests there and keeps them out of the desktop
@@ -119,5 +120,53 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
     await expectTappable(page, page.getByRole("button", { name: "Delete account" }), "the delete button");
     await signOut.tap();
     await expect(page).toHaveURL(/\/en$/);
+  });
+
+  // Spec 0016 AC-21: "Change dates" on a phone. The bar is fixed to the bottom of the screen and fits at 320 px, the checkboxes
+  // are 44 x 44 px targets, and tapping is enough to choose and apply. (The bar above a real on-screen keyboard cannot be tested:
+  // manual row of spec 0016.)
+  test("AC-10: Change dates does not scroll sideways, the bar fits at 375 and 320 px, and stamps are chosen and dated with taps", async ({ page }) => {
+    const email = await signInAsNewUser(page);
+    await expandAllStages(page);
+    const stamp = (key: string) => page.locator(`#place-${key}`);
+    for (const key of ["OKTPH_02", "OKTPH_03"]) {
+      await stamp(key).getByRole("button", { name: "Add stamp" }).tap();
+      await expect(stamp(key).getByRole("button", { name: "Remove" })).toBeVisible();
+    }
+    const change = page.getByRole("button", { name: "Change dates" });
+    await expectTappable(page, change, "the Change dates button");
+    await change.tap();
+    const bar = page.getByRole("region", { name: "Change the date of several stamps" });
+    await expect(bar).toBeVisible();
+
+    await stamp("OKTPH_02").getByRole("checkbox").tap();
+    await stamp("OKTPH_03").getByRole("checkbox").tap();
+    await expect(bar.getByRole("status")).toHaveText("2 selected");
+    await bar.getByLabel("New date of the selected stamps").fill("2024-03-05");
+
+    const label = (key: string) => stamp(key).locator("label", { has: page.getByRole("checkbox") });
+    await expectTappable(page, label("OKTPH_02"), "the checkbox's label", 44);
+    // with something chosen and a date typed, every control of the bar is enabled
+    for (const width of [375, 320]) {
+      await page.setViewportSize({ width, height: 700 });
+      await expectNoSidewaysScroll(page, `sideways scroll with the bar at ${width} px`);
+      const box = (await bar.boundingBox())!;
+      expect(box.x, `the bar starts inside the window at ${width} px`).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width, `the bar ends inside the window at ${width} px`).toBeLessThanOrEqual(width + 0.5);
+      expect(box.y + box.height, `the bar sits at the bottom of the screen at ${width} px`).toBeGreaterThan(700 - 4);
+      for (const name of ["Select all", "Clear", "Cancel", "Apply", "Open calendar"]) {
+        await expectTappable(page, bar.getByRole("button", { name }), `the ${name} button`, 44);
+      }
+      await expectTappable(page, bar.getByLabel("New date of the selected stamps"), "the date field", 44);
+    }
+
+    await bar.getByRole("button", { name: "Apply" }).tap();
+    await expect(page.getByText("2 dates changed")).toBeVisible();
+    await expect(bar).toHaveCount(0);
+    await expectNoSidewaysScroll(page, "sideways scroll after the dates were changed");
+    const stored = psql(
+      `select string_agg(distinct s.stamped_on::text, ',') from public.user_stamps s join auth.users u on u.id = s.user_id where u.email = '${email}'`,
+    );
+    expect(stored).toBe("2024-03-05");
   });
 });

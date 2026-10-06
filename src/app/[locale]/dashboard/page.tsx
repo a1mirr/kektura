@@ -20,9 +20,14 @@ import {
   walkedRanges,
   findStageForKm,
 } from "@/lib/progress";
+import { buildBulkItems, extraItemId, placeItemId } from "@/lib/bulk-dates";
 import { dayBefore, maxStampDate } from "@/lib/stamp-date";
 import { buildMapPoints } from "@/lib/map-data";
 import { hasToleranceNote, requiredNote } from "@/lib/new-stamps";
+import BulkCheckbox from "@/components/BulkCheckbox";
+import BulkDateBar from "@/components/BulkDateBar";
+import BulkDatesProvider from "@/components/BulkDatesProvider";
+import BulkStageButton from "@/components/BulkStageButton";
 import LocateButton from "@/components/LocateButton";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import PageShell from "@/components/PageShell";
@@ -91,6 +96,18 @@ export default async function Dashboard({
   }));
 
 
+  // The stamped rows that "Change dates" can choose, in the order the page lists them (spec 0016 AC-14, AC-15).
+  const bulkItems = buildBulkItems({
+    stages: stages.map((st) => ({
+      stage: st.stage,
+      places: st.places,
+      retired: retiredList.filter((r) => r.stage === st.stage),
+    })),
+    isStamped: (key) => stampedPlaces.has(key) || stampedRetired.has(key),
+    extras: extraList,
+    isExtraStamped: (id) => extraDone.has(id),
+  });
+
   const requiredFrom = new Map(placeList.map((p) => [p.key, p.requiredFrom]));
   const dateText = (iso: string) => format.dateTime(new Date(`${iso}T00:00:00Z`), { dateStyle: "long", timeZone: "UTC" });
   const mapPoints = buildMapPoints(checkpoints, placeKm, stampedPlaces, (key) =>
@@ -156,6 +173,8 @@ export default async function Dashboard({
         </>
       }
     >
+      <BulkDatesProvider items={bulkItems} max={maxDate}>
+      <BulkDateBar />
       <section>
         <h2 className="mb-2 font-semibold">{t("checkpoints")}</h2>
         {placeList.length === 0 ? (
@@ -182,6 +201,7 @@ export default async function Dashboard({
                 const [before, after] = t("retiredReplacedBy", { place: "\u2063" }).split("\u2063");
                 return (
                   <RetiredRow key={r.key} id={`place-${r.key}`} listed={listedRetired.has(r.key)}>
+                    <BulkCheckbox id={placeItemId(r.key)} name={r.name} />
                     <div className="min-w-0 flex-1 basis-40">
                       <div>
                         <span className="mr-2 inline-block min-w-10 text-stone-500" aria-hidden>
@@ -235,6 +255,7 @@ export default async function Dashboard({
                           {t("goExtras", { count: stageExtras.length })}
                         </a>
                       )}
+                      <BulkStageButton stage={n} />
                       <StageStampButton
                         stampKeys={keys.stamp}
                         unstampKeys={keys.unstamp}
@@ -250,6 +271,7 @@ export default async function Dashboard({
                       data-stage={p.stage}
                       className="flex scroll-mt-24 flex-wrap items-start justify-between gap-x-2 gap-y-1 px-4 py-3"
                     >
+                      <BulkCheckbox id={placeItemId(p.key)} name={p.name} />
                       <div className="min-w-0 flex-1 basis-40">
                         <div>
                           <span className="mr-2 inline-block min-w-10 text-stone-500 tabular-nums">{p.label}</span>
@@ -311,6 +333,7 @@ export default async function Dashboard({
           <ul className="divide-y rounded-lg bg-white shadow-sm">
             {extraListWithStage.map((e) => (
               <li id={`extra-${e.id}`} key={e.id} className="flex scroll-mt-24 flex-wrap items-start justify-between gap-x-2 gap-y-1 px-4 py-3">
+                <BulkCheckbox id={extraItemId(e.id)} name={e.name} />
                 <div className="min-w-0 flex-1 basis-40">
                   <div>
                     {e.name}
@@ -336,6 +359,7 @@ export default async function Dashboard({
           </ul>
         </section>
       )}
+      </BulkDatesProvider>
     </PageShell>
   );
 }
