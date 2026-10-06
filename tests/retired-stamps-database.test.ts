@@ -1,9 +1,10 @@
 // Spec 0004 AC-15 (a stamp that becomes retired keeps every user's stamp), spec 0024 AC-26 (a friend's page counts no retired
 // stamp) and the rules of the retired columns, against the real local database (`npm run testdb:start`). Skips itself when it
-// isn't running; CI's end-to-end job runs it. Every drill is one transaction that is rolled back.
+// isn't running (it fails where CI requires one, `REQUIRE_LOCAL_DB`, spec 0007 AC-12); CI's end-to-end job runs it. Every drill is one transaction that is rolled back.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
+import { databaseDecision, requireDatabase } from "../e2e/local-db";
 
 const seed = fs.readFileSync(new URL("../supabase/seed.sql", import.meta.url), "utf8");
 
@@ -17,13 +18,11 @@ function run(sql: string): string[] {
     .split("\n");
 }
 
-const hasDatabase = () => {
-  try {
-    return run("select 1;")[0] === "1";
-  } catch {
-    return false;
-  }
-};
+const RELATIONS = ["public.checkpoints", "public.user_stamps"];
+// `supabase status` (the probe of requireDatabase) takes a while: ask once before the first test, which has 5 s.
+beforeAll(() => {
+  databaseDecision(RELATIONS);
+}, 60_000);
 
 const user = (n: number) => `00000000-0000-4000-8000-0000000000f${n}`;
 const createUser = (n: number) =>
@@ -32,7 +31,7 @@ const inner = (text: string) => text.replace(/^begin;$/m, "-- begin").replace(/c
 
 describe("spec 0004: a stamp that becomes retired", () => {
   it("AC-15: keeps every user's stamp on it, with its date and id, and does not move them to another variant of the place", async (ctx) => {
-    if (!hasDatabase()) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const { retiredStampsSql } = (await import("../scripts/lib/retired-stamps.mjs")) as { retiredStampsSql: (entries: unknown[]) => string };
     // The new source no longer lists OKTPH_03_1 (a variant of Kőszeg, which keeps OKTPH_03_2) and the retired file now does.
     const block = retiredStampsSql([
@@ -66,7 +65,7 @@ describe("spec 0004: a stamp that becomes retired", () => {
   });
 
   it("AC-14: running the seed again changes nothing about the retired row, and never deletes it", (ctx) => {
-    if (!hasDatabase()) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const lines = run(
       [
         "begin;",
@@ -85,7 +84,7 @@ describe("spec 0004: a stamp that becomes retired", () => {
 
 describe("spec 0004: the retired columns", () => {
   it("AC-14: the retired row sits outside the trail order: above every current seq, no number in its stage, the km of the place it followed, its own key", (ctx) => {
-    if (!hasDatabase()) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const [line] = run(
       `select (r.seq > (select max(seq) from public.checkpoints where retired_on is null)) || ',' || (r.stage_seq is null) || ',' || (r.km_from_start = (select max(km_from_start) from public.checkpoints where place_key = r.after_place_key and retired_on is null)) || ',' || (r.place_key = r.code) || ',' || (r.stage = (select max(stage) from public.checkpoints where place_key = r.after_place_key and retired_on is null)) from public.checkpoints r where r.retired_on is not null;`,
     );
@@ -93,7 +92,7 @@ describe("spec 0004: the retired columns", () => {
   });
 
   it("AC-14: a current stamp cannot carry retired details, and no two retired rows share a key", (ctx) => {
-    if (!hasDatabase()) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     expect(() =>
       run("begin; update public.checkpoints set replaced_by = 'OKTPH_103' where code = 'OKTPH_102_1'; rollback;"),
     ).toThrow();
@@ -107,7 +106,7 @@ describe("spec 0004: the retired columns", () => {
 
 describe("spec 0024: what a friend sees of retired stamps", () => {
   it("AC-26: the friend functions leave a retired stamp out: not in their stamps, not in what they were waived", (ctx) => {
-    if (!hasDatabase()) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const lines = run(
       [
         "begin;",

@@ -1,9 +1,10 @@
 // Spec 0004 AC-12 (adding a stamp keeps what users have) and spec 0024 AC-25 (the waived places a friend shares) against
-// the real local database (`npm run testdb:start`). Skips itself when it isn't running; CI's end-to-end job runs it.
+// the real local database (`npm run testdb:start`). Skips itself when it isn't running (it fails where CI requires one, `REQUIRE_LOCAL_DB`, spec 0007 AC-12); CI's end-to-end job runs it.
 // Every drill is one transaction that is rolled back, so the reference data other tests read is never changed.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
+import { databaseDecision, requireDatabase } from "../e2e/local-db";
 import { buildPlaces, stampedPlaceKeys, waivedPlaceKeys, type Checkpoint } from "@/lib/progress";
 
 const seed = fs.readFileSync(new URL("../supabase/seed.sql", import.meta.url), "utf8");
@@ -18,13 +19,11 @@ function run(sql: string): string[] {
     .split("\n");
 }
 
-const hasDatabase = () => {
-  try {
-    return run("select 1;")[0] === "1";
-  } catch {
-    return false;
-  }
-};
+const RELATIONS = ["public.checkpoints", "public.user_stamps"];
+// `supabase status` (the probe of requireDatabase) takes a while: ask once before the first test, which has 5 s.
+beforeAll(() => {
+  databaseDecision(RELATIONS);
+}, 60_000);
 
 const user = (n: number) => `00000000-0000-4000-8000-0000000000e${n}`;
 const createUser = (n: number) =>
@@ -48,7 +47,7 @@ function seedWithInsertedPlace(beforeCode: string) {
 
 describe("spec 0004: adding a stamp to the seed", () => {
   it("AC-12: every existing code keeps its id and every user's stamp keeps pointing at it, while the places after it move down the trail", (ctx) => {
-    if (!hasDatabase()) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const regenerated = seedWithInsertedPlace("OKTPH_50_1");
     expect(regenerated).toContain("'OKTPH_TEST_NEW'");
     const snapshot = "select string_agg(code || '=' || id, ',' order by code) from public.checkpoints where code is not null and code <> 'OKTPH_TEST_NEW'";
@@ -130,7 +129,7 @@ describe("spec 0024: a friend's waived places", () => {
   }
 
   it("AC-25: is the rule of progress.ts: for friends' stamps along the whole trail the database and waivedPlaceKeys agree", (ctx) => {
-    if (!hasDatabase()) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const checkpoints = loadCheckpoints();
     const dated = new Set(checkpoints.filter((c) => c.required_from !== null).map((c) => c.place_key));
     expect(dated.size).toBeGreaterThan(5);
@@ -150,7 +149,7 @@ describe("spec 0024: a friend's waived places", () => {
   }, 60_000);
 
   it("AC-25: a stamped new place is not waived, and only an accepted friend who shares is asked about", (ctx) => {
-    if (!hasDatabase()) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const checkpoints = loadCheckpoints();
     const stamped = scenario(checkpoints, () => "2013-01-01"); // every place, the new ones too
     expect(waivedAccordingToDatabase(stamped.stampDates)).toEqual([]);
@@ -162,7 +161,7 @@ describe("spec 0024: a friend's waived places", () => {
   }, 60_000);
 
   it("AC-25: a place is required from the earliest date of its variants, and from the beginning when one variant has none", (ctx) => {
-    if (!hasDatabase()) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const checkpoints = loadCheckpoints();
     const variants = checkpoints.filter((c) => c.place_key === "OKTPH_132_B"); // Encs: two variants, both dated 2022-05-01
     expect(variants).toHaveLength(2);
@@ -187,7 +186,7 @@ describe("spec 0024: a friend's waived places", () => {
   }, 60_000);
 
   it("AC-25: only a signed-in user may call it", (ctx) => {
-    if (!hasDatabase()) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const [line] = run(
       "select has_function_privilege('anon', 'public.get_friend_waived_places()', 'execute') || ',' || has_function_privilege('authenticated', 'public.get_friend_waived_places()', 'execute');",
     );

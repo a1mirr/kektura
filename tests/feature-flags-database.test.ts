@@ -1,16 +1,17 @@
 // Spec 0035 AC-7, AC-8, AC-12, AC-13 against the real local database (`npm run testdb:start`). The tests skip
-// themselves when it isn't running; CI's end-to-end job runs them. They talk to PostgREST the way a browser could,
+// themselves when it isn't running and fail where CI requires it (`REQUIRE_LOCAL_DB`, spec 0007 AC-12); CI's end-to-end job runs them. They talk to PostgREST the way a browser could,
 // as a signed-in user and as an anonymous visitor, so they prove what a malicious client can and cannot do. Each test
 // works on flags of its own (`dbtest-...`), never on the declared ones that the E2E tests switch.
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { localSupabase, psql } from "../e2e/local-db";
+import { databaseDecision, localSupabase, psql, requireDatabase } from "../e2e/local-db";
 import { FLAG_KEYS } from "@/lib/feature-flags";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Person = { client: SupabaseClient<Database>; id: string };
 
+const RELATIONS = ["public.feature_flags", "public.feature_flag_users"];
 let local: { url: string; anonKey: string } | undefined;
 let ana: Person;
 let bob: Person;
@@ -35,11 +36,8 @@ async function seenBy(client: SupabaseClient<Database>) {
 }
 
 beforeAll(async () => {
-  try {
-    local = localSupabase();
-  } catch {
-    return; // no local Supabase: the tests skip
-  }
+  if (databaseDecision(RELATIONS).action !== "run") return; // the tests skip or fail, whichever the environment asks for
+  local = localSupabase();
   [ana, bob] = [await signUp(), await signUp()];
   anon = connect();
   psql(
@@ -54,7 +52,7 @@ afterAll(() => {
 
 describe("spec 0035: the flag tables", () => {
   it("AC-7: both tables have row level security and no policy, and neither role may touch them", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     expect(
       psql(
         "select count(*) from pg_class where oid in ('public.feature_flags'::regclass, 'public.feature_flag_users'::regclass) and relrowsecurity",
@@ -81,16 +79,16 @@ describe("spec 0035: the flag tables", () => {
   });
 
   it("AC-12: deleting the account removes its allowlist entries", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const leaver = await signUp();
     psql(`insert into public.feature_flag_users (key, user_id) values ('${flag("list")}', '${leaver.id}')`);
     expect(psql(`select count(*) from public.feature_flag_users where user_id = '${leaver.id}'`)).toBe("1");
     psql(`delete from auth.users where id = '${leaver.id}'`);
     expect(psql(`select count(*) from public.feature_flag_users where user_id = '${leaver.id}'`)).toBe("0");
-  });
+  }, 30_000); // a sign-up of its own: more than the default 5 s while the whole suite runs in parallel
 
   it("AC-13: every declared flag has a row, so its allowlist can be filled", (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const stored = psql("select key from public.feature_flags").split("\n");
     for (const key of FLAG_KEYS) expect(stored, key).toContain(key);
   });
@@ -98,7 +96,7 @@ describe("spec 0035: the flag tables", () => {
 
 describe("spec 0035: feature_flags_for_me()", () => {
   it("AC-8: a signed-in user sees each flag's mode and whether they are on its allowlist", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     expect(await seenBy(ana.client)).toEqual({
       off: { key: flag("off"), mode: "off", listed: true },
       list: { key: flag("list"), mode: "allowlist", listed: true },
@@ -108,7 +106,7 @@ describe("spec 0035: feature_flags_for_me()", () => {
   });
 
   it("AC-8: a signed-out visitor is on no allowlist, and never learns anyone's id", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const seen = await seenBy(anon);
     expect(seen.list).toEqual({ key: flag("list"), mode: "allowlist", listed: false });
     expect(seen.on?.mode).toBe("on");
@@ -117,7 +115,7 @@ describe("spec 0035: feature_flags_for_me()", () => {
   });
 
   it("AC-8: it is a security definer function with an empty search_path, granted to anon and authenticated only", (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     expect(
       psql("select prosecdef || '|' || proconfig::text from pg_proc where proname = 'feature_flags_for_me' and pronamespace = 'public'::regnamespace"),
     ).toBe('true|{"search_path=\\"\\""}');
