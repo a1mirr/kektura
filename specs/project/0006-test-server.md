@@ -70,7 +70,7 @@ Google account and without touching real data. Production keeps Google sign-in o
   (`e2e/accessibility-allowlist.ts`): the rule, the page, optionally the width, the reason and the task that fixes it. The list
   can only shrink: the test of a page fails when an entry for that page no longer fires (at the width it names, or at either
   width when it names none), so the entry has to be deleted, and a new violation can only be fixed, never listed silently. Every
-  entry names a page that is scanned and gives a reason (checked by `tests/accessibility-allowlist.test.ts`, which also tests how
+  entry names a page that is scanned (checked in `e2e/accessibility.spec.ts`) and gives a reason (checked by `tests/accessibility-allowlist.test.ts`, which also tests how
   findings are judged against the list). The list is empty when no violation is known.
 
 ## Notes
