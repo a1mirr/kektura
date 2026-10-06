@@ -60,7 +60,7 @@ phone, and "Account" says what is behind the link. Every page also carries the s
 - **AC-16**: The account page has a "Sign out" button (`ru`: Выйти, `hu`: Kijelentkezés, `de`: Abmelden) next to its heading. It
   behaves as spec 0005 AC-6 says: a plain form POST to `/auth/sign-out` that revokes the session, clears the
   cookies and returns to the landing page in the current locale. Afterwards the dashboard and the account page send
-  the visitor to the landing page.
+  the visitor to the landing page. The button is a touch target at least 44 px high.
 - **AC-17**: Signing out from the account page works with JavaScript off (the button is a plain form, not a client
   component).
 - **AC-18**: The page, the header link and the button are translated in every language, and the About page
@@ -119,7 +119,7 @@ email on the page.
 | AC-11 | `DeleteAccountButton.test.tsx`, `e2e/account.spec.ts` (server action answering 500) |
 | AC-12 | `e2e/feedback.spec.ts` (anonymous caller refused); migration 0008 |
 | AC-13 | `src/app/[locale]/account/actions.test.ts`, `src/lib/log.test.ts` |
-| AC-16 | `e2e/account.spec.ts` (the button sits next to the heading; sign out from the account page, then dashboard and account redirect; in each language: `e2e/languages.spec.ts`), `e2e/auth.spec.ts` |
+| AC-16 | `e2e/account.spec.ts` (the button sits next to the heading; sign out from the account page, then dashboard and account redirect; in each language: `e2e/languages.spec.ts`), `e2e/auth.spec.ts`, `e2e/mobile.spec.ts` (at 375 px the button is at least 44 px high and signs out when tapped) |
 | AC-17 | `e2e/account.spec.ts` (with JavaScript disabled) |
 | AC-19 | `tests/site-logo.test.ts` (one component, drawn only by the locale layout and the 404 page, which also covers the error page: the layout wraps its boundary; the SVG is local; empty `alt`; translated names; no back-link keys left), `e2e/site-logo.spec.ts` (every public and signed-in page: link, address, accessible name, 44 px target, at the content's left edge, no overflow at 375 px, focus ring, banner above it, every language, the 404 page) |
 | AC-18 | `tests/messages.test.ts` (the header link, the page title and the About page's link text use the same name in each language, and no key is still called settings), `e2e/languages.spec.ts` (the account link, the page title and the sign-out button in every language), `e2e/about.spec.ts` (link) |

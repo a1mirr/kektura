@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
-import { signInAsNewUser } from "./helpers";
+import { expectNoSidewaysScroll, signInAsNewUser } from "./helpers";
 import { psql } from "./local-db";
 
 // Spec 0036 (the page layout), spec 0001 AC-28 (the dashboard's two columns), spec 0024 AC-27 and AC-28 (the friend's page and
@@ -12,23 +12,6 @@ const box = async (locator: ReturnType<Page["locator"]>) => (await locator.bound
 
 // The scrollbar takes part of the window: the layout works with the width that is left.
 const clientWidth = (page: Page) => page.evaluate(() => document.documentElement.clientWidth);
-
-// How far the page scrolls sideways (0: not at all), with the elements that stick out for the failure message.
-async function expectNoSidewaysScroll(page: Page, message: string) {
-  await expect
-    .poll(
-      () =>
-        page.evaluate(() => {
-          const width = document.documentElement.clientWidth;
-          const wide = [...document.body.querySelectorAll("*")]
-            .filter((el) => el.getBoundingClientRect().right > width + 0.5)
-            .map((el) => `<${el.tagName.toLowerCase()} class="${el.className}">`);
-          return document.documentElement.scrollWidth - width > 0 ? wide.join(" | ") || "page wider than the window" : "";
-        }),
-      { message },
-    )
-    .toBe("");
-}
 
 // The logo's strip, the page and the footer: one width, one pair of edges (spec 0036 AC-1).
 async function expectSharedEdges(page: Page, label: string, { footer: hasFooter = true } = {}) {

@@ -184,7 +184,7 @@ export default async function Dashboard({
                   <RetiredRow key={r.key} id={`place-${r.key}`} listed={listedRetired.has(r.key)}>
                     <div className="min-w-0 flex-1 basis-40">
                       <div>
-                        <span className="mr-2 inline-block min-w-10 text-stone-400" aria-hidden>
+                        <span className="mr-2 inline-block min-w-10 text-stone-500" aria-hidden>
                           –
                         </span>
                         {r.name}
@@ -252,7 +252,7 @@ export default async function Dashboard({
                     >
                       <div className="min-w-0 flex-1 basis-40">
                         <div>
-                          <span className="mr-2 inline-block min-w-10 text-stone-400 tabular-nums">{p.label}</span>
+                          <span className="mr-2 inline-block min-w-10 text-stone-500 tabular-nums">{p.label}</span>
                           {p.name}
                           <span className="ml-2 text-sm text-stone-500">{t("kmValue", { km: format.number(p.km) })}</span>
                         </div>
