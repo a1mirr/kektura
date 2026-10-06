@@ -1,15 +1,16 @@
 // Spec 0024 AC-1, AC-2, AC-4 to AC-6, AC-9, AC-10, AC-12 against the real local database (`npm run testdb:start`).
-// The tests skip themselves when it isn't running. They talk to PostgREST the way a browser could, as
+// The tests skip themselves when it isn't running, and fail where CI requires it (`REQUIRE_LOCAL_DB`, spec 0007 AC-12). They talk to PostgREST the way a browser could, as
 // signed-in users, so they prove what a malicious client can and cannot do.
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { beforeAll, describe, expect, it } from "vitest";
-import { localSupabase, psql } from "../e2e/local-db";
+import { databaseDecision, localSupabase, psql, requireDatabase } from "../e2e/local-db";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Client = SupabaseClient<Database>;
 type Person = { client: Client; id: string };
 
+const RELATIONS = ["public.profiles", "public.friendships"];
 let local: { url: string; anonKey: string } | undefined;
 
 const connect = (): Client => createClient<Database>(local!.url, local!.anonKey, { auth: { persistSession: false } });
@@ -40,17 +41,14 @@ let bob: Person;
 let cleo: Person;
 
 beforeAll(async () => {
-  try {
-    local = localSupabase();
-  } catch {
-    return; // no local Supabase: the tests skip (CI's end-to-end job runs them against one)
-  }
+  if (databaseDecision(RELATIONS).action !== "run") return; // the tests skip or fail, whichever the environment asks for
+  local = localSupabase();
   [ana, bob, cleo] = [await signUp("Ana Maria Kovacs"), await signUp(), await signUp("Cleo")];
 }, 60_000); // `supabase status` and three sign-ups, while the whole suite runs in parallel
 
 describe("spec 0024: friends database rules", () => {
   it("AC-1: the display name defaults to the first name, with a fallback, and stays 1 to 40 characters", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const names = async (who: Person) =>
       (await who.client.from("profiles").select("display_name").eq("id", who.id).single()).data?.display_name;
     expect(await names(ana)).toBe("Ana");
@@ -68,7 +66,7 @@ describe("spec 0024: friends database rules", () => {
   });
 
   it("AC-12: nobody can write profiles or friendships directly", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     // The attack: make yourself an accepted friend of someone else without their approval.
     const forged = await bob.client.from("friendships").insert({ user_id: bob.id, friend_id: ana.id, status: "accepted" });
     expect(forged.error).not.toBeNull();
@@ -82,14 +80,14 @@ describe("spec 0024: friends database rules", () => {
   });
 
   it("AC-12: the invite token cannot be read through the table, only by its owner through a function", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     expect((await ana.client.from("profiles").select("invite_token").eq("id", ana.id)).error).not.toBeNull();
     expect((await ana.client.from("profiles").select("*").eq("id", ana.id)).error).not.toBeNull();
     expect(await tokenOf(ana)).toMatch(/^[0-9a-f]{32}$/);
   });
 
   it("AC-12: anonymous callers cannot use any friends function", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const anon = { client: connect(), id: "" };
     const zero = "00000000-0000-0000-0000-000000000000";
     const calls: [string, Record<string, unknown>][] = [
@@ -109,7 +107,7 @@ describe("spec 0024: friends database rules", () => {
   });
 
   it("AC-12: nobody but the database itself may execute the sign-up trigger function", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     // PostgREST hides trigger functions whatever their grants, so the privilege itself is what is checked.
     for (const role of ["anon", "authenticated"]) {
       expect(psql(`select has_function_privilege('${role}', 'public.handle_new_user()', 'execute')`), role).toBe("f");
@@ -117,7 +115,7 @@ describe("spec 0024: friends database rules", () => {
   });
 
   it("AC-3: an invite link resolves to the inviter's name and whether it is yours; unknown tokens to nothing", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const token = await tokenOf(ana);
     expect((await rpc(bob, "get_inviter_info", { token })).data).toEqual([{ display_name: "Anna", is_own: false }]);
     expect((await rpc(ana, "get_inviter_info", { token })).data).toEqual([{ display_name: "Anna", is_own: true }]);
@@ -127,7 +125,7 @@ describe("spec 0024: friends database rules", () => {
   });
 
   it("AC-4, AC-5, AC-9, AC-10: request, approval, sharing switch and removal", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     expect((await ana.client.from("user_stamps").insert({ user_id: ana.id, checkpoint_id: 1 })).error).toBeNull();
     expect((await bob.client.from("user_stamps").insert({ user_id: bob.id, checkpoint_id: 2 })).error).toBeNull();
 
@@ -172,7 +170,7 @@ describe("spec 0024: friends database rules", () => {
   });
 
   it("AC-2, AC-6: regenerating the link invalidates the old one; friends never see the new one", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const old = await tokenOf(ana);
     expect((await rpc(ana, "regenerate_invite")).error).toBeNull();
     const fresh = await tokenOf(ana);

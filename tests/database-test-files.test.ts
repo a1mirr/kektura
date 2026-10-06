@@ -1,0 +1,53 @@
+// Spec 0007 AC-12 and AC-13: every test file under tests/ that needs the local database decides what a missing one means
+// through `requireDatabase` of e2e/local-db.ts and nowhere else, and CI's database step runs every one of them.
+import fs from "node:fs";
+import { describe, expect, it } from "vitest";
+
+const read = (file: string) => fs.readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
+const testFiles = fs.readdirSync(new URL("../tests/", import.meta.url)).filter((name) => name.endsWith(".test.ts"));
+
+// These two are about the helper and about this rule, so they name what they forbid and import the helper without
+// needing a database.
+const aboutTheRule = ["database-test-files.test.ts", "local-db-helper.test.ts"];
+
+// What makes a file a database test: the helper's import, or a way of its own to reach the database.
+const touchesDatabase = (text: string) =>
+  /e2e\/local-db/.test(text) || /execFileSync\(\s*"docker"/.test(text) || /\bhasDatabase\b/.test(text);
+
+const databaseFiles = testFiles.filter((name) => !aboutTheRule.includes(name) && touchesDatabase(read(`tests/${name}`)));
+
+describe("spec 0007: the database test files", () => {
+  it("AC-12: the rule finds the database tests (the files CI's database step runs)", () => {
+    expect(databaseFiles).toEqual(
+      expect.arrayContaining([
+        "database-rules.test.ts",
+        "feature-flags-database.test.ts",
+        "flag-admin-database.test.ts",
+        "friends-migration.test.ts",
+        "retired-stamps-database.test.ts",
+        "seed-cleanup.test.ts",
+        "stamp-dates-database.test.ts",
+      ]),
+    );
+  });
+
+  describe.each(databaseFiles)("%s", (name) => {
+    const text = read(`tests/${name}`);
+
+    it("AC-12: imports requireDatabase from the helper and calls it in tests", () => {
+      expect(text).toMatch(/import \{[^}]*\brequireDatabase\b[^}]*\} from "\.\.\/e2e\/local-db"/);
+      expect(text).toMatch(/requireDatabase\(ctx\b/);
+    });
+
+    it("AC-12: has no skip and no reachability check of its own", () => {
+      expect(text).not.toMatch(/\bctx\.skip\(|\bcontext\.skip\(|\bit\.skip\b|\bdescribe\.skip\b|\.skipIf\(|\bhasDatabase\b/);
+      expect(text).not.toMatch(/REQUIRE_LOCAL_DB\s*[=!]|process\.env\.REQUIRE_LOCAL_DB/);
+    });
+
+    it("AC-13: is run by CI's database step", () => {
+      const ci = read(".github/workflows/ci.yml");
+      const run = ci.split("\n").find((line) => line.includes("npx vitest run") && line.includes("tests/")) ?? "";
+      expect(run.split(/\s+/)).toContain(`tests/${name}`);
+    });
+  });
+});

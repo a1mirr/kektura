@@ -92,6 +92,45 @@ describe("spec 0007: the CI workflow", () => {
     expect(upload).toContain("path: playwright-report/");
   });
 
+  describe("AC-12, AC-13: the database tests cannot skip in CI", () => {
+    const e2e = job("e2e");
+    const database = step(e2e, "Database rule tests");
+
+    it("only the database step of the e2e job requires the database", () => {
+      expect(database).toMatch(/env:\s*\n\s+REQUIRE_LOCAL_DB: "1"/);
+      expect(job("check")).not.toContain("REQUIRE_LOCAL_DB");
+      expect(job("review")).not.toContain("REQUIRE_LOCAL_DB");
+      expect(ci.match(/REQUIRE_LOCAL_DB: /g)).toHaveLength(1);
+      expect(e2e.replace(database, "")).not.toContain("REQUIRE_LOCAL_DB: ");
+    });
+
+    it("nothing else sets it: no other workflow, no git hook, no Stop hook, no npm script, no test server script", () => {
+      const others = [
+        ...fs.readdirSync(new URL("../.github/workflows/", import.meta.url)).filter((f) => f !== "ci.yml").map((f) => `.github/workflows/${f}`),
+        ...fs.readdirSync(new URL("../.githooks/", import.meta.url)).map((f) => `.githooks/${f}`),
+        ".claude/hooks/stop-check.mjs",
+        ".claude/settings.json",
+        "package.json",
+        "scripts/test-env.mjs",
+        "playwright.config.ts",
+      ];
+      for (const file of others) expect(read(file), file).not.toContain("REQUIRE_LOCAL_DB");
+    });
+
+    it("the step writes the vitest JSON report and the next step checks it with the script, which fails the job", () => {
+      expect(database).toMatch(/--reporter=default --reporter=json --outputFile\.json=database-tests-report\.json/);
+      const check = step(e2e, "Every database test ran");
+      expect(check).toContain("run: node scripts/check-database-tests.mjs database-tests-report.json");
+      expect(check).not.toMatch(/continue-on-error|\|\| true/);
+      expect(e2e.indexOf("- name: Every database test ran")).toBeGreaterThan(e2e.indexOf("- name: Database rule tests"));
+      expect(fs.existsSync(new URL("../scripts/check-database-tests.mjs", import.meta.url))).toBe(true);
+    });
+
+    it("the step starts after Supabase has started", () => {
+      expect(e2e.indexOf("Database rule tests")).toBeGreaterThan(e2e.indexOf("Start local Supabase"));
+    });
+  });
+
   it("AC-3: the e2e job checks the generated types after Supabase has started; the scripts exist", () => {
     const e2e = job("e2e");
     expect(e2e.indexOf("npm run types:check")).toBeGreaterThan(e2e.indexOf("Start local Supabase"));

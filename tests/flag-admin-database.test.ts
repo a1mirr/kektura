@@ -1,11 +1,11 @@
 // Spec 0035 AC-23 against the real local database (`npm run testdb:start`): the functions the Telegram webhook calls.
-// The tests skip themselves when it isn't running; CI's end-to-end job runs them. They call the functions through
+// The tests skip themselves when it isn't running and fail where CI requires it (`REQUIRE_LOCAL_DB`, spec 0007 AC-12); CI's end-to-end job runs them. They call the functions through
 // PostgREST as the service role (what the webhook does) and as an anonymous visitor and a signed-in user (what
 // nobody may do). Each test works on flags of its own (`dbtest-...`), never on the declared ones.
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { localSupabase, psql } from "../e2e/local-db";
+import { databaseDecision, localSupabase, psql, requireDatabase } from "../e2e/local-db";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Client = SupabaseClient<Database>;
@@ -30,6 +30,7 @@ vi.mock("@/lib/telegram", async (importOriginal) => ({
   },
 }));
 
+const RELATIONS = ["public.feature_flags", "public.feature_flag_users"];
 let local: ReturnType<typeof localSupabase> | undefined;
 let service: Client;
 let anon: Client;
@@ -40,11 +41,8 @@ const flag = (suffix: string) => `${prefix}-${suffix}`;
 const connect = (key: string): Client => createClient<Database>(local!.url, key, { auth: { persistSession: false } });
 
 beforeAll(async () => {
-  try {
-    local = localSupabase();
-  } catch {
-    return; // no local Supabase: the tests skip
-  }
+  if (databaseDecision(RELATIONS).action !== "run") return; // the tests skip or fail, whichever the environment asks for
+  local = localSupabase();
   service = connect(local.serviceKey);
   anon = connect(local.anonKey);
   const client = connect(local.anonKey);
@@ -64,7 +62,7 @@ const listed = (key: string) =>
 
 describe("spec 0035: the flag functions of the Telegram webhook", () => {
   it("AC-23: only the service role may call them: neither an anonymous visitor nor a signed-in user can", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     for (const who of [anon, ana.client]) {
       expect((await who.rpc("admin_list_feature_flags")).error?.code).toBe("42501");
       expect((await who.rpc("admin_set_feature_flag", { p_key: flag("a"), p_mode: "on" })).error?.code).toBe("42501");
@@ -87,7 +85,7 @@ describe("spec 0035: the flag functions of the Telegram webhook", () => {
   }, 30_000);
 
   it("AC-23: they are security definer functions with an empty search_path", (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const rows = psql(
       "select prosecdef || '|' || proconfig::text from pg_proc where proname like 'admin_%feature_flag%' and pronamespace = 'public'::regnamespace",
     ).split("\n");
@@ -96,7 +94,7 @@ describe("spec 0035: the flag functions of the Telegram webhook", () => {
   });
 
   it("AC-23: a mode is set, creating the flag when it has no row, and setting it again changes nothing", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     expect((await service.rpc("admin_set_feature_flag", { p_key: flag("m"), p_mode: "allowlist" })).data).toBe("ok");
     expect(mode(flag("m"))).toBe("allowlist");
     expect((await service.rpc("admin_set_feature_flag", { p_key: flag("m"), p_mode: "allowlist" })).data).toBe("ok");
@@ -106,7 +104,7 @@ describe("spec 0035: the flag functions of the Telegram webhook", () => {
   });
 
   it("AC-23: a mode that does not exist is refused and changes nothing", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     await service.rpc("admin_set_feature_flag", { p_key: flag("bad"), p_mode: "off" });
     expect((await service.rpc("admin_set_feature_flag", { p_key: flag("bad"), p_mode: "half" })).data).toBe("bad_mode");
     expect((await service.rpc("admin_set_feature_flag", { p_key: flag("bad"), p_mode: null as unknown as string })).data).toBe("bad_mode");
@@ -114,7 +112,7 @@ describe("spec 0035: the flag functions of the Telegram webhook", () => {
   });
 
   it("AC-23: a user is found by email in any case, added and removed idempotently, and then sees the flag as theirs", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     await service.rpc("admin_set_feature_flag", { p_key: flag("u"), p_mode: "allowlist" });
     const add = () => service.rpc("admin_set_feature_flag_user", { p_key: flag("u"), p_email: ana.email.toUpperCase(), p_allowed: true });
     expect((await add()).data).toBe("ok");
@@ -130,7 +128,7 @@ describe("spec 0035: the flag functions of the Telegram webhook", () => {
   });
 
   it("AC-23: an email with no account, or a flag with no row, is told apart and changes nothing", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     await service.rpc("admin_set_feature_flag", { p_key: flag("n"), p_mode: "allowlist" });
     expect((await service.rpc("admin_set_feature_flag_user", { p_key: flag("n"), p_email: "nobody@kektura.test", p_allowed: true })).data).toBe("no_account");
     expect((await service.rpc("admin_set_feature_flag_user", { p_key: flag("norow"), p_email: ana.email, p_allowed: true })).data).toBe("no_flag");
@@ -139,7 +137,7 @@ describe("spec 0035: the flag functions of the Telegram webhook", () => {
   });
 
   it("AC-17, AC-23: the list holds every stored flag with its mode and the size of its allowlist", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     await service.rpc("admin_set_feature_flag", { p_key: flag("l"), p_mode: "allowlist" });
     await service.rpc("admin_set_feature_flag_user", { p_key: flag("l"), p_email: ana.email, p_allowed: true });
     const { data } = await service.rpc("admin_list_feature_flags");
@@ -150,7 +148,7 @@ describe("spec 0035: the flag functions of the Telegram webhook", () => {
 
 describe("spec 0035: the allowlist functions of the flag panel", () => {
   it("AC-33: a flag's allowlist is listed by display name, never email, and a user is removed by id, once", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     await service.rpc("admin_set_feature_flag", { p_key: flag("p"), p_mode: "allowlist" });
     await service.rpc("admin_set_feature_flag_user", { p_key: flag("p"), p_email: ana.email, p_allowed: true });
     const { data } = await service.rpc("admin_list_feature_flag_users", { p_key: flag("p") });
@@ -196,7 +194,7 @@ describe("spec 0035: the Telegram webhook against the database", () => {
   };
 
   it("AC-17, AC-19, AC-22: /flags, /allow and /deny reach the real functions, and the answers follow what the database did", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     expect(await reply("/flags")).toMatch(/^friends: on\n/);
     // friends is on for everybody, so listing a user changes nothing visible; the allowlist row is the proof.
     expect(await reply(`/allow friends ${ana.email}`)).toMatch(/added to the allowlist of friends\. The flag is on, so this has no effect/);
@@ -207,7 +205,7 @@ describe("spec 0035: the Telegram webhook against the database", () => {
   });
 
   it("AC-20, AC-22: /flag friends on asks, and /confirm sets the stored mode (here it already is on, so nothing else changes)", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     expect(await reply("/flag friends on")).toMatch(/Send \/confirm/);
     expect(await reply("/confirm")).toBe("friends is now on.");
     expect(psql("select mode from public.feature_flags where key = 'friends'")).toBe("on");
@@ -228,7 +226,7 @@ describe("spec 0035: the Telegram webhook against the database", () => {
   };
 
   it("AC-28, AC-29, AC-30: the panel's buttons reach the real functions: the allowlist is opened by name, a user removed, a mode tapped", async (ctx) => {
-    if (!local) return ctx.skip();
+    requireDatabase(ctx, RELATIONS);
     const name = psql(`select display_name from public.profiles where id = '${ana.id}'`);
     expect(await reply(`/allow friends ${ana.email}`)).toMatch(/added to the allowlist/);
 
