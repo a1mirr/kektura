@@ -2,8 +2,8 @@
 
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useCallback, useRef } from "react";
-import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { getPathname, useRouter } from "@/i18n/navigation";
 import type { KmRange } from "@/lib/progress";
 import { revealInList } from "@/lib/map-reveal";
 import type { MapExtra, MapPoint } from "@/lib/map-data";
@@ -36,6 +36,7 @@ export default function TrailMap({
 }) {
   const t = useTranslations("dashboard");
   const router = useRouter();
+  const locale = useLocale();
   const container = useRef<HTMLDivElement>(null);
   const wrapper = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapHandle>({ map: null, ready: false, route: null });
@@ -65,6 +66,7 @@ export default function TrailMap({
   const ctx = useLatest<MapContext>({
     t,
     refreshPage: () => router.refresh(),
+    reportHref: (code) => getPathname({ href: { pathname: "/feedback", query: { stamp: code } }, locale }),
     routeFrom: planner.routeFrom,
     routeTo: planner.routeTo,
     setRouteFrom: planner.setRouteFrom,

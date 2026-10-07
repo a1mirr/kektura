@@ -1,7 +1,7 @@
 # 0017: Feedback form with Telegram notifications
 
 Status: Done
-Owner code: `src/app/[locale]/(pages)/feedback/*`, `src/lib/feedback.ts`, `src/lib/telegram.ts`,
+Owner code: `src/app/[locale]/(pages)/feedback/*`, `src/lib/feedback.ts`, `src/lib/stamp-lookup.ts`, `src/lib/telegram.ts`,
 `src/lib/rate-limit.ts`, `supabase/migrations/0008_pages_settings.sql`, `scripts/telegram-check.mjs`
 
 ## Goal
@@ -46,6 +46,13 @@ the rest.
   (spec 0035) is registered, and where it points.
 - **AC-10**: Unexpected input to the server action (not a string, an array, ...) is a clean `invalid`
   result, never a thrown error.
+- **AC-11**: The form can be opened for one stamp, `/<language>/feedback?stamp=<code>` (the link of spec 0003 AC-27): the address carries a stamp code and nothing else. The
+  code counts only if it has the shape of a stamp code (`OKTPH_...`, one value) **and** is a current stamp of the seed; anything else (free text, an unknown or
+  retired code, two values, an empty one) gives the plain form, so no link can put words into a visitor's form. For a known stamp the form says "About the stamp <name> (<code>)",
+  the name being the seed's, and sends the code with the message; the server checks it again, and puts a line "Stamp: <name> (<code>)" and an empty line before the
+  sender's words, in the stored row and in Telegram, in English whatever the page's language. That line counts in the 2000 characters (the form shows what is left, the
+  server refuses a message that is too long with it). An unknown code sent to the action is ignored (the message is stored as written); a seed that cannot be read fails the
+  submission. The form's honeypot and rate limit (AC-7) apply as before and come first.
 
 ## Out of scope
 
@@ -78,5 +85,6 @@ Supabase dashboard, table `user_feedback`).
 | AC-4, AC-5 | `src/lib/telegram.test.ts`, `actions.test.ts` (notification text and target, skipped without config, failures never fail the action, token and message text never logged), `src/lib/log.test.ts` |
 | AC-7 | `src/lib/rate-limit.test.ts`, `actions.test.ts` (honeypot, per-address limit) |
 | AC-1, AC-6, AC-8 | `e2e/feedback.spec.ts` (footer link, title, send, cleared form, ru/hu labels), `FeedbackForm.test.tsx` (counter, every message, sending state, honeypot wiring, note) |
+| AC-11 | `src/lib/feedback.test.ts` (only the shape of a stamp code; the line and the room it takes), `src/app/[locale]/(pages)/feedback/actions.test.ts` (a known code puts the seed's name before the message in the row and in Telegram; free text, an unknown, a retired code, a number and an array are ignored; nothing is looked up for a message without a stamp or from a bot; the line counts in the 2000; an unreadable seed fails), `src/app/[locale]/(pages)/feedback/FeedbackForm.test.tsx` (the line, the room, only the code is sent), `e2e/feedback.spec.ts` (the page, the stored row, and the plain form for six kinds of wrong address) |
 | AC-9 | `tests/telegram-check.test.ts` (the script against a fake Telegram API on localhost: a working setup, `--find-chat-id` with and without chats, a bad token, no token, no chat id, an unreachable API; the token is never printed) |
 | AC-9 (the real bot) | manual (it needs the real bot and chat): `npm run telegram:check` prints "Test message sent" and the message arrives. Last checked: never recorded. |

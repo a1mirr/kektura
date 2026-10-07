@@ -1,7 +1,7 @@
 # 0015: About page
 
 Status: Done
-Owner code: `src/app/[locale]/(pages)/about/page.tsx`, `src/lib/trail-facts.ts`, `messages/*.json` (`about.*`)
+Owner code: `src/app/[locale]/(pages)/about/page.tsx`, `src/lib/trail-facts.ts`, `src/lib/trail-meta.ts`, `messages/*.json` (`about.*`)
 
 ## Goal
 
@@ -45,6 +45,8 @@ Everything it says is true of the app today.
 - **AC-7**: The page text has the same keys in every locale (`tests/messages.test.ts`); each
   locale reads naturally and uses the app's own terms (`ru`: печати, этап, участок; `hu`: bélyegzőhely,
   szakasz; `de`: Stempelstelle, Etappe).
+- **AC-9**: "Data and credits" says how fresh the trail data is: "Trail data: MTSZ file of <date>." in the page's language, the date being that of the older of the two
+  MTSZ files the data was last generated from (`public/data/okt-meta.json`, written by the generator: spec 0004 AC-17), never typed in by hand. The dashboard's map says the same (spec 0003 AC-28).
 - **AC-8**: The page ends with a "Questions or ideas?" section (`h2`) that links to `/feedback`.
 
 ## Out of scope
@@ -71,4 +73,5 @@ document).
 | AC-5 | `e2e/about.spec.ts` (links), `e2e/friends.spec.ts` (friends paragraph, flag on); the wording against spec 0014 and migration 0008: manual (judgement): read it next to them. Last checked: never recorded. |
 | AC-4 | `e2e/about.spec.ts` (every external link is `https:`, opens in a new tab with `noopener`), `e2e/feature-flags.spec.ts` (the etteremhet.hu credit follows the `restaurants` flag) |
 | AC-8 | `e2e/about.spec.ts` (the link to the feedback form) |
+| AC-9 | `e2e/about.spec.ts` (the line in English and Hungarian, from the generated file), `tests/stamp-moves.test.ts` (the file's date and its generator) |
 | AC-6, AC-7 | `tests/messages.test.ts` (parity incl. rich-text tags; no open-source / PWA wording in any locale), `e2e/about.spec.ts` (the default language, no overflow at 375 px), `e2e/languages.spec.ts` (every language: its title and sections, no overflow at 375 px) |

@@ -193,3 +193,83 @@ describe("spec 0024: a friend's waived places", () => {
     expect(line).toBe("false,true");
   });
 });
+
+// ---- a stamp that moved (spec 0001 AC-29, spec 0004 AC-16, AC-19) -------------------------------------------------------
+import { stampMovesSql } from "../scripts/lib/stamp-moves.mjs";
+
+// The seed as the generator would write it after the MTSZ moved `code` to new coordinates: the row's lat and lng change and the
+// file's `moves` have an entry for it (the block replaces the committed one, which has none).
+function seedWithMove(code: string, lat: number, lng: number, moves: { code: string; moved_on: string }[]) {
+  const lines = seed.split("\n").map((l) =>
+    l.startsWith("  (") && l.includes(`'${code}'`) ? l.replace(/, (-?[\d.]+), (-?[\d.]+), (-?\d+), ([\d.]+)\)(,?)$/, `, ${lat}, ${lng}, $3, $4)$5`) : l,
+  );
+  const text = lines.join("\n");
+  const at = text.indexOf("-- Days a stamp moved");
+  expect(at).toBeGreaterThan(0);
+  return text.slice(0, at) + stampMovesSql(moves) + "\ncommit;\n";
+}
+
+describe("spec 0004: a stamp that moved", () => {
+  const code = "OKTPH_50_1";
+  const snapshot = (columns: string) => `select ${columns} from public.checkpoints where code = '${code}'`;
+
+  it("AC-19, spec 0001 AC-29: the row keeps its id and every user's stamp on it keeps its date; only where it is changes, and no date of requirement appears", (ctx) => {
+    requireDatabase(ctx, RELATIONS);
+    const moved = seedWithMove(code, 47.123456, 18.654321, [{ code, moved_on: "2026-09-30" }]);
+    const stamps = `select string_agg(c.code || '@' || s.stamped_on, ',' order by c.code) from public.user_stamps s join public.checkpoints c on c.id = s.checkpoint_id where s.user_id = '${user(1)}'`;
+    const lines = run(
+      [
+        "begin;",
+        createUser(1),
+        `insert into public.user_stamps (user_id, checkpoint_id, stamped_on) select '${user(1)}', id, '2026-07-01' from public.checkpoints where seq between 60 and 70;`,
+        `select 'before:' || (${snapshot("id || '|' || lat || '|' || lng || '|' || coalesce(required_from::text, '-') || '|' || coalesce(moved_on::text, '-')")});`,
+        `select 'stamps_before:' || (${stamps});`,
+        `select 'total_before:' || count(*) from public.checkpoints;`,
+        inner(moved),
+        `select 'after:' || (${snapshot("id || '|' || lat || '|' || lng || '|' || coalesce(required_from::text, '-') || '|' || coalesce(moved_on::text, '-')")});`,
+        `select 'stamps_after:' || (${stamps});`,
+        `select 'total_after:' || count(*) from public.checkpoints;`,
+        "select 'moved_rows:' || string_agg(code, ',' order by code) from public.checkpoints where moved_on is not null;",
+        "rollback;",
+      ].join("\n"),
+    );
+    const get = (name: string) => lines.find((l) => l.startsWith(`${name}:`))!.slice(name.length + 1);
+    const [id, , , required, movedOn] = get("after").split("|");
+    const [idBefore, , , requiredBefore, movedBefore] = get("before").split("|");
+    expect(id).toBe(idBefore); // the same row
+    expect(get("after")).toContain("|47.123456|18.654321|"); // in its new place
+    expect(movedBefore).toBe("-"); // it had not moved
+    expect(movedOn).toBe("2026-09-30");
+    expect(required).toBe(requiredBefore); // a move is no new stamp: no date of requirement
+    expect(requiredBefore).toBe("-");
+    expect(get("stamps_after")).toBe(get("stamps_before"));
+    expect(get("stamps_before").split(",").length).toBeGreaterThan(5);
+    expect(get("total_after")).toBe(get("total_before")); // nothing added, nothing dropped
+    expect(get("moved_rows")).toBe(code); // the day reached that code only
+  });
+
+  it("AC-16: a day removed from the file leaves the database with the next seed, and a day that changed is replaced", (ctx) => {
+    requireDatabase(ctx, RELATIONS);
+    const lines = run(
+      [
+        "begin;",
+        inner(seedWithMove(code, 47.1, 18.6, [{ code, moved_on: "2026-05-01" }])),
+        `select 'first:' || (${snapshot("moved_on")});`,
+        stampMovesSql([{ code, moved_on: "2026-06-02" }]), // the block of the next seed (a seed's own temporary table is made once per transaction)
+        `select 'changed:' || (${snapshot("moved_on")});`,
+        stampMovesSql([]),
+        `select 'removed:' || coalesce((${snapshot("moved_on::text")}), '-');`,
+        "rollback;",
+      ].join("\n"),
+    );
+    const get = (name: string) => lines.find((l) => l.startsWith(`${name}:`))!.slice(name.length + 1);
+    expect(get("first")).toBe("2026-05-01");
+    expect(get("changed")).toBe("2026-06-02");
+    expect(get("removed")).toBe("-");
+  });
+
+  it("AC-16: a retired row never carries a day of moving (a check of the table)", (ctx) => {
+    requireDatabase(ctx, RELATIONS);
+    expect(() => run(["begin;", "update public.checkpoints set moved_on = '2026-09-30' where retired_on is not null;", "rollback;"].join("\n"))).toThrow(/checkpoints_moved_on_current/);
+  });
+});

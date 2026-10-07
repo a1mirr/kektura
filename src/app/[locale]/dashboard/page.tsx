@@ -19,17 +19,21 @@ import {
   waivedPlaceKeys,
   walkedRanges,
   findStageForKm,
+  type Checkpoint,
 } from "@/lib/progress";
 import { buildBulkItems, extraItemId, placeItemId } from "@/lib/bulk-dates";
 import { dayBefore, maxStampDate } from "@/lib/stamp-date";
 import { buildMapPoints } from "@/lib/map-data";
 import { hasToleranceNote, requiredNote } from "@/lib/new-stamps";
+import { isRecentlyMoved, movedNote, recentlyMovedVariant, todayIso } from "@/lib/stamp-moves";
+import { TRAIL_DATA_DATE } from "@/lib/trail-meta";
 import BulkCheckbox from "@/components/BulkCheckbox";
 import BulkDateBar from "@/components/BulkDateBar";
 import BulkDatesProvider from "@/components/BulkDatesProvider";
 import BulkStageButton from "@/components/BulkStageButton";
 import LocateButton from "@/components/LocateButton";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
+import MovedNote from "@/components/MovedNote";
 import PageShell from "@/components/PageShell";
 import RequiredFrom from "@/components/RequiredFrom";
 import RetiredRow from "@/components/RetiredRow";
@@ -110,13 +114,28 @@ export default async function Dashboard({
 
   const requiredFrom = new Map(placeList.map((p) => [p.key, p.requiredFrom]));
   const dateText = (iso: string) => format.dateTime(new Date(`${iso}T00:00:00Z`), { dateStyle: "long", timeZone: "UTC" });
-  const mapPoints = buildMapPoints(checkpoints, placeKm, stampedPlaces, (key) =>
-    requiredNote(
-      requiredFrom.get(key) ?? null,
-      waived.has(key),
-      { requiredFrom: (date) => t("requiredFrom", { date }), notRequired: t("notRequired") },
-      dateText,
-    ),
+  // A stamp the MTSZ moved in the last 180 days says so, in its row and in its popup (spec 0001 AC-29, spec 0003 AC-26): the data's own
+  // description of where it is now, no more.
+  const today = todayIso();
+  const movedText = {
+    on: (date: string) => t("movedOn", { date }),
+    now: (description: string) => t("movedNow", { description }),
+    check: t("movedCheck"),
+  };
+  const movedNoteOf = (c: Checkpoint) =>
+    isRecentlyMoved(c.moved_on, today) ? movedNote(c.moved_on!, localizedDescription(c.code, c.description, locale), movedText, dateText) : undefined;
+  const mapPoints = buildMapPoints(
+    checkpoints,
+    placeKm,
+    stampedPlaces,
+    (key) =>
+      requiredNote(
+        requiredFrom.get(key) ?? null,
+        waived.has(key),
+        { requiredFrom: (date) => t("requiredFrom", { date }), notRequired: t("notRequired") },
+        dateText,
+      ),
+    movedNoteOf,
   );
 
   const cards = [
@@ -170,6 +189,7 @@ export default async function Dashboard({
                 <h2 className="mb-2 font-semibold">{t("map")}</h2>
                 <TrailMapLoader points={mapPoints} extras={mapExtras} doneRanges={doneRanges} withRestaurants={showRestaurants} />
                 <p className="mt-2 text-sm text-stone-500">{t("mapLegend")}</p>
+                <p className="mt-1 text-sm text-stone-500">{t("trailData", { date: dateText(TRAIL_DATA_DATE) })}</p>
               </section>
             </div>
           )}
@@ -284,6 +304,10 @@ export default async function Dashboard({
                         {p.requiredFrom && (
                           <RequiredFrom requiredFrom={p.requiredFrom} waived={waived.has(p.key)} tolerance={hasToleranceNote(p)} />
                         )}
+                        {(() => {
+                          const moved = recentlyMovedVariant(p.variants, today);
+                          return moved && <MovedNote>{movedNoteOf(moved)!}</MovedNote>;
+                        })()}
                         {retiredReplacedBy.has(p.key) && (
                           <p className="mt-1 text-xs text-stone-600 [overflow-wrap:anywhere]">
                             {t("replacesRetired", {

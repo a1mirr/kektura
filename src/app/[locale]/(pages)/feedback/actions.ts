@@ -3,9 +3,10 @@
 import { headers } from "next/headers";
 import { hasLocale } from "next-intl";
 import { routing } from "@/i18n/routing";
-import { formatFeedbackNotification, validateFeedback } from "@/lib/feedback";
+import { FEEDBACK_MAX, formatFeedbackNotification, stampPrefix, validateFeedback } from "@/lib/feedback";
 import { logFeedbackError, logFeedbackNotifyFailure } from "@/lib/log";
 import { createRateLimiter } from "@/lib/rate-limit";
+import { findStamp } from "@/lib/stamp-lookup";
 import { createClient } from "@/lib/supabase/server";
 import { sendTelegramMessage, telegramConfig } from "@/lib/telegram";
 
@@ -25,12 +26,13 @@ const overall = createRateLimiter({ limit: 100, windowMs: 60 * 60_000 });
 // Caddy puts the client address first in x-forwarded-for; without a proxy everyone shares a bucket.
 const clientIp = (h: Headers) => h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "unknown";
 
-// `input` is `{ message, locale, website }`. `website` is the honeypot: hidden from people, so a
-// filled one is a bot, which gets a success answer and nothing else.
+// `input` is `{ message, locale, website, stamp? }`. `website` is the honeypot: hidden from people, so a
+// filled one is a bot, which gets a success answer and nothing else. `stamp` is a stamp code from `?stamp=<code>` (spec 0017 AC-11): it is
+// checked against the seed and only then does its name go before the message; anything else is ignored.
 export async function submitFeedback(input: unknown): Promise<FeedbackResult> {
   try {
     if (typeof input !== "object" || input === null) return { ok: false, reason: "invalid" };
-    const { message: raw, locale, website } = input as Record<string, unknown>;
+    const { message: raw, locale, website, stamp: rawStamp } = input as Record<string, unknown>;
     if (typeof website === "string" && website.trim() !== "") return ok;
 
     const checked = validateFeedback(raw);
@@ -40,12 +42,17 @@ export async function submitFeedback(input: unknown): Promise<FeedbackResult> {
       return { ok: false, reason: "rate_limited" };
     }
 
+    // A report about a stamp: its name, looked up here, goes before the sender's words and counts in the 2000 characters.
+    const stamp = rawStamp === undefined ? null : await findStamp(rawStamp);
+    const message = stamp ? stampPrefix(stamp) + checked.message : checked.message;
+    if ([...message].length > FEEDBACK_MAX) return { ok: false, reason: "too_long" };
+
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
     // RLS only lets the row carry the caller's own user id (or none at all).
-    const { error } = await supabase.from("user_feedback").insert({ user_id: user?.id ?? null, message: checked.message });
+    const { error } = await supabase.from("user_feedback").insert({ user_id: user?.id ?? null, message });
     if (error) {
       logFeedbackError("write", error, user?.id);
       return { ok: false, reason: "failed" };
@@ -56,7 +63,7 @@ export async function submitFeedback(input: unknown): Promise<FeedbackResult> {
     if (config) {
       const sent = await sendTelegramMessage(
         formatFeedbackNotification({
-          message: checked.message,
+          message,
           locale: hasLocale(routing.locales, locale) ? locale : "?",
           senderEmail: user ? (user.email ?? `user ${user.id}`) : null,
         }),

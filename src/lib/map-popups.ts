@@ -7,9 +7,17 @@ export type MenuAction = {
   run: (button: HTMLButtonElement, showError: (message: string) => void) => void;
 };
 
-// A stamp's popup: title, optional subtitle, one button per action and a hidden error line that an
+export type MenuExtras = {
+  // Spec 0003 AC-26: the note of a stamp that moved, a paragraph of its own under the subtitle.
+  note?: string | null;
+  // Spec 0003 AC-27: "Report a wrong location", a link of at least 44 x 44 px that opens in a new tab. Only an https: or same-site
+  // path becomes a link, so nothing in the data can make a javascript: one.
+  link?: { label: string; href: string } | null;
+};
+
+// A stamp's popup: title, optional subtitle, optional note, one button per action, an optional link and a hidden error line that an
 // action can reveal.
-export function buildMenu(title: string, subtitle: string | null, actions: MenuAction[]) {
+export function buildMenu(title: string, subtitle: string | null, actions: MenuAction[], extras: MenuExtras = {}) {
   const box = document.createElement("div");
   box.style.minWidth = "200px";
   const heading = document.createElement("strong");
@@ -20,6 +28,13 @@ export function buildMenu(title: string, subtitle: string | null, actions: MenuA
     sub.textContent = subtitle;
     sub.style.cssText = "font-size:12px;color:#78716c;margin-bottom:4px";
     box.append(sub);
+  }
+  if (extras.note) {
+    const note = document.createElement("div");
+    note.dataset.movedNote = "";
+    note.textContent = extras.note;
+    note.style.cssText = "font-size:12px;color:#78350f;background:#fffbeb;border-radius:4px;padding:6px;margin:4px 0";
+    box.append(note);
   }
   const error = document.createElement("div");
   error.setAttribute("role", "alert");
@@ -40,6 +55,17 @@ export function buildMenu(title: string, subtitle: string | null, actions: MenuA
       action.run(button, showError);
     });
     box.append(button);
+  }
+  if (extras.link && /^\/(?![/\\])|^https:\/\//.test(extras.link.href)) {
+    const link = document.createElement("a");
+    link.href = extras.link.href;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = extras.link.label;
+    link.dataset.reportLink = "";
+    link.style.cssText =
+      "display:flex;align-items:center;min-height:44px;min-width:44px;border-top:1px solid #e7e5e4;color:#1d4ed8;text-decoration:underline";
+    box.append(link);
   }
   box.append(error);
   return box;

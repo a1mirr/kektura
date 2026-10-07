@@ -3,7 +3,8 @@
 Status: Done
 Owner code: `src/lib/progress.ts`, `src/app/[locale]/dashboard/page.tsx`, `src/components/StageSection.tsx`,
 `src/components/StampDescriptions.tsx`, `src/components/RequiredFrom.tsx`, `src/lib/new-stamps.ts`,
-`src/components/RetiredRow.tsx`, `src/components/RetiredStampControl.tsx`, `src/components/RetiredToggle.tsx`, `src/lib/retired-toggle.ts`
+`src/components/RetiredRow.tsx`, `src/components/RetiredStampControl.tsx`, `src/components/RetiredToggle.tsx`, `src/lib/retired-toggle.ts`,
+`src/components/MovedNote.tsx`, `src/lib/stamp-moves.ts`
 
 ## Goal
 
@@ -96,6 +97,20 @@ walked before it retired collected it, and it belongs in their record.
 - **AC-27**: The notes of AC-26 wrap under the name at 375 px, in every language, and the badge and the date field never push
   a control off the screen or widen the page.
 
+### Stamps that moved
+
+A stamp the MTSZ moved to a new place (the same stamp, found somewhere else) is not a new stamp and not a retired one.
+
+- **AC-29**: A stamp that moved keeps its row, code, place key and database `id`: only where it is changes (its coordinates and description and, if
+  they changed, its km and position in the trail), and every user's stamp on it stays with its date. No `required_from` comes with a move
+  (AC-16), and the places after it keep their stamps. The page shows only where it is now: the old place is nowhere. For 180 days from its
+  `moved_on` day (the day itself and the 179 after it; a day still in the future shows nothing) its row says, in the page's language: "Moved on
+  <date>." and "Where it is now: <the description the data holds, in the page's language, spec 0033>" (left out when the stamp has none) and "If
+  you use an older map or booklet, check the new place." It says only what the data holds: no distance, no direction. A place whose variants
+  moved on different days shows the most recent. A friend's row has the same note (spec 0024 AC-29), and the stamp's popup and marker on the map
+  have theirs (spec 0003 AC-26). After the 180 days nothing of it is left on the page. The note is text that wraps under the name (a long word breaks instead of
+  widening the row) and is a paragraph with words in it, never colour alone.
+
 ### Stages
 
 - **AC-6**: The list groups places by official stage (1..27) in stage order. A stage's starting
@@ -147,7 +162,7 @@ walked before it retired collected it, and it belongs in their record.
 
 ## Out of scope
 
-Stamps that moved (the same stamp at a new place); counting or drawing the old route of a retired stamp; retired stamps in the monthly figures;
+The history of a stamp's earlier locations; counting or drawing the old route of a retired stamp; retired stamps in the monthly figures;
 letting a user declare that they walked a place before it
 was required; applying the MTSZ's one-month tolerance in the figures (AC-19 only says it); elevation-based stats; walked time; stamps outside the official 161 (stamping extra stamps is spec 0002; their
 stage is AC-12 to AC-15); moving extra stamps into the stage's place list; changing the count of 161.
@@ -170,4 +185,6 @@ stage is AC-12 to AC-15); moving extra stamps into the stage's place list; chang
 | AC-10 | `src/components/StampDescriptions.test.tsx` (every description rendered, no truncation classes), `e2e/stamping.spec.ts` (dashboard) and `e2e/friends.spec.ts` (a friend's page): nothing clipped or sticking out of its row at 375 px |
 | AC-11 | `e2e/stamping.spec.ts` (375 px in the default language and in German: no sideways scroll with every stage collapsed, expanded, and with a stamped place and extra stamp) |
 | AC-28 | `e2e/layout.spec.ts` (from 1024 px the aside is left of the list, in two columns of figures; after a long scroll the map's block is 16 px below the top, inside the window, and the figures have scrolled away; below it one column in the order, nothing sticks, the list as wide as the window; the "go to extra stamps" link still reaches the extra stamps at 1280 x 720), `e2e/map.spec.ts` (the 📍 button: in two columns the map is in view already and the row does not move, in one column the map scrolls into view; "Show in list" in both layouts), `src/components/PageShell.test.tsx` (the aside and its order, stretching), `tests/page-shell.test.ts` (the sticky block has a z-index) |
+| AC-29 | `src/lib/stamp-moves.test.ts` (the 180 days, the day itself and the last day, a future day, calendar days over a month, a year and a leap day, the note's words and its absence of distance, a place's most recent variant), `src/components/MovedNote.test.tsx` (text, never markup; wraps), `tests/stamp-dates-database.test.ts` (a moved row keeps its id and every user's stamp with its date, gets no `required_from`, nothing is added or dropped, the day reaches that code only) |
+| AC-29 (the note on the real page) | manual (the shared reference data is cached for 24 hours, so an end-to-end test cannot change a row under a running test server, and the real seed has no move): `update public.checkpoints set moved_on = current_date - 3 where code = 'OKTPH_142'` in the local test database, restart `npm run dev:test`, open the dashboard and a friend's page: the row says "Moved on …", where it is now and the advice, in each language; remove the day and restart: the note is gone; at 375 px the row and the page do not widen. Last checked: 2026-10-07 (production build of the test server with a stamp moved three days earlier: the dashboard's row in English, Hungarian, German and Russian, and a friend's row in English. Not looked at: that the note is gone once the day is removed, and the row at 375 px; the wrapping is only asserted by its CSS class in the component test). |
 | AC-11 (own line, right-aligned) | `e2e/stamping.spec.ts` (at 375 px a stamped row's controls start below the text and end at the row's right padding) |

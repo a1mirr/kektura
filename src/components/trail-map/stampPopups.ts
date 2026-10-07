@@ -2,7 +2,7 @@ import type { RefObject } from "react";
 import type { Map as MapLibreMap, Popup } from "maplibre-gl";
 import { setExtraStamped, setPlacesStamped } from "@/app/[locale]/dashboard/actions";
 import type { ActionResult } from "@/lib/action-result";
-import { buildMenu, type MenuAction } from "@/lib/map-popups";
+import { buildMenu, type MenuAction, type MenuExtras } from "@/lib/map-popups";
 import { newStampDate } from "@/lib/stamp-date";
 import type { MapContext, MapInputs, MapLibre } from "./types";
 
@@ -65,10 +65,16 @@ export function attachStampPopups(
 
     const actions: MenuAction[] = [];
     let subtitle: string | null = null;
+    const extras: MenuExtras = {};
     if (kind === "place") {
       const point = latest.current.points.find((p) => p.placeKey === key);
       const stamped = point?.stamped ?? false;
-      if (point) subtitle = [t("kmFromStart", { km: point.km.toFixed(1) }), point.note].filter(Boolean).join(" · ");
+      if (point) {
+        subtitle = [t("kmFromStart", { km: point.km.toFixed(1) }), point.note].filter(Boolean).join(" · ");
+        extras.note = point.movedNote;
+        // Spec 0003 AC-27: any stamp's popup offers the report; only its code travels in the address.
+        if (point.code) extras.link = { label: t("reportLocation"), href: c.reportHref(point.code) };
+      }
       actions.push(
         {
           label: t("routeFromHere"),
@@ -109,7 +115,7 @@ export function attachStampPopups(
     });
     menu
       .setLngLat(f.geometry.coordinates as [number, number])
-      .setDOMContent(buildMenu(name, subtitle, actions))
+      .setDOMContent(buildMenu(name, subtitle, actions, extras))
       .addTo(m);
   });
 }

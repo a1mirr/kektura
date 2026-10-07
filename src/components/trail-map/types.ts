@@ -45,6 +45,7 @@ export type LayerToggles = {
 export type MapContext = {
   t: Translator;
   refreshPage: () => void; // router.refresh(): a session that expired sends the page to sign-in
+  reportHref: (code: string) => string; // the feedback form for a stamp (spec 0003 AC-27): only its code is in the address
   routeFrom: string | null;
   routeTo: string | null;
   setRouteFrom: (key: string | null) => void;

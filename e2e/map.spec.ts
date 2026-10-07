@@ -1,5 +1,6 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
-import { expandAllStages, signInAsNewUser, stat } from "./helpers";
+import fs from "node:fs";
+import { expect, test, type Page } from "@playwright/test";
+import { canvas, expandAllStages, openStampPopup, pressLocate, signInAsNewUser, stat } from "./helpers";
 
 // Spec 0003: the map behaviours the DOM allows. The map is a WebGL canvas, so there
 // is no pixel clicking on stamps except through the app's own list -> map flow: the 📍 button flies
@@ -9,7 +10,6 @@ import { expandAllStages, signInAsNewUser, stat } from "./helpers";
 const expectNoSideways = async (page: Page) =>
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 
-const canvas = (page: Page) => page.locator(".maplibregl-canvas");
 const mapSection = (page: Page) => page.locator("section", { has: canvas(page) });
 
 async function openDashboardWithMap(page: Page) {
@@ -19,33 +19,6 @@ async function openDashboardWithMap(page: Page) {
   // The list -> map listeners are attached when the map has loaded its first tiles, which takes a second or two over the network:
   // a click on 📍 before that does nothing. The tile requests are done when the network is quiet.
   await page.waitForLoadState("networkidle");
-}
-
-// A click on 📍 does nothing until the map has loaded and attached its listener (a second or two over the network, more on a busy
-// machine), so it is repeated until the label appears on the map. (`.first()`: the label is the only popup until one is clicked open.)
-async function pressLocate(page: Page, button: Locator) {
-  await expect(async () => {
-    await button.click();
-    await expect(page.locator(".maplibregl-popup").filter({ hasText: /\S/ }).first()).toBeVisible({ timeout: 2_000 });
-  }).toPass({ timeout: 45_000 });
-}
-
-// 📍 on a list row, then a click on the canvas centre until the stamp's popup opens (the fly animation
-// and the smooth scroll have to finish first, so the click is retried).
-async function openStampPopup(page: Page, placeKey: string, action: string) {
-  await pressLocate(page, page.locator(`#place-${placeKey}`).getByRole("button", { name: "Show on map" }));
-  // The stamp's name label sits on the dot: once it stops moving the fly animation and the scroll are
-  // over (a click during the flight would interrupt it and miss the dot).
-  const label = page.locator(".maplibregl-popup").filter({ hasText: /\S/ }).last();
-  await expect(label).toBeVisible();
-  await expect(async () => {
-    const before = await label.boundingBox();
-    await page.waitForTimeout(500);
-    expect(await label.boundingBox()).toEqual(before);
-  }).toPass();
-  const size = await canvas(page).evaluate((el) => ({ w: el.clientWidth, h: el.clientHeight }));
-  await canvas(page).click({ position: { x: size.w / 2, y: size.h / 2 } });
-  await expect(page.getByRole("button", { name: action })).toBeVisible();
 }
 
 test.describe("spec 0003: the trail map", () => {
@@ -429,5 +402,32 @@ test.describe("spec 0003: the trail map", () => {
     await page.context().clearCookies(); // the session is gone, as after signing out in another tab
     await page.getByRole("button", { name: "Mark as walked" }).dispatchEvent("click");
     await expect(page).toHaveURL(/\/en$/);
+  });
+});
+
+// Spec 0003 AC-27: every stamp's popup offers the report of a wrong location, for that stamp's code only.
+test.describe("spec 0003: the report link of a stamp's popup", () => {
+  test("AC-27: the popup of a stamp has the link, in a new tab, at least 44 x 44 px, with only the stamp's code in the address", async ({ page }) => {
+    await openDashboardWithMap(page);
+    await expandAllStages(page);
+    await openStampPopup(page, "OKTPH_84_B", "Mark as walked"); // Lokó-pihenő, one stamp at its place
+    const link = page.locator(".maplibregl-popup").getByRole("link", { name: "Report a wrong location" });
+    await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute("href", "/en/feedback?stamp=OKTPH_84_B");
+    await expect(link).toHaveAttribute("target", "_blank");
+    await expect(link).toHaveAttribute("rel", /noopener/);
+    const box = (await link.boundingBox())!;
+    expect(box.width).toBeGreaterThanOrEqual(44);
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    await expect(page.locator(".maplibregl-popup [data-moved-note]")).toHaveCount(0); // it has not moved
+  });
+});
+
+test.describe("spec 0003: how fresh the trail data is", () => {
+  test("AC-28: under the map the page names the MTSZ file the trail data is from", async ({ page }) => {
+    await openDashboardWithMap(page);
+    const { mtszFileDate } = JSON.parse(fs.readFileSync("public/data/okt-meta.json", "utf8")) as { mtszFileDate: string };
+    const day = new Intl.DateTimeFormat("en", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${mtszFileDate}T00:00:00Z`));
+    await expect(mapSection(page)).toContainText(`Trail data: MTSZ file of ${day}.`);
   });
 });

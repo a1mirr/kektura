@@ -31,6 +31,7 @@ function cp(key: string, km: number, stage: number): Checkpoint {
     replaced_by: null,
     after_place_key: null,
     position_approximate: false,
+    moved_on: null,
   };
 }
 
