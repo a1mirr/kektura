@@ -71,7 +71,7 @@ phone, and "Account" says what is behind the link. Every page also carries the s
 - **AC-19**: Every page shows the logo, a blue trail blaze, with the name next to it ("Kéktúra tracker",
   `ru`: Трекер Kéktúra, `hu`: Kéktúra követő) at the left edge of the page's content width (spec 0036 AC-1), and it links to the main page of the page's
   language (`/ru`, `/en`, `/hu`): for a signed-in user that leads to the dashboard (spec 0005 AC-2), for everybody
-  else the landing page. "Every page" is the landing page, dashboard, account, friends pages, About, Changelog,
+  else the landing page. "Every page" is the landing page, dashboard, account, stats, friends pages, About, Changelog,
   Useful links, Feedback, the error page and the 404 page, which has no language in its address and so links
   to the default language's main page. It is one component, `SiteLogo`, drawn once by the locale layout and by the 404
   page (which brings its own document): a page does not draw its own, so a new page gets it. It is a link

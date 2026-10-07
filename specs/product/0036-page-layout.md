@@ -17,7 +17,7 @@ pages that are made of independent blocks put them side by side (the dashboard, 
 
 - **AC-1**: The header strip (the logo, spec 0014 AC-19), the page content and the footer share one content width, 64 rem
   (1024 px), and one pair of edges. The logo sits at that left edge, so on a window wider than 64 rem it is never at the window's
-  edge. A page's own header (the title row of the dashboard, the account page and a friend's page, with the language switcher and
+  edge. A page's own header (the title row of the dashboard, the account page, the stats page and a friend's page, with the language switcher and
   links) lies inside the same width. Below 64 rem the width is the window's.
 - **AC-2**: One component, `PageShell`, sets the content width, the side padding and the vertical rhythm of a page, so a new page
   gets them without remembering them: every page file draws its page with it and has no `<main>`, `mx-auto` or `max-w-*` page container (a `max-w-prose` on a text block inside a page is allowed, AC-3)
