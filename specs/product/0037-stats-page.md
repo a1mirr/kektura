@@ -1,8 +1,8 @@
 # 0037: My stats: the stats page and its monthly chart
 
 Status: Done
-Owner code: `src/app/[locale]/stats/page.tsx`, `src/components/MonthChart.tsx`, `src/lib/month-stats.ts`, `src/app/[locale]/dashboard/page.tsx`
-(the header link), `messages/*.json` (`stats.*`, `dashboard.stats`)
+Owner code: `src/app/[locale]/stats/page.tsx`, `src/components/MonthChart.tsx`, `src/lib/month-stats.ts`, `src/lib/account-menu.ts`
+(the menu entry), `messages/*.json` (`stats.*`, `accountMenu.stats`)
 
 ## Goal
 
@@ -14,9 +14,9 @@ It answers "when did I walk what", and is the only place the stamps-per-month ch
 
 ### The page
 
-- **AC-1**: `/stats` (under every language prefix) is for signed-in users; a signed-out visitor is sent to the landing page. The dashboard's header has
-  a link "My stats" to it, next to "Account" (spec 0014 AC-14). Other pages link to it by the same address.
-- **AC-2**: The page's document title and `h1` are "My stats" (`ru`: Моя статистика, `hu`: Statisztikáim, `de`: Meine Statistik); the dashboard's header link has the same
+- **AC-1**: `/stats` (under every language prefix) is for signed-in users; a signed-out visitor is sent to the landing page. The account menu has
+  an entry "My stats" to it, first in the list (spec 0014 AC-21). Other pages link to it by the same address.
+- **AC-2**: The page's document title and `h1` are "My stats" (`ru`: Моя статистика, `hu`: Statisztikáim, `de`: Meine Statistik); the account menu's entry has the same
   words.
 - **AC-3**: Under the heading are four figures, in the dashboard's cards: the stamps ("N / 161", places not variant rows, spec 0001 AC-1), the walked
   kilometres, the remaining kilometres (spec 0001 AC-4) and the completed stages ("N / 27": a stage whose places are all stamped or waived, spec 0001 AC-20).
@@ -56,7 +56,7 @@ It answers "when did I walk what", and is the only place the stamps-per-month ch
   leaving closes it (a click does not close what hovering opened). With the keyboard Tab reaches the chart once (one tab stop for all the months, first on the newest), Left and Right move to the previous and next month, Home and End to the first and last, focus alone shows the tooltip,
   Escape closes it and Enter or Space toggles it.
 - **AC-13**: A month with no stamp has no bar but a faint baseline mark, and the whole column of the month is a target for AC-11 and AC-12, so a gap reads as zero.
-- **AC-14**: The page, the figures, the month names, the tooltip and the axis are in every language (`stats.*`, `dashboard.stats`; the month names come
+- **AC-14**: The page, the figures, the month names, the tooltip and the axis are in every language (`stats.*`, `accountMenu.stats`; the month names come
   from `Intl` in the page's language, in UTC so the month is the date's own). The tooltip texts have ICU plurals, so the forms of each language are right
   (`ru`: "1 печать", "2 печати", "5 печатей").
 - **AC-15**: Every month is a button in a group named like the heading, and its accessible name is the month followed by the lines of its tooltip
@@ -85,8 +85,8 @@ retired stamps in the figures (spec 0001 AC-25); a feature flag.
 
 | AC | Test |
 | --- | --- |
-| AC-1 | `e2e/stats.spec.ts` (signed out; the header link of the dashboard), `e2e/layout.spec.ts` and `e2e/site-logo.spec.ts` (the page among the signed-in pages) |
-| AC-2 | `e2e/stats.spec.ts` (title and heading, in every language), `tests/messages.test.ts` (the words are the header link's) |
+| AC-1 | `e2e/stats.spec.ts` (signed out; the account menu's entry), `e2e/layout.spec.ts` and `e2e/site-logo.spec.ts` (the page among the signed-in pages) |
+| AC-2 | `e2e/stats.spec.ts` (title and heading, in every language), `tests/messages.test.ts` (the words are the menu entry's) |
 | AC-3 | `e2e/stats.spec.ts` (the four figures, the dashboard's values after a walk, completed stages, the note for a new user, only the user's own stamps), `e2e/layout.spec.ts` (shared edges, no sideways scroll at five widths in four languages) |
 | AC-4, AC-5, AC-6, AC-7, AC-8, AC-9 | `src/lib/month-stats.test.ts` (gaps and years, the span of places and extra stamps, a day is its own month, places not rows, retired stamps ignored, stages and extras, the later stamp's month, the order of stamps, the sum equal to the walked km, a waived place, a changed date, a removed stamp), `e2e/stats.spec.ts` (the six months of a walk in a browser, their km summing to the dashboard's), `e2e/stamp-dates.spec.ts` (dates changed in bulk: the new month has the stamps) |
 | AC-10 | `e2e/stats.spec.ts` (every month named, years under January and the first bar; a 14-month walk scrolls inside its frame at 375 and 320 px, opens on the newest months, drops no label; fits at 1280 px), `e2e/mobile.spec.ts` (17 months at 375 px) |

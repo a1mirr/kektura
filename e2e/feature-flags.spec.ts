@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { setFeatureFlag, signInAsNewUser } from "./helpers";
+import { openAccountMenu, setFeatureFlag, signInAsNewUser } from "./helpers";
 
 // Spec 0035 AC-5, AC-6, AC-11: the `friends` and `restaurants` flags in each state, for a signed-in user, a user on the
 // allowlist and a signed-out visitor. Flags are global, so the tests run one after the other (this file is its own
@@ -10,7 +10,8 @@ test.afterAll(() => {
   setFeatureFlag("restaurants", "on");
 });
 
-const friendsLink = (page: Page) => page.locator("header").getByRole("link", { name: "Friends" });
+// The Friends entry of the account menu (spec 0014 AC-21); a visible one needs the menu open.
+const friendsLink = (page: Page) => page.locator("body > header details").getByRole("link", { name: "Friends" });
 
 async function friendsAnswer(page: Page) {
   return (await page.goto("/en/friends"))?.status();
@@ -31,6 +32,7 @@ test.describe("spec 0035: a flag that is off is off", () => {
     setFeatureFlag("friends", "on"); // no deploy, no restart, no cache to clear (AC-6)
     expect(await friendsAnswer(page)).toBe(200);
     await page.goto("/en/dashboard");
+    await openAccountMenu(page);
     await expect(friendsLink(page)).toBeVisible();
     await page.goto("/en/about");
     await expect(page.getByText("If you connect with friends")).toBeVisible();
@@ -45,6 +47,7 @@ test.describe("spec 0035: a flag that is off is off", () => {
     setFeatureFlag("friends", "allowlist", [email]);
     expect(await friendsAnswer(page)).toBe(200);
     await page.goto("/en/dashboard");
+    await openAccountMenu(page);
     await expect(friendsLink(page)).toBeVisible();
     expect(await friendsAnswer(other)).toBe(404);
     expect(await friendsAnswer(visitor)).toBe(404);

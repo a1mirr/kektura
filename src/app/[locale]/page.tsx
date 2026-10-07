@@ -5,7 +5,6 @@ import { redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
 import { testLoginEnabled } from "@/lib/test-login";
-import LocaleSwitcher from "@/components/LocaleSwitcher";
 import PageShell from "@/components/PageShell";
 import SignInButton from "@/components/SignInButton";
 import TestLoginForm from "@/components/TestLoginForm";
@@ -34,9 +33,6 @@ export default async function Home({
 
   return (
     <PageShell variant="hero">
-      <div className="absolute right-4 top-4 sm:right-6">
-        <LocaleSwitcher />
-      </div>
       <h1 className="text-4xl font-bold text-blue-700">{t("headline")}</h1>
       <p className="text-lg text-stone-600">{t("subtitle")}</p>
       {error && <p className="text-red-600">{t("authError")}</p>}

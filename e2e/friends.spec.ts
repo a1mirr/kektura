@@ -1,6 +1,6 @@
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
 import { routing } from "../src/i18n/routing";
-import { expandAllStages, measureDescriptions, signInAsNewUser, stat } from "./helpers";
+import { expandAllStages, measureDescriptions, openAccountMenu, signInAsNewUser, stat } from "./helpers";
 import { psql } from "./local-db";
 
 // Two people with their own browser contexts. Ana stamps two neighbouring places (8.1 km) and sets her name;
@@ -250,9 +250,9 @@ test.describe("spec 0024: friends", () => {
     await expect(anaPage.getByText("This person already asked to connect with you")).toBeVisible();
   });
 
-  test("AC-16: the dashboard links to the page and the About page tells what friends see (flag on)", async ({ page }) => {
+  test("AC-16: the account menu links to the page and the About page tells what friends see (flag on)", async ({ page }) => {
     await signInAsNewUser(page);
-    await page.getByRole("link", { name: "Friends" }).click();
+    await (await openAccountMenu(page)).getByRole("link", { name: "Friends" }).click();
     await expect(page).toHaveURL(/\/en\/friends$/);
     await page.goto("/en/about");
     await expect(page.getByText("They cannot see your stamp dates or extra stamps.")).toBeVisible();
@@ -358,7 +358,7 @@ test.describe("spec 0024: the Friends page buttons respond", () => {
         if (approved) await approve(anaPage);
         for (const locale of [routing.defaultLocale, "ru"]) {
           await anaPage.goto(`/${locale}/friends`);
-          await anaPage.locator("summary").first().click(); // the open question is the widest state
+          await anaPage.locator("main summary").first().click(); // the open question is the widest state
           const small = await anaPage.locator("button:visible, summary:visible").evaluateAll((els) =>
             els.map((el) => ({ text: el.textContent, ...el.getBoundingClientRect().toJSON() })).filter((r) => r.width < 44 || r.height < 44),
           );

@@ -1,17 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import type { Locale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { pageWidth } from "./PageShell";
 
-// The logo and name at the left edge of every page's content width (spec 0036 AC-1), linking to the main page of the visitor's
-// language (spec 0014 AC-19). Rendered once by the locale layout and by the 404 page, which has no
-// locale layout: a page never draws its own copy.
-export default async function SiteLogo({ locale }: { locale: Locale }) {
+// The header strip of every page: the logo and name at the left edge of the content width (spec 0036 AC-1), linking to the
+// main page of the visitor's language (spec 0014 AC-19), and `children` at the right edge: the language switcher and the
+// account menu (AC-20). Rendered once by the locale layout and by the 404 page, which has no locale layout and gives no
+// children: a page never draws its own copy.
+export default async function SiteLogo({ locale, children }: { locale: Locale; children?: ReactNode }) {
   const t = await getTranslations({ locale, namespace: "app" });
 
   return (
-    <header className={`${pageWidth} pt-4`}>
+    <header className={`${pageWidth} flex flex-wrap items-center justify-between gap-x-3 gap-y-1 pt-4`}>
       <Link
         href={`/${locale}`}
         aria-label={t("home")}
@@ -20,6 +22,7 @@ export default async function SiteLogo({ locale }: { locale: Locale }) {
         <Image src="/logo.svg" alt="" width={32} height={32} unoptimized />
         {t("name")}
       </Link>
+      {children && <div className="ml-auto flex items-center gap-2">{children}</div>}
     </header>
   );
 }

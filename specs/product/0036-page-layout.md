@@ -17,14 +17,14 @@ pages that are made of independent blocks put them side by side (the dashboard, 
 
 - **AC-1**: The header strip (the logo, spec 0014 AC-19), the page content and the footer share one content width, 64 rem
   (1024 px), and one pair of edges. The logo sits at that left edge, so on a window wider than 64 rem it is never at the window's
-  edge. A page's own header (the title row of the dashboard, the account page, the stats page and a friend's page, with the language switcher and
-  links) lies inside the same width. Below 64 rem the width is the window's.
+  edge. The strip also carries, at its right edge, the language switcher and the account menu (spec 0014 AC-20), which end at the
+  content's edge, not the window's. A page's own header (the title row of the dashboard, the settings page, the stats page and a friend's page) lies inside the same width. Below 64 rem the width is the window's.
 - **AC-2**: One component, `PageShell`, sets the content width, the side padding and the vertical rhythm of a page, so a new page
   gets them without remembering them: every page file draws its page with it and has no `<main>`, `mx-auto` or `max-w-*` page container (a `max-w-prose` on a text block inside a page is allowed, AC-3)
   of its own. The width is one value, 64 rem, in the CSS variable `--page-width` (`globals.css`), taken by the shell, the logo
   strip and the footer, so they cannot disagree. Content fills the window minus the side padding below that width (16 px up to
   640 px, 24 px above) and is centred at it above.
-- **AC-3**: The pages that are a long read (About, Changelog, Useful links, Feedback, and the text blocks of the account page)
+- **AC-3**: The pages that are a long read (About, Changelog, Useful links, Feedback, and the text blocks of the settings page)
   keep a line of about 65 characters (`65ch`): a text column centred inside the content width. Cards, the map, charts and stage
   lists use the full width.
 - **AC-4**: The landing page, the error page and the 404 page keep a centred block (at most 42 rem wide) that fills the space
@@ -40,7 +40,7 @@ pages that are made of independent blocks put them side by side (the dashboard, 
 
 ## Out of scope
 
-Colours, fonts and the look of cards; a sidebar or other navigation; the account menu; a dark theme; a layout for very wide screens
+Colours, fonts and the look of cards; a sidebar or other navigation (the account menu is spec 0014's); a dark theme; a layout for very wide screens
 that shows more of the same content instead of centring it.
 
 ## Notes
@@ -54,9 +54,9 @@ that shows more of the same content instead of centring it.
 
 | AC | Test |
 | --- | --- |
-| AC-1 | `e2e/layout.spec.ts` (the logo strip, the page and the footer: same width and left edge, centred, the logo's mark at the content edge, at 375, 768, 1024, 1440 and 1920 px on the public pages and signed in, and the dashboard's own header and language switcher inside it), `e2e/site-logo.spec.ts` (the logo at the content's left edge) |
+| AC-1 | `e2e/layout.spec.ts` (the logo strip, the page and the footer: same width and left edge, centred, the logo's mark at the content edge, at 375, 768, 1024, 1440 and 1920 px on the public pages and signed in, and the dashboard's own header inside it, and the strip's language switcher and account button ending at the content's right edge), `e2e/site-logo.spec.ts` (the logo at the content's left edge) |
 | AC-2 | `tests/page-shell.test.ts` (every page file uses `PageShell` and has no container of its own; the width is one 64 rem variable taken by the shell, the logo strip and the footer; the paddings), `src/components/PageShell.test.tsx` (every variant is one `<main>` with the shared width) |
-| AC-3 | `e2e/layout.spec.ts` (the column is `65ch` wide and centred on the four pages; the account page's text, not its cards), `src/components/PageShell.test.tsx` |
+| AC-3 | `e2e/layout.spec.ts` (the column is `65ch` wide and centred on the four pages; the settings page's text, not its cards), `src/components/PageShell.test.tsx` |
 | AC-4 | `e2e/layout.spec.ts` (the landing page, the 404 page and the invite page at 1920 px), `src/components/PageShell.test.tsx` |
 | AC-5 | `e2e/layout.spec.ts` (shared edges and no sideways scroll: at all five widths on the landing, About, Changelog, Useful links and Feedback pages and, signed in, the dashboard, stats, account and Friends pages, in English, and in Hungarian, German and Russian on the dashboard, Friends, stats, account, About and Changelog pages; at 375, 768 and 1920 px on the 404 page, the invite page signed out and in, and a friend's page; one column below 1024 px: the dashboard, a friend's page and the Friends page). Not tested in a browser: the error page (`error.tsx`), which no flow triggers cheaply; it draws the same `hero` variant as the 404 page and the landing page, and `tests/page-shell.test.ts` checks that it uses the shell. The tests check `scrollWidth`, not every element of a long page in every language |
 | AC-6 | `e2e/layout.spec.ts` (the landing page's footer is on the first screen at every width), `src/components/PageShell.test.tsx` (`flex-1`, no `min-h-screen`), `e2e/footer.spec.ts` |

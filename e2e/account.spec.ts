@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { expect, test, type Page } from "@playwright/test";
 import { routing } from "../src/i18n/routing";
-import { expandAllStages, signInAsNewUser, signInWithEmail, stat } from "./helpers";
+import { accountButton, expandAllStages, openAccountMenu, signInAsNewUser, signInWithEmail, stat } from "./helpers";
 import { psql } from "./local-db";
 
 // Presses "Delete account" once the page has hydrated (before that the click does nothing).
@@ -14,24 +14,24 @@ async function openDeleteConfirmation(page: Page) {
 
 const count = (sql: string) => Number(psql(sql));
 
-test.describe("spec 0014: the account page", () => {
+test.describe("spec 0014: the settings page", () => {
   test("AC-7, AC-15: signed-out visitors are sent to the landing page", async ({ page }) => {
     await page.goto("/en/account");
     await expect(page).toHaveURL(/\/en$/);
-    await page.goto("/en/settings"); // the old address: redirected to /account, then to the landing page
+    await page.goto("/en/settings"); // the address /settings: redirected to /account, then to the landing page
     await expect(page).toHaveURL(/\/en$/);
   });
 
-  test("AC-7, AC-14, AC-15: the dashboard header leads to the account page, which has no chart; cancelling deletes nothing", async ({ page }) => {
+  test("AC-7, AC-15, AC-18: the account menu leads to the settings page, which has no chart; cancelling deletes nothing", async ({ page }) => {
     const email = await signInAsNewUser(page);
-    // The stamps-per-month chart is on the stats page (spec 0037), not on the dashboard (it renders in one piece, so once its
-    // Account link is there, a missing chart really is missing).
-    await expect(page.getByRole("link", { name: "Account", exact: true })).toBeVisible();
+    // The stamps-per-month chart is on the stats page (spec 0037), not on the dashboard (it renders in one piece, so once the
+    // account button is there, a missing chart really is missing).
+    await expect(accountButton(page)).toBeVisible();
     await expect(page.getByRole("heading", { name: "Stamps per month" })).toHaveCount(0);
-    await page.getByRole("link", { name: "Account", exact: true }).click();
+    await (await openAccountMenu(page)).getByRole("link", { name: "Settings", exact: true }).click();
     await expect(page).toHaveURL(/\/en\/account$/);
-    await expect(page).toHaveTitle("Account");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Account");
+    await expect(page).toHaveTitle("Settings");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Settings");
     await expect(page.getByRole("heading", { name: "Stamps per month" })).toHaveCount(0); // moved to /stats (spec 0037)
 
     await openDeleteConfirmation(page);
@@ -61,6 +61,7 @@ test.describe("spec 0014: the account page", () => {
     await page.getByRole("button", { name: "Yes, permanently delete my account" }).click();
     await expect(page).toHaveURL(/\/en$/);
     await expect(page.getByRole("button", { name: "Sign in with Google" })).toBeVisible();
+    await expect(accountButton(page)).toHaveCount(0); // the layout's strip follows the session: no account menu for a deleted account (spec 0014 AC-20)
 
     expect(count(`select count(*) from auth.users where id = '${userId}'`)).toBe(0);
     expect(count(`select count(*) from public.user_stamps where user_id = '${userId}'`)).toBe(0);
@@ -94,15 +95,7 @@ test.describe("spec 0014: the account page", () => {
   });
 });
 
-test.describe("spec 0014: sign out and the account link", () => {
-  test("AC-14: the dashboard header has one Account link and no Settings link or Sign out control", async ({ page }) => {
-    await signInAsNewUser(page);
-    const header = page.locator("main > header");
-    await expect(header.getByRole("link", { name: "Account", exact: true })).toHaveAttribute("href", "/en/account");
-    await expect(page.getByRole("link", { name: "Settings" })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Sign out" })).toHaveCount(0);
-  });
-
+test.describe("spec 0014: sign out and the settings address", () => {
   test("AC-15: the old /settings address redirects to /account in the same language", async ({ page }) => {
     await signInAsNewUser(page);
     await page.goto("/en/settings");
@@ -111,12 +104,12 @@ test.describe("spec 0014: sign out and the account link", () => {
     await expect(page).toHaveURL(new RegExp(`/(${routing.locales.join("|")})/account$`));
   });
 
-  test("AC-16: signing out from the account page ends the session for the dashboard and the account page", async ({ page }) => {
+  test("AC-16: signing out from the settings page ends the session for the dashboard and the settings page", async ({ page }) => {
     await signInAsNewUser(page);
-    await page.getByRole("link", { name: "Account", exact: true }).click();
+    await (await openAccountMenu(page)).getByRole("link", { name: "Settings", exact: true }).click();
     await expect(page).toHaveURL(/\/en\/account$/);
     const header = page.locator("main > header"); // the button sits next to the heading
-    await expect(header.getByRole("heading", { level: 1 })).toHaveText("Account");
+    await expect(header.getByRole("heading", { level: 1 })).toHaveText("Settings");
     await header.getByRole("button", { name: "Sign out" }).click();
     await expect(page).toHaveURL(/\/en$/);
     await expect(page.getByRole("button", { name: "Sign in with Google" })).toBeVisible();

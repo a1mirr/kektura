@@ -34,7 +34,7 @@ Everything it says is true of the app today.
     are delivered to the developer together with the email when signed in (spec 0017);
   - cookies keep the user signed in, and the browser remembers display choices (which stages are open,
     which map layers are on);
-  - the "Account" page deletes the account and all stamps; feedback messages already sent are kept but
+  - the "Settings" page (spec 0014 AC-18) deletes the account and all stamps; feedback messages already sent are kept but
     no longer linked to the user;
   - a link to `/account`;
   - while the friends feature is on (spec 0024: the `friends` flag, spec 0035): what a connected friend can see (display name,

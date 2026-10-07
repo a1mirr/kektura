@@ -85,8 +85,6 @@
     "retiredDate": "Datum, an dem du ihn gesammelt hast, spätestens {date}",
     "replacesRetired": "Ersetzt den eingestellten Stempel {name} (gültig bis {date}).",
     "mapAttribution": "© OpenStreetMap-Mitwirkende · Route: MTSZ",
-    "account": "Konto",
-    "stats": "Meine Statistik",
     "stampDate": "Datum des Stempels",
     "openCalendar": "Kalender öffnen",
     "bulkMode": "Daten ändern",
@@ -140,7 +138,7 @@
     "dataTitle": "Deine Daten",
     "data1": "Du meldest dich mit Google an; die App sieht dein Google-Passwort nie. Sie speichert dein Konto (die E-Mail-Adresse und den Namen aus deinem Google-Profil), die Stempel, die du markierst, samt Datum sowie die Nachrichten, die du über das Feedback-Formular sendest; diese werden, wenn du angemeldet bist, zusammen mit deiner E-Mail-Adresse an den Entwickler zugestellt.",
     "data2": "Cookies halten dich angemeldet. Dein Browser merkt sich außerdem Anzeigeeinstellungen, zum Beispiel welche Etappen geöffnet und welche Kartenebenen eingeschaltet sind.",
-    "data3": "Du kannst dein Konto und alle deine Stempel jederzeit auf der Seite <account>Konto</account> löschen. Feedback-Nachrichten, die du bereits gesendet hast, bleiben erhalten, sind aber nicht mehr mit dir verknüpft.",
+    "data3": "Du kannst dein Konto und alle deine Stempel jederzeit auf der Seite <account>Einstellungen</account> löschen. Feedback-Nachrichten, die du bereits gesendet hast, bleiben erhalten, sind aber nicht mehr mit dir verknüpft.",
     "contactTitle": "Fragen oder Ideen?",
     "contactText": "Hast du einen Fehler gefunden oder eine Idee für den Tracker? Schick sie uns über das <feedback>Feedback-Formular</feedback>.",
     "data4": "Wenn du dich mit Freunden verbindest, können sie deinen Anzeigenamen und deinen Fortschritt Etappe für Etappe sehen (offizielle Stempel, Kilometer, Etappen). Deine Stempeldaten und Zusatzstempel sehen sie nicht. Du kannst das Teilen deines Fortschritts mit einem Freund jederzeit auf der Seite „Freunde“ beenden."
@@ -190,8 +188,15 @@
     "tooLong": "Die Nachricht ist zu lang (höchstens 2.000 Zeichen).",
     "rateLimited": "Zu viele Nachrichten in kurzer Zeit. Bitte versuche es später erneut."
   },
+  "accountMenu": {
+    "label": "Konto",
+    "stats": "Meine Statistik",
+    "friends": "Freunde",
+    "settings": "Einstellungen",
+    "signOut": "Abmelden"
+  },
   "account": {
-    "title": "Konto",
+    "title": "Einstellungen",
     "signOut": "Abmelden",
     "dangerZone": "Gefahrenbereich",
     "dangerZoneDesc": "Lösche dein Konto und alle zugehörigen Stempeldaten dauerhaft.",

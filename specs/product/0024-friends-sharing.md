@@ -161,8 +161,7 @@ The width and the edges of the pages are spec 0036's.
 ### Feature flag and texts
 
 - **AC-15**: While the flag `friends` is off, `/friends`, `/friends/<id>` and `/friends/invite/*` answer 404,
-  the actions return `disabled` without touching the database and no link to them is shown (the dashboard
-  link, the About page paragraph). The flag is `friends` (spec 0035): off, on for the users on its
+  the actions return `disabled` without touching the database and no link to them is shown (the account menu's Friends entry, spec 0014 AC-21, the About page paragraph). The flag is `friends` (spec 0035): off, on for the users on its
   allowlist, or on for everybody, read on every request, so a change shows on the next one with no deploy and no
   restart. It is on in production.
 - **AC-16**: Every user-visible string exists in every language of the site. The About page (spec 0015) tells
@@ -202,7 +201,7 @@ route plan.
 | AC-11 | `e2e/friends.spec.ts` (delete the account, the friend's list is empty) |
 | AC-12 | `tests/friends-migration.test.ts` (forged friendship, direct writes, token column, anon, the trigger function); Supabase advisors after applying |
 | AC-13, AC-14 | `src/app/[locale]/(pages)/friends/actions.test.ts` (an action that fails is shown on the page: `e2e/friends.spec.ts`) |
-| AC-15 | `actions.test.ts` (`disabled`); the pages, the dashboard link and the About paragraph in each state of the flag: `e2e/feature-flags.spec.ts` (spec 0035); the flag mechanism itself: spec 0035 |
+| AC-15 | `actions.test.ts` (`disabled`); the pages, the menu entry and the About paragraph in each state of the flag: `e2e/feature-flags.spec.ts` (spec 0035); the flag mechanism itself: spec 0035 |
 | AC-16 | `tests/messages.test.ts`, `e2e/friends.spec.ts` (About paragraph); `src/content/changelog.ts` (the friends entries; the rule: spec 0018 AC-7) |
 | AC-17 | `src/components/FriendActionButton.test.tsx` (pending, no second press, the row), `e2e/friends.spec.ts` (a slow server) |
 | AC-18 | `src/lib/friends.test.ts` (the path, a message per notice in every language), `src/components/FriendActionButton.test.tsx` (status and alert), `e2e/friends.spec.ts` (each action, the default language and Russian, unknown values) |

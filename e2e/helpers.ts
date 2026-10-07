@@ -32,6 +32,19 @@ export async function signInAsNewUser(page: Page) {
   return email;
 }
 
+// The account menu's button (spec 0014 AC-20): a <summary>, named Account in English.
+export const accountButton = (page: Page) => page.locator("body > header summary");
+
+// Opens the account menu and returns its list. Waits until the page has hydrated first (the button then carries
+// `aria-expanded`, spec 0014 AC-22), so the click is the one the script listens to.
+export async function openAccountMenu(page: Page) {
+  const button = accountButton(page);
+  await expect(button).toHaveAttribute("aria-expanded", "false");
+  await button.click();
+  await expect(button).toHaveAttribute("aria-expanded", "true");
+  return page.locator("body > header details ul");
+}
+
 // The value of a dashboard stat card, e.g. stat(page, "Stamps") -> "0 / 161".
 export const stat = (page: Page, label: string) =>
   page.locator("dl > div", { has: page.locator("dt", { hasText: new RegExp(`^${label}$`) }) }).locator("dd");

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { randomUUID } from "node:crypto";
-import { signInAsNewUser, signInThroughForm, stat } from "./helpers";
+import { openAccountMenu, signInAsNewUser, signInThroughForm, stat } from "./helpers";
 
 test.describe("spec 0006 + 0005: signing in and out on the test server", () => {
   test("AC-3, AC-5: the dummy login opens an empty dashboard marked as the test server", async ({ page }) => {
@@ -38,8 +38,8 @@ test.describe("spec 0006 + 0005: signing in and out on the test server", () => {
 
   test("0005 AC-6, AC-3: signing out returns to the landing page, after which the dashboard redirects there", async ({ page }) => {
     await signInAsNewUser(page);
-    await page.getByRole("link", { name: "Account", exact: true }).click(); // spec 0014 AC-16: sign out lives there
-    await page.getByRole("button", { name: "Sign out" }).click();
+    const menu = await openAccountMenu(page); // spec 0014 AC-26: sign out is in the account menu (and on the settings page, AC-16)
+    await menu.getByRole("button", { name: "Sign out" }).click();
     await expect(page).toHaveURL(/\/en$/);
     await page.goto("/en/dashboard");
     await expect(page).toHaveURL(/\/en$/);

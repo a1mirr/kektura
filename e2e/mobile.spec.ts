@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { expandAllStages, expectNoSidewaysScroll, seedStatsWalk, signInAsNewUser, stampPlacesOn, stat } from "./helpers";
+import { accountButton, expandAllStages, expectNoSidewaysScroll, openAccountMenu, seedStatsWalk, signInAsNewUser, stampPlacesOn, stat } from "./helpers";
 import { psql } from "./local-db";
 
 // Spec 0006 AC-10: the pages at a phone's width, in the `mobile` project (Chromium, 375 x 812, touch, mobile emulation,
@@ -110,15 +110,48 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
     await expectNoSidewaysScroll(page, "sideways scroll on the Friends page after saving");
   });
 
-  test("AC-10: the account page does not scroll sideways, and signing out works with a tap", async ({ page }) => {
+  test("AC-10: the settings page does not scroll sideways, and signing out works with a tap", async ({ page }) => {
     await signInAsNewUser(page);
     await page.goto("/en/account");
-    await expect(page.getByRole("heading", { name: "Account", level: 1 })).toBeVisible();
-    await expectNoSidewaysScroll(page, "sideways scroll on the account page");
+    await expect(page.getByRole("heading", { name: "Settings", level: 1 })).toBeVisible();
+    await expectNoSidewaysScroll(page, "sideways scroll on the settings page");
     const signOut = page.getByRole("button", { name: "Sign out" });
     await expectTappable(page, signOut, "the sign-out button", 44);
     await expectTappable(page, page.getByRole("button", { name: "Delete account" }), "the delete button");
     await signOut.tap();
+    await expect(page).toHaveURL(/\/en$/);
+  });
+
+  // Spec 0014 AC-20 to AC-26: the header strip's account menu opens with a tap in every language, its list stays inside the window
+  // and every target is at least 44 px (the strip itself must not push the page sideways, even in the longest language).
+  test("AC-10: the account menu opens with a tap, its list stays inside the window and its targets are 44 px, in every language", async ({ page }) => {
+    await signInAsNewUser(page);
+    for (const locale of ["en", "hu", "de", "ru"]) {
+      await page.goto(`/${locale}/dashboard`);
+      const button = accountButton(page);
+      await expectTappable(page, button, `the account button (${locale})`, 44);
+      await expectTappable(page, page.getByLabel(/^(Language|Nyelv|Sprache|Язык)$/), `the language switcher (${locale})`, 44);
+      await expectNoSidewaysScroll(page, `sideways scroll with the strip's controls in ${locale}`);
+      await expect(button).toHaveAttribute("aria-expanded", "false"); // hydrated
+      await button.tap();
+      await expect(button).toHaveAttribute("aria-expanded", "true");
+      const list = page.locator("body > header details ul");
+      const width = await page.evaluate(() => document.documentElement.clientWidth);
+      const box = (await list.boundingBox())!;
+      expect(box.x, `the list starts inside the window (${locale})`).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width, `the list ends inside the window (${locale})`).toBeLessThanOrEqual(width + 0.5);
+      expect(box.width, `the list is at least 200 px wide (${locale})`).toBeGreaterThanOrEqual(200);
+      for (const control of await list.locator("a, button").all()) {
+        const target = (await control.boundingBox())!;
+        expect(Math.min(target.width, target.height), `an entry is a 44 px target (${locale})`).toBeGreaterThanOrEqual(44);
+      }
+      await expectNoSidewaysScroll(page, `sideways scroll with the menu open in ${locale}`);
+    }
+    await page.goto("/en/dashboard");
+    const menu = await openAccountMenu(page);
+    await menu.getByRole("link", { name: "My stats", exact: true }).tap();
+    await expect(page).toHaveURL(/\/en\/stats$/);
+    await (await openAccountMenu(page)).getByRole("button", { name: "Sign out" }).tap();
     await expect(page).toHaveURL(/\/en$/);
   });
 

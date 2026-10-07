@@ -3,7 +3,7 @@ import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 import type en from "../messages/en.json";
 import { routing } from "../src/i18n/routing";
-import { expectNoSidewaysScroll, seedStatsWalk, signInAsNewUser, stampPlacesOn, stampStagesOn, stat } from "./helpers";
+import { expectNoSidewaysScroll, openAccountMenu, seedStatsWalk, signInAsNewUser, stampPlacesOn, stampStagesOn, stat } from "./helpers";
 
 // The expected texts are read from the language's own messages file, so a new language needs no edit here.
 const messages = (locale: string): typeof en => JSON.parse(fs.readFileSync(path.join(process.cwd(), "messages", `${locale}.json`), "utf8"));
@@ -37,11 +37,11 @@ test.describe("spec 0037: the stats page", () => {
     await expect(page).toHaveURL(/\/en$/);
   });
 
-  test("AC-1, AC-2, AC-3: title, heading and the four figures; the dashboard header leads here; a new user gets a note, not a chart", async ({
+  test("AC-1, AC-2, AC-3: title, heading and the four figures; the account menu leads here; a new user gets a note, not a chart", async ({
     page,
   }) => {
     await signInAsNewUser(page);
-    await page.getByRole("link", { name: "My stats", exact: true }).click();
+    await (await openAccountMenu(page)).getByRole("link", { name: "My stats", exact: true }).click();
     await expect(page).toHaveURL(/\/en\/stats$/);
     await expect(page).toHaveTitle("My stats");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("My stats");
@@ -222,7 +222,7 @@ test.describe("spec 0037: the stats page", () => {
       const m = messages(locale);
       await signInAsNewUser(page);
       await page.goto(`/${locale}/dashboard`);
-      await expect(page.getByRole("link", { name: m.dashboard.stats, exact: true })).toHaveAttribute("href", `/${locale}/stats`);
+      await expect((await openAccountMenu(page)).getByRole("link", { name: m.accountMenu.stats, exact: true })).toHaveAttribute("href", `/${locale}/stats`);
       await page.goto(`/${locale}/stats`);
       await expect(page).toHaveTitle(m.stats.title);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(m.stats.title);

@@ -85,8 +85,6 @@
     "retiredDate": "Date you collected it, by {date}",
     "replacesRetired": "Replaces the retired stamp {name} (valid until {date}).",
     "mapAttribution": "© OpenStreetMap contributors · route: MTSZ",
-    "account": "Account",
-    "stats": "My stats",
     "stampDate": "Date of the stamp",
     "openCalendar": "Open calendar",
     "bulkMode": "Change dates",
@@ -140,7 +138,7 @@
     "dataTitle": "Your data",
     "data1": "You sign in with Google; the app never sees your Google password. It stores your account (the email and name from your Google profile), the stamps you mark with their dates, and the messages you send through the feedback form, which are delivered to the developer together with your email if you are signed in.",
     "data2": "Cookies keep you signed in. Your browser also remembers display choices, such as which stages are open and which map layers are on.",
-    "data3": "You can delete your account and all your stamps at any time on the <account>Account</account> page. Feedback messages you have already sent are kept, but are no longer linked to you.",
+    "data3": "You can delete your account and all your stamps at any time on the <account>Settings</account> page. Feedback messages you have already sent are kept, but are no longer linked to you.",
     "contactTitle": "Questions or ideas?",
     "contactText": "Found a bug or have an idea for the tracker? Send it through the <feedback>feedback form</feedback>.",
     "data4": "If you connect with friends, they can see your display name and your stage-by-stage progress (official stamps, kilometres, stages). They cannot see your stamp dates or extra stamps. You can stop sharing your progress with a friend at any time on the Friends page."
@@ -190,8 +188,15 @@
     "tooLong": "The message is too long (2,000 characters at most).",
     "rateLimited": "Too many messages in a short time. Please try again later."
   },
+  "accountMenu": {
+    "label": "Account",
+    "stats": "My stats",
+    "friends": "Friends",
+    "settings": "Settings",
+    "signOut": "Sign out"
+  },
   "account": {
-    "title": "Account",
+    "title": "Settings",
     "signOut": "Sign out",
     "dangerZone": "Danger Zone",
     "dangerZoneDesc": "Permanently delete your account and all associated stamping data.",

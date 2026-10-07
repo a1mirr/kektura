@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
-import { Link, redirect } from "@/i18n/navigation";
+import { redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { loadDashboardData } from "@/lib/dashboard-data";
 import { flagOn } from "@/lib/feature-flags-server";
@@ -29,7 +29,6 @@ import BulkDateBar from "@/components/BulkDateBar";
 import BulkDatesProvider from "@/components/BulkDatesProvider";
 import BulkStageButton from "@/components/BulkStageButton";
 import LocateButton from "@/components/LocateButton";
-import LocaleSwitcher from "@/components/LocaleSwitcher";
 import PageShell from "@/components/PageShell";
 import RequiredFrom from "@/components/RequiredFrom";
 import RetiredRow from "@/components/RetiredRow";
@@ -63,8 +62,7 @@ export default async function Dashboard({
   if (!user) return redirect({ href: "/", locale });
 
   // Reference data comes from a shared server cache; only the user's own stamps hit the database (spec 0002 AC-15, AC-16).
-  const [showFriends, showRestaurants, { checkpoints, extras: extraList, stamps, extraStamps }] = await Promise.all([
-    flagOn("friends"),
+  const [showRestaurants, { checkpoints, extras: extraList, stamps, extraStamps }] = await Promise.all([
     flagOn("restaurants"),
     loadDashboardData(supabase),
   ]);
@@ -130,22 +128,8 @@ export default async function Dashboard({
     <PageShell
       stretch
       header={
-        <header className="flex items-center justify-between">
+        <header>
           <h1 className="text-2xl font-bold text-blue-700">{t("title")}</h1>
-          <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
-            <LocaleSwitcher />
-            {showFriends && (
-              <Link href="/friends" className="text-sm text-stone-600 hover:underline">
-                {t("friends")}
-              </Link>
-            )}
-            <Link href="/stats" className="text-sm text-stone-600 hover:underline">
-              {t("stats")}
-            </Link>
-            <Link href="/account" className="text-sm text-stone-600 hover:underline">
-              {t("account")}
-            </Link>
-          </div>
         </header>
       }
       aside={
