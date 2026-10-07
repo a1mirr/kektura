@@ -18,7 +18,8 @@ dropdown, and a visitor with no signal gets Hungarian.
   The matcher's extension escape must stay `\\.` in the TS string.
 - **AC-2**: A signed-in visitor of the landing page goes straight to their dashboard. The landing
   page and the dashboard use the same session check (`getUser`), so a revoked but unexpired token
-  can never bounce between them.
+  can never bounce between them. The redirect comes before the page is drawn, so a signed-in visitor never loads the landing
+  page's gallery of screenshots (spec 0038 AC-8).
 - **AC-3**: A signed-out visitor of the dashboard is redirected to the landing page.
 - **AC-4**: The OAuth callback only ever redirects to a known locale (`?locale=` is validated) and
   shows the sign-in error on failure. After a successful sign-in it lands on the dashboard, or on the page
@@ -64,7 +65,7 @@ dropdown, and a visitor with no signal gets Hungarian.
 | AC | Test |
 | --- | --- |
 | AC-1 | `src/proxy.test.ts` |
-| AC-2, AC-3, AC-6 | `e2e/auth.spec.ts` (test server, spec 0006) |
+| AC-2, AC-3, AC-6 | `e2e/auth.spec.ts` (test server, spec 0006); AC-2's no pictures for a signed-in visitor: `e2e/landing.spec.ts` |
 | AC-4 | `e2e/auth.spec.ts` (a failed code exchange, no code, an unknown locale and a markup-carrying locale all end on `/<known locale>?error=auth` on the address the user is on; a forwarded host is honoured and a malformed one is not); `src/lib/landing-path.test.ts` (`next`); the dummy login's `next` is covered by `e2e/friends.spec.ts`. The success path needs a real Google sign-in: manual (a real OAuth round trip). Last checked: never recorded. |
 | AC-5 | `tests/messages.test.ts` |
 | AC-9 | `src/proxy.test.ts` (`/de` runs the proxy), `e2e/language-switcher.spec.ts` (a browser in each language gets it, one in a language we don't have gets the default; every language's address answers, an unknown one is a 404), `tests/smoke-test.test.ts` (the deploy's smoke test asks for the page of every language: the message files are the routing's languages), `e2e/auth.spec.ts` (an unknown `?locale=` ends on `/hu`), `e2e/site-logo.spec.ts` (the 404 page links to `/hu`) |

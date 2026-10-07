@@ -10,7 +10,9 @@ export type PageVariant = "wide" | "reading" | "hero" | "card";
 // `wide`: the whole width, for pages made of cards, a map, charts and lists. `reading`: a long read, a text column of about 65
 // characters centred in it (AC-3). `hero`: a centred block that fills the space above the footer with flex-1, not
 // min-h-screen (the landing, error and 404 pages, AC-4). `card`: one centred card (the invite page, AC-4).
-// `spaced` puts a gap between the page's blocks.
+// `spaced` puts a gap between the page's blocks. A hero page may give `below`, content that follows the block at the
+// full content width (the landing page's gallery, spec 0038): the page is then as tall as its content, starts at the top
+// and the footer comes after it, below the first screen (spec 0036 AC-6).
 //
 // A wide page made of independent blocks gives `aside` (the left column) next to its children (the right one) and
 // `header` (the title row, above both): from 1024 px they stand side by side, below it they are one column in the DOM's
@@ -24,6 +26,7 @@ export default function PageShell({
   header,
   aside,
   stretch = false,
+  below,
   children,
 }: {
   variant?: PageVariant;
@@ -31,6 +34,7 @@ export default function PageShell({
   header?: ReactNode;
   aside?: ReactNode;
   stretch?: boolean;
+  below?: ReactNode;
   children: ReactNode;
 }) {
   const gap = spaced ? " space-y-8" : "";
@@ -44,8 +48,12 @@ export default function PageShell({
   }
   if (variant === "hero") {
     return (
-      <main data-page={variant} className={`${pageWidth} flex flex-1 flex-col items-center justify-center py-8 text-center`}>
+      <main
+        data-page={variant}
+        className={`${pageWidth} flex flex-1 flex-col items-center py-8 text-center ${below ? "gap-12" : "justify-center"}`}
+      >
         <div className="flex w-full max-w-2xl flex-col items-center gap-6">{children}</div>
+        {below}
       </main>
     );
   }
