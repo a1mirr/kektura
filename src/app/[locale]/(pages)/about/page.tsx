@@ -5,6 +5,7 @@ import { getFormatter, getTranslations, setRequestLocale } from "next-intl/serve
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { flagOn } from "@/lib/feature-flags-server";
+import { TRAIL_DATA_DATE } from "@/lib/trail-meta";
 import { TRAIL_FACTS } from "@/lib/trail-facts";
 import PageShell from "@/components/PageShell";
 
@@ -90,6 +91,9 @@ export default async function AboutPage({ params }: Props) {
             </li>
           ))}
         </ul>
+        <p className="mt-3 text-stone-700">
+          {t("trailData", { date: format.dateTime(new Date(`${TRAIL_DATA_DATE}T00:00:00Z`), { dateStyle: "long", timeZone: "UTC" }) })}
+        </p>
         <p className="mt-3 text-sm text-stone-500">{t("independent")}</p>
       </section>
 

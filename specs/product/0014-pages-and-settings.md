@@ -13,7 +13,7 @@ Footer navigation to the informational pages (About, Changelog, Useful links, Fe
 signed-in users that holds everything about the account: signing out and deleting the account (the stamps-per-month chart
 lives on the stats page, spec 0037), and one header strip on every page: the site logo, a way home that never needs the footer, with
 the language dropdown and, for a signed-in visitor, one "Account" button at its right. The button opens a short menu to the
-pages of the signed-in area (My stats, Friends, Settings), so no page carries a row of links of its own, which matters most on a phone.
+pages of the signed-in area (My stats, Friends, Settings), so no page carries a row of links of its own (a friend's page keeps one link back to the Friends list), which matters most on a phone.
 
 ## Behaviour
 
@@ -55,7 +55,7 @@ pages of the signed-in area (My stats, Friends, Settings), so no page carries a 
 - **AC-13**: The delete action never throws: it returns an `ActionResult` (`ok`, `unauthorized` or
   `failed`) and logs a failure as one `[account-delete]` line without secrets (spec 0008's rules).
 - **AC-14**: A page's own title row has no navigation of its own: the dashboard's header is its title alone, with no language dropdown and no links to
-  "My stats", "Friends" or the settings page, which are the header strip's (AC-20, AC-21), and the stats, settings and Friends pages have none either.
+  "My stats", "Friends" or the settings page, which are the header strip's (AC-20, AC-21), and the stats, settings and Friends pages have none either. The one exception is a friend's page (spec 0024 AC-22), whose title row keeps a single link, "Friends", back to the list: it is the way back from a page the menu does not list, and it is the only link in that row.
 - **AC-15**: The page's document title and `h1` are "Settings" (`ru`: Настройки, `hu`: Beállítások, `de`: Einstellungen); its address stays `/account`. The address `/settings`, in any language prefix,
   redirects (307, in `next.config.ts`, so before the proxy and without a session) to `/account` in the same
   language, so open tabs and old links don't end on a 404.
@@ -140,7 +140,7 @@ email on the page.
 | AC-3, AC-4 | specs 0018, 0019 |
 | AC-5, AC-6 | spec 0017 |
 | AC-7, AC-15 | `e2e/account.spec.ts` (redirect when signed out; the menu leads to the page; title and heading "Settings"; `/settings` redirects to `/account`; in each language: `e2e/languages.spec.ts`) |
-| AC-14 | `e2e/account-menu.spec.ts` (the dashboard's, stats and settings pages' title rows have no links and the dashboard's is its heading alone), `tests/account-menu.test.ts` (no page file links to `/stats`, `/account` or `/friends` from its header, and none draws a switcher or menu) |
+| AC-14 | `e2e/account-menu.spec.ts` (the dashboard's, stats and settings pages' title rows have no links and the dashboard's is its heading alone), `tests/account-menu.test.ts` (no page file links to `/stats`, `/account` or `/friends` from its header, and none draws a switcher or menu; a friend's page has exactly one link in its title row, to `/friends`, and no other) |
 | AC-8 | Removed (the chart is spec 0037's; `e2e/account.spec.ts` checks that `/account` and the dashboard have none) |
 | AC-9, AC-10 | `e2e/account.spec.ts` (cancel; delete: account, stamps and extra stamps gone, feedback kept and unlinked, signed out and no account button on the page it ends on, signing in again gives an empty account), `src/app/[locale]/account/DeleteAccountButton.test.tsx` |
 | AC-11 | `DeleteAccountButton.test.tsx`, `e2e/account.spec.ts` (server action answering 500) |

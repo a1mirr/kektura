@@ -3,6 +3,7 @@ import type { Database } from "@/lib/supabase/database.types";
 import { compareProgress } from "./compare";
 import type { ComparePoint } from "./compare-map";
 import { getReferenceData } from "./dashboard-data";
+import { isRecentlyMoved, todayIso } from "./stamp-moves";
 import {
   buildPlaces,
   buildStages,
@@ -80,7 +81,7 @@ export async function getFriendProgress(friend: Friend) {
 
 // Spec 0024 AC-22: the friend's progress next to the signed-in user's own. The only database read besides the friend's
 // shared stamps (already in `friend`) is the user's own `user_stamps`, under RLS: nothing else of the friend is asked for.
-export async function compareWithFriend(supabase: SupabaseClient<Database>, friend: Friend) {
+export async function compareWithFriend(supabase: SupabaseClient<Database>, friend: Friend, today: string = todayIso()) {
   const [progress, { data: stamps }] = await Promise.all([
     getFriendProgress(friend),
     supabase.from("user_stamps").select("checkpoint_id, stamped_on"),
@@ -94,7 +95,7 @@ export async function compareWithFriend(supabase: SupabaseClient<Database>, frie
   const points: ComparePoint[] = progress.places.flatMap((p) =>
     p.variants
       .filter((v) => v.lat != null && v.lng != null)
-      .map((v) => ({ placeKey: placeKeyOf(v), label: p.label, name: v.name, lat: Number(v.lat), lng: Number(v.lng), who: comparison.placeWho.get(p.key)! })),
+      .map((v) => ({ placeKey: placeKeyOf(v), label: p.label, name: v.name, lat: Number(v.lat), lng: Number(v.lng), who: comparison.placeWho.get(p.key)!, moved: isRecentlyMoved(v.moved_on, today) })),
   );
   return { progress, comparison, points };
 }

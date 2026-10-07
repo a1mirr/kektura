@@ -2,7 +2,7 @@
 
 Status: Done
 Owner code: `src/lib/route-geometry.ts`, `src/lib/route-stats.ts`, `src/components/TrailMap.tsx`, `src/components/trail-map/`, `src/lib/map-*.ts`,
-`src/lib/compare-map.ts`, `src/components/CompareMap.tsx`, `src/app/globals.css` (`.map-box`, the dashboard map's height)
+`src/lib/compare-map.ts`, `src/components/CompareMap.tsx`, `src/lib/stamp-moves.ts`, `src/lib/trail-meta.ts`, `src/app/globals.css` (`.map-box`, the dashboard map's height)
 
 ## Goal
 
@@ -107,6 +107,19 @@ geometry (AC-9) and the layer code with the dashboard's map, and is read-only. I
   required has no such line.
 - **AC-23**: A retired stamp (spec 0001 AC-22) is never a marker of the map, a start or end of a route or a hop, even if its row has coordinates: the
   dashboard builds the map's points from current stamps only.
+- **AC-26**: A stamp that moved in the last 180 days (spec 0001 AC-29) is marked on the map: its marker has a ring around it (an empty circle wider than the
+  dot, so the sign is a shape and not a colour), and its popup carries, in a paragraph of its own under the km, the note of spec 0001 AC-29 ("Moved on
+  <date>." the data's description of where it is now, and the advice to check the new place). The ring follows the "Stamps" toggle (AC-10) and is on a
+  friend's map (AC-18) too, around the places that moved there, which has no popup. The marker, the popup, the route from and to the stamp and the "locate me"
+  distance all use the stamp's current coordinates, the only ones the data holds; the map and the list show no old location. Every other marker has
+  no ring and its popup no such paragraph.
+- **AC-27**: Every stamp's popup ends with a link "Report a wrong location" to the feedback form for that stamp (spec 0017 AC-11): `/<language>/feedback?stamp=<code>`,
+  opening in a new tab (`target="_blank"`, `rel="noopener noreferrer"`), so the map and its state stay where they are. Only the stamp's own code travels in the
+  address, never free text. The link is a target of at least 44 x 44 px, the whole row of the popup, also at 375 px; only a path of this site or an
+  `https:` address ever becomes a link (AC-15). A friend's map has no popup and so no link.
+- **AC-28**: The page says how fresh its trail data is under the dashboard's map and under a friend's map: "Trail data: MTSZ file of <date>." in the page's
+  language, the date being that of the older of the two MTSZ files the data was last generated from (`public/data/okt-meta.json`, spec 0004 AC-17); the About page says
+  the same (spec 0015 AC-9).
 - **AC-17**: `TrailMap.tsx` is a composition of focused hooks and modules (`src/components/trail-map/`: map
   creation with its sources and layers, stamp and restaurant popups, route planner state, fullscreen, layer
   toggles with persistence, data and focus listeners) and of pure helpers in `src/lib/map-*.ts` (popup DOM builders,
@@ -115,7 +128,7 @@ geometry (AC-9) and the layer code with the dashboard's map, and is read-only. I
 
 ## Out of scope
 
-Routing off the trail; replacing MapLibre.
+Routing off the trail; replacing MapLibre; the old location of a stamp that moved (nothing draws it); temporary warnings, detours and closures (the MTSZ's warnings page covers them).
 
 ## Notes
 
@@ -142,6 +155,10 @@ Routing off the trail; replacing MapLibre.
 | AC-24, AC-25 | `e2e/layout.spec.ts` (the height from 1024 px at five window sizes, never over 70 %; the map's block fits the window at 1280 x 720, 1440 x 900 and 1024 x 768 in English, to within 4 px; the canvas follows its container through four window sizes), `e2e/map.spec.ts` (with the route panel shown at 1280 x 720 the block scrolls inside itself, stays in the window and its last control can be reached; in English, Hungarian, German and Russian at 1280 x 720 and 1024 x 768 the block has no sideways overflow, stays in the window and its end can be reached) |
 | AC-17 | `src/lib/map-storage.test.ts`, `map-data.test.ts`, `map-layers.test.ts`, `map-popups.test.ts`, `map-reveal.test.ts` (the pure helpers); `tests/map-structure.test.ts` (no file of the map code is over 300 lines) |
 | AC-23 | `src/lib/map-data.test.ts` (a retired row with coordinates is no point), `src/lib/progress.test.ts` (a retired row is no place; the hops and the route planner are built from places) |
+| AC-26 | `src/lib/map-data.test.ts` (a moved point carries its note and the `moved` flag on its feature, every other has it off), `src/lib/map-layers.test.ts` (the ring: an empty circle with a stroke, from the stamps' source, for the moved points only, wider than the dot at every zoom, under the dots, following the stamps' toggle; the same ring on a friend's map), `src/lib/compare-map.test.ts` (a friend's point carries the flag), `src/lib/friends-compare.test.ts` (a place that moved in the last 180 days has a ring, no other has), `src/components/trail-map/stampPopups.test.ts` and `src/lib/map-popups.test.ts` (the paragraph in the popup, as text, none without a note) |
+| AC-26 (the ring on the canvas) | manual (the map is WebGL pixels that E2E cannot read, and the shared reference data is cached for 24 hours, so a test cannot change a row under a running test server): see the checklist below. Last checked: 2026-10-07 (production build of the test server with two stamps moved three days earlier: on the dashboard's map the ring around one of them, at one zoom level, gone with the "Stamps" toggle; two rings on a friend's map at the zoom it opens at; the popup's paragraph. Not looked at: other zoom levels, a phone, that no other dot on the dashboard's map has a ring). |
+| AC-27 | `src/lib/map-popups.test.ts` (the link: new tab, `noopener`, at least 44 x 44 px, the whole row; only a path of this site or an `https:` address becomes one; its place in the popup), `src/components/trail-map/stampPopups.test.ts` (every stamp's popup has it with only the stamp's code in the address; a row without a code has none), `e2e/map.spec.ts` (the real popup: the address, a new tab, 44 x 44 px), `e2e/mobile.spec.ts` (375 px: the popup fits and the link is a 44 px target) |
+| AC-28 | `e2e/map.spec.ts` (under the dashboard's map, from the file's date), `tests/stamp-moves.test.ts` and `tests/trail-data.test.ts` (the generated file) |
 | AC-22 | `src/components/trail-map/stampPopups.test.ts` (a fake map: the popup of a new stamp carries the note, one that was always required does not), `src/lib/new-stamps.test.ts` (the note: the date, the waiver, nothing for an always required place) |
 | AC-4, AC-8, AC-12 (route from / to, mark and unmark) | `e2e/map.spec.ts`: two stamps picked through their popups show the stretch's numbers; a failed save keeps the popup open, the next save marks the stamp, and the popup of a marked stamp unmarks it |
 | AC-14 (restaurants), AC-12 (hover names, "Show in list" in a collapsed stage), AC-13 (the flight to zoom 12 or more), AC-9 (the line looks more detailed) | manual (canvas hover, click and pixels): see the checklist below; AC-15 popup builders: `src/lib/map-popups.test.ts`; the reveal of a list row: `src/lib/map-reveal.test.ts`. Last checked: never recorded. |
@@ -158,3 +175,4 @@ Manual checklist (dashboard, `npm run dev:test`, canvas interactions):
 - AC-14: with restaurants on, hover one (name and distance) and click it (pinned popup with an "Open on etteremhet.hu" link that opens in a new tab).
 - AC-18, AC-19: on a friend's page with both of you stamped, the map shows green solid, blue dashed, orange dotted and faint grey stretches; "Mine" and "Theirs" show blue solid and grey dashed, and the dots follow.
 - AC-20: hovering a place on that map shows its number, name and state (the click to the list is E2E-tested); zoom in past level 9 and the line gets more detailed.
+- AC-26: in the local test database `update public.checkpoints set moved_on = current_date - 3 where code = 'OKTPH_142'`, restart `npm run dev:test` (the reference data is cached), zoom to Nagy-nyugodó and look at a few zoom levels: its dot has an amber ring around it and no other dot has one; untick "Stamps": the ring goes with the dots; click the dot: the popup has the "Moved on …" paragraph and "Report a wrong location".

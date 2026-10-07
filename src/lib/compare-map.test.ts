@@ -85,3 +85,15 @@ describe("spec 0003: the comparison map's lines and points", () => {
     expect(compareHoverText({ label: "4.2", name: "Lokó-pihenő" }, "Only them")).toBe("4.2 Lokó-pihenő · Only them");
   });
 });
+
+describe("spec 0003: a friend's map and the stamps that moved", () => {
+  it("AC-26: a place that moved has `moved` on its point (the ring), every other has it off", () => {
+    const pts: ComparePoint[] = [
+      { placeKey: "A", label: "1.1", name: "A", lat: 47, lng: 16, who: "both", moved: true },
+      { placeKey: "B", label: "1.2", name: "B", lat: 47, lng: 16.1, who: "neither" },
+    ];
+    for (const view of ["both", "mine", "theirs"] as const) {
+      expect(compareDots(pts, view).features.map((f) => f.properties?.moved)).toEqual([true, false]);
+    }
+  });
+});

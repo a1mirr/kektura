@@ -40,6 +40,19 @@ describe("spec 0014: the header strip", () => {
     }
   });
 
+  it("AC-14: a friend's page keeps exactly one link in its title row, back to the Friends list, and no other link row", () => {
+    const source = read("src/app/[locale]/(pages)/friends/[id]/page.tsx");
+    const start = source.indexOf("<header");
+    const title = source.slice(start, source.indexOf("</header>", start));
+    expect(start).toBeGreaterThan(-1);
+    expect(title).toContain("<h1");
+    const links = [...title.matchAll(/<(?:Link|a)\b[^>]*>/g)].map((match) => match[0]);
+    expect(links).toHaveLength(1);
+    expect(links[0]).toContain('href="/friends"');
+    // and the page links to none of the other pages of the menu
+    expect(source).not.toMatch(/href="\/(stats|account)"/);
+  });
+
   it("AC-27: the controls read the session with getUser (never getClaims) and the friends flag per request, and only for a signed-in visitor", () => {
     const source = read("src/components/HeaderControls.tsx").replace(/^\s*\/\/.*$/gm, ""); // the code, not its comments
     expect(source).toContain("auth.getUser()");

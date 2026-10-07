@@ -145,6 +145,18 @@ A seed that adds a **retired stamp** (`scripts/data/okt-retired-stamps.json`, sp
 code that reads it is live: migration 0076 adds the columns but not the row, because the code running while a deploy is
 applied would show it as a place. Apply the seed's `-- Retired stamps` block (it is idempotent), then clear the cache as above.
 
+A seed that **moves a stamp** (`moves` of `scripts/data/okt-stamp-dates.json`, spec 0004 AC-16) is applied after the merge that carries it has
+deployed: the seed writes `checkpoints.moved_on`, a column that migration 0077 adds, so a seed applied before the migration is in production fails
+(`column "moved_on" does not exist`). The whole routine, from the MTSZ's file to a read-only check that production serves the new coordinates, is the recipe
+"A stamp that moved" in the Notes of spec 0004; its last two steps are this section: apply the seed, clear the cache as above, then read
+(nothing is changed by it):
+
+```sql
+select code, lat, lng, moved_on from public.checkpoints where code = 'OKTPH_...';
+```
+
+The coordinates and the day must be the new ones; the dashboard's row and popup of the stamp then carry the note until 180 days after `moved_on`.
+
 ## Watching the site from outside
 
 (Issue #87, "0060".) The deploy's smoke test runs once, after a deploy; between deploys an external uptime service watches

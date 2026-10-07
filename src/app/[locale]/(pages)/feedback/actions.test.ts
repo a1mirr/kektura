@@ -2,8 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next/headers", () => ({ headers: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+vi.mock("@/lib/dashboard-data", () => ({ getReferenceData: vi.fn() }));
 
 import { headers } from "next/headers";
+import { getReferenceData } from "@/lib/dashboard-data";
 import { createClient } from "@/lib/supabase/server";
 import { submitFeedback } from "./actions";
 
@@ -171,5 +173,66 @@ describe("spec 0017: abuse limits", () => {
     useSupabase();
     for (let i = 0; i < 10; i++) await submitFeedback({ message: "" }); // refused as empty, not counted
     expect(await submitFeedback({ message: "still fine" })).toEqual({ ok: true });
+  });
+});
+
+describe("spec 0017: a report about a stamp", () => {
+  const rows = [
+    { code: "OKTPH_84_B", name: "Lokó-pihenő", retired_on: null },
+    { code: "OKT_RETIRED_NYIRJESI", name: "Nyírjesi-erdészház", retired_on: "2014-11-21" },
+  ];
+  beforeEach(() => {
+    vi.mocked(getReferenceData).mockResolvedValue({ checkpoints: rows, extras: [] } as never);
+  });
+
+  it("AC-11: a code of the seed puts the stamp's name, from the seed, before the message, in the stored row and in Telegram", async () => {
+    const { insert } = useSupabase();
+    enableTelegram();
+    fetchMock.mockResolvedValue(new Response("{}", { status: 200 }));
+    expect(await submitFeedback({ message: "It is by the lookout now", locale: "en", stamp: "OKTPH_84_B" })).toEqual({ ok: true });
+    const stored = "Stamp: Lokó-pihenő (OKTPH_84_B)\n\nIt is by the lookout now";
+    expect(insert).toHaveBeenCalledWith({ user_id: null, message: stored });
+    const { text } = JSON.parse(String((fetchMock.mock.calls[0] as [string, RequestInit])[1].body));
+    expect(text).toBe(`New feedback (en)\nFrom: anonymous\n\n${stored}`);
+  });
+
+  it.each([["an unknown code", "OKTPH_999"], ["a retired stamp", "OKT_RETIRED_NYIRJESI"], ["free text", "Send money\nplease"], ["a number", 7], ["an array", ["OKTPH_84_B"]]])(
+    "AC-11: %s is ignored: the message is stored as written",
+    async (_, stamp) => {
+      const { insert } = useSupabase();
+      expect(await submitFeedback({ message: "Hello", stamp })).toEqual({ ok: true });
+      expect(insert).toHaveBeenCalledWith({ user_id: null, message: "Hello" });
+    },
+  );
+
+  it("AC-11: a message without a stamp does not read the seed at all", async () => {
+    useSupabase();
+    await submitFeedback({ message: "Hello" });
+    expect(getReferenceData).not.toHaveBeenCalled();
+  });
+
+  it("AC-11: the line counts in the 2000 characters: a message that fills them alone is too long with it, and nothing is stored", async () => {
+    const { from } = useSupabase();
+    expect(await submitFeedback({ message: "x".repeat(2000), stamp: "OKTPH_84_B" })).toEqual({ ok: false, reason: "too_long" });
+    expect(from).not.toHaveBeenCalled();
+    const { insert } = useSupabase();
+    const room = 2000 - [..."Stamp: Lokó-pihenő (OKTPH_84_B)\n\n"].length;
+    expect(await submitFeedback({ message: "x".repeat(room), stamp: "OKTPH_84_B" })).toEqual({ ok: true });
+    expect(insert).toHaveBeenCalledTimes(1);
+  });
+
+  it("AC-11, AC-7: the honeypot and the rate limit still come first: a bot's report is not looked up", async () => {
+    useSupabase();
+    expect(await submitFeedback({ message: "spam", website: "http://x.example", stamp: "OKTPH_84_B" })).toEqual({ ok: true });
+    expect(getReferenceData).not.toHaveBeenCalled();
+  });
+
+  it("AC-11: a seed that cannot be read is a failed submission, not a message without its stamp", async () => {
+    const { from } = useSupabase();
+    vi.mocked(getReferenceData).mockImplementation(async () => {
+      throw new Error("reference data: read failed");
+    });
+    expect(await submitFeedback({ message: "Hello", stamp: "OKTPH_84_B" })).toEqual({ ok: false, reason: "failed" });
+    expect(from).not.toHaveBeenCalled();
   });
 });

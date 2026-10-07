@@ -14,10 +14,10 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     date: "2026-10-07",
     title: {
-      en: "Change the date of many stamps at once, a page of your stats and an account menu",
-      ru: "Дату можно изменить сразу у многих печатей, появились страница статистики и меню аккаунта",
-      hu: "Sok bélyegzés dátuma módosítható egyszerre, megjelent a statisztikák oldala és a fiókmenü",
-      de: "Das Datum vieler Stempel auf einmal ändern, eine Seite mit deiner Statistik und ein Kontomenü",
+      en: "Change the date of many stamps at once, a page of your stats, moved stamps on the map and an account menu",
+      ru: "Дату можно изменить сразу у многих печатей, появились страница статистики и меню аккаунта, а перенесённые печати видны на карте",
+      hu: "Sok bélyegzés dátuma módosítható egyszerre, megjelent a statisztikák oldala és a fiókmenü, az áthelyezett bélyegzők pedig látszanak a térképen",
+      de: "Das Datum vieler Stempel auf einmal ändern, eine Seite mit deiner Statistik, ein Kontomenü und verlegte Stempel auf der Karte",
     },
     changes: [
       {
@@ -41,10 +41,37 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         kind: "improved",
         text: {
-          en: "One Account menu in the top right corner of every page replaces the Friends, My stats and Account links: it opens a short list with My stats, Friends (while the feature is on), Settings and Sign out. The language dropdown now sits next to it on every page, and the page that used to be called Account is called Settings. The menu works with the keyboard (Escape closes it) and without JavaScript.",
-          ru: "Одно меню «Аккаунт» в правом верхнем углу каждой страницы заменило ссылки «Друзья», «Моя статистика» и «Аккаунт»: оно открывает короткий список — «Моя статистика», «Друзья» (пока функция включена), «Настройки» и «Выйти». Выбор языка теперь стоит рядом с ним на каждой странице, а страница, которая называлась «Аккаунт», теперь называется «Настройки». Меню работает с клавиатуры (Escape закрывает его) и без JavaScript.",
-          hu: "Minden oldal jobb felső sarkában egyetlen „Fiók” menü váltja fel a „Barátok”, a „Statisztikáim” és a „Fiók” linkeket: rövid listát nyit a „Statisztikáim”, a „Barátok” (amíg a funkció be van kapcsolva), a „Beállítások” és a „Kijelentkezés” pontokkal. A nyelvválasztó mostantól minden oldalon mellette áll, a korábban „Fiók” nevű oldal neve pedig „Beállítások”. A menü billentyűzettel is működik (az Escape bezárja), JavaScript nélkül is.",
-          de: "Ein Menü „Konto“ in der oberen rechten Ecke jeder Seite ersetzt die Links „Freunde“, „Meine Statistik“ und „Konto“: Es öffnet eine kurze Liste mit „Meine Statistik“, „Freunde“ (solange die Funktion aktiv ist), „Einstellungen“ und „Abmelden“. Die Sprachauswahl steht jetzt auf jeder Seite daneben, und die Seite, die bisher „Konto“ hieß, heißt jetzt „Einstellungen“. Das Menü funktioniert mit der Tastatur (Escape schließt es) und ohne JavaScript.",
+          en: "When you are signed in, one Account menu in the top right corner of each page replaces the Friends, My stats and Account links: it opens a short list with My stats, Friends (while the feature is on), Settings and Sign out. The language dropdown now sits in the same top bar of every page except the \"page not found\" page, and the page that used to be called Account is called Settings. The menu works with the keyboard (Escape closes it) and without JavaScript.",
+          ru: "Когда вы вошли в аккаунт, одно меню «Аккаунт» в правом верхнем углу каждой страницы заменяет ссылки «Друзья», «Моя статистика» и «Аккаунт»: оно открывает короткий список — «Моя статистика», «Друзья» (пока функция включена), «Настройки» и «Выйти». Выбор языка теперь стоит в той же верхней панели каждой страницы, кроме страницы «не найдено», а страница, которая называлась «Аккаунт», теперь называется «Настройки». Меню работает с клавиатуры (Escape закрывает его) и без JavaScript.",
+          hu: "Bejelentkezve minden oldal jobb felső sarkában egyetlen „Fiók” menü váltja fel a „Barátok”, a „Statisztikáim” és a „Fiók” linkeket: rövid listát nyit a „Statisztikáim”, a „Barátok” (amíg a funkció be van kapcsolva), a „Beállítások” és a „Kijelentkezés” pontokkal. A nyelvválasztó mostantól ugyanabban a felső sávban áll minden oldalon, kivéve a „nem található” oldalt, a korábban „Fiók” nevű oldal neve pedig „Beállítások”. A menü billentyűzettel is működik (az Escape bezárja), JavaScript nélkül is.",
+          de: "Wenn du angemeldet bist, ersetzt ein Menü „Konto“ in der oberen rechten Ecke jeder Seite die Links „Freunde“, „Meine Statistik“ und „Konto“: Es öffnet eine kurze Liste mit „Meine Statistik“, „Freunde“ (solange die Funktion aktiv ist), „Einstellungen“ und „Abmelden“. Die Sprachauswahl steht jetzt in derselben oberen Leiste jeder Seite außer der Seite „nicht gefunden“, und die Seite, die bisher „Konto“ hieß, heißt jetzt „Einstellungen“. Das Menü funktioniert mit der Tastatur (Escape schließt es) und ohne JavaScript.",
+        },
+      },
+      {
+        kind: "new",
+        text: {
+          en: "If the MTSZ moves a stamp to a new place, the page shows where it is now. For 180 days after the move the stamp's row, on your page and on a friend's, and its popup on the map say when it moved, where the stamp is now and that you should check the new place if you use an older map or booklet, and its marker on the map has a ring around it. Nothing is lost: you keep the stamp you collected, with its date. The \"Stamps\" switch under the map hides the rings together with the dots.",
+          ru: "Если MTSZ переносит печать на новое место, страница показывает, где она теперь. В течение 180 дней после переноса строка печати (у вас и у друга) и её окно на карте сообщают, когда её перенесли, где она сейчас и что стоит проверить новое место, если вы пользуетесь более старой картой или книжкой, а метка печати на карте обведена кольцом. Ничего не теряется: собранная печать остаётся с её датой. Переключатель «Штампы» под картой скрывает кольца вместе с точками.",
+          hu: "Ha az MTSZ áthelyez egy bélyegzőt, az oldal azt mutatja, hol van most. Az áthelyezés után 180 napig a bélyegző sora (nálad és egy barátodnál is) és a térképi ablaka megmondja, mikor helyezték át, hol van most, és hogy ellenőrizd az új helyet, ha régebbi térképet vagy füzetet használsz; a bélyegző jelölőjét a térképen gyűrű veszi körül. Semmi sem vész el: a begyűjtött bélyegződ a dátumával együtt megmarad. A térkép alatti „Bélyegzők” kapcsoló a gyűrűket is elrejti a pontokkal együtt.",
+          de: "Wenn der MTSZ einen Stempel an einen neuen Ort verlegt, zeigt die Seite, wo er jetzt ist. 180 Tage nach der Verlegung sagen die Zeile des Stempels (bei dir und bei einem Freund) und sein Fenster auf der Karte, wann er verlegt wurde, wo er jetzt ist und dass du die neue Stelle prüfen solltest, wenn du eine ältere Karte oder ein älteres Heft benutzt; die Markierung auf der Karte hat einen Ring. Nichts geht verloren: Der gesammelte Stempel bleibt mit seinem Datum. Der Schalter „Stempel“ unter der Karte blendet die Ringe zusammen mit den Punkten aus.",
+        },
+      },
+      {
+        kind: "new",
+        text: {
+          en: "Found a stamp in a different place than the map says? Every stamp's popup on the map now has a \"Report a wrong location\" link. It opens the feedback form for that stamp, so you only have to say what you found.",
+          ru: "Нашли печать не там, где показывает карта? В окне каждой печати на карте теперь есть ссылка «Сообщить о неверном месте». Она открывает форму обратной связи для этой печати, так что остаётся только написать, что вы нашли.",
+          hu: "Máshol találtál egy bélyegzőt, mint ahol a térkép mutatja? A térképen minden bélyegző ablakában ott van a „Hibás hely jelentése” hivatkozás. Az adott bélyegzőhöz megnyitja a visszajelző űrlapot, így csak azt kell leírnod, mit találtál.",
+          de: "Einen Stempel an einem anderen Ort gefunden, als die Karte zeigt? Im Fenster jedes Stempels auf der Karte gibt es jetzt den Link „Falschen Standort melden“. Er öffnet das Feedback-Formular für diesen Stempel, sodass du nur noch schreiben musst, was du gefunden hast.",
+        },
+      },
+      {
+        kind: "new",
+        text: {
+          en: "The About page and the map now say how fresh the trail data is: which MTSZ file it comes from, with its date.",
+          ru: "Страница «О приложении» и карта теперь сообщают, насколько свежи данные трассы: из какого файла MTSZ они взяты, и его дату.",
+          hu: "A Névjegy oldal és a térkép mostantól megmondja, mennyire friss az útvonal adata: melyik MTSZ-fájlból származik, és mi a dátuma.",
+          de: "Die Seite „Über das Projekt“ und die Karte sagen jetzt, wie aktuell die Streckendaten sind: aus welcher MTSZ-Datei sie stammen, mit Datum.",
         },
       },
     ],

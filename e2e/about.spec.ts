@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import { expect, test } from "@playwright/test";
 
 test.describe("spec 0015: about page", () => {
@@ -22,6 +23,15 @@ test.describe("spec 0015: about page", () => {
     await expect(fact("Stages")).toHaveText("27");
     await expect(fact("Official stamping places")).toHaveText("161");
     await expect(fact("Kilometres (MTSZ table)")).toHaveText("1,183.1");
+  });
+
+  test("AC-9: says which MTSZ file the trail data is from, in the page's language", async ({ page }) => {
+    await page.goto("/en/about");
+    const { mtszFileDate } = JSON.parse(fs.readFileSync("public/data/okt-meta.json", "utf8")) as { mtszFileDate: string };
+    const long = (locale: string) => new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${mtszFileDate}T00:00:00Z`));
+    await expect(page.getByRole("region", { name: "Data and credits" })).toContainText(`Trail data: MTSZ file of ${long("en")}.`);
+    await page.goto("/hu/about");
+    await expect(page.getByRole("region", { name: "Adatok és köszönetnyilvánítás" })).toContainText(`az MTSZ ${long("hu")} napi fájlja`);
   });
 
   test("AC-3: explains the progress rule in four points", async ({ page }) => {

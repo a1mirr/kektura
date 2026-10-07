@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { accountButton, expandAllStages, expectNoSidewaysScroll, openAccountMenu, seedStatsWalk, signInAsNewUser, stampPlacesOn, stat } from "./helpers";
+import { accountButton, expandAllStages, expectNoSidewaysScroll, openAccountMenu, openStampPopup, seedStatsWalk, signInAsNewUser, stampPlacesOn, stat } from "./helpers";
 import { psql } from "./local-db";
 
 // Spec 0006 AC-10: the pages at a phone's width, in the `mobile` project (Chromium, 375 x 812, touch, mobile emulation,
@@ -90,6 +90,19 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
     await expectNoSidewaysScroll(page, "sideways scroll with the map in fullscreen");
     await leave.tap();
     await expect(enter).toBeVisible();
+  });
+
+  // Spec 0003 AC-27: the report link of a stamp's popup is a 44 px target at the narrowest width the layout promises.
+  test("AC-10: a stamp's popup fits at 375 px and its report link is a target of at least 44 px", async ({ page }) => {
+    await signInAsNewUser(page);
+    await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    await expandAllStages(page);
+    await openStampPopup(page, "OKTPH_84_B", "Mark as walked");
+    const link = page.locator(".maplibregl-popup").getByRole("link", { name: "Report a wrong location" });
+    await expectTappable(page, link, "the report link", 44);
+    await expect(link).toHaveAttribute("href", "/en/feedback?stamp=OKTPH_84_B");
+    await expectNoSidewaysScroll(page, "sideways scroll with a stamp's popup open");
   });
 
   test("AC-10: the friends page does not scroll sideways, and the name is saved with a tap", async ({ page }) => {

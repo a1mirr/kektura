@@ -36,6 +36,7 @@ const checkpoints: Checkpoint[] = [0, 10, 20, 30].map((km, i) => ({
   replaced_by: null,
   after_place_key: null,
   position_approximate: false,
+  moved_on: null,
 }));
 const stagesMeta: StageMeta[] = [
   { stage: 1, start: "A", end: "B", km: 10 },

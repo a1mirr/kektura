@@ -15,5 +15,6 @@
     { "code": "OKTPH_147_B", "place": "Nagy-Milic", "required_from": "2025-05-08", "source": "https://www.kektura.hu/hir/uj-belyegzok-a-kekturan", "tolerance_note": true },
     { "code": "OKTPH_97_B", "place": "Tepke", "required_from": "2026-06-11", "source": "https://www.kektura.hu/hir/hat-uj-belyegzovel-bovul-a-kektura-2026-ban", "tolerance_note": true },
     { "code": "OKTPH_126_B", "place": "Martonyi kolostorrom (the MTSZ post prints OKTHP_126_B)", "required_from": "2026-06-11", "source": "https://www.kektura.hu/hir/hat-uj-belyegzovel-bovul-a-kektura-2026-ban", "tolerance_note": true }
-  ]
+  ],
+  "moves": []
 }

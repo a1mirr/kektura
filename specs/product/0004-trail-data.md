@@ -2,7 +2,8 @@
 
 Status: Done
 Owner code: `scripts/build-data.mjs`, `scripts/lib/geo.mjs`, `scripts/data/okt-stages.json`,
-`scripts/data/okt-stamp-dates.json`, `scripts/lib/stamp-dates.mjs`, `scripts/data/okt-retired-stamps.json`, `scripts/lib/retired-stamps.mjs`; generated
+`scripts/data/okt-stamp-dates.json`, `scripts/lib/stamp-dates.mjs`, `scripts/lib/stamp-moves.mjs`, `scripts/lib/trail-meta.mjs`,
+`scripts/data/okt-retired-stamps.json`, `scripts/lib/retired-stamps.mjs`; generated
 `supabase/seed.sql`, `supabase/seed_extra.sql`, `public/data/okt-*.json`
 
 ## Goal
@@ -28,7 +29,7 @@ and safe to regenerate whenever MTSZ (or heyjoe.hu) publishes a new file.
   row move to the remaining variants of the same place (extra stamps: same name) first; a place that
   is gone entirely takes its stamps with it. Each seed runs in one transaction.
 
-- **AC-10**: `scripts/data/okt-stamp-dates.json` holds the MTSZ's published dates for new stamps: one entry per stamp
+- **AC-10**: `scripts/data/okt-stamp-dates.json` holds, in `stamps`, the MTSZ's published dates for new stamps: one entry per stamp
   code with its `required_from` date, the address of the publication that gives it and, only where that publication
   says so, `tolerance_note: true`. Every code is one of the seed's (the **current** code: the MTSZ renames codes, so an
   announcement is matched to its place by name and position), appears once, has a real `YYYY-MM-DD` date, and its source is
@@ -48,6 +49,24 @@ and safe to regenerate whenever MTSZ (or heyjoe.hu) publishes a new file.
   (it becomes a retired row), and the stamps on it keep their id, date and row; they are not moved to another variant of the place (AC-9 moves stamps only off
   rows that are really dropped). Structure: the columns `retired_on`, `replaced_by`, `after_place_key`, `position_approximate` of a current row are empty
   (a check), and no two retired rows share a `place_key`.
+- **AC-16**: The same file holds, in `moves`, the stamps that moved: a stamp whose coordinates changed by more than 100 m between two MTSZ files (a
+  smaller change only replaces the coordinates) has an entry with its current `code`, the `moved_on` day it is known from and the address of the MTSZ
+  publication that gives it. An entry has a code of the stamps file, appears once, has a real `YYYY-MM-DD` day that is not in the future and an
+  `https://www.kektura.hu/` or `https://www.mtsz.org/` source: entered as published, never guessed. `build-data.mjs` reads the previous
+  `supabase/seed.sql` before it writes the new one and **fails** when a code's coordinates moved by more than 100 m without an entry (naming the code and the distance), and
+  when an entry is not real; a new code and a code that is gone are no moves. It writes the days into the seed (`checkpoints.moved_on`) as the last
+  block of its transaction, which clears the day of every code the file no longer has and sets the file's, so an entry removed from the file leaves the database
+  with the next seed. A current row may carry `moved_on`; a retired row never does (a check of the table). With no entry the block only clears, and nothing
+  is shown as moved; an entry is added by hand when the MTSZ announces a move (the recipe under Notes).
+- **AC-17**: `build-data.mjs` writes `public/data/okt-meta.json`, `{ "mtszFileDate": "YYYY-MM-DD" }`: the date in the names of the two MTSZ files it was run on (`okt_bh_<date>.gpx`,
+  `okt_teljes_bh_<date>.gpx`), the older of the two, and fails when a name carries no real day. The About page and the maps say it (spec 0015 AC-9,
+  spec 0003 AC-28).
+- **AC-18**: The drawn line passes every stamp: in the generated data every stamp is within 1 km of the detailed route and every place has a stamp within 400 m of it
+  (limits written in `tests/trail-data.test.ts`: 801 m and 325 m today; a moved stamp whose new coordinates are wrong, or a route that no longer passes a place,
+  fails), and the km written for a stamp is where the route is nearest to its coordinates (within 0.5 km: the seed and the route come from one run of the generator).
+- **AC-19**: A stamp that moved keeps its row: a seed with new coordinates and an entry for a code keeps its `id`, every user's stamp on it with its date and the rows' count,
+  changes its `lat`, `lng` (and description, km, position), sets `moved_on` for that code only and gives it no `required_from` (spec 0001 AC-29). A move that comes
+  with a new code is a replacement: the retired and new rules (AC-14, AC-15, AC-10) apply.
 - **AC-12**: Adding a stamp never changes what a user has. A seed regenerated with a place put into the middle of a stage keeps every
   existing code's database `id` and every `user_stamps` row pointing at the same checkpoint with the same date; only `seq`,
   `stage_seq` and `km_from_start` of the places after it move.
@@ -58,7 +77,7 @@ and safe to regenerate whenever MTSZ (or heyjoe.hu) publishes a new file.
 
 ## Out of scope
 
-Downloading the source files (done by hand from kektura.hu / heyjoe.hu); stamp artwork.
+Downloading the source files (done by hand from kektura.hu / heyjoe.hu); stamp artwork; noticing a change on the MTSZ's site by itself (the files, the dates and the moves are entered by hand); temporary warnings, detours and closures.
 
 ## Notes
 
@@ -71,8 +90,8 @@ Downloading the source files (done by hand from kektura.hu / heyjoe.hu); stamp a
 - Extra stamps: heyjoe.hu's `okt_pecsetek.gpx` (https://heyjoe.hu/pecset_gpx.php?mozgalom=okt).
 
 **Regenerating.** Run `node scripts/build-data.mjs <stamps.gpx> <route.gpx> [okt_pecsetek.gpx]`. It
-writes `supabase/seed.sql`, `public/data/okt-route.json`, `okt-route-detail.json`, `okt-hops.json`
-and, with the third argument, `supabase/seed_extra.sql`. Never edit those by hand. Then:
+writes `supabase/seed.sql`, `public/data/okt-route.json`, `okt-route-detail.json`, `okt-hops.json`,
+`okt-meta.json` (AC-17) and, with the third argument, `supabase/seed_extra.sql`. Never edit those by hand. Then:
 1. Run `npm test` (this spec's checks, the dates file included).
 2. Run `npm run testdb:reset` and `npm run e2e`.
 3. Apply the seeds to production.
@@ -85,6 +104,20 @@ and, with the third argument, `supabase/seed_extra.sql`. Never edit those by han
 AC-17. The announcements of 2025 and 2026 state a one-month tolerance during the inspection of a booklet, which is the `tolerance_note` flag;
 older ones say nothing of it. A stamp introduced before 2014 has no published date and is required from the beginning. A stamp that replaced another
 (Vércverés for Nyírjesi-erdészház, 2014-11-21) is a new stamp like any other. The generated seed has no Nyírjesi row.
+
+**A stamp that moved** is one recipe, from the new MTSZ file to the live site:
+1. Download the new `okt_bh_<date>.gpx` and `okt_teljes_bh_<date>.gpx` (keep the MTSZ's names: the date in them is shown to users, AC-17) and add the entry to
+   `moves` of `okt-stamp-dates.json` under the seed's code: the day the MTSZ gives and the address of its publication (AC-16).
+2. `node scripts/build-data.mjs <stamps.gpx> <route.gpx> [okt_pecsetek.gpx]`. It fails on a move without an entry, naming the code and the distance; files it
+   wrote before it failed are not to be kept (`git checkout -- supabase public/data`).
+3. If the km or the stage changed, update `okt-stages.json`; write the new description's translations into `src/content/stamp-descriptions.json` (spec 0033 AC-5:
+   regenerating does not touch them, and the old ones describe the old place). `npm test` (AC-16 to AC-19, the translations), `npm run testdb:reset`, `npm run e2e`.
+4. A changelog entry (spec 0018 AC-7) and the pull request; the merge deploys the code and the migrations (spec 0026), not the seeds.
+5. Apply the seed to production (`begin` ... `commit` in one go, after reading its cleanup as a read-only query, AC-9), then expire the reference data (step 4 of
+   Regenerating: `deploy/README.md`, "After the seeds change"): until then the old place is served for up to 24 hours.
+6. Read-only check that production serves the new place: `select code, lat, lng, moved_on from public.checkpoints where code = '<code>'` shows the new coordinates and the
+   day, and the dashboard's row and popup show the note (spec 0001 AC-29).
+The note and the ring disappear by themselves 180 days after `moved_on`; the entry may stay in the file or go (AC-16).
 
 **Adding a stamp** is one recipe: regenerate from the new GPX files; add the new place to `okt-stages.json` (the build fails on a place
 without a stage); add its entry to `okt-stamp-dates.json` under the seed's code; run the checks below; list the change in the changelog (spec
@@ -122,6 +155,11 @@ exists in any open source (MTSZ owns it), so don't scrape for it; the plan is us
 | AC-14 | `tests/trail-data.test.ts` (the file's codes, days, sources, what it points at, `assumed`; the seed carries the generator's block, before the cleanup, and keeps its codes), `tests/retired-stamps-database.test.ts` (running the seed again changes nothing and deletes nothing; the row sits outside the trail order; the check and the unique key), `tests/seed-cleanup.test.ts` (the cleanup leaves the retired row) |
 | AC-14 (the sources) | manual (it needs the live kektura.hu page): open the source named in the file and read the retirement day and the replacing stamp. Last checked: 2026-10-05 (Nyírjesi-erdészház, replaced by Vércverés, 2014-11-21 matched; the MTSZ publishes no code and no position, hence `assumed`). |
 | AC-15 | `tests/retired-stamps-database.test.ts` (a code the new source no longer lists but the retired file does: the row stays, retired, and the stamp keeps its id and date and is not moved) |
+| AC-16 | `tests/stamp-moves.test.ts` (the threshold; a real entry: code, once, calendar day, not in the future, MTSZ address; the seed read for its coordinates; 150 m without an entry, 80 m, an entry, a new and a gone code, east-west; the seed's block, with and without entries; the committed file and seed; and `build-data.mjs` itself run in a copy of the scripts on GPX made from the seed: a move without an entry stops it naming the code and the distance, 80 m only replaces, an entry builds and sets the day for its code only as the last block, an unreal entry stops it), `tests/trail-data.test.ts` (the seed carries the block, after the dates), `tests/stamp-dates-database.test.ts` (a day removed from the file leaves the database, a changed one is replaced, a retired row refuses a day) |
+| AC-17 | `tests/stamp-moves.test.ts` (the day read from the file names in the MTSZ's forms, a name without a real day stops the build, the older file's date, the generated file; the committed file) |
+| AC-18 | `tests/trail-data.test.ts` (every stamp and every place against the detailed route, the km against the route, and that the limits would catch a stamp a kilometre away) |
+| AC-19 | `tests/stamp-dates-database.test.ts` (against the local database, in a transaction that is rolled back: a seed that moves a stamp keeps its id and every user's stamp with its date, changes only its place, sets the day for that code only, gives it no `required_from`) |
+| The routine of "A stamp that moved" against production | manual (it needs production and an MTSZ file with a real move, and no real move is entered yet): follow the recipe under Notes. Last checked: never recorded. |
 | AC-12 | `tests/stamp-dates-database.test.ts` (against the local database, in a transaction that is rolled back: a seed with a place inserted mid-stage keeps every id and every stamp with its date and shifts the places after it) |
 | AC-13 | `tests/labels.test.ts` (a source scan: a label is never a key, id, link, anchor or stored value; a place key is never label-shaped); `src/lib/trail-facts.ts` and `tests/trail-data.test.ts` (the counts come from the data, 0015 AC-2) |
 | AC-9 (a real source file) | manual (it needs the downloaded GPX files): after regenerating, read the seed's `begin` ... `commit` block and run its cleanup as a read-only query first (codes not in the new list, stamps that would move) before applying it to production. Last checked: 2026-10-04 (the seeds were regenerated from the files of 2026-09-24: production already held exactly their rows, so the cleanup had nothing to remove). |

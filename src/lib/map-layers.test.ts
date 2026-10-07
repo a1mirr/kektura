@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  COMPARE_MOVED_RING_LAYER,
+  COMPARE_DOTS_LAYER,
   COMPARE_SOURCE_IDS,
   compareLayers,
   DETAIL_ZOOM,
   EXTRAS_LAYER,
+  MOVED_RING_LAYER,
   RESTAURANTS_LAYER,
   SOURCE_IDS,
   STAMPS_LAYER,
@@ -23,6 +26,7 @@ describe("spec 0003: map layer definitions", () => {
       "segment",
       "restaurants",
       "extras",
+      "moved-ring",
       "dots",
     ]);
   });
@@ -68,6 +72,7 @@ describe("spec 0003: comparison map layers", () => {
       "compare-dotted",
       "compare-dashed",
       "compare-solid",
+      "compare-moved-ring",
       "compare-dots",
     ]);
   });
@@ -92,5 +97,38 @@ describe("spec 0003: comparison map layers", () => {
       expect(layer.filter).toEqual(["==", ["get", "style"], style]);
       expect(layer.paint["line-color"]).toEqual(["get", "color"]);
     }
+  });
+});
+
+describe("spec 0003: the ring of a stamp that moved", () => {
+  const ring = (initial: Parameters<typeof trailLayers>[0]) => trailLayers(initial).find((l) => l.id === MOVED_RING_LAYER)!;
+
+  it("AC-26: the ring is an empty circle with a stroke, drawn from the stamps' source for the points that moved only, under the dots", () => {
+    const layers = trailLayers(all);
+    const layer = ring(all);
+    expect(layer).toMatchObject({ type: "circle", source: "dots", filter: ["==", ["get", "moved"], true] });
+    const paint = layer.paint as Record<string, unknown>;
+    expect(paint["circle-opacity"]).toBe(0); // a ring, not a disc
+    expect(paint["circle-stroke-width"]).toBeGreaterThanOrEqual(2);
+    expect(layers.findIndex((l) => l.id === MOVED_RING_LAYER)).toBe(layers.findIndex((l) => l.id === STAMPS_LAYER) - 1);
+  });
+
+  it("AC-26: the ring is wider than the dot it surrounds at every zoom, so it is told apart by its shape", () => {
+    const radius = (id: string) => (trailLayers(all).find((l) => l.id === id)!.paint as Record<string, unknown>)["circle-radius"] as unknown[];
+    const ringStops = radius(MOVED_RING_LAYER).slice(3);
+    const dotStops = radius(STAMPS_LAYER).slice(3);
+    expect(ringStops.filter((_, i) => i % 2 === 1).map((r, i) => Number(r) - Number(dotStops.filter((_, j) => j % 2 === 1)[i]))).toEqual([4, 5]);
+  });
+
+  it("AC-26: the ring follows the stamps' toggle", () => {
+    expect(ring(all).layout?.visibility).toBe("visible");
+    expect(ring({ stamps: false, extras: true, restaurants: true }).layout?.visibility).toBe("none");
+  });
+
+  it("AC-26: a friend's map has the same ring around the places that moved", () => {
+    const layers = compareLayers();
+    const layer = layers.find((l) => l.id === COMPARE_MOVED_RING_LAYER)!;
+    expect(layer).toMatchObject({ type: "circle", source: "compare-dots", filter: ["==", ["get", "moved"], true] });
+    expect(layers.findIndex((l) => l.id === COMPARE_MOVED_RING_LAYER)).toBe(layers.findIndex((l) => l.id === COMPARE_DOTS_LAYER) - 1);
   });
 });

@@ -81,7 +81,7 @@ checks, ships and is run). The headings below only group the index: moving a spe
 
 | Spec | Area | Status |
 | --- | --- | --- |
-| [0001](product/0001-progress.md) | Progress: places, walked stretches, stats, stages, extra stamps in stages | Done |
+| [0001](product/0001-progress.md) | Progress: places, walked stretches, stats, stages, extra stamps in stages, retired stamps, stamps that moved | Done |
 | [0002](product/0002-stamping.md) | Stamping: server actions, stamp buttons, cached reference data | Done |
 | [0016](product/0016-stamp-dates.md) | Stamp dates: validation, own time zone, safe editing, changing many at once, the yyyy-mm-dd field | Done |
 | [0033](product/0033-translated-stamp-descriptions.md) | Stamp descriptions translated into ru, en and de | Done |
@@ -91,7 +91,7 @@ checks, ships and is run). The headings below only group the index: moving a spe
 | Spec | Area | Status |
 | --- | --- | --- |
 | [0003](product/0003-map-route-planner.md) | Map lines, the route planner, the comparison map of a friend's page and how the map code is structured | Done |
-| [0004](product/0004-trail-data.md) | Generated trail data and seeds | Done |
+| [0004](product/0004-trail-data.md) | Generated trail data and seeds, stamps that moved, the date of the MTSZ files | Done |
 
 #### Friends
 

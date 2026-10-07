@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import { psql } from "./local-db";
 
 // Signs in through the dummy login with this email; the account is created on first use (spec 0006 AC-3).
@@ -107,6 +107,36 @@ export function setFeatureFlag(key: string, mode: "off" | "allowlist" | "on", al
         ? `insert into public.feature_flag_users (key, user_id) select ${quote(key)}, id from auth.users where email in (${allowedEmails.map(quote).join(", ")});`
         : ""),
   );
+}
+
+// The map's canvas (spec 0003): a WebGL element, so stamps are reached through the app's own list -> map flow below.
+export const canvas = (page: Page) => page.locator(".maplibregl-canvas");
+
+// A click on 📍 does nothing until the map has loaded and attached its listener (a second or two over the network, more on a busy
+// machine), so it is repeated until the label appears on the map. (`.first()`: the label is the only popup until one is clicked open.)
+export async function pressLocate(page: Page, button: Locator) {
+  await expect(async () => {
+    await button.click();
+    await expect(page.locator(".maplibregl-popup").filter({ hasText: /\S/ }).first()).toBeVisible({ timeout: 2_000 });
+  }).toPass({ timeout: 45_000 });
+}
+
+// 📍 on a list row, then a click on the canvas centre until the stamp's popup opens (the fly animation
+// and the smooth scroll have to finish first, so the click is retried).
+export async function openStampPopup(page: Page, placeKey: string, action: string) {
+  await pressLocate(page, page.locator(`#place-${placeKey}`).getByRole("button", { name: "Show on map" }));
+  // The stamp's name label sits on the dot: once it stops moving the fly animation and the scroll are
+  // over (a click during the flight would interrupt it and miss the dot).
+  const label = page.locator(".maplibregl-popup").filter({ hasText: /\S/ }).last();
+  await expect(label).toBeVisible();
+  await expect(async () => {
+    const before = await label.boundingBox();
+    await page.waitForTimeout(500);
+    expect(await label.boundingBox()).toEqual(before);
+  }).toPass();
+  const size = await canvas(page).evaluate((el) => ({ w: el.clientWidth, h: el.clientHeight }));
+  await canvas(page).click({ position: { x: size.w / 2, y: size.h / 2 } });
+  await expect(page.getByRole("button", { name: action })).toBeVisible();
 }
 
 // Stamps places for a user straight in the database, each on its own day (`{ OKTPH_02: "2026-01-25" }`): every variant of the

@@ -11,6 +11,10 @@ export type MapPoint = {
   stamped: boolean;
   // Spec 0003 AC-22: what the popup adds under the km for a new stamp (the date it is required from, whether it is waived).
   note?: string;
+  // Spec 0003 AC-26: the stamp moved within the last 180 days (spec 0001 AC-29): the note its popup shows, and the ring its marker gets.
+  movedNote?: string;
+  // The stamp's own code, for the "Report a wrong location" link (spec 0003 AC-27); null for a row without one.
+  code: string | null;
 };
 
 // The map's points: one per current stamp that has coordinates. A retired stamp is never one, even when its row has coordinates
@@ -20,12 +24,13 @@ export function buildMapPoints(
   placeKm: ReadonlyMap<string, number>,
   stamped: { has: (key: string) => boolean },
   noteOf: (key: string) => string | undefined,
+  movedNoteOf: (checkpoint: Checkpoint) => string | undefined = () => undefined,
 ): MapPoint[] {
   return checkpoints
     .filter((c) => c.retired_on == null && c.lat != null && c.lng != null)
     .map((c) => {
       const key = placeKeyOf(c);
-      return { placeKey: key, name: c.name, lat: Number(c.lat), lng: Number(c.lng), km: placeKm.get(key)!, stamped: stamped.has(key), note: noteOf(key) };
+      return { placeKey: key, name: c.name, lat: Number(c.lat), lng: Number(c.lng), km: placeKm.get(key)!, stamped: stamped.has(key), note: noteOf(key), movedNote: movedNoteOf(c), code: c.code };
     });
 }
 
@@ -54,18 +59,19 @@ const pointFeatures = (
     stamped: boolean;
     kind: string;
     key: string;
+    moved?: boolean;
   }[],
 ): FeatureCollection<Point> => ({
   type: "FeatureCollection",
   features: items.map((p): Feature<Point> => ({
     type: "Feature",
-    properties: { name: p.name, stamped: p.stamped, kind: p.kind, key: p.key },
+    properties: { name: p.name, stamped: p.stamped, kind: p.kind, key: p.key, moved: p.moved === true },
     geometry: { type: "Point", coordinates: [p.lng, p.lat] },
   })),
 });
 
 export const placesData = (points: MapPoint[]) =>
-  pointFeatures(points.map((p) => ({ ...p, kind: "place", key: p.placeKey })));
+  pointFeatures(points.map((p) => ({ ...p, kind: "place", key: p.placeKey, moved: p.movedNote !== undefined })));
 
 export const extrasData = (extras: MapExtra[]) =>
   pointFeatures(extras.map((e) => ({ ...e, kind: "extra", key: String(e.id) })));

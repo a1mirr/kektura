@@ -54,7 +54,8 @@ export function compareLines(route: Route, ranges: ComparisonRanges, view: Compa
 }
 
 // `label` is the place's number in the list ("17.1"), `placeKey` the key of its list row.
-export type ComparePoint = { placeKey: string; label: string; name: string; lat: number; lng: number; who: Who };
+// `moved`: the stamp moved within the last 180 days (spec 0003 AC-26): its point gets a ring.
+export type ComparePoint = { placeKey: string; label: string; name: string; lat: number; lng: number; who: Who; moved?: boolean };
 
 // A place stamped in the picked view is filled, a place that is not is hollow (the dashboard's dots).
 export function compareDots(points: ComparePoint[], view: CompareView): FeatureCollection<Point> {
@@ -65,7 +66,7 @@ export function compareDots(points: ComparePoint[], view: CompareView): FeatureC
       const color = view === "both" ? WHO_COLOR[p.who] : DONE;
       return {
         type: "Feature",
-        properties: { key: p.placeKey, label: p.label, name: p.name, who: p.who, fill: stamped ? color : "#ffffff", stroke: stamped ? color : "#a8a29e" },
+        properties: { key: p.placeKey, label: p.label, name: p.name, who: p.who, moved: p.moved === true, fill: stamped ? color : "#ffffff", stroke: stamped ? color : "#a8a29e" },
         geometry: { type: "Point", coordinates: [p.lng, p.lat] },
       };
     }),

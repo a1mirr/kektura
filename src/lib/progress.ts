@@ -4,7 +4,7 @@ import type { Tables } from "@/lib/supabase/database.types";
 
 export type Checkpoint = Pick<
   Tables<"checkpoints">,
-  "id" | "seq" | "stage" | "stage_seq" | "code" | "place_key" | "name" | "description" | "lat" | "lng" | "km_from_start" | "required_from" | "retired_on" | "replaced_by" | "after_place_key" | "position_approximate"
+  "id" | "seq" | "stage" | "stage_seq" | "code" | "place_key" | "name" | "description" | "lat" | "lng" | "km_from_start" | "required_from" | "retired_on" | "replaced_by" | "after_place_key" | "position_approximate" | "moved_on"
 >;
 
 export type StampRow = Pick<Tables<"user_stamps">, "checkpoint_id" | "stamped_on">;

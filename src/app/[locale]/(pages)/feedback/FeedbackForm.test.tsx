@@ -14,10 +14,10 @@ afterEach(() => {
   submitFeedback.mockReset();
 });
 
-function renderForm() {
+function renderForm(stamp: { code: string; name: string } | null = null) {
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <FeedbackForm />
+      <FeedbackForm stamp={stamp} />
     </NextIntlClientProvider>,
   );
   return {
@@ -106,5 +106,35 @@ describe("spec 0017: feedback form", () => {
     fireEvent.change(trap, { target: { value: "http://spam.example" } });
     await submit();
     expect(submitFeedback).toHaveBeenCalledWith({ message: "Hello", website: "http://spam.example", locale: "en" });
+  });
+});
+
+describe("spec 0017: the form opened for a stamp", () => {
+  const stamp = { code: "OKTPH_84_B", name: "Lokó-pihenő" };
+
+  it("AC-11: it says which stamp the message is about, with the name it was given", () => {
+    renderForm(stamp);
+    expect(document.querySelector("[data-feedback-stamp]")?.textContent).toBe("About the stamp Lokó-pihenő (OKTPH_84_B)");
+  });
+
+  it("AC-11: without a stamp there is no such line", () => {
+    renderForm();
+    expect(document.querySelector("[data-feedback-stamp]")).toBeNull();
+  });
+
+  it("AC-11: the stamp's code travels with the message, nothing else does, and the sender's words are what they typed", async () => {
+    submitFeedback.mockResolvedValue({ ok: true });
+    const { box } = renderForm(stamp);
+    type(box, "It moved");
+    await submit();
+    expect(submitFeedback).toHaveBeenCalledWith({ message: "It moved", website: "", locale: "en", stamp: "OKTPH_84_B" });
+    expect(box.value).toBe("");
+  });
+
+  it("AC-11: the line takes its share of the 2000 characters: the box and the counter show what is left", () => {
+    const { box } = renderForm(stamp);
+    const left = 2000 - [..."Stamp: Lokó-pihenő (OKTPH_84_B)\n\n"].length;
+    expect(box.maxLength).toBe(left);
+    expect(screen.getByText(`0 / ${left}`)).toBeTruthy();
   });
 });
