@@ -8,11 +8,13 @@ import { flagOn } from '@/lib/feature-flags-server';
 import { Link, redirect } from '@/i18n/navigation';
 import CompareSection from '@/components/CompareSection';
 import PageShell from '@/components/PageShell';
+import MovedNote from '@/components/MovedNote';
 import RequiredFrom from '@/components/RequiredFrom';
 import StageControls from '@/components/StageControls';
 import StageSection from '@/components/StageSection';
 import StampDescriptions from '@/components/StampDescriptions';
 import { hasToleranceNote } from '@/lib/new-stamps';
+import { movedNote, recentlyMovedVariant, todayIso } from '@/lib/stamp-moves';
 import { countDone } from '@/lib/progress';
 import { localizedDescription } from '@/lib/stamp-description';
 
@@ -42,6 +44,14 @@ export default async function FriendPage({
   const { summary, places, stages, stampedKeys, waived } = progress;
   const t = await getTranslations('dashboard');
   const format = await getFormatter();
+  // A stamp that moved in the last 180 days says so on the friend's list too (spec 0024 AC-29), as on the dashboard (spec 0001 AC-29).
+  const today = todayIso();
+  const dateText = (iso: string) => format.dateTime(new Date(`${iso}T00:00:00Z`), { dateStyle: 'long', timeZone: 'UTC' });
+  const movedText = {
+    on: (date: string) => t('movedOn', { date }),
+    now: (description: string) => t('movedNow', { description }),
+    check: t('movedCheck'),
+  };
 
   const cards = [
     { label: t("stamps"), value: `${stampedKeys.size} / ${places.length}` },
@@ -108,6 +118,14 @@ export default async function FriendPage({
                       {p.requiredFrom && (
                         <RequiredFrom requiredFrom={p.requiredFrom} waived={waived.has(p.key)} tolerance={hasToleranceNote(p)} who="friend" />
                       )}
+                      {(() => {
+                        const moved = recentlyMovedVariant(p.variants, today);
+                        return (
+                          moved && (
+                            <MovedNote>{movedNote(moved.moved_on!, localizedDescription(moved.code, moved.description, locale), movedText, dateText)}</MovedNote>
+                          )
+                        );
+                      })()}
                       <StampDescriptions descriptions={p.variants.map((v) => localizedDescription(v.code, v.description, locale))} />
                     </div>
                     <div className="flex shrink-0 items-center gap-1">

@@ -37,6 +37,7 @@ function cp(key: string, km: number, over: Partial<Checkpoint> = {}): Checkpoint
     replaced_by: null,
     after_place_key: null,
     position_approximate: false,
+    moved_on: null,
     ...over,
   };
 }

@@ -14,10 +14,10 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     date: "2026-10-07",
     title: {
-      en: "Change the date of many stamps at once",
-      ru: "Дату можно изменить сразу у многих печатей",
-      hu: "Sok bélyegzés dátuma módosítható egyszerre",
-      de: "Das Datum vieler Stempel auf einmal ändern",
+      en: "Change the date of many stamps at once, and moved stamps on the map",
+      ru: "Дату можно изменить сразу у многих печатей, а перенесённые печати видны на карте",
+      hu: "Sok bélyegzés dátuma módosítható egyszerre, az áthelyezett bélyegzők pedig látszanak a térképen",
+      de: "Das Datum vieler Stempel auf einmal ändern, und verlegte Stempel auf der Karte",
     },
     changes: [
       {
@@ -27,6 +27,33 @@ export const CHANGELOG: ChangelogEntry[] = [
           ru: "Дату можно изменить сразу у многих печатей. Нажмите «Изменить даты» над списком этапов, отметьте печати, собранные в один день (щелчок с Shift отмечает весь диапазон, «Выбрать этап» — весь этап, «Выбрать все» — всё), введите дату или выберите её в календаре и нажмите «Применить»: все отмеченные получат эту дату, а если что-то пойдёт не так, не изменится ни одна. На заголовке этапа «Задать дату» сделает первые шаги за вас. Упразднённой печати нельзя поставить дату начиная со дня её упразднения. Режиму нужен JavaScript; поле даты у каждой печати осталось прежним.",
           hu: "Sok bélyegzés dátuma módosítható egyszerre. Nyomd meg a „Dátumok módosítása” gombot a szakaszok listája fölött, jelöld ki az ugyanazon a napon begyűjtött bélyegzőket (a Shift-kattintás egy egész tartományt jelöl ki, a „Szakasz kijelölése” egy egész szakaszt, a „Mind kijelöl” mindent), írd be a dátumot vagy válaszd ki a naptárban, és nyomd meg az Alkalmaz gombot: mindegyik megkapja a dátumot, vagy ha valami elromlik, egyik sem. A szakasz fejlécén a „Dátum beállítása” elvégzi helyetted az első lépéseket. A megszűnt bélyegző nem kaphat a megszűnése napjától kezdve dátumot. A módhoz JavaScript kell; az egyes bélyegzők dátummezője a régi maradt.",
           de: "Das Datum vieler Stempel lässt sich auf einmal ändern. Tippe über der Etappenliste auf „Daten ändern“, hake die Stempel an, die du am selben Tag gesammelt hast (mit Shift-Klick einen ganzen Bereich, mit „Etappe wählen“ eine ganze Etappe, mit „Alle auswählen“ alles), gib ein Datum ein oder wähle es im Kalender und tippe auf Übernehmen: Alle bekommen dieses Datum, oder keiner, wenn etwas schiefgeht. Auf dem Kopf einer Etappe erledigt „Datum setzen“ die ersten Schritte für dich. Ein eingestellter Stempel kann ab dem Tag seiner Einstellung kein Datum bekommen. Der Modus braucht JavaScript; das Datumsfeld jedes Stempels bleibt, wie es war.",
+        },
+      },
+      {
+        kind: "new",
+        text: {
+          en: "If the MTSZ moves a stamp to a new place, the page shows where it is now. For 180 days after the move the stamp's row, on your page and on a friend's, and its popup on the map say when it moved, where the stamp is now and that you should check the new place if you use an older map or booklet, and its marker on the map has a ring around it. Nothing is lost: you keep the stamp you collected, with its date. The \"Stamps\" switch under the map hides the rings together with the dots.",
+          ru: "Если MTSZ переносит печать на новое место, страница показывает, где она теперь. В течение 180 дней после переноса строка печати (у вас и у друга) и её окно на карте сообщают, когда её перенесли, где она сейчас и что стоит проверить новое место, если вы пользуетесь более старой картой или книжкой, а метка печати на карте обведена кольцом. Ничего не теряется: собранная печать остаётся с её датой. Переключатель «Штампы» под картой скрывает кольца вместе с точками.",
+          hu: "Ha az MTSZ áthelyez egy bélyegzőt, az oldal azt mutatja, hol van most. Az áthelyezés után 180 napig a bélyegző sora (nálad és egy barátodnál is) és a térképi ablaka megmondja, mikor helyezték át, hol van most, és hogy ellenőrizd az új helyet, ha régebbi térképet vagy füzetet használsz; a bélyegző jelölőjét a térképen gyűrű veszi körül. Semmi sem vész el: a begyűjtött bélyegződ a dátumával együtt megmarad. A térkép alatti „Bélyegzők” kapcsoló a gyűrűket is elrejti a pontokkal együtt.",
+          de: "Wenn der MTSZ einen Stempel an einen neuen Ort verlegt, zeigt die Seite, wo er jetzt ist. 180 Tage nach der Verlegung sagen die Zeile des Stempels (bei dir und bei einem Freund) und sein Fenster auf der Karte, wann er verlegt wurde, wo er jetzt ist und dass du die neue Stelle prüfen solltest, wenn du eine ältere Karte oder ein älteres Heft benutzt; die Markierung auf der Karte hat einen Ring. Nichts geht verloren: Der gesammelte Stempel bleibt mit seinem Datum. Der Schalter „Stempel“ unter der Karte blendet die Ringe zusammen mit den Punkten aus.",
+        },
+      },
+      {
+        kind: "new",
+        text: {
+          en: "Found a stamp in a different place than the map says? Every stamp's popup on the map now has a \"Report a wrong location\" link. It opens the feedback form for that stamp, so you only have to say what you found.",
+          ru: "Нашли печать не там, где показывает карта? В окне каждой печати на карте теперь есть ссылка «Сообщить о неверном месте». Она открывает форму обратной связи для этой печати, так что остаётся только написать, что вы нашли.",
+          hu: "Máshol találtál egy bélyegzőt, mint ahol a térkép mutatja? A térképen minden bélyegző ablakában ott van a „Hibás hely jelentése” hivatkozás. Az adott bélyegzőhöz megnyitja a visszajelző űrlapot, így csak azt kell leírnod, mit találtál.",
+          de: "Einen Stempel an einem anderen Ort gefunden, als die Karte zeigt? Im Fenster jedes Stempels auf der Karte gibt es jetzt den Link „Falschen Standort melden“. Er öffnet das Feedback-Formular für diesen Stempel, sodass du nur noch schreiben musst, was du gefunden hast.",
+        },
+      },
+      {
+        kind: "new",
+        text: {
+          en: "The About page and the map now say how fresh the trail data is: which MTSZ file it comes from, with its date.",
+          ru: "Страница «О приложении» и карта теперь сообщают, насколько свежи данные трассы: из какого файла MTSZ они взяты, и его дату.",
+          hu: "A Névjegy oldal és a térkép mostantól megmondja, mennyire friss az útvonal adata: melyik MTSZ-fájlból származik, és mi a dátuma.",
+          de: "Die Seite „Über das Projekt“ und die Karte sagen jetzt, wie aktuell die Streckendaten sind: aus welcher MTSZ-Datei sie stammen, mit Datum.",
         },
       },
     ],

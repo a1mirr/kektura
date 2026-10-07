@@ -5,17 +5,24 @@
 // Usage: node scripts/build-data.mjs <stamps.gpx> <full-route.gpx>
 // Optional 3rd arg: heyjoe.hu okt_pecsetek.gpx (extra, non-official stamps).
 // Writes: supabase/seed.sql, public/data/okt-route.json, public/data/okt-route-detail.json,
-//         public/data/okt-hops.json and, with the 3rd arg, supabase/seed_extra.sql
+//         public/data/okt-hops.json, public/data/okt-meta.json and, with the 3rd arg, supabase/seed_extra.sql
 import fs from "node:fs";
 import { attr, flatMeters, nearestVertex, readTrack } from "./lib/geo.mjs";
 import { readRetiredStamps, retiredStampsSql } from "./lib/retired-stamps.mjs";
 import { readStampDates, stampDatesSql } from "./lib/stamp-dates.mjs";
+import { MOVE_THRESHOLD_M, moveProblems, readStampMoves, seedCoordinates, stampMovesSql, unexplainedMoves } from "./lib/stamp-moves.mjs";
+import { trailDataDate, trailMetaJson } from "./lib/trail-meta.mjs";
 
 const [stampsPath, routePath] = process.argv.slice(2);
 if (!stampsPath || !routePath) {
   console.error("usage: node scripts/build-data.mjs <stamps.gpx> <full-route.gpx>");
   process.exit(1);
 }
+
+// The seed of the last run, read before this one overwrites it: the coordinates a stamp had (a move is checked against them).
+const previousSeed = fs.existsSync("supabase/seed.sql") ? fs.readFileSync("supabase/seed.sql", "utf8") : "";
+// Which MTSZ files this is from: the date in their names (spec 0004 AC-17).
+const mtszFileDate = trailDataDate(stampsPath, routePath);
 
 const decode = (s) =>
   s
@@ -172,6 +179,23 @@ const stampDates = readStampDates();
 const unknownDates = stampDates.filter((e) => !waypoints.some((w) => w.code === e.code));
 if (unknownDates.length) throw new Error("okt-stamp-dates.json has codes the stamps file lacks: " + unknownDates.map((e) => e.code).join(", "));
 
+// Moved stamps (spec 0004 AC-16): a coordinate that changed by more than 100 m since the last seed needs an entry with the day and the
+// publication, and an entry has to be a real one.
+const stampMoves = readStampMoves();
+const moveErrors = moveProblems(stampMoves, waypoints.map((w) => w.code), new Date().toISOString().slice(0, 10));
+if (moveErrors.length) throw new Error("okt-stamp-dates.json `moves`:\n  " + moveErrors.join("\n  "));
+const unexplained = unexplainedMoves(
+  seedCoordinates(previousSeed),
+  new Map(waypoints.map((w) => [w.code, { lat: w.lat, lng: w.lng }])),
+  stampMoves,
+);
+if (unexplained.length) {
+  throw new Error(
+    `stamps moved by more than ${MOVE_THRESHOLD_M} m since the last seed, with no entry in the \`moves\` of okt-stamp-dates.json (moved_on and the MTSZ's publication):\n  ` +
+      unexplained.map((m) => `${m.code}: ${m.meters} m`).join("\n  "),
+  );
+}
+
 // Retired stamps (spec 0004 AC-14): kept as rows, so what they point at must exist and their code must not be a current stamp's.
 const retired = readRetiredStamps();
 const currentKeys = new Set(waypoints.map((w) => placeKey(w.code)));
@@ -219,10 +243,13 @@ on conflict (user_id, checkpoint_id) do nothing;
 delete from public.checkpoints where code is null or code not in (select code from seed_codes);
 
 ${stampDatesSql(stampDates)}
+${stampMovesSql(stampMoves)}
 commit;
 `;
 fs.writeFileSync("supabase/seed.sql", sql);
 console.log(`supabase/seed.sql: ${waypoints.length} rows`);
+fs.writeFileSync("public/data/okt-meta.json", trailMetaJson(mtszFileDate));
+console.log(`public/data/okt-meta.json: MTSZ file of ${mtszFileDate}`);
 
 // --- extra (non-official) stamps -------------------------------------------
 // Optional 3rd arg: heyjoe.hu "okt_pecsetek.gpx" (community list: castles, museums, other

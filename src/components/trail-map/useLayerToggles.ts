@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { EXTRAS_LAYER, RESTAURANTS_LAYER, STAMPS_LAYER } from "@/lib/map-layers";
+import { EXTRAS_LAYER, MOVED_RING_LAYER, RESTAURANTS_LAYER, STAMPS_LAYER } from "@/lib/map-layers";
 import {
   readStored,
   store,
@@ -12,14 +12,16 @@ import type { MapHandleRef } from "./types";
 import { useLatest } from "./useLatest";
 
 // Remember a layer's toggle and apply it to the map layer (once the map exists).
-function useRememberedLayer(mapRef: MapHandleRef, storageKey: string, layerId: string | null, on: boolean) {
+function useRememberedLayer(mapRef: MapHandleRef, storageKey: string, layerIds: string[], on: boolean) {
+  const key = layerIds.join(",");
   useEffect(() => {
     store(storageKey, on);
     const { map, ready } = mapRef.current;
-    if (layerId && ready && map?.getLayer(layerId)) {
-      map.setLayoutProperty(layerId, "visibility", on ? "visible" : "none");
+    if (!ready || !map) return;
+    for (const layerId of key ? key.split(",") : []) {
+      if (map.getLayer(layerId)) map.setLayoutProperty(layerId, "visibility", on ? "visible" : "none");
     }
-  }, [mapRef, storageKey, layerId, on]);
+  }, [mapRef, storageKey, key, on]);
 }
 
 // Spec 0003 AC-10: walked stretches and official stamps are on by default, extra stamps and
@@ -37,10 +39,11 @@ export function useLayerToggles(mapRef: MapHandleRef) {
     showRestaurants,
   });
 
-  useRememberedLayer(mapRef, STORAGE_KEY_DONE, null, showDone);
-  useRememberedLayer(mapRef, STORAGE_KEY_STAMPS, STAMPS_LAYER, showStamps);
-  useRememberedLayer(mapRef, STORAGE_KEY_EXTRAS, EXTRAS_LAYER, showExtras);
-  useRememberedLayer(mapRef, STORAGE_KEY_RESTAURANTS, RESTAURANTS_LAYER, showRestaurants);
+  useRememberedLayer(mapRef, STORAGE_KEY_DONE, [], showDone);
+  // The ring of a stamp that moved goes with the stamps (spec 0003 AC-26).
+  useRememberedLayer(mapRef, STORAGE_KEY_STAMPS, [STAMPS_LAYER, MOVED_RING_LAYER], showStamps);
+  useRememberedLayer(mapRef, STORAGE_KEY_EXTRAS, [EXTRAS_LAYER], showExtras);
+  useRememberedLayer(mapRef, STORAGE_KEY_RESTAURANTS, [RESTAURANTS_LAYER], showRestaurants);
 
   return {
     values: { showDone, showStamps, showExtras, showRestaurants },

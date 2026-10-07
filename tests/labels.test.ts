@@ -32,7 +32,7 @@ describe("spec 0004: place labels are display only", () => {
   it("AC-13: a place's key can never be mistaken for its label", () => {
     const rows = ["OKTPH_01", "OKTPH_02_1", "OKTPH_03_B"].map(
       (code, i) =>
-        ({ id: i + 1, seq: i + 1, stage: 1, stage_seq: i + 1, code, place_key: code.replace(/_\d+$/, ""), name: code, description: null, lat: 47, lng: 16, km_from_start: i, required_from: null, retired_on: null, replaced_by: null, after_place_key: null, position_approximate: false }) satisfies Checkpoint,
+        ({ id: i + 1, seq: i + 1, stage: 1, stage_seq: i + 1, code, place_key: code.replace(/_\d+$/, ""), name: code, description: null, lat: 47, lng: 16, km_from_start: i, required_from: null, retired_on: null, replaced_by: null, after_place_key: null, position_approximate: false, moved_on: null }) satisfies Checkpoint,
     );
     for (const p of buildPlaces(rows)) {
       expect(p.key).not.toMatch(/^\d+\.\d+$/);

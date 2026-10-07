@@ -84,3 +84,45 @@ describe("spec 0003: popup DOM builders (AC-12, AC-14, AC-15)", () => {
     expect(box.querySelector("img")).toBeNull();
   });
 });
+
+describe("spec 0003: the note and the report link of a stamp's popup", () => {
+  const link = { label: "Report a wrong location", href: "/en/feedback?stamp=OKTPH_84_B" };
+
+  it("AC-26: a note is a paragraph of its own under the subtitle, as text", () => {
+    const box = buildMenu("Lokó-pihenő", "679.5 km", [{ label: "Go", run: () => {} }], { note: `Moved on 30 September 2026. ${evil}` });
+    const note = box.querySelector<HTMLElement>("[data-moved-note]")!;
+    expect(note.textContent).toBe(`Moved on 30 September 2026. ${evil}`);
+    expect(note.querySelector("img")).toBeNull(); // text, never markup (AC-15)
+    expect([...box.children].indexOf(note)).toBeLessThan([...box.children].indexOf(box.querySelector("button")!));
+  });
+
+  it("AC-26: no note, no paragraph", () => {
+    expect(buildMenu("Name", null, [], { note: undefined }).querySelector("[data-moved-note]")).toBeNull();
+    expect(buildMenu("Name", null, [], { note: null }).querySelector("[data-moved-note]")).toBeNull();
+  });
+
+  it("AC-27: the report link opens in a new tab and is at least 44 x 44 px", () => {
+    const box = buildMenu("Name", null, [], { link });
+    const a = box.querySelector<HTMLAnchorElement>("a[data-report-link]")!;
+    expect(a.textContent).toBe("Report a wrong location");
+    expect(a.getAttribute("href")).toBe("/en/feedback?stamp=OKTPH_84_B");
+    expect(a.target).toBe("_blank");
+    expect(a.rel).toBe("noopener noreferrer");
+    expect(a.style.minHeight).toBe("44px");
+    expect(a.style.minWidth).toBe("44px");
+    expect(a.style.display).toBe("flex"); // the whole row is the target, not the words
+  });
+
+  it("AC-27: only a path of this site or an https: address becomes a link", () => {
+    for (const href of ["javascript:alert(1)", "//evil.example/", "http://x.example/", "data:text/html,x"]) {
+      expect(buildMenu("Name", null, [], { link: { label: "x", href } }).querySelector("a")).toBeNull();
+    }
+    expect(buildMenu("Name", null, [], { link: { label: "x", href: "https://www.kektura.hu/" } }).querySelector("a")).not.toBeNull();
+  });
+
+  it("AC-27: the link comes after the buttons and before the error line", () => {
+    const box = buildMenu("Name", null, [{ label: "Go", run: () => {} }], { link });
+    const order = [...box.children].map((c) => c.tagName + (c.getAttribute("role") ?? ""));
+    expect(order).toEqual(["STRONG", "BUTTON", "A", "DIValert"]);
+  });
+});

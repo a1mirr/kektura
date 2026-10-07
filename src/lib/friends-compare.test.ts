@@ -19,6 +19,7 @@ const checkpoints: Checkpoint[] = [0, 10, 20].map((km, i) => ({
   replaced_by: null,
   after_place_key: null,
   position_approximate: false,
+  moved_on: null,
 }));
 
 vi.mock("./dashboard-data", () => ({ getReferenceData: async () => ({ checkpoints, extras: [] }) }));
@@ -67,6 +68,19 @@ describe("spec 0024: comparing with a friend", () => {
     const { points } = await compareWithFriend(supabase, friend);
     expect(points.map((p) => [p.placeKey, p.who])).toEqual([["P0", "me"], ["P1", "them"], ["P2", "them"]]);
     expect(points.map((p) => p.label)).toEqual(["1.1", "1.2", "1.3"]); // the numbers of the list
-    for (const p of points) expect(Object.keys(p).sort()).toEqual(["label", "lat", "lng", "name", "placeKey", "who"]);
+    for (const p of points) expect(Object.keys(p).sort()).toEqual(["label", "lat", "lng", "moved", "name", "placeKey", "who"]);
+  });
+
+  it("AC-29: a place that moved in the last 180 days is a point with a ring, and no other is", async () => {
+    const { supabase } = recordingSupabase([]);
+    const moved = checkpoints[1]; // P1
+    try {
+      moved.moved_on = "2026-10-01";
+      const { points } = await compareWithFriend(supabase, friend, "2026-10-07");
+      expect(points.map((p) => [p.placeKey, p.moved])).toEqual([["P0", false], ["P1", true], ["P2", false]]);
+      expect((await compareWithFriend(supabase, friend, "2027-04-01")).points.map((p) => p.moved)).toEqual([false, false, false]); // 182 days later
+    } finally {
+      moved.moved_on = null;
+    }
   });
 });

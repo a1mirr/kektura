@@ -154,6 +154,9 @@ The width and the edges of the pages are spec 0036's.
   stages) on the left and the friend's stage list on the right. The friend's name and links, and their four figures, stay above both
   over the full width. The comparison's cards are two to a row in the narrow column. Below 1024 px it is one column in that order
   (figures, Compare, stage list), as on a phone, and the stage links of the comparison still lead to their section.
+- **AC-29**: A stamp that moved in the last 180 days (spec 0001 AC-29) is shown as such on a friend's page: its row in the friend's stage list has the same note as on the
+  user's own dashboard (in the viewer's language, with the data's own description), and its place on the comparison map has the ring of spec 0003 AC-26. The map under the
+  comparison says which MTSZ file the trail data is from (spec 0003 AC-28). The friend's page has no popup, so no report link; nothing about the friend is read for it.
 - **AC-28**: From 1024 px the Friends page has two columns, 5 : 7: the person's own controls (the name field, the invite link and
   its regenerate button, the pending requests) on the left and the list of friends on the right; the title and the message of AC-18
   stay above both. Below 1024 px it is one column in that order.
@@ -211,4 +214,6 @@ route plan.
 | AC-21 | `e2e/friends.spec.ts` (JavaScript off) |
 | AC-22 | `src/lib/friends-compare.test.ts` (what is read), `e2e/friends-compare.spec.ts` (figures, stage list, 404s, 375 px in the default language and German) |
 | AC-23, AC-24 | `src/lib/compare.test.ts` |
+| AC-29 | `src/lib/friends-compare.test.ts` (a place that moved in the last 180 days is a point with the `moved` flag, no other is, and none 182 days later), `src/lib/compare-map.test.ts` and `src/lib/map-layers.test.ts` (the flag on the feature, the ring layer), `src/components/MovedNote.test.tsx` (the note) |
+| AC-29 (the note on a friend's page) | manual (the shared reference data is cached for 24 hours, so an end-to-end test cannot change a row under a running test server, and the real seed has no move): the steps of spec 0001 AC-29's manual row, then open a friend's page. Last checked: 2026-10-07 (the note on a friend's row, the line under the map and the ring on the friend's map). |
 | AC-27, AC-28 | `e2e/layout.spec.ts` (a friend's page and the Friends page at 1023, 1024, 1440 and 375 px: side by side from 1024, one column below, the friend's figures above both, no sideways scroll), `src/components/PageShell.test.tsx` (the columns and their order) |

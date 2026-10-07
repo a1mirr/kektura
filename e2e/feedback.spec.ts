@@ -47,6 +47,33 @@ test.describe("spec 0017: feedback form", () => {
     expect(rowsFor(marker)).toBe(`${userId}|Found a bug ${marker}`);
   });
 
+  test("AC-11: opened for a stamp (?stamp=<code>) the form names it, and the stored message starts with its name from the seed", async ({ page }) => {
+    const marker = randomUUID();
+    const prefix = `Stamp: Lokó-pihenő (OKTPH_84_B)\n\n`;
+    const words = `It is by the lookout now ${marker}`;
+    const left = 2000 - [...prefix].length;
+    await page.goto("/en/feedback?stamp=OKTPH_84_B");
+    await expect(page.locator("[data-feedback-stamp]")).toHaveText("About the stamp Lokó-pihenő (OKTPH_84_B)");
+    await expect(page.getByText(`0 / ${left}`)).toBeVisible(); // the line takes its share of the 2000 characters
+    const box = page.getByLabel("Your message");
+    await expect(async () => {
+      await box.fill(words);
+      await expect(page.getByText(`${[...words].length} / ${left}`)).toBeVisible({ timeout: 1_000 });
+    }).toPass();
+    await page.getByRole("button", { name: "Submit feedback" }).click();
+    await expect(page.getByText("Thanks for your feedback!")).toBeVisible();
+    expect(psql(`select message from public.user_feedback where message like '%${marker}%'`)).toBe(prefix + words);
+  });
+
+  test("AC-11: only a code of a current stamp of the seed counts: free text, an unknown code and a retired stamp's code give the plain form", async ({ page }) => {
+    for (const query of ["stamp=Please%20send%20money%20to%20me", "stamp=OKTPH_999", "stamp=OKT_RETIRED_NYIRJESI", "stamp=%3Cscript%3Ealert(1)%3C%2Fscript%3E", "stamp=OKTPH_84_B&stamp=OKTPH_02", "stamp="]) {
+      await page.goto(`/en/feedback?${query}`);
+      await expect(page.getByLabel("Your message"), query).toBeVisible();
+      await expect(page.locator("[data-feedback-stamp]"), query).toHaveCount(0);
+      await expect(page.getByText("0 / 2000"), query).toBeVisible();
+    }
+  });
+
   test("AC-8: Russian and Hungarian forms have their own labels", async ({ page }) => {
     await page.goto("/ru/feedback");
     await expect(page.getByLabel("Ваше сообщение")).toBeVisible();
