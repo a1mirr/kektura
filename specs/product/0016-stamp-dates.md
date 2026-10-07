@@ -47,8 +47,8 @@ user's own day. A date is only ever saved when it is a real, complete one, never
 - **AC-7**: While saving, the field stays enabled and keeps focus. A failed save restores the saved date and
   shows the usual "Couldn't save, try again." (spec 0002 AC-10); an expired session refreshes the page
   (0002 AC-11). Several quick edits are one save.
-- **AC-8**: The dates are what the per-month statistics use (0001 AC-5), so correcting a date moves the
-  stamp to its new month.
+- **AC-8**: The dates are what the per-month statistics use (spec 0037), so correcting a date moves the
+  stamp, and the km that depend on it, to its new month.
 - **AC-9**: Next to the field is a calendar button (accessible name "Open calendar"). It opens the browser's date
   picker on the current date of the field, limited to the valid range (1938-01-01 to tomorrow, UTC). Picking a day
   fills the field and saves it at once (a pick is one complete date: no pause is needed); a picked day that is
@@ -115,7 +115,7 @@ user's own day. A date is only ever saved when it is a real, complete one, never
 Notes on a stamp; a time of day; a different date per row or a range of dates when changing many; undo after Apply; dates for
 places that are not stamped yet (stamping with a date is AC-1); a database check on the date range (it would
 need `current_date`, which can't be part of a constraint that must hold when a dump is reloaded); a custom-built
-calendar widget. Other dates on the site (the changelog's long dates, the month labels of the "Stamps per month"
+calendar widget. Other dates on the site (the changelog's long dates, the month labels of the stats page's
 chart) keep their localized form: this spec covers the fields where a date is entered.
 
 ## Notes
@@ -153,11 +153,11 @@ chart) keep their localized form: this spec covers the fields where a date is en
 | AC-3, AC-4 | `src/app/[locale]/dashboard/actions.test.ts`, `src/lib/stamp-date.test.ts` (calendar dates) |
 | AC-5, AC-6, AC-7, AC-9, AC-10, AC-12 | `src/components/StampDateInput.test.tsx` (timers, blur, invalid and other-format text, failure, focus, the calendar button and its fallbacks, the hidden picker, following the server), `e2e/stamp-dates.spec.ts` (typing a whole date makes one request; a future date is refused and restored; a day picked in the calendar is saved at once and the picker's range is 1938-01-01 to tomorrow in UTC; persistence after reload; extra stamps) |
 | AC-9 (the native picker itself) | manual (native browser UI): click the calendar button in Chrome, Firefox and Safari (also on a phone): the picker opens on the field's date, a day that is picked appears in the field and is saved. Last checked: never recorded. |
-| AC-8 | `src/lib/progress.test.ts` (months from `stamped_on`), `e2e/stamp-dates.spec.ts` (dates changed in bulk: the chart shows the new month) |
+| AC-8 | `src/lib/month-stats.test.ts` (months from `stamped_on`, a changed date moves a stamp and its km), `e2e/stamp-dates.spec.ts` (dates changed in bulk: the stats page's new month has the stamps) |
 | AC-11 | `tests/messages.test.ts` (parity) |
 | AC-13 | `src/app/[locale]/dashboard/actions.test.ts` (a retired stamp's date: before the retirement day, strict, mixed requests refused), `src/components/RetiredStampControl.test.tsx` (the field never sends a later day and restores it) |
 | AC-13 (the calendar picker's last day) | manual (native browser UI, like AC-9's row): open the calendar of a collected retired stamp: days after the day before it retired cannot be picked. Last checked: never recorded. |
-| AC-14, AC-15, AC-16, AC-19, AC-20 | `src/components/BulkDateBar.test.tsx` (the mode, the checkboxes of stamped rows only, leaving it, the server's HTML without the buttons, range and stage and all/clear choices, the bar's Apply states, nothing sent before Apply, pending, success and failure messages), `src/lib/bulk-dates.test.ts` (order of the rows, ranges, the request), `e2e/stamp-dates.spec.ts` (a click, a shift-click, Space, a stage, Enter; one request; the new dates and the chart's new month; Escape and Cancel; a vanished stamp; no JavaScript) |
+| AC-14, AC-15, AC-16, AC-19, AC-20 | `src/components/BulkDateBar.test.tsx` (the mode, the checkboxes of stamped rows only, leaving it, the server's HTML without the buttons, range and stage and all/clear choices, the bar's Apply states, nothing sent before Apply, pending, success and failure messages), `src/lib/bulk-dates.test.ts` (order of the rows, ranges, the request), `e2e/stamp-dates.spec.ts` (a click, a shift-click, Space, a stage, Enter; one request; the new dates and the stats page's new month; Escape and Cancel; a vanished stamp; no JavaScript) |
 | AC-17 | `src/app/[locale]/dashboard/actions.test.ts` (what is sent to the function, the limit of 500, invalid input, `unauthorized`, a refused request, a database error and its log line), `tests/database-rules.test.ts` (the function itself: the caller's rows and every variant only, all or nothing, who may call it, no inserts, security invoker, and a stamp deleted by another transaction meanwhile makes it answer false: two sessions) |
 | AC-18 | `src/lib/bulk-dates.test.ts`, `src/components/BulkDateBar.test.tsx` (the bar names the stamps), `tests/database-rules.test.ts` (the function refuses the day it retired or later), `e2e/stamp-dates.spec.ts` |
 | AC-21 | `src/components/BulkDateBar.test.tsx` (the keyboard's gap from a stubbed visual viewport: it follows a resize and a scroll, is 0 while pinch-zoomed or without a viewport, and the listeners go with the bar), `e2e/mobile.spec.ts` (the mode at 375 and 320 px: no sideways scroll, the bar inside the window at the bottom, targets of 44 px, choosing and applying with taps), `e2e/stamp-dates.spec.ts` (Space and Enter; the fullscreen map is topmost over the bar at 1280 px), `e2e/accessibility.spec.ts` (`dashboard-change-dates`, both widths) |

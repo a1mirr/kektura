@@ -22,9 +22,9 @@ test.describe("spec 0014: the account page", () => {
     await expect(page).toHaveURL(/\/en$/);
   });
 
-  test("AC-7, AC-8, AC-9, AC-14, AC-15: the dashboard header leads to the account page; cancelling deletes nothing", async ({ page }) => {
+  test("AC-7, AC-14, AC-15: the dashboard header leads to the account page, which has no chart; cancelling deletes nothing", async ({ page }) => {
     const email = await signInAsNewUser(page);
-    // AC-8: the chart is on the account page, not here (the dashboard renders in one piece, so once its
+    // The stamps-per-month chart is on the stats page (spec 0037), not on the dashboard (it renders in one piece, so once its
     // Account link is there, a missing chart really is missing).
     await expect(page.getByRole("link", { name: "Account", exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Stamps per month" })).toHaveCount(0);
@@ -32,7 +32,7 @@ test.describe("spec 0014: the account page", () => {
     await expect(page).toHaveURL(/\/en\/account$/);
     await expect(page).toHaveTitle("Account");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Account");
-    await expect(page.getByRole("heading", { name: "Stamps per month" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Stamps per month" })).toHaveCount(0); // moved to /stats (spec 0037)
 
     await openDeleteConfirmation(page);
     await page.getByRole("button", { name: "Cancel" }).click();
@@ -141,27 +141,4 @@ test.describe("spec 0014: sign out and the account link", () => {
     }
   });
 
-});
-
-test.describe("spec 0001: the stamps-per-month chart on the account page", () => {
-  test("AC-5: month labels and the tooltip follow the page's language", async ({ page }) => {
-    await signInAsNewUser(page);
-    await expandAllStages(page);
-    await page.locator("#place-OKTPH_02").getByRole("button", { name: "Add stamp" }).click();
-    await expect(stat(page, "Stamps")).toHaveText("1 / 161");
-
-    const now = new Date();
-    const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`; // the stamp's own day, as the browser sent it
-    const labels = new Set<string>();
-    for (const locale of [routing.defaultLocale, "en"]) {
-      const label = new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${month}-01T00:00:00Z`));
-      labels.add(label);
-      await page.goto(`/${locale}/account`);
-      const chart = page.locator(".recharts-wrapper");
-      await expect(chart.locator(".recharts-cartesian-axis-tick-value").first()).toHaveText(label);
-      await chart.locator(".recharts-bar-rectangle").first().hover();
-      await expect(chart.locator(".recharts-tooltip-wrapper")).toContainText(label);
-    }
-    expect(labels.size, "the two languages write the month differently").toBe(2);
-  });
 });

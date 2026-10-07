@@ -29,7 +29,7 @@ async function expectLogo(page: Page, locale: Locale) {
   expect(box!.y).toBeLessThan(80); // below the test banner, above any page content
 }
 
-// Polled: after the viewport shrinks, a chart that measures its container (the account page's) takes a frame to follow,
+// Polled: after the viewport shrinks, a chart that measures its container (the stats page's) takes a frame to follow,
 // and reading the width at once sees the old one.
 async function expectNoOverflow(page: Page, width: number) {
   await page.setViewportSize({ width, height: 800 });
@@ -57,9 +57,9 @@ test.describe("spec 0014: site logo", () => {
     }
   });
 
-  test("AC-19: a signed-in user has it on the dashboard, account and friends pages, and it leads to the dashboard", async ({ page }) => {
+  test("AC-19: a signed-in user has it on the dashboard, stats, account and friends pages, and it leads to the dashboard", async ({ page }) => {
     await signInAsNewUser(page);
-    for (const path of ["/dashboard", "/account", "/friends"]) {
+    for (const path of ["/dashboard", "/stats", "/account", "/friends"]) {
       await page.goto(`/en${path}`);
       await expectLogo(page, "en");
       for (const width of [375]) await expectNoOverflow(page, width);

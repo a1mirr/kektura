@@ -9,8 +9,8 @@ Owner code: `src/components/Footer.tsx`, `src/app/[locale]/(pages)/*`, `src/app/
 ## Goal
 
 Footer navigation to the informational pages (About, Changelog, Useful links, Feedback), and an account page for
-signed-in users that holds everything about the account: the stamps-per-month chart, signing out and deleting the
-account. The dashboard header stays light (the language dropdown and one "Account" link), which matters most on a
+signed-in users that holds everything about the account: signing out and deleting the account (the stamps-per-month chart
+lives on the stats page, spec 0037). The dashboard header stays light (the language dropdown and two links, "My stats" and "Account"), which matters most on a
 phone, and "Account" says what is behind the link. Every page also carries the site logo, a way home that never needs the footer.
 
 ## Behaviour
@@ -39,7 +39,7 @@ phone, and "Account" says what is behind the link. Every page also carries the s
 
 - **AC-7**: `/account` is for signed-in users; a signed-out visitor is sent to the landing page. The
   dashboard header has an "Account" link to it (AC-14).
-- **AC-8**: The "Stamps per month" chart (spec 0001 AC-5) is shown on `/account`, not on the dashboard.
+- **AC-8**: Removed. The "Stamps per month" chart moved to the stats page (spec 0037); `/account` has none.
 - **AC-9**: "Delete account" asks for confirmation first ("Are you sure? This cannot be undone." with a
   confirm button and a cancel link). Confirming permanently deletes the account with all its stamps and
   extra stamps, signs the user out and returns to the landing page. Cancelling changes nothing.
@@ -52,8 +52,8 @@ phone, and "Account" says what is behind the link. Every page also carries the s
   and can't be executed by anonymous callers.
 - **AC-13**: The delete action never throws: it returns an `ActionResult` (`ok`, `unauthorized` or
   `failed`) and logs a failure as one `[account-delete]` line without secrets (spec 0008's rules).
-- **AC-14**: The dashboard header has the language dropdown (spec 0005 AC-10) and one link, "Account" (`ru`: Аккаунт, `hu`: Fiók, `de`: Konto), to
-  `/account`. It has no "Settings" link and no "Sign out" control.
+- **AC-14**: The dashboard header has the language dropdown (spec 0005 AC-10) and two links: "My stats" (`ru`: Моя статистика, `hu`: Statisztikáim, `de`: Meine Statistik) to
+  `/stats` (spec 0037 AC-1) and "Account" (`ru`: Аккаунт, `hu`: Fiók, `de`: Konto) to `/account`. It has no "Settings" link and no "Sign out" control.
 - **AC-15**: The page's document title and `h1` are "Account". The old address `/settings`, in any language prefix,
   redirects (307, in `next.config.ts`, so before the proxy and without a session) to `/account` in the same
   language, so open tabs and old links don't end on a 404.
@@ -97,8 +97,6 @@ email on the page.
   environment, which is the bigger risk.
 - After the deletion the user's session no longer exists at the Auth server, so `signOut()` gets a
   401/403 back; supabase-js ignores that and still clears the session cookies.
-- The per-month chart lives on the account page by the owner's decision (AC-8). To move it, change AC-8, the E2E
-  test below and one component.
 - The message namespace is `account` (`title`, `signOut`, ...), the header link is `dashboard.account`. The
   `[account-delete]` log line and the `delete_user_account` function keep their names from when the page was
   called "settings"; this file's name does too, so existing links keep working.
@@ -113,8 +111,8 @@ email on the page.
 | AC-2 | spec 0015 |
 | AC-3, AC-4 | specs 0018, 0019 |
 | AC-5, AC-6 | spec 0017 |
-| AC-7, AC-14, AC-15 | `e2e/account.spec.ts` (redirect when signed out; header link and no sign-out control; title and heading; `/settings` redirects to `/account`; in each language: `e2e/languages.spec.ts`) |
-| AC-8 | `e2e/account.spec.ts` (`/account` shows the chart heading, the dashboard doesn't) |
+| AC-7, AC-14, AC-15 | `e2e/account.spec.ts` (redirect when signed out; header links and no sign-out control; title and heading; `/settings` redirects to `/account`; in each language: `e2e/languages.spec.ts`) |
+| AC-8 | Removed (the chart is spec 0037's; `e2e/account.spec.ts` checks that `/account` and the dashboard have none) |
 | AC-9, AC-10 | `e2e/account.spec.ts` (cancel; delete: account, stamps and extra stamps gone, feedback kept and unlinked, signed out, signing in again gives an empty account), `src/app/[locale]/account/DeleteAccountButton.test.tsx` |
 | AC-11 | `DeleteAccountButton.test.tsx`, `e2e/account.spec.ts` (server action answering 500) |
 | AC-12 | `e2e/feedback.spec.ts` (anonymous caller refused); migration 0008 |

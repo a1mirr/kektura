@@ -250,10 +250,9 @@ test.describe("spec 0016: change many dates at once", () => {
     expect(dates).toContain(`OKTPH_01_DDKPH_01=${today()}`);
     expect(dates).toContain(`extra${extraId}=${today()}`);
 
-    // the statistics move the stamps to their new month (spec 0016 AC-8)
-    await page.goto("/en/account");
-    const labels = await page.locator(".recharts-wrapper .recharts-cartesian-axis-tick-value").allTextContents();
-    expect(labels.map((l) => l.trim())).toContain("Mar 2024");
+    // the statistics move the stamps to their new month (spec 0016 AC-8, spec 0037 AC-8): the 8 places are March 2024's now
+    await page.goto("/en/stats");
+    await expect(page.getByRole("button", { name: /^March 2024: 8 stamps/ })).toBeVisible();
   });
 
   test("AC-20, AC-16: a stage's 'Set date' opens the mode with that stage chosen, and Enter in the date field applies", async ({ page }) => {

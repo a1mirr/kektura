@@ -47,12 +47,12 @@ test.describe("spec 0036: the page layout", () => {
     }
   });
 
-  test("AC-1, AC-5: the same on the dashboard, account and Friends pages, where the page's own header lies inside the width", async ({ page }) => {
+  test("AC-1, AC-5: the same on the dashboard, stats, account and Friends pages, where the page's own header lies inside the width", async ({ page }) => {
     test.setTimeout(180_000);
     await signInAsNewUser(page);
     for (const width of WIDTHS) {
       await page.setViewportSize({ width, height: 900 });
-      for (const path of ["/dashboard", "/account", "/friends"]) {
+      for (const path of ["/dashboard", "/stats", "/account", "/friends"]) {
         await page.goto(`/en${path}`);
         await expectSharedEdges(page, `${width} px, /en${path}`);
         await expectNoSidewaysScroll(page, `sideways scroll at ${width} px on /en${path}`);
@@ -70,12 +70,12 @@ test.describe("spec 0036: the page layout", () => {
   });
 
   test("AC-5: in every other language too nothing scrolls sideways and the edges are shared", async ({ page }) => {
-    test.setTimeout(180_000);
+    test.setTimeout(300_000);
     await signInAsNewUser(page);
     for (const width of WIDTHS) {
       await page.setViewportSize({ width, height: 900 });
       for (const locale of ["hu", "de", "ru"]) {
-        for (const path of ["/dashboard", "/friends", "/account", "/about", "/changelog"]) {
+        for (const path of ["/dashboard", "/friends", "/stats", "/account", "/about", "/changelog"]) {
           await page.goto(`/${locale}${path}`);
           await expectSharedEdges(page, `${width} px, /${locale}${path}`);
           await expectNoSidewaysScroll(page, `sideways scroll at ${width} px on /${locale}${path}`);
