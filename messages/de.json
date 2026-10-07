@@ -23,7 +23,6 @@
     "remaining": "Verbleibend, km",
     "map": "Wegekarte",
     "mapLegend": "Blaue Linie — gewanderte Abschnitte (zwischen zwei benachbarten abgestempelten Orten), graue Striche — der Rest.",
-    "perMonth": "Stempel pro Monat",
     "checkpoints": "Stempelstellen",
     "stamp": "Stempel hinzufügen",
     "unstamp": "Entfernen",
@@ -87,6 +86,7 @@
     "replacesRetired": "Ersetzt den eingestellten Stempel {name} (gültig bis {date}).",
     "mapAttribution": "© OpenStreetMap-Mitwirkende · Route: MTSZ",
     "account": "Konto",
+    "stats": "Meine Statistik",
     "stampDate": "Datum des Stempels",
     "openCalendar": "Kalender öffnen",
     "bulkMode": "Daten ändern",
@@ -200,6 +200,18 @@
     "deleteButton": "Ja, mein Konto dauerhaft löschen",
     "cancel": "Abbrechen",
     "deleteFailed": "Das Konto konnte nicht gelöscht werden. Bitte versuche es erneut."
+  },
+  "stats": {
+    "title": "Meine Statistik",
+    "stages": "Abgeschlossene Etappen",
+    "perMonth": "Stempel pro Monat",
+    "empty": "Noch keine Stempel. Die Monate erscheinen hier, sobald du einen Stempel gesammelt hast.",
+    "tipStamps": "{count, plural, one {# Stempel} other {# Stempel}}",
+    "tipExtra": "{count, plural, one {# Zusatzstempel} other {# Zusatzstempel}}",
+    "tipNone": "In diesem Monat keine Stempel",
+    "tipKm": "{km} km",
+    "tipStage": "Etappe {list}",
+    "tipStages": "Etappen {list}"
   },
   "friends": {
     "title": "Freunde",

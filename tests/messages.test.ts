@@ -81,3 +81,26 @@ describe("spec 0014: the account page has one name in every language", () => {
     expect([...messages.keys()].filter((key) => /(^|\.)settings(\.|$)|signOut/.test(key) && key !== "account.signOut")).toEqual([]);
   });
 });
+
+describe("spec 0037: the stats page has one name in every language", () => {
+  const expected = { en: "My stats", ru: "Моя статистика", hu: "Statisztikáim", de: "Meine Statistik" };
+
+  it("AC-2: the name is given for every language, so a new language fails here until it has one", () => {
+    expect(Object.keys(expected).sort()).toEqual([...routing.locales].sort());
+  });
+
+  it.each(Object.entries(expected))("AC-2: %s: the header link and the page title say %s", (locale, name) => {
+    const messages = byLocale[locale] as typeof import("../messages/en.json");
+    expect(messages.dashboard.stats).toBe(name);
+    expect(messages.stats.title).toBe(name);
+  });
+
+  it.each(Object.entries(locales))("AC-14: %s has the plural forms of the tooltip's counts (an ICU plural with the language's categories)", (locale, messages) => {
+    const categories = new Intl.PluralRules(locale).resolvedOptions().pluralCategories.filter((c) => c !== "zero").sort();
+    for (const key of ["stats.tipStamps", "stats.tipExtra"]) {
+      const text = messages.get(key) ?? "";
+      const given = [...text.matchAll(/(one|few|many|other) {/g)].map((m) => m[1]).sort();
+      expect(given, key).toEqual(categories);
+    }
+  });
+});

@@ -31,8 +31,7 @@ walked before it is shown as missing it.
 - **AC-4**: Total km = last place km - first place km; walked km = sum of the ranges; remaining =
   total - walked (never negative); percent = walked / total, rounded. Kilometres are rounded to
   0.1. With no places everything is 0.
-- **AC-5**: "Stamps per month" counts places, not variant rows, each in the month of its earliest
-  stamp (`stamped_on`), oldest month first. Month labels and the tooltip are localized.
+- **AC-5**: Removed. The per-month figures (stamps, km, stages) are spec 0037's.
 
 ### Stamps required from a date
 
@@ -157,14 +156,13 @@ stage is AC-12 to AC-15); moving extra stamps into the stage's place list; chang
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-2, AC-3, AC-4, AC-5 (counting), AC-6, AC-7, AC-12, AC-15 | `src/lib/progress.test.ts` |
+| AC-1, AC-2, AC-3, AC-4, AC-6, AC-7, AC-12, AC-15 | `src/lib/progress.test.ts` |
 | AC-13, AC-14 | `e2e/extra-stamps-stages.spec.ts` (every extra stamp names a stage, in order along the trail; each stage's "go to extra stamps (N)" counts exactly its extra stamps and jumps to them; stages without any have no link; the counts add up) |
 | AC-3, AC-4, AC-7 on the real dashboard | `e2e/stamping.spec.ts` |
-| AC-5 (localized labels) | `e2e/account.spec.ts` (the month label on the account page's axis and in the tooltip, in the default language and in English, each the way `Intl` writes it for that language) |
 | AC-8, AC-9 | `src/components/StageSection.test.tsx` |
-| AC-22, AC-23 | `src/lib/progress.test.ts` (a retired row is no place and no neighbour; the rows read; listed with a stamp, by the earlier neighbour's date, on and after the retirement day, one neighbour, none; the monthly counts ignore a stamp on one) |
+| AC-22, AC-23 | `src/lib/progress.test.ts` (a retired row is no place and no neighbour; the rows read; listed with a stamp, by the earlier neighbour's date, on and after the retirement day, one neighbour, none) |
 | AC-24 | `src/components/RetiredRow.test.tsx` (hidden by default, the checkbox shows it, remembered, storage refusing), `src/components/StageControls.test.tsx` (the checkbox only while there is a retired stamp) |
-| AC-25 | `src/components/RetiredStampControl.test.tsx` (no default day, disabled until a real day before the retirement, the date field keeps to it, the remove button), `e2e/retired-stamps.spec.ts` (the count, km, stage totals and "Stamp stage" ignore it; the collected line and the stage mark) |
+| AC-25 | `src/components/RetiredStampControl.test.tsx` (no default day, disabled until a real day before the retirement, the date field keeps to it, the remove button), `e2e/retired-stamps.spec.ts` (the count, km, stage totals and "Stamp stage" ignore it; the collected line and the stage mark), `src/lib/month-stats.test.ts` (a stamp on a retired row is no month's stamp and does not stretch the months) |
 | AC-26, AC-27 | `e2e/retired-stamps.spec.ts` (the note, badge, link, approximate position, the replacing stamp's line; 375 px in English, Hungarian, German and Russian) |
 | AC-16, AC-17, AC-18, AC-20 | `src/lib/progress.test.ts` (the earliest date of the variants; the later neighbour decides, on and after the date, one neighbour, none; a stamped place never waived; the stretch across a waived place and the opposite case; a waived place is done for its stage but no stamp), `src/lib/friends.test.ts` and `src/lib/compare.test.ts` (the same on a friend's page) |
 | AC-19 | `src/components/RequiredFrom.test.tsx` (the date in the page's language, hint and badge, the button that opens the note and Escape, the tolerance sentence), `src/lib/new-stamps.test.ts` (which stamps carry the tolerance) |

@@ -23,7 +23,6 @@
     "remaining": "Remaining, km",
     "map": "Trail map",
     "mapLegend": "Blue line — walked stretches (between two neighbouring stamped places), grey dashes — the rest.",
-    "perMonth": "Stamps per month",
     "checkpoints": "Stamping points",
     "stamp": "Add stamp",
     "unstamp": "Remove",
@@ -87,6 +86,7 @@
     "replacesRetired": "Replaces the retired stamp {name} (valid until {date}).",
     "mapAttribution": "© OpenStreetMap contributors · route: MTSZ",
     "account": "Account",
+    "stats": "My stats",
     "stampDate": "Date of the stamp",
     "openCalendar": "Open calendar",
     "bulkMode": "Change dates",
@@ -200,6 +200,18 @@
     "deleteButton": "Yes, permanently delete my account",
     "cancel": "Cancel",
     "deleteFailed": "Couldn't delete the account. Please try again."
+  },
+  "stats": {
+    "title": "My stats",
+    "stages": "Completed stages",
+    "perMonth": "Stamps per month",
+    "empty": "No stamps yet. The months appear here once you have collected a stamp.",
+    "tipStamps": "{count, plural, one {# stamp} other {# stamps}}",
+    "tipExtra": "{count, plural, one {# extra stamp} other {# extra stamps}}",
+    "tipNone": "No stamps this month",
+    "tipKm": "{km} km",
+    "tipStage": "Stage {list}",
+    "tipStages": "Stages {list}"
   },
   "friends": {
     "title": "Friends",

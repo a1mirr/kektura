@@ -14,10 +14,10 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     date: "2026-10-07",
     title: {
-      en: "Change the date of many stamps at once",
-      ru: "Дату можно изменить сразу у многих печатей",
-      hu: "Sok bélyegzés dátuma módosítható egyszerre",
-      de: "Das Datum vieler Stempel auf einmal ändern",
+      en: "Change the date of many stamps at once, and a page of your stats",
+      ru: "Дату можно изменить сразу у многих печатей, и появилась страница статистики",
+      hu: "Sok bélyegzés dátuma módosítható egyszerre, és megjelent a statisztikák oldala",
+      de: "Das Datum vieler Stempel auf einmal ändern, und eine Seite mit deiner Statistik",
     },
     changes: [
       {
@@ -27,6 +27,15 @@ export const CHANGELOG: ChangelogEntry[] = [
           ru: "Дату можно изменить сразу у многих печатей. Нажмите «Изменить даты» над списком этапов, отметьте печати, собранные в один день (щелчок с Shift отмечает весь диапазон, «Выбрать этап» — весь этап, «Выбрать все» — всё), введите дату или выберите её в календаре и нажмите «Применить»: все отмеченные получат эту дату, а если что-то пойдёт не так, не изменится ни одна. На заголовке этапа «Задать дату» сделает первые шаги за вас. Упразднённой печати нельзя поставить дату начиная со дня её упразднения. Режиму нужен JavaScript; поле даты у каждой печати осталось прежним.",
           hu: "Sok bélyegzés dátuma módosítható egyszerre. Nyomd meg a „Dátumok módosítása” gombot a szakaszok listája fölött, jelöld ki az ugyanazon a napon begyűjtött bélyegzőket (a Shift-kattintás egy egész tartományt jelöl ki, a „Szakasz kijelölése” egy egész szakaszt, a „Mind kijelöl” mindent), írd be a dátumot vagy válaszd ki a naptárban, és nyomd meg az Alkalmaz gombot: mindegyik megkapja a dátumot, vagy ha valami elromlik, egyik sem. A szakasz fejlécén a „Dátum beállítása” elvégzi helyetted az első lépéseket. A megszűnt bélyegző nem kaphat a megszűnése napjától kezdve dátumot. A módhoz JavaScript kell; az egyes bélyegzők dátummezője a régi maradt.",
           de: "Das Datum vieler Stempel lässt sich auf einmal ändern. Tippe über der Etappenliste auf „Daten ändern“, hake die Stempel an, die du am selben Tag gesammelt hast (mit Shift-Klick einen ganzen Bereich, mit „Etappe wählen“ eine ganze Etappe, mit „Alle auswählen“ alles), gib ein Datum ein oder wähle es im Kalender und tippe auf Übernehmen: Alle bekommen dieses Datum, oder keiner, wenn etwas schiefgeht. Auf dem Kopf einer Etappe erledigt „Datum setzen“ die ersten Schritte für dich. Ein eingestellter Stempel kann ab dem Tag seiner Einstellung kein Datum bekommen. Der Modus braucht JavaScript; das Datumsfeld jedes Stempels bleibt, wie es war.",
+        },
+      },
+      {
+        kind: "new",
+        text: {
+          en: "A page of your own stats. \"My stats\", next to \"Account\" above the list of stages, shows your stamps, kilometres and completed stages and the chart of stamps per month, which has left the account page. The chart now names every month, also the ones without a stamp; hover over a month, tap it or move to it with the arrow keys to see how many stamps and kilometres it holds and in which stages. A stretch counts in the month of the later of its two stamps, so a stamp placed next to an older one adds the whole stretch to the month it was stamped in. When the months do not fit a phone, the chart scrolls inside its frame.",
+          ru: "Страница с вашей статистикой. «Моя статистика», рядом с «Аккаунт» над списком этапов, показывает ваши печати, километры и пройденные этапы и диаграмму печатей по месяцам, которая ушла со страницы аккаунта. Теперь на диаграмме подписан каждый месяц, в том числе без единой печати; наведите курсор на месяц, коснитесь его или перейдите к нему стрелками, чтобы увидеть, сколько в нём печатей и километров и какие этапы. Отрезок засчитывается в месяц более поздней из двух его печатей, поэтому печать, поставленная рядом с более старой, добавляет весь отрезок в тот месяц, когда её поставили. Если месяцы не помещаются на телефоне, диаграмма прокручивается внутри своей рамки.",
+          hu: "Saját statisztikai oldal. A „Statisztikáim” a „Fiók” mellett, a szakaszok listája fölött mutatja a bélyegzéseidet, a kilométereidet és a teljesített szakaszokat, valamint a havi bélyegzések diagramját, amely elköltözött a fiók oldaláról. A diagram mostantól minden hónapot megnevez, a bélyegzés nélkülieket is; vidd az egeret egy hónap fölé, koppints rá, vagy lépj rá a nyilakkal, hogy lásd, hány bélyegzést és kilométert tartalmaz, és mely szakaszokat. Egy szakasz a két bélyegzője közül a későbbi hónapjába számít, így egy régebbi mellé tett bélyegzés a teljes szakaszt ahhoz a hónaphoz adja, amikor lepecsételted. Ha a hónapok nem férnek el a telefonon, a diagram a saját keretében görgethető.",
+          de: "Eine Seite mit deiner eigenen Statistik. „Meine Statistik“, neben „Konto“ über der Etappenliste, zeigt deine Stempel, Kilometer und abgeschlossenen Etappen und das Diagramm der Stempel pro Monat, das die Kontoseite verlassen hat. Das Diagramm nennt jetzt jeden Monat, auch die ohne Stempel; fahre mit der Maus über einen Monat, tippe ihn an oder gehe mit den Pfeiltasten hin, um zu sehen, wie viele Stempel und Kilometer er enthält und in welchen Etappen. Ein Abschnitt zählt in den Monat des späteren seiner beiden Stempel, ein Stempel neben einem älteren fügt also den ganzen Abschnitt dem Monat hinzu, in dem er gesetzt wurde. Passen die Monate nicht auf ein Handy, scrollt das Diagramm in seinem Rahmen.",
         },
       },
     ],
