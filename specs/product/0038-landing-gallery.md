@@ -46,7 +46,7 @@ route planner. The pictures are real screenshots of a demo account, made again b
   390 x 760 CSS pixels at a device scale of 2, `SCREENSHOT_SIZE` in `src/lib/screenshots.ts`), and all together weigh no more than
   `SCREENSHOTS_BUDGET_BYTES` (2.5 MB): a picture that grows past it fails the test, so a heavy file cannot be committed unnoticed.
 - **AC-10**: `npm run screenshots` takes the three pictures from the test server (spec 0006), by default the production build on
-  `http://localhost:3002` (`SCREENSHOTS_URL` changes it), in a phone-shaped Chromium window, and writes the files of AC-8. The account
+  `http://localhost:3002` (`SCREENSHOTS_URL` changes it), in a phone-shaped Chromium window, and writes the files of AC-9. The account
   is the demo account `demo@kektura.test`, signed in through the dummy login, and the script first gives it a fixed made-up dataset:
   the first three stages stamped on three days of September 2026, the first three places of stage 4, two extra stamps; its other
   stamps are deleted. No real name, email address or friend is in the data. The map's block is left out of the dashboard picture
