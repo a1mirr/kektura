@@ -6,6 +6,7 @@ import { routing } from "@/i18n/routing";
 import { testLoginEnabled } from "@/lib/test-login";
 import TestBanner from "@/components/TestBanner";
 import Footer from "@/components/Footer";
+import HeaderControls from "@/components/HeaderControls";
 import SiteLogo from "@/components/SiteLogo";
 
 export function generateStaticParams() {
@@ -38,8 +39,10 @@ export default async function LocaleLayout({
     <html lang={locale}>
       <body className="flex min-h-screen flex-col bg-stone-50 text-stone-900">
         {testLoginEnabled() && <TestBanner />}
-        <SiteLogo locale={locale} />
         <NextIntlClientProvider>
+          <SiteLogo locale={locale}>
+            <HeaderControls />
+          </SiteLogo>
           {/* A column that takes the space above the footer: full-height pages (landing, error) fill it with flex-1 instead of min-h-screen, which would push the footer below the fold. */}
           <div className="flex flex-grow flex-col">{children}</div>
           <Footer />

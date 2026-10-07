@@ -103,7 +103,7 @@ checks, ships and is run). The headings below only group the index: moving a spe
 
 | Spec | Area | Status |
 | --- | --- | --- |
-| [0014](product/0014-pages-and-settings.md) | Footer pages, site logo, account page (sign out, account deletion) | Done |
+| [0014](product/0014-pages-and-settings.md) | Footer pages, the header strip with the logo, the language dropdown and the account menu, the settings page (sign out, account deletion) | Done |
 | [0015](product/0015-about-page.md) | About page | Done |
 | [0017](product/0017-feedback.md) | Feedback form with Telegram notifications | Done |
 | [0018](product/0018-changelog.md) | Changelog page | Done |

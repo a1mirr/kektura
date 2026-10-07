@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { routing } from "../src/i18n/routing";
 import { describeFindings, judge, scan, WIDTHS, type Finding, type Width } from "./accessibility";
 import { ALLOWED } from "./accessibility-allowlist";
-import { expandAllStages, seedStatsWalk, signInAsNewUser } from "./helpers";
+import { expandAllStages, openAccountMenu, seedStatsWalk, signInAsNewUser } from "./helpers";
 
 // Spec 0006 AC-11, AC-12: axe on the main pages, at the desktop width and at the phone width. A "serious" or "critical"
 // violation that is not in the allow-list fails the page's test, and so does an allow-list entry that no longer fires.
@@ -83,7 +83,21 @@ const TARGETS: Target[] = [
     signedIn: true,
     open: async (page) => {
       await page.goto("/en/account");
-      await expect(page.getByRole("heading", { level: 1, name: "Account" })).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1, name: "Settings" })).toBeVisible();
+    },
+  },
+  {
+    // Spec 0014 AC-22: the account menu open (the list is not there for a scan of the page as it loads): its entries, the marked
+    // current page and the sign-out button, with the contrast and the roles axe checks
+    name: "account-menu-open",
+    signedIn: true,
+    open: async (page) => {
+      // the stats page: nothing clickable lies under the open list (on the settings page it covers the Sign out button, which
+      // axe then reports as too small a target: it is overlapped, not small)
+      await page.goto("/en/stats");
+      await expect(page.getByRole("heading", { level: 1, name: "My stats" })).toBeVisible();
+      await openAccountMenu(page);
+      await expect(page.locator("body > header details ul").getByRole("link", { name: "My stats" })).toHaveAttribute("aria-current", "page");
     },
   },
   {

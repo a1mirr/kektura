@@ -90,8 +90,6 @@
     "retiredDate": "A begyűjtés napja, legkésőbb {date}",
     "replacesRetired": "A megszűnt {name} bélyegző helyett (eddig érvényes volt: {date}).",
     "mapAttribution": "© az OpenStreetMap közreműködői · útvonal: MTSZ",
-    "account": "Fiók",
-    "stats": "Statisztikáim",
     "stampDate": "A bélyegzés dátuma",
     "openCalendar": "Naptár megnyitása",
     "bulkMode": "Dátumok módosítása",
@@ -146,7 +144,7 @@
     "dataTitle": "Az adataid",
     "data1": "A bejelentkezést a Google intézi, az alkalmazás sosem látja a Google-jelszavadat. Tároljuk a fiókodat (a Google-profilod e-mail-címét és nevét), az általad jelölt bélyegzéseket dátummal, valamint a visszajelzési űrlapon küldött üzeneteidet, amelyeket – ha be vagy jelentkezve – az e-mail-címeddel együtt kézbesítünk a fejlesztőnek.",
     "data2": "A sütik tartanak bejelentkezve. A böngésző a megjelenítési beállításaidat is megjegyzi, például hogy mely szakaszok vannak nyitva, és mely térképrétegek vannak bekapcsolva.",
-    "data3": "A fiókodat és az összes bélyegzésedet bármikor törölheted a <account>Fiók</account> oldalon. A már elküldött visszajelzések megmaradnak, de már nem kapcsolódnak hozzád.",
+    "data3": "A fiókodat és az összes bélyegzésedet bármikor törölheted a <account>Beállítások</account> oldalon. A már elküldött visszajelzések megmaradnak, de már nem kapcsolódnak hozzád.",
     "contactTitle": "Kérdésed vagy ötleted van?",
     "contactText": "Hibát találtál, vagy van ötleted a követőhöz? Írd meg a <feedback>visszajelzési űrlapon</feedback>.",
     "data4": "Ha barátokkal kapcsolódsz, láthatják a megjelenített nevedet és a szakaszonkénti haladásodat (hivatalos bélyegzők, kilométerek, szakaszok). Nem láthatják a bélyegzések dátumát és az extra bélyegzőket. A haladásod megosztását bármikor leállíthatod a Barátok oldalon."
@@ -197,8 +195,15 @@
     "success": "Köszönjük a visszajelzést!",
     "error": "Nem sikerült elküldeni."
   },
+  "accountMenu": {
+    "label": "Fiók",
+    "stats": "Statisztikáim",
+    "friends": "Barátok",
+    "settings": "Beállítások",
+    "signOut": "Kijelentkezés"
+  },
   "account": {
-    "title": "Fiók",
+    "title": "Beállítások",
     "signOut": "Kijelentkezés",
     "dangerZone": "Veszélyes zóna",
     "dangerZoneDesc": "Fiókod és minden hozzá tartozó adat végleges törlése.",

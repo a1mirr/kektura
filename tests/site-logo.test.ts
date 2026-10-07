@@ -20,7 +20,7 @@ function sourceFiles(dir: string): string[] {
 
 describe("spec 0014: the site logo", () => {
   it("AC-19: the locale layout and the 404 page render it, in their own language", () => {
-    expect(read("src/app/[locale]/layout.tsx")).toContain("<SiteLogo locale={locale} />");
+    expect(read("src/app/[locale]/layout.tsx")).toContain("<SiteLogo locale={locale}>");
     expect(read("src/app/not-found.tsx")).toContain("<SiteLogo locale={locale} />");
   });
 

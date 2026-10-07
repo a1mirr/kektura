@@ -156,7 +156,7 @@ A stamp the MTSZ moved to a new place (the same stamp, found somewhere else) is 
   the page scrolls (`position: sticky`, 16 px below the top of the window); the figures above it scroll away with the page. The block
   is never taller than the window: when its content is taller (a route panel under the map, a very short window, a language whose text
   wraps more) it scrolls inside itself, so everything in it stays reachable (spec 0003 AC-24), and the fullscreen map (spec 0003 AC-11)
-  still covers the whole page. The header row (title, language, links) is above both columns. Below 1024 px the page is one column, in
+  still covers the whole page. The header row (the title) is above both columns. Below 1024 px the page is one column, in
   the order figures, map, stage list, extra stamps, and nothing sticks. "Show in list" (spec 0003 AC-12), the 📍 buttons and the "go to
   extra stamps" links keep bringing their row or the map into view in both layouts.
 

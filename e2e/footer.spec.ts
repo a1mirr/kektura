@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { signInAsNewUser } from "./helpers";
 
 test.describe("spec 0014: footer", () => {
-  test("AC-1: a public page has links to the four pages, and none to the account page", async ({ page }) => {
+  test("AC-1: a public page has links to the four pages, and none to the settings page", async ({ page }) => {
     await page.goto("/en");
     const footer = page.getByRole("contentinfo");
     const links = footer.getByRole("link");

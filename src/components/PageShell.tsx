@@ -44,7 +44,7 @@ export default function PageShell({
   }
   if (variant === "hero") {
     return (
-      <main data-page={variant} className={`${pageWidth} relative flex flex-1 flex-col items-center justify-center py-8 text-center`}>
+      <main data-page={variant} className={`${pageWidth} flex flex-1 flex-col items-center justify-center py-8 text-center`}>
         <div className="flex w-full max-w-2xl flex-col items-center gap-6">{children}</div>
       </main>
     );

@@ -4,7 +4,7 @@ import { expect, test } from "@playwright/test";
 import en from "../messages/en.json";
 import { CHANGELOG } from "../src/content/changelog";
 import { routing } from "../src/i18n/routing";
-import { signInAsNewUser } from "./helpers";
+import { accountButton, openAccountMenu, signInAsNewUser } from "./helpers";
 
 // The one test per behaviour that runs over every language (task 0068): the expected texts are read from the
 // language's own messages file, so a new language needs no edit here. Other specs use the default language and
@@ -56,12 +56,16 @@ test.describe("spec 0005: every language", () => {
       }
     });
 
-    test(`0014 AC-15, AC-16, AC-18: the account link, page and sign-out button are in ${locale}, and the old /settings address keeps the language`, async ({ page }) => {
+    test(`0014 AC-15, AC-16, AC-18, AC-20, AC-21, AC-26: the account menu, the settings page and the sign-out button are in ${locale}, and the old /settings address keeps the language`, async ({ page }) => {
       await signInAsNewUser(page);
       await page.goto(`/${locale}/settings`);
       await expect(page).toHaveURL(new RegExp(`/${locale}/account$`));
       await page.goto(`/${locale}/dashboard`);
-      await page.getByRole("link", { name: m.dashboard.account, exact: true }).click();
+      await expect(accountButton(page)).toHaveText(m.accountMenu.label);
+      const menu = await openAccountMenu(page);
+      await expect(menu.getByRole("link")).toHaveText([m.accountMenu.stats, m.accountMenu.friends, m.accountMenu.settings]);
+      await expect(menu.getByRole("button", { name: m.accountMenu.signOut })).toBeVisible();
+      await menu.getByRole("link", { name: m.accountMenu.settings, exact: true }).click();
       await expect(page).toHaveURL(new RegExp(`/${locale}/account$`));
       await expect(page).toHaveTitle(m.account.title);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(m.account.title);

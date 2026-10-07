@@ -13,8 +13,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     resolveAlias: { "next-intl/config": requestConfig },
   },
-  // Spec 0014 AC-15: the account page used to live at /settings. Temporary (307), so the address stays free
-  // for real settings later.
+  // Spec 0014 AC-15: the settings page lives at /account, and /settings, its old address, redirects there (307).
   async redirects() {
     return [{ source: `/:locale(${routing.locales.join("|")})/settings`, destination: "/:locale/account", permanent: false }];
   },

@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
-import { expectNoSidewaysScroll, signInAsNewUser } from "./helpers";
+import { accountButton, expectNoSidewaysScroll, signInAsNewUser } from "./helpers";
 import { psql } from "./local-db";
 
 // Spec 0036 (the page layout), spec 0001 AC-28 (the dashboard's two columns), spec 0024 AC-27 and AC-28 (the friend's page and
@@ -62,10 +62,12 @@ test.describe("spec 0036: the page layout", () => {
       const header = await box(page.locator("main > header"));
       expect(header.x).toBeGreaterThanOrEqual(main.x);
       expect(header.x + header.width).toBeLessThanOrEqual(main.x + main.width + 0.5);
-      // the language switcher and the links end at the right edge of the content, not of the window
-      const switcher = await box(page.getByLabel("Language"));
-      const account = await box(page.getByRole("link", { name: "Account" }));
-      expect(Math.max(switcher.x + switcher.width, account.x + account.width)).toBeLessThanOrEqual(main.x + main.width + 0.5);
+      // the strip's language switcher and account button end at the right edge of the content, not of the window, and do not overlap
+      const switcher = await box(page.getByRole("combobox", { name: "Language" }));
+      const account = await box(accountButton(page));
+      const padding = (await clientWidth(page)) >= 640 ? 24 : 16;
+      expect(account.x + account.width, `${width} px: the account button at the content's right edge`).toBeCloseTo(main.x + main.width - padding, 0);
+      expect(switcher.x + switcher.width, `${width} px: the switcher left of the button`).toBeLessThanOrEqual(account.x);
     }
   });
 
@@ -137,7 +139,7 @@ test.describe("spec 0036: the page layout", () => {
     }
   });
 
-  test("AC-3: the account page's text blocks keep that line length too, while its cards use the full width", async ({ page }) => {
+  test("AC-3: the settings page's text blocks keep that line length too, while its cards use the full width", async ({ page }) => {
     await signInAsNewUser(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/en/account");

@@ -62,23 +62,33 @@ describe("spec 0015: about page text", () => {
   });
 });
 
-describe("spec 0014: the account page has one name in every language", () => {
-  const expected = { en: "Account", ru: "Аккаунт", hu: "Fiók", de: "Konto" };
+describe("spec 0014: the settings page has one name in every language", () => {
+  const settings = { en: "Settings", ru: "Настройки", hu: "Beállítások", de: "Einstellungen" };
+  const account = { en: "Account", ru: "Аккаунт", hu: "Fiók", de: "Konto" };
 
-  it("AC-18: the name is given for every language, so a new language fails here until it has one", () => {
-    expect(Object.keys(expected).sort()).toEqual([...routing.locales].sort());
+  it("AC-18: the names are given for every language, so a new language fails here until it has them", () => {
+    expect(Object.keys(settings).sort()).toEqual([...routing.locales].sort());
+    expect(Object.keys(account).sort()).toEqual([...routing.locales].sort());
   });
 
-  it.each(Object.entries(expected))("AC-18: %s: the header link, the page title and the About page's link text say %s", (locale, name) => {
+  it.each(Object.entries(settings))("AC-18: %s: the menu entry, the page title and the About page's link text say %s", (locale, name) => {
     const messages = byLocale[locale] as typeof import("../messages/en.json");
-    expect(messages.dashboard.account).toBe(name);
+    expect(messages.accountMenu.settings).toBe(name);
     expect(messages.account.title).toBe(name);
     expect(messages.about.data3).toContain(`<account>${name}</account>`);
   });
 
-  it.each(Object.entries(expected))("AC-18: %s: nothing is still called settings", (locale) => {
-    const messages = flatten(byLocale[locale]);
-    expect([...messages.keys()].filter((key) => /(^|\.)settings(\.|$)|signOut/.test(key) && key !== "account.signOut")).toEqual([]);
+  it.each(Object.entries(account))("AC-20: %s: the menu's button says %s, the name of the account, not the name of the page", (locale, name) => {
+    const messages = byLocale[locale] as typeof import("../messages/en.json");
+    expect(messages.accountMenu.label).toBe(name);
+    expect(messages.accountMenu.label).not.toBe(messages.accountMenu.settings);
+  });
+
+  it.each(Object.entries(settings))("AC-18: %s: no old header-link keys are left, and Sign out is in the menu and on the page, in the same words", (locale) => {
+    const messages = byLocale[locale] as typeof import("../messages/en.json");
+    expect(Object.keys(messages.dashboard)).not.toContain("account");
+    expect(Object.keys(messages.dashboard)).not.toContain("stats");
+    expect(messages.accountMenu.signOut).toBe(messages.account.signOut);
   });
 });
 
@@ -89,9 +99,9 @@ describe("spec 0037: the stats page has one name in every language", () => {
     expect(Object.keys(expected).sort()).toEqual([...routing.locales].sort());
   });
 
-  it.each(Object.entries(expected))("AC-2: %s: the header link and the page title say %s", (locale, name) => {
+  it.each(Object.entries(expected))("AC-2: %s: the menu entry and the page title say %s", (locale, name) => {
     const messages = byLocale[locale] as typeof import("../messages/en.json");
-    expect(messages.dashboard.stats).toBe(name);
+    expect(messages.accountMenu.stats).toBe(name);
     expect(messages.stats.title).toBe(name);
   });
 

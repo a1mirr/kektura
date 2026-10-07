@@ -53,19 +53,19 @@ Google account and without touching real data. Production keeps Google sign-in o
   mobile emulation; 375 px is the narrowest width spec 0036 promises), that runs only the tests tagged `@mobile`, and the
   desktop project `chromium` runs everything else, so no test runs twice. The tagged tests (`e2e/mobile.spec.ts`) cover the
   landing page with the dummy sign-in, stamping a place on the dashboard, changing the dates of several stamps at once (the bar at 375 and 320 px), the stage list, the map (a section of the dashboard,
-  not a page of its own: going fullscreen and leaving it), the Friends page (saving the name), the stats page (a long walk scrolls inside the chart's frame, a month's tooltip is opened and closed with taps) and the account page (signing
-  out). Each one asserts that its page does not scroll sideways (`expectNoSidewaysScroll` in `e2e/helpers.ts`, the check
+  not a page of its own: going fullscreen and leaving it), the Friends page (saving the name), the stats page (a long walk scrolls inside the chart's frame, a month's tooltip is opened and closed with taps), the settings page (signing
+  out) and the account menu of the header strip (opened with a tap in every language, its list inside the window, 44 px targets, spec 0014 AC-25). Each one asserts that its page does not scroll sideways (`expectNoSidewaysScroll` in `e2e/helpers.ts`, the check
   `e2e/layout.spec.ts` uses too), that the page's main action is visible, lies inside the window and is at least 24 px high
-  and wide (44 px where a spec promises it: the sign-out button, spec 0014 AC-16, and the name's Save button, spec 0024
+  and wide (44 px where a spec promises it: the sign-out button, spec 0014 AC-16, the account menu's button and entries, AC-25, and the name's Save button, spec 0024
   AC-20), and that tapping it does what it should. The feature-flag project starts only after both projects (AC-6).
 - **AC-11**: The main pages are checked with axe (`@axe-core/playwright`, `e2e/accessibility.spec.ts`), each at a desktop width
   (1280 x 800) and at the phone width (375 x 812): the landing page in every language, the dashboard (every stage open, one place
-  stamped, the map drawn), the dashboard in its "Change dates" mode (one stamp chosen and a date typed), the stats page (six months drawn, one of them empty), the account page, the Friends page and the Changelog page. The rules are the WCAG 2.0, 2.1 and 2.2
+  stamped, the map drawn), the dashboard in its "Change dates" mode (one stamp chosen and a date typed), the stats page (six months drawn, one of them empty), the settings page, the stats page with the account menu open (its list, the marked entry, Sign out), the Friends page and the Changelog page. The rules are the WCAG 2.0, 2.1 and 2.2
   success criteria of levels A and AA, all of them at both widths except the colour contrast of the dashboard, which is checked at
   the desktop width only (the colours do not change with the width, and the rule is half of the time axe takes on that page). A finding of impact `serious` or `critical` that the allow-list (AC-12) does not name fails
   the test of its page, with the rule, the width and the elements; findings of lower impact are attached to the test as
   annotations and do not fail it. Only the page as it is when it has loaded is scanned: not what opens on a click (the map's
-  popups, the confirmation of deleting an account).
+  popups, the confirmation of deleting an account), except the account menu's list, which one target opens.
 - **AC-12**: The serious and critical violations that exist and are not fixed yet are listed in one allow-list
   (`e2e/accessibility-allowlist.ts`): the rule, the page, optionally the width, the reason and the task that fixes it. The list
   can only shrink: the test of a page fails when an entry for that page no longer fires (at the width it names, or at either
@@ -103,5 +103,5 @@ and a width below 375 px.
 | AC-9 | `e2e/auth.spec.ts` ("AC-3, AC-5, AC-9") |
 | AC-7 | `tests/test-server-env.test.ts` (the real Next env loader, with a `.env.local` that holds a bot; and that `scripts/test-env.mjs` builds its environment with `testServerEnv`) |
 | AC-10 | `e2e/mobile.spec.ts` (the first test checks that the project is a 375 px touch screen; the rest are the pages and actions named in the AC), `playwright.config.ts` (the projects) |
-| AC-11 | `e2e/accessibility.spec.ts` (one test per page, both widths). Not covered by axe, and not tested: how a screen reader reads the pages, focus order and keyboard use, and what opens on a click. manual (axe finds roughly a third of accessibility problems, not all): walk the landing page, the dashboard, the account page and the stats page (the month bars are a custom widget: buttons in a group with arrow-key movement) with a keyboard only and with a screen reader (NVDA or VoiceOver). Last checked: never recorded. |
+| AC-11 | `e2e/accessibility.spec.ts` (one test per page, both widths; the account menu open on the stats page). Not covered by axe, and not tested: how a screen reader reads the pages, focus order beyond the account menu's (`e2e/account-menu.spec.ts` tests its keys), and what opens on a click apart from that menu. manual (axe finds roughly a third of accessibility problems, not all): walk the landing page, the dashboard, the settings page, the account menu (a `<details>` with a `<summary>`: how the screen reader announces its name and open state) and the stats page (the month bars are a custom widget: buttons in a group with arrow-key movement) with a keyboard only and with a screen reader (NVDA or VoiceOver). Last checked: never recorded. |
 | AC-12 | `tests/accessibility-allowlist.test.ts` (an unlisted serious or critical finding fails, a listed one passes, an entry that no longer fires is stale, an entry covers its own page and width only, minor and moderate findings are not enforced, every real entry has a reason), `e2e/accessibility.spec.ts` (every entry names a scanned page; each page's test fails on a stale entry) |
