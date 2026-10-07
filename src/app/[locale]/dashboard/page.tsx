@@ -158,6 +158,9 @@ export default async function Dashboard({
                 {t("friends")}
               </Link>
             )}
+            <Link href="/stats" className="text-sm text-stone-600 hover:underline">
+              {t("stats")}
+            </Link>
             <Link href="/account" className="text-sm text-stone-600 hover:underline">
               {t("account")}
             </Link>

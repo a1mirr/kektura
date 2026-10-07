@@ -114,7 +114,7 @@ describe("spec 0003: the note and the report link of a stamp's popup", () => {
   });
 
   it("AC-27: only a path of this site or an https: address becomes a link", () => {
-    for (const href of ["javascript:alert(1)", "//evil.example/", "http://x.example/", "data:text/html,x"]) {
+    for (const href of ["javascript:alert(1)", "//evil.example/", "/\\evil.example", "/\\/evil.example", "\\\\evil.example", "http://x.example/", "data:text/html,x"]) {
       expect(buildMenu("Name", null, [], { link: { label: "x", href } }).querySelector("a")).toBeNull();
     }
     expect(buildMenu("Name", null, [], { link: { label: "x", href: "https://www.kektura.hu/" } }).querySelector("a")).not.toBeNull();

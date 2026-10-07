@@ -32,8 +32,7 @@ walked before it is shown as missing it.
 - **AC-4**: Total km = last place km - first place km; walked km = sum of the ranges; remaining =
   total - walked (never negative); percent = walked / total, rounded. Kilometres are rounded to
   0.1. With no places everything is 0.
-- **AC-5**: "Stamps per month" counts places, not variant rows, each in the month of its earliest
-  stamp (`stamped_on`), oldest month first. Month labels and the tooltip are localized.
+- **AC-5**: Removed. The per-month figures (stamps, km, stages) are spec 0037's.
 
 ### Stamps required from a date
 
@@ -172,14 +171,13 @@ stage is AC-12 to AC-15); moving extra stamps into the stage's place list; chang
 
 | AC | Test |
 | --- | --- |
-| AC-1, AC-2, AC-3, AC-4, AC-5 (counting), AC-6, AC-7, AC-12, AC-15 | `src/lib/progress.test.ts` |
+| AC-1, AC-2, AC-3, AC-4, AC-6, AC-7, AC-12, AC-15 | `src/lib/progress.test.ts` |
 | AC-13, AC-14 | `e2e/extra-stamps-stages.spec.ts` (every extra stamp names a stage, in order along the trail; each stage's "go to extra stamps (N)" counts exactly its extra stamps and jumps to them; stages without any have no link; the counts add up) |
 | AC-3, AC-4, AC-7 on the real dashboard | `e2e/stamping.spec.ts` |
-| AC-5 (localized labels) | `e2e/account.spec.ts` (the month label on the account page's axis and in the tooltip, in the default language and in English, each the way `Intl` writes it for that language) |
 | AC-8, AC-9 | `src/components/StageSection.test.tsx` |
-| AC-22, AC-23 | `src/lib/progress.test.ts` (a retired row is no place and no neighbour; the rows read; listed with a stamp, by the earlier neighbour's date, on and after the retirement day, one neighbour, none; the monthly counts ignore a stamp on one) |
+| AC-22, AC-23 | `src/lib/progress.test.ts` (a retired row is no place and no neighbour; the rows read; listed with a stamp, by the earlier neighbour's date, on and after the retirement day, one neighbour, none) |
 | AC-24 | `src/components/RetiredRow.test.tsx` (hidden by default, the checkbox shows it, remembered, storage refusing), `src/components/StageControls.test.tsx` (the checkbox only while there is a retired stamp) |
-| AC-25 | `src/components/RetiredStampControl.test.tsx` (no default day, disabled until a real day before the retirement, the date field keeps to it, the remove button), `e2e/retired-stamps.spec.ts` (the count, km, stage totals and "Stamp stage" ignore it; the collected line and the stage mark) |
+| AC-25 | `src/components/RetiredStampControl.test.tsx` (no default day, disabled until a real day before the retirement, the date field keeps to it, the remove button), `e2e/retired-stamps.spec.ts` (the count, km, stage totals and "Stamp stage" ignore it; the collected line and the stage mark), `src/lib/month-stats.test.ts` (a stamp on a retired row is no month's stamp and does not stretch the months) |
 | AC-26, AC-27 | `e2e/retired-stamps.spec.ts` (the note, badge, link, approximate position, the replacing stamp's line; 375 px in English, Hungarian, German and Russian) |
 | AC-16, AC-17, AC-18, AC-20 | `src/lib/progress.test.ts` (the earliest date of the variants; the later neighbour decides, on and after the date, one neighbour, none; a stamped place never waived; the stretch across a waived place and the opposite case; a waived place is done for its stage but no stamp), `src/lib/friends.test.ts` and `src/lib/compare.test.ts` (the same on a friend's page) |
 | AC-19 | `src/components/RequiredFrom.test.tsx` (the date in the page's language, hint and badge, the button that opens the note and Escape, the tolerance sentence), `src/lib/new-stamps.test.ts` (which stamps carry the tolerance) |
@@ -188,5 +186,5 @@ stage is AC-12 to AC-15); moving extra stamps into the stage's place list; chang
 | AC-11 | `e2e/stamping.spec.ts` (375 px in the default language and in German: no sideways scroll with every stage collapsed, expanded, and with a stamped place and extra stamp) |
 | AC-28 | `e2e/layout.spec.ts` (from 1024 px the aside is left of the list, in two columns of figures; after a long scroll the map's block is 16 px below the top, inside the window, and the figures have scrolled away; below it one column in the order, nothing sticks, the list as wide as the window; the "go to extra stamps" link still reaches the extra stamps at 1280 x 720), `e2e/map.spec.ts` (the 📍 button: in two columns the map is in view already and the row does not move, in one column the map scrolls into view; "Show in list" in both layouts), `src/components/PageShell.test.tsx` (the aside and its order, stretching), `tests/page-shell.test.ts` (the sticky block has a z-index) |
 | AC-29 | `src/lib/stamp-moves.test.ts` (the 180 days, the day itself and the last day, a future day, calendar days over a month, a year and a leap day, the note's words and its absence of distance, a place's most recent variant), `src/components/MovedNote.test.tsx` (text, never markup; wraps), `tests/stamp-dates-database.test.ts` (a moved row keeps its id and every user's stamp with its date, gets no `required_from`, nothing is added or dropped, the day reaches that code only) |
-| AC-29 (the note on the real page) | manual (the shared reference data is cached for 24 hours, so an end-to-end test cannot change a row under a running test server, and the real seed has no move): `update public.checkpoints set moved_on = current_date - 3 where code = 'OKTPH_142'` in the local test database, restart `npm run dev:test`, open the dashboard and a friend's page: the row says "Moved on …", where it is now and the advice, in each language; remove the day and restart: the note is gone. Last checked: 2026-10-07 (see the pull request of task #77). |
+| AC-29 (the note on the real page) | manual (the shared reference data is cached for 24 hours, so an end-to-end test cannot change a row under a running test server, and the real seed has no move): `update public.checkpoints set moved_on = current_date - 3 where code = 'OKTPH_142'` in the local test database, restart `npm run dev:test`, open the dashboard and a friend's page: the row says "Moved on …", where it is now and the advice, in each language; remove the day and restart: the note is gone. Last checked: 2026-10-07 (production build of the test server with a stamp moved three days earlier: the dashboard's row in English, Hungarian, German and Russian, and a friend's row in English. Not looked at: that the note is gone once the day is removed). |
 | AC-11 (own line, right-aligned) | `e2e/stamping.spec.ts` (at 375 px a stamped row's controls start below the text and end at the row's right padding) |

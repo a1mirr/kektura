@@ -125,3 +125,44 @@ export async function openStampPopup(page: Page, placeKey: string, action: strin
   await canvas(page).click({ position: { x: size.w / 2, y: size.h / 2 } });
   await expect(page.getByRole("button", { name: action })).toBeVisible();
 }
+
+// Stamps places for a user straight in the database, each on its own day (`{ OKTPH_02: "2026-01-25" }`): every variant of the
+// place gets a row, as the stamp button would. Faster than clicking, and the only way to put stamps in the past or in many months.
+export function stampPlacesOn(email: string, dates: Record<string, string>) {
+  for (const [key, day] of Object.entries(dates)) {
+    psql(
+      `insert into public.user_stamps (user_id, checkpoint_id, stamped_on) select u.id, c.id, '${day}' from auth.users u, public.checkpoints c where u.email = '${email}' and coalesce(c.place_key, c.code) = '${key}' and c.retired_on is null`,
+    );
+  }
+}
+
+// Every place of the first `stages` stages stamped on one day.
+export function stampStagesOn(email: string, stages: number, day: string) {
+  psql(
+    `insert into public.user_stamps (user_id, checkpoint_id, stamped_on) select u.id, c.id, '${day}' from auth.users u, public.checkpoints c where u.email = '${email}' and c.stage <= ${stages} and c.retired_on is null`,
+  );
+}
+
+// An extra stamp (by its id: 1 is Velem, 3.8 km from the start, in stage 1) on a day.
+export function stampExtraOn(email: string, extraId: number, day: string) {
+  psql(
+    `insert into public.user_extra_stamps (user_id, extra_id, stamped_on) select u.id, ${extraId}, '${day}' from auth.users u where u.email = '${email}'`,
+  );
+}
+
+// The walk of spec 0037's tests: six months, one of them empty, one with only an extra stamp, and a stretch finished by a
+// stamp that is placed next to an earlier month's. Places 01 to 05 are 0, 8.1, 13.0, 28.7 and 38.4 km from the start.
+//   Dec 2025: 05 (1 stamp, stage 1, 0 km)      Jan 2026: 01 and 02 (2 stamps, 8.1 km)       Feb: nothing
+//   Mar: the extra stamp 1 only                  Apr: 04 (1 stamp, 9.7 km: 04-05 is walked now, 05 is older)
+//   May: 03 (1 stamp, 4.9 + 15.7 = 20.6 km: both its stretches are walked now, 02 and 04 are older)
+// Together 38.4 km, the dashboard's walked km, and 5 of the 161 places.
+export function seedStatsWalk(email: string) {
+  stampPlacesOn(email, {
+    OKTPH_05: "2025-12-30",
+    OKTPH_01_DDKPH_01: "2026-01-20",
+    OKTPH_02: "2026-01-25",
+    OKTPH_04: "2026-04-02",
+    OKTPH_03: "2026-05-10",
+  });
+  stampExtraOn(email, 1, "2026-03-15");
+}

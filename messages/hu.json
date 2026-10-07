@@ -24,7 +24,6 @@
     "map": "Az útvonal térképe",
     "mapLegend": "Kék vonal — teljesített szakaszok (két szomszédos lepecsételt hely között), szürke szaggatott — a többi.",
     "trailData": "Útvonaladatok: az MTSZ {date} napi fájlja.",
-    "perMonth": "Bélyegzések havonta",
     "checkpoints": "Bélyegzőhelyek",
     "stamp": "Bélyegzés",
     "unstamp": "Törlés",
@@ -92,6 +91,7 @@
     "replacesRetired": "A megszűnt {name} bélyegző helyett (eddig érvényes volt: {date}).",
     "mapAttribution": "© az OpenStreetMap közreműködői · útvonal: MTSZ",
     "account": "Fiók",
+    "stats": "Statisztikáim",
     "stampDate": "A bélyegzés dátuma",
     "openCalendar": "Naptár megnyitása",
     "bulkMode": "Dátumok módosítása",
@@ -207,6 +207,18 @@
     "deleteButton": "Igen, véglegesen törlöm a fiókom",
     "cancel": "Mégse",
     "deleteFailed": "Nem sikerült törölni a fiókot. Próbáld újra."
+  },
+  "stats": {
+    "title": "Statisztikáim",
+    "stages": "Teljesített szakaszok",
+    "perMonth": "Bélyegzések havonta",
+    "empty": "Még nincs bélyegzésed. A hónapok itt jelennek meg, amint begyűjtöttél egyet.",
+    "tipStamps": "{count, plural, one {# bélyegzés} other {# bélyegzés}}",
+    "tipExtra": "{count, plural, one {# extra bélyegző} other {# extra bélyegző}}",
+    "tipNone": "Ebben a hónapban nincs bélyegzés",
+    "tipKm": "{km} km",
+    "tipStage": "{list}. szakasz",
+    "tipStages": "Szakaszok: {list}"
   },
   "friends": {
     "title": "Barátok",

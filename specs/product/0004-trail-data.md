@@ -56,8 +56,8 @@ and safe to regenerate whenever MTSZ (or heyjoe.hu) publishes a new file.
   `supabase/seed.sql` before it writes the new one and **fails** when a code's coordinates moved by more than 100 m without an entry (naming the code and the distance), and
   when an entry is not real; a new code and a code that is gone are no moves. It writes the days into the seed (`checkpoints.moved_on`) as the last
   block of its transaction, which clears the day of every code the file no longer has and sets the file's, so an entry removed from the file leaves the database
-  with the next seed. A current row may carry `moved_on`; a retired row never does (a check of the table). The file has no entry today: the MTSZ's
-  announcements of moves are entered when one is found (the recipe under Notes).
+  with the next seed. A current row may carry `moved_on`; a retired row never does (a check of the table). With no entry the block only clears, and nothing
+  is shown as moved; an entry is added by hand when the MTSZ announces a move (the recipe under Notes).
 - **AC-17**: `build-data.mjs` writes `public/data/okt-meta.json`, `{ "mtszFileDate": "YYYY-MM-DD" }`: the date in the names of the two MTSZ files it was run on (`okt_bh_<date>.gpx`,
   `okt_teljes_bh_<date>.gpx`), the older of the two, and fails when a name carries no real day. The About page and the maps say it (spec 0015 AC-9,
   spec 0003 AC-28).
@@ -90,8 +90,8 @@ Downloading the source files (done by hand from kektura.hu / heyjoe.hu); stamp a
 - Extra stamps: heyjoe.hu's `okt_pecsetek.gpx` (https://heyjoe.hu/pecset_gpx.php?mozgalom=okt).
 
 **Regenerating.** Run `node scripts/build-data.mjs <stamps.gpx> <route.gpx> [okt_pecsetek.gpx]`. It
-writes `supabase/seed.sql`, `public/data/okt-route.json`, `okt-route-detail.json`, `okt-hops.json`
-and, with the third argument, `supabase/seed_extra.sql`. Never edit those by hand. Then:
+writes `supabase/seed.sql`, `public/data/okt-route.json`, `okt-route-detail.json`, `okt-hops.json`,
+`okt-meta.json` (AC-17) and, with the third argument, `supabase/seed_extra.sql`. Never edit those by hand. Then:
 1. Run `npm test` (this spec's checks, the dates file included).
 2. Run `npm run testdb:reset` and `npm run e2e`.
 3. Apply the seeds to production.

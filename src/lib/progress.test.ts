@@ -9,7 +9,6 @@ import {
   buildRetired,
   retiredVisibleKeys,
   stampedPlaceKeys,
-  stampsPerMonth,
   walkedRanges,
   findStageForKm,
   type Checkpoint,
@@ -122,28 +121,6 @@ describe("spec 0001: walked stretches", () => {
     const s = progressSummary(places, walkedRanges(places, new Set(["A", "B"])));
     expect(s.doneKm).toBe(4.9);
     expect(s.remainingKm).toBe(15.7);
-  });
-});
-
-describe("spec 0001: stamps per month", () => {
-  it("AC-5: counts places (not variant rows) in the month of their earliest stamp", () => {
-    const places = buildPlaces([cp("A", 0), cp("K", 5), cp("K", 6), cp("B", 9)]);
-    const [a, k1, k2, b] = places.flatMap((p) => p.variants.map((v) => v.id));
-    const data = stampsPerMonth(
-      [
-        { checkpoint_id: k2, stamped_on: "2026-09-03" },
-        { checkpoint_id: k1, stamped_on: "2026-08-20" },
-        { checkpoint_id: a, stamped_on: "2026-09-01" },
-        { checkpoint_id: b, stamped_on: "2025-12-31" },
-        { checkpoint_id: 999_999, stamped_on: "2026-01-01" }, // unknown checkpoint: ignored
-      ],
-      places,
-    );
-    expect(data).toEqual([
-      { month: "2025-12", count: 1 },
-      { month: "2026-08", count: 1 },
-      { month: "2026-09", count: 1 },
-    ]);
   });
 });
 
@@ -305,16 +282,6 @@ describe("spec 0001: retired stamps", () => {
   const places = () => buildPlaces(lineWithRetired());
   const visible = (stamped: [string, string][], own: [string, string][] = []) =>
     [...retiredVisibleKeys(retired(), places(), new Map(stamped), new Map(own))];
-
-  it("AC-25: a stamp on a retired row is no month's stamp: the monthly counts ignore it", () => {
-    const rows = lineWithRetired();
-    const retiredId = rows[4].id;
-    const stamps = [
-      { checkpoint_id: rows[0].id, stamped_on: "2014-06-01" },
-      { checkpoint_id: retiredId, stamped_on: "2014-06-02" },
-    ];
-    expect(stampsPerMonth(stamps, buildPlaces(rows))).toEqual([{ month: "2014-06", count: 1 }]);
-  });
 
   it("AC-23: a stamp the user holds is always listed, whatever their dates", () => {
     expect(visible([], [["R", "2026-01-01"]])).toEqual(["R"]);

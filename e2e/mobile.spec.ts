@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { expandAllStages, expectNoSidewaysScroll, openStampPopup, signInAsNewUser, stat } from "./helpers";
+import { expandAllStages, expectNoSidewaysScroll, openStampPopup, seedStatsWalk, signInAsNewUser, stampPlacesOn, stat } from "./helpers";
 import { psql } from "./local-db";
 
 // Spec 0006 AC-10: the pages at a phone's width, in the `mobile` project (Chromium, 375 x 812, touch, mobile emulation,
@@ -126,13 +126,47 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
   test("AC-10: the account page does not scroll sideways, and signing out works with a tap", async ({ page }) => {
     await signInAsNewUser(page);
     await page.goto("/en/account");
-    await expect(page.getByRole("heading", { name: "Stamps per month" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Account", level: 1 })).toBeVisible();
     await expectNoSidewaysScroll(page, "sideways scroll on the account page");
     const signOut = page.getByRole("button", { name: "Sign out" });
     await expectTappable(page, signOut, "the sign-out button", 44);
     await expectTappable(page, page.getByRole("button", { name: "Delete account" }), "the delete button");
     await signOut.tap();
     await expect(page).toHaveURL(/\/en$/);
+  });
+
+  // Spec 0037: the stats page. A long walk scrolls inside the chart's own frame, and a tap on a month opens its tooltip, a second tap
+  // closes it (no hover on a phone).
+  test("AC-10: the stats page does not scroll sideways, and a month's tooltip is opened and closed with taps", async ({ page }) => {
+    const email = await signInAsNewUser(page);
+    seedStatsWalk(email);
+    stampPlacesOn(email, { OKTPH_06: "2025-01-05" }); // 17 months in all: the chart is wider than the phone
+    await page.goto("/en/stats");
+    await expect(page.locator("[data-month]").first()).toBeAttached();
+    await expectNoSidewaysScroll(page, "sideways scroll on the stats page");
+    expect(await page.locator("[data-month-chart]").evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
+
+    const may = page.getByRole("button", { name: /^May 2026:/ });
+    await expectTappable(page, may, "the newest month", 44); // the whole column is the target (spec 0037 AC-10)
+    const tooltip = page.locator("[data-chart-tooltip]");
+    // Retried until it sticks: a tap before hydration does nothing.
+    await expect(async () => {
+      await may.tap();
+      await expect(tooltip).toContainText("May 2026", { timeout: 1_000 });
+    }).toPass();
+    await expect(tooltip).toContainText("20.6 km");
+    await expectNoSidewaysScroll(page, "sideways scroll on the stats page with a tooltip open");
+    const box = (await tooltip.boundingBox())!;
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(375.5);
+    await may.tap(); // a second tap closes it
+    await expect(tooltip).toHaveCount(0);
+    // another month, and a tap on the page closes it again
+    const april = page.getByRole("button", { name: /^April 2026:/ });
+    await april.tap();
+    await expect(tooltip).toContainText("April 2026");
+    await page.getByRole("heading", { level: 1 }).tap();
+    await expect(tooltip).toHaveCount(0);
   });
 
   // Spec 0016 AC-21: "Change dates" on a phone. The bar is fixed to the bottom of the screen and fits at 320 px, the checkboxes

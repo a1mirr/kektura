@@ -11,7 +11,7 @@ export type MapPoint = {
   stamped: boolean;
   // Spec 0003 AC-22: what the popup adds under the km for a new stamp (the date it is required from, whether it is waived).
   note?: string;
-  // Spec 0003 AC-26: the stamp moved within the last 180 days (spec 0001 AC-30): the note its popup shows, and the ring its marker gets.
+  // Spec 0003 AC-26: the stamp moved within the last 180 days (spec 0001 AC-29): the note its popup shows, and the ring its marker gets.
   movedNote?: string;
   // The stamp's own code, for the "Report a wrong location" link (spec 0003 AC-27); null for a row without one.
   code: string | null;

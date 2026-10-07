@@ -56,7 +56,7 @@ export function buildMenu(title: string, subtitle: string | null, actions: MenuA
     });
     box.append(button);
   }
-  if (extras.link && /^\/(?!\/)|^https:\/\//.test(extras.link.href)) {
+  if (extras.link && /^\/(?![/\\])|^https:\/\//.test(extras.link.href)) {
     const link = document.createElement("a");
     link.href = extras.link.href;
     link.target = "_blank";

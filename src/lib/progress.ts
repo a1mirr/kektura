@@ -199,21 +199,6 @@ export function progressSummary(places: Place[], ranges: KmRange[]) {
   };
 }
 
-// Places (not rows: a stamped place has a row per variant) first stamped in each month, oldest first.
-export function stampsPerMonth(stamps: StampRow[], places: Place[]): { month: string; count: number }[] {
-  const placeOf = new Map(places.flatMap((p) => p.variants.map((v) => [v.id, p.key] as const)));
-  const monthOfPlace = new Map<string, string>();
-  for (const s of stamps) {
-    const place = placeOf.get(s.checkpoint_id);
-    const month = s.stamped_on.slice(0, 7);
-    const seen = place && monthOfPlace.get(place);
-    if (place && (!seen || month < seen)) monthOfPlace.set(place, month);
-  }
-  const byMonth = new Map<string, number>();
-  for (const month of monthOfPlace.values()) byMonth.set(month, (byMonth.get(month) ?? 0) + 1);
-  return [...byMonth.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([month, count]) => ({ month, count }));
-}
-
 // Places grouped by official stage (1..27), in stage order. A stage's starting point is the previous
 // stage's last place (same stamp), except where they don't join (Visegrád -> Nagymaros, a ferry).
 export function buildStages(places: Place[], stagesMeta: StageMeta[]): Stage[] {
