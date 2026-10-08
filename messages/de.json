@@ -13,7 +13,17 @@
     "authError": "Die Anmeldung ist fehlgeschlagen, bitte versuche es erneut.",
     "testLoginEmail": "Test-Anmeldung: beliebige E-Mail-Adresse (das Konto wird bei der ersten Anmeldung angelegt)",
     "testLoginButton": "Als Testnutzer anmelden",
-    "testLoginNote": "Nur auf dem Testserver. Die Daten liegen in der lokalen Testdatenbank."
+    "testLoginNote": "Nur auf dem Testserver. Die Daten liegen in der lokalen Testdatenbank.",
+    "screenshots": {
+      "heading": "So sieht es aus",
+      "note": "Die Screenshots zeigen ein Demo-Konto in der englischen Oberfläche.",
+      "dashboardAlt": "Die Übersicht eines Demo-Kontos: gesammelte Stempel, Prozent geschafft, gewanderte und verbleibende Kilometer sowie die Liste der Etappen mit ihren Stempelstellen.",
+      "dashboardCaption": "Dein Fortschritt in Zahlen und jede Etappe mit ihren Stempelstellen.",
+      "mapAlt": "Die Karte des Weges im Vollbild: die blaue Linie über den bereits gewanderten Abschnitten und die darauf markierten Stempelstellen.",
+      "mapCaption": "Die Karte: Die blaue Linie zeigt, was du gewandert bist, die Punkte sind die Stempel.",
+      "routeAlt": "Der Routenplaner auf der Karte: ein Abschnitt zwischen zwei Stempelstellen auf dem Weg, darunter Entfernung, Aufstieg, Abstieg und Gehzeit.",
+      "routeCaption": "Der Routenplaner: Wähle zwei Stempelstellen und sieh Entfernung, Anstieg und Zeit."
+    }
   },
   "dashboard": {
     "title": "Mein Fortschritt",

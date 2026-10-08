@@ -14,10 +14,10 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     date: "2026-10-07",
     title: {
-      en: "Change the date of many stamps at once, a page of your stats, moved stamps on the map and an account menu",
-      ru: "Дату можно изменить сразу у многих печатей, появились страница статистики и меню аккаунта, а перенесённые печати видны на карте",
-      hu: "Sok bélyegzés dátuma módosítható egyszerre, megjelent a statisztikák oldala és a fiókmenü, az áthelyezett bélyegzők pedig látszanak a térképen",
-      de: "Das Datum vieler Stempel auf einmal ändern, eine Seite mit deiner Statistik, ein Kontomenü und verlegte Stempel auf der Karte",
+      en: "Change the date of many stamps at once, a page of your stats, moved stamps on the map, an account menu and screenshots on the start page",
+      ru: "Дату можно изменить сразу у многих печатей, появились страница статистики и меню аккаунта, перенесённые печати видны на карте, а на главной странице есть скриншоты",
+      hu: "Sok bélyegzés dátuma módosítható egyszerre, megjelent a statisztikák oldala és a fiókmenü, az áthelyezett bélyegzők látszanak a térképen, a nyitóoldalon pedig képernyőképek mutatják az alkalmazást",
+      de: "Das Datum vieler Stempel auf einmal ändern, eine Seite mit deiner Statistik, ein Kontomenü, verlegte Stempel auf der Karte und Screenshots auf der Startseite",
     },
     changes: [
       {
@@ -72,6 +72,15 @@ export const CHANGELOG: ChangelogEntry[] = [
           ru: "Страница «О приложении» и карта теперь сообщают, насколько свежи данные трассы: из какого файла MTSZ они взяты, и его дату.",
           hu: "A Névjegy oldal és a térkép mostantól megmondja, mennyire friss az útvonal adata: melyik MTSZ-fájlból származik, és mi a dátuma.",
           de: "Die Seite „Über das Projekt“ und die Karte sagen jetzt, wie aktuell die Streckendaten sind: aus welcher MTSZ-Datei sie stammen, mit Datum.",
+        },
+      },
+      {
+        kind: "new",
+        text: {
+          en: "The start page now shows what the app looks like before you sign in: three screenshots of a demo account (your progress with the stages, the map with the blue line over what is walked, and the route planner with a picked stretch), each with a short caption. The screenshots are in English in every language, and the footer comes after them.",
+          ru: "Главная страница теперь показывает, как выглядит приложение, ещё до входа: три скриншота демо-аккаунта (ваш прогресс с этапами, карта с синей линией поверх пройденного и планировщик маршрута с выбранным участком), у каждого короткая подпись. Скриншоты на английском для всех языков, а подвал страницы теперь идёт после них.",
+          hu: "A nyitóoldal mostantól bejelentkezés előtt megmutatja, hogyan néz ki az alkalmazás: egy demófiók három képernyőképét (a haladásod a szakaszokkal, a térkép a megtett utat jelző kék vonallal, és a túratervező egy kiválasztott szakasszal), mindegyiket rövid felirattal. A képernyőképek minden nyelven angolok, az oldal lábléce pedig utánuk következik.",
+          de: "Die Startseite zeigt jetzt schon vor der Anmeldung, wie die App aussieht: drei Screenshots eines Demo-Kontos (dein Fortschritt mit den Etappen, die Karte mit der blauen Linie über dem Gewanderten und der Routenplaner mit einem gewählten Abschnitt), jeweils mit einer kurzen Beschriftung. Die Screenshots sind in allen Sprachen englisch, und die Fußzeile steht jetzt nach ihnen.",
         },
       },
     ],

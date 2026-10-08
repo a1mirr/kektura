@@ -30,6 +30,22 @@ describe("spec 0036: PageShell", () => {
     expect(screen.getByRole("main").className).not.toContain("min-h-screen");
   });
 
+  it("AC-4, AC-6: a hero page with content below keeps its block narrow and puts the content after it at the full width, top-aligned", () => {
+    render(
+      <PageShell variant="hero" below={<p>gallery</p>}>
+        <p>hello</p>
+      </PageShell>,
+    );
+    const main = screen.getByRole("main");
+    const [block, below] = Array.from(main.children);
+    expect(block.className).toContain("max-w-2xl");
+    expect(block.textContent).toBe("hello");
+    expect(below.textContent).toBe("gallery");
+    expect(below.className).not.toContain("max-w-2xl"); // the content's own width, not the block's
+    expect(main.className).not.toContain("justify-center"); // taller than a screen: it starts at the top
+    expect(main.className).not.toContain("min-h-screen");
+  });
+
   it("AC-4: a card page draws one narrow centred card", () => {
     render(<PageShell variant="card">invite</PageShell>);
     const card = screen.getByText("invite");

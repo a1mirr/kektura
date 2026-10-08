@@ -22,8 +22,8 @@ pages of the signed-in area (My stats, Friends, Settings), so no page carries a 
 - **AC-1**: Every page has a footer with links to About, Changelog, Useful links and Feedback, in the
   page's language. The footer links only to pages anyone can open; the settings page is reached from
   the account menu (AC-21), because a footer link would lead signed-out visitors nowhere. Full-height
-  pages (landing, error) fill the space above the footer instead of a whole screen, so on a phone the
-  landing page and its footer fit one screen without scrolling.
+  pages (the error page) fill the space above the footer instead of a whole screen, so the footer stays on the first screen. The
+  landing page's footer follows its gallery of screenshots, below the first screen (spec 0038 AC-7).
 
 ### Informational pages
 
@@ -135,7 +135,7 @@ email on the page.
 
 | AC | Test |
 | --- | --- |
-| AC-1 | `e2e/footer.spec.ts` (four links on a public page and on the dashboard, none for the settings page; the link texts of every language: `e2e/languages.spec.ts`; landing page and footer fit one phone screen) |
+| AC-1 | `e2e/footer.spec.ts` (four links on a public page and on the dashboard, none for the settings page; the link texts of every language: `e2e/languages.spec.ts`; the landing page's footer follows its gallery: `e2e/landing.spec.ts`, spec 0038 AC-7) |
 | AC-2 | spec 0015 |
 | AC-3, AC-4 | specs 0018, 0019 |
 | AC-5, AC-6 | spec 0017 |

@@ -43,7 +43,7 @@ export default async function LocaleLayout({
           <SiteLogo locale={locale}>
             <HeaderControls />
           </SiteLogo>
-          {/* A column that takes the space above the footer: full-height pages (landing, error) fill it with flex-1 instead of min-h-screen, which would push the footer below the fold. */}
+          {/* A column that takes the space above the footer: full-height pages (error) fill it with flex-1 instead of min-h-screen, which would push the footer below the fold (the landing page's footer follows its gallery, spec 0038 AC-7). */}
           <div className="flex flex-grow flex-col">{children}</div>
           <Footer />
         </NextIntlClientProvider>

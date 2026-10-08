@@ -54,4 +54,8 @@ Needs Docker Desktop.
    `dev:test`.
 
 `npm run testdb:reset` rebuilds the test database from scratch; `npm run testdb:stop` stops it.
+
+The pictures of the landing page (`public/screenshots/`, spec 0038) are retaken by `npm run screenshots` against a running
+test server (`npm run testdb:start`, then `npm run build:e2e && npm run start:e2e`, port 3002); look at them before you commit them.
+
 Production (`npm run dev`, the cloud project) is unaffected and has no dummy login.

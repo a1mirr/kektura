@@ -6,6 +6,7 @@ import { routing } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
 import { testLoginEnabled } from "@/lib/test-login";
 import PageShell from "@/components/PageShell";
+import Screenshots from "@/components/Screenshots";
 import SignInButton from "@/components/SignInButton";
 import TestLoginForm from "@/components/TestLoginForm";
 
@@ -32,7 +33,7 @@ export default async function Home({
   const t = await getTranslations("home");
 
   return (
-    <PageShell variant="hero">
+    <PageShell variant="hero" below={<Screenshots />}>
       <h1 className="text-4xl font-bold text-blue-700">{t("headline")}</h1>
       <p className="text-lg text-stone-600">{t("subtitle")}</p>
       {error && <p className="text-red-600">{t("authError")}</p>}

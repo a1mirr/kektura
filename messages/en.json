@@ -13,7 +13,17 @@
     "authError": "Sign-in failed, please try again.",
     "testLoginEmail": "Test login: any email (the account is created on first sign-in)",
     "testLoginButton": "Sign in as test user",
-    "testLoginNote": "Test server only. The data lives in the local test database."
+    "testLoginNote": "Test server only. The data lives in the local test database.",
+    "screenshots": {
+      "heading": "What it looks like",
+      "note": "The screenshots show a demo account in the English interface.",
+      "dashboardAlt": "The dashboard of a demo account: stamps collected, percent completed, kilometres walked and left, and the list of stages with their stamping places.",
+      "dashboardCaption": "Your progress in numbers, and every stage with its stamping places.",
+      "mapAlt": "The trail map in full screen: the blue line over the stretches already walked, and the stamping places marked on it.",
+      "mapCaption": "The map: the blue line shows what you have walked, the dots are the stamps.",
+      "routeAlt": "The route planner on the map: a stretch between two stamping places drawn on the trail, with its distance, ascent, descent and walking time below.",
+      "routeCaption": "The route planner: pick two stamps and see the distance, climb and time."
+    }
   },
   "dashboard": {
     "title": "My progress",

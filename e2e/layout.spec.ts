@@ -178,15 +178,6 @@ test.describe("spec 0036: the page layout", () => {
     expect(card.width).toBeLessThanOrEqual(448 + 0.5); // max-w-md
     expect(card.x + card.width / 2).toBeCloseTo(main.x + main.width / 2, 0);
   });
-
-  test("AC-6: the footer stays on the first screen of the landing page at every width", async ({ page }) => {
-    for (const width of WIDTHS) {
-      await page.setViewportSize({ width, height: 800 });
-      await page.goto("/en");
-      const footer = await box(page.locator("footer"));
-      expect(footer.y + footer.height, `${width} px`).toBeLessThanOrEqual(800 + 0.5);
-    }
-  });
 });
 
 test.describe("spec 0001: the dashboard's two columns", () => {

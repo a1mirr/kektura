@@ -20,12 +20,4 @@ test.describe("spec 0014: footer", () => {
     await signInAsNewUser(page);
     await expect(page.getByRole("contentinfo").getByRole("link", { name: "Feedback" })).toBeVisible();
   });
-
-  test("AC-1: on a phone the landing page and its footer fit one screen, without scrolling", async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 812 });
-    await page.goto("/en");
-    await expect(page.getByRole("contentinfo")).toBeInViewport({ ratio: 1 });
-    const extra = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
-    expect(extra).toBeLessThanOrEqual(0);
-  });
 });

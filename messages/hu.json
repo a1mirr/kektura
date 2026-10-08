@@ -13,7 +13,17 @@
     "authError": "A bejelentkezés sikertelen, próbáld újra.",
     "testLoginEmail": "Tesztbelépés: bármilyen e-mail-cím (a fiók az első belépéskor jön létre)",
     "testLoginButton": "Belépés tesztfelhasználóként",
-    "testLoginNote": "Csak a tesztszerveren. Az adatok a helyi tesztadatbázisban vannak."
+    "testLoginNote": "Csak a tesztszerveren. Az adatok a helyi tesztadatbázisban vannak.",
+    "screenshots": {
+      "heading": "Így néz ki",
+      "note": "A képernyőképek egy demófiókot mutatnak, angol felülettel.",
+      "dashboardAlt": "Egy demófiók áttekintő oldala: összegyűjtött bélyegzések, teljesítés százalékban, megtett és hátralévő kilométerek, valamint a szakaszok listája a bélyegzőhelyekkel.",
+      "dashboardCaption": "A haladásod számokban, és minden szakasz a bélyegzőhelyeivel.",
+      "mapAlt": "A túra térképe teljes képernyőn: kék vonal a már megtett útszakaszokon, rajta a bélyegzőhelyek jelölései.",
+      "mapCaption": "A térkép: a kék vonal a megtett utat mutatja, a pontok a bélyegzések.",
+      "routeAlt": "A túratervező a térképen: két bélyegzőhely közötti szakasz a nyomvonalon, alatta a távolság, a szintemelkedés, a szintcsökkenés és a menetidő.",
+      "routeCaption": "A túratervező: válassz két bélyegzőhelyet, és nézd meg a távolságot, az emelkedést és az időt."
+    }
   },
   "dashboard": {
     "title": "Haladásom",

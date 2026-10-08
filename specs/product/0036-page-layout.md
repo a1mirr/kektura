@@ -27,16 +27,19 @@ pages that are made of independent blocks put them side by side (the dashboard, 
 - **AC-3**: The pages that are a long read (About, Changelog, Useful links, Feedback, and the text blocks of the settings page)
   keep a line of about 65 characters (`65ch`): a text column centred inside the content width. Cards, the map, charts and stage
   lists use the full width.
-- **AC-4**: The landing page, the error page and the 404 page keep a centred block (at most 42 rem wide) that fills the space
-  above the footer; the invite page (spec 0024) is one centred card (at most 28 rem). None of them gets an empty wide column.
+- **AC-4**: The landing page, the error page and the 404 page keep a centred block (at most 42 rem wide); on the error page and the
+  404 page it fills the space above the footer, on the landing page the gallery of screenshots (spec 0038) follows it at the full
+  content width (a `hero` page's `below` slot). The invite page (spec 0024) is one centred card (at most 28 rem). None of them gets an
+  empty wide column.
 
 ### Narrow and wide screens
 
 - **AC-5**: A page never scrolls sideways at 375, 768, 1024, 1440 and 1920 px, in every language, signed in and signed out. Below
   1024 px every page is one column, in the order of the blocks in the page; 375 px is the narrowest width the layout promises (a
   page may still work on a narrower screen, but nothing is promised or guarded).
-- **AC-6**: Full-height pages (landing, error, 404) fill the space above the footer with `flex-1`, never `min-h-screen`, so the
-  footer stays on the first screen at any width.
+- **AC-6**: Full-height pages (error, 404) fill the space above the footer with `flex-1`, never `min-h-screen`, so the footer
+  stays on the first screen at any width. The landing page is the exception: its gallery (spec 0038) makes it taller than a screen
+  on purpose and the footer follows the gallery (spec 0038 AC-7); it still uses `flex-1`, never `min-h-screen`.
 
 ## Out of scope
 
@@ -57,6 +60,6 @@ that shows more of the same content instead of centring it.
 | AC-1 | `e2e/layout.spec.ts` (the logo strip, the page and the footer: same width and left edge, centred, the logo's mark at the content edge, at 375, 768, 1024, 1440 and 1920 px on the public pages and signed in, and the dashboard's own header inside it, and the strip's language switcher and account button ending at the content's right edge), `e2e/site-logo.spec.ts` (the logo at the content's left edge) |
 | AC-2 | `tests/page-shell.test.ts` (every page file uses `PageShell` and has no container of its own; the width is one 64 rem variable taken by the shell, the logo strip and the footer; the paddings), `src/components/PageShell.test.tsx` (every variant is one `<main>` with the shared width) |
 | AC-3 | `e2e/layout.spec.ts` (the column is `65ch` wide and centred on the four pages; the settings page's text, not its cards), `src/components/PageShell.test.tsx` |
-| AC-4 | `e2e/layout.spec.ts` (the landing page, the 404 page and the invite page at 1920 px), `src/components/PageShell.test.tsx` |
+| AC-4 | `e2e/layout.spec.ts` (the landing page's block, the 404 page and the invite page at 1920 px), `src/components/PageShell.test.tsx` (including a hero page with content below), `e2e/landing.spec.ts` (the gallery's three columns) |
 | AC-5 | `e2e/layout.spec.ts` (shared edges and no sideways scroll: at all five widths on the landing, About, Changelog, Useful links and Feedback pages and, signed in, the dashboard, stats, account and Friends pages, in English, and in Hungarian, German and Russian on the dashboard, Friends, stats, account, About and Changelog pages; at 375, 768 and 1920 px on the 404 page, the invite page signed out and in, and a friend's page; one column below 1024 px: the dashboard, a friend's page and the Friends page). Not tested in a browser: the error page (`error.tsx`), which no flow triggers cheaply; it draws the same `hero` variant as the 404 page and the landing page, and `tests/page-shell.test.ts` checks that it uses the shell. The tests check `scrollWidth`, not every element of a long page in every language |
-| AC-6 | `e2e/layout.spec.ts` (the landing page's footer is on the first screen at every width), `src/components/PageShell.test.tsx` (`flex-1`, no `min-h-screen`), `e2e/footer.spec.ts` |
+| AC-6 | `src/components/PageShell.test.tsx` (`flex-1`, no `min-h-screen`, also with content below), `e2e/landing.spec.ts` (the landing page's footer follows its gallery, spec 0038 AC-7). Not tested in a browser: that the footer of the error page is on the first screen (no flow triggers that page cheaply, AC-5): the unit test pins the classes that do it |
