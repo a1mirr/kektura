@@ -65,12 +65,14 @@ It answers "when did I walk what", and is the only place the stamps-per-month ch
   service role) and the shared reference data through the dashboard's cached read (spec 0002 AC-15, AC-16).
 - **AC-17**: The page passes the accessibility checks of spec 0006 AC-11 at both widths and its chart works on a phone (spec 0006 AC-10): a month's column is a target of at
   least 44 px wide.
+- **AC-18**: While the flag `share` is on (spec 0035), a "Share your progress" panel follows the chart: creating, copying, sending and deleting share cards (spec 0039 AC-6). With the flag off the page has no
+  such panel and reads no card.
 
 ## Out of scope
 
 Weekly or daily views; a year selector; folding old years into one bar (a wrong year, stamp dates run from 1938, gives a long, mostly empty chart that scrolls);
 a switch between stamps and km (the km are in the tooltip); a comparison with a friend's months (friends share no dates, spec 0024); a cumulative line; exporting the data;
-retired stamps in the figures (spec 0001 AC-25); a feature flag.
+retired stamps in the figures (spec 0001 AC-25); a feature flag for the page itself (the share panel has one, AC-18).
 
 ## Notes
 
@@ -96,3 +98,4 @@ retired stamps in the figures (spec 0001 AC-25); a feature flag.
 | AC-15 | `e2e/stats.spec.ts` (the buttons' names, the group's name) |
 | AC-16 | `e2e/stats.spec.ts` (a second user sees none of the first user's stamps); `src/lib/dashboard-data.ts` is the dashboard's, spec 0002 |
 | AC-17 | `e2e/accessibility.spec.ts` (the stats page with six months drawn, both widths), `e2e/mobile.spec.ts` (the month's column is tappable: 44 px by `expectTappable`) |
+| AC-18 | `e2e/feature-flags.spec.ts` (spec 0039: no panel while the flag is off, the panel on the next request), `src/components/SharePanel.test.tsx` |

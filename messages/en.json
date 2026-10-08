@@ -157,7 +157,8 @@
     "data3": "You can delete your account and all your stamps at any time on the <account>Settings</account> page. Feedback messages you have already sent are kept, but are no longer linked to you.",
     "contactTitle": "Questions or ideas?",
     "contactText": "Found a bug or have an idea for the tracker? Send it through the <feedback>feedback form</feedback>.",
-    "data4": "If you connect with friends, they can see your display name and your stage-by-stage progress (official stamps, kilometres, stages). They cannot see your stamp dates or extra stamps. You can stop sharing your progress with a friend at any time on the Friends page."
+    "data4": "If you connect with friends, they can see your display name and your stage-by-stage progress (official stamps, kilometres, stages). They cannot see your stamp dates or extra stamps. You can stop sharing your progress with a friend at any time on the Friends page.",
+    "data5": "If you create a share card, anyone with its link can see a snapshot of your progress: percentage, stamps, kilometres, stages and the walked part of the map, and your display name only if you chose to show it. Never your stamp dates or extra stamps. You can delete a card at any time on the stats page, and deleting your account deletes all your cards."
   },
   "changelog": {
     "title": "Changelog",
@@ -301,5 +302,36 @@
     "notWalked": "Not walked",
     "mapLabel": "Map of the trail: who walked which stretch",
     "legend": "Legend"
+  },
+  "share": {
+    "title": "Share your progress",
+    "intro": "Make a card with your progress and send its link in Telegram or any messenger. The card shows today's numbers and does not change afterwards.",
+    "showName": "Show my name on the card",
+    "notice": "Anyone with the link can see the card, and the walked part of the map shows roughly where you are on the trail. You can delete a card at any time and its link stops working.",
+    "create": "Create a card",
+    "yourCards": "Your cards",
+    "none": "No cards yet.",
+    "cardLine": "{percent}% · {done} / {total} stamps",
+    "created": "Created {date}",
+    "withName": "with your name",
+    "anonymous": "anonymous",
+    "open": "Open",
+    "linkLabel": "Link to the card",
+    "copy": "Copy link",
+    "copied": "Link copied",
+    "telegram": "Send to Telegram",
+    "telegramText": "I have walked {percent}% of the Blue Trail so far: {done} of {total} stamps.",
+    "delete": "Delete",
+    "deleteQuestion": "Delete this card? Its link stops working.",
+    "deleteConfirm": "Yes, delete",
+    "cancel": "Cancel",
+    "limit": "You already have the maximum of {count} cards. Delete one to create another.",
+    "failed": "That didn't work. Please try again.",
+    "pageTitle": "Kéktúra progress",
+    "pageTitleNamed": "{name}'s Kéktúra progress",
+    "description": "{done} of {total} stamps · {km} km walked",
+    "asOf": "As of {date}",
+    "mapLabel": "Map of the trail with the walked part in blue",
+    "cta": "Track your own Kéktúra"
   }
 }

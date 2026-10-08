@@ -1,5 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
-import { openAccountMenu, setFeatureFlag, signInAsNewUser } from "./helpers";
+import { expectNoSidewaysScroll, openAccountMenu, setFeatureFlag, signInAsNewUser, stampStagesOn } from "./helpers";
+import { describeFindings, judge, scan, WIDTHS } from "./accessibility";
+import { psql } from "./local-db";
 
 // Spec 0035 AC-5, AC-6, AC-11: the `friends` and `restaurants` flags in each state, for a signed-in user, a user on the
 // allowlist and a signed-out visitor. Flags are global, so the tests run one after the other (this file is its own
@@ -129,5 +131,169 @@ test.describe("spec 0035: the restaurants flag", () => {
     await expect(checkbox(other)).toHaveCount(0);
     await other.waitForTimeout(500);
     expect(fetchedByOther).toEqual([]);
+  });
+});
+
+test.describe("spec 0039: the share flag and share cards", () => {
+  test.afterAll(() => setFeatureFlag("share", "off")); // off is what production starts with; no other test needs it on
+
+  // Built at run time, from a repeated pair: a 32-character hex literal, or one with many different characters, assigned to a constant is what the secret scanner (spec 0007 AC-16) takes for an API key.
+  const UNKNOWN_TOKEN = "ab".repeat(16);
+  const panel = (page: Page) => page.getByRole("region", { name: "Share your progress" });
+
+  test("AC-1: off hides the panel and answers 404 for a page and the image; on shows them on the next request", async ({ page, browser }) => {
+    await signInAsNewUser(page);
+    setFeatureFlag("share", "off");
+    await page.goto("/en/stats");
+    await expect(page.getByRole("heading", { name: "My stats" })).toBeVisible();
+    await expect(panel(page)).toHaveCount(0);
+    await page.goto("/en/about");
+    await expect(page.getByText("If you create a share card")).toHaveCount(0);
+
+    // A card that exists answers 404 as well while the flag is off: the flag, not the data, decides.
+    setFeatureFlag("share", "on");
+    await page.goto("/en/about");
+    await expect(page.getByText("If you create a share card")).toBeVisible();
+    await page.goto("/en/stats");
+    await panel(page).getByRole("button", { name: "Create a card" }).click();
+    await expect(panel(page).getByRole("link", { name: "Open" })).toBeVisible();
+    const link = await panel(page).getByLabel("Link to the card").inputValue();
+    const path = new URL(link).pathname;
+    const visitor = await (await browser.newContext()).newPage();
+    expect((await visitor.goto(path))?.status()).toBe(200);
+
+    setFeatureFlag("share", "off");
+    expect((await visitor.goto(path))?.status()).toBe(404);
+    expect((await visitor.request.get(`/api/share/${path.split("/").pop()}/image`)).status()).toBe(404);
+    expect((await visitor.goto(`/en/share/${UNKNOWN_TOKEN}`))?.status()).toBe(404);
+
+    setFeatureFlag("share", "on");
+    expect((await visitor.goto(path))?.status()).toBe(200);
+  });
+
+  test("AC-2 to AC-6: a card is created, opened by a signed-out visitor with its preview tags and image, and deleted", async ({ page, browser }) => {
+    const email = await signInAsNewUser(page);
+    stampStagesOn(email, 2, "2026-06-01");
+    setFeatureFlag("share", "on");
+    await page.goto("/en/stats");
+
+    // Anonymous by default.
+    await panel(page).getByRole("button", { name: "Create a card" }).click();
+    const item = panel(page).getByRole("listitem").filter({ hasText: "anonymous" }); // stays this card when a newer one is created
+    await expect(item).toHaveCount(1);
+    const link = await item.getByLabel("Link to the card").inputValue();
+    expect(link).toMatch(/\/en\/share\/[0-9a-f]{32}$/);
+    await expect(item.getByRole("link", { name: "Send to Telegram" })).toHaveAttribute("href", /^https:\/\/t\.me\/share\/url\?url=.+&text=.+/);
+    const numbers = (await item.locator("p").first().innerText()).match(/^(\d+)% · (\d+) \/ 161 stamps$/);
+    expect(numbers).not.toBeNull();
+    const [, percent, stamps] = numbers!;
+
+    // A signed-out visitor sees the frozen numbers, the map and the preview tags, and nothing about whose it is.
+    const visitorContext = await browser.newContext();
+    const visitor = await visitorContext.newPage();
+    const path = new URL(link).pathname;
+    expect((await visitor.goto(path))?.status()).toBe(200);
+    await expect(visitor.getByRole("heading", { name: "Kéktúra progress", level: 1 })).toBeVisible();
+    await expect(visitor.getByText(`${percent}%`, { exact: true })).toBeVisible();
+    await expect(visitor.getByText(`${stamps} / 161`)).toBeVisible();
+    await expect(visitor.getByRole("img", { name: "Map of the trail with the walked part in blue" })).toBeVisible();
+    await expect(visitor.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+    await expect(visitor.locator('meta[property="og:title"]')).toHaveAttribute("content", "Kéktúra progress");
+    await expect(visitor.locator('meta[property="og:description"]')).toHaveAttribute("content", new RegExp(`^${stamps} of 161 stamps`));
+    const imageUrl = await visitor.locator('meta[property="og:image"]').getAttribute("content");
+    expect(imageUrl).toMatch(/\/api\/share\/[0-9a-f]{32}\/image$/);
+    expect(await visitor.content()).not.toContain(email);
+
+    const image = await visitor.request.get(new URL(imageUrl!).pathname);
+    expect(image.status()).toBe(200);
+    expect(image.headers()["content-type"]).toBe("image/png");
+    expect((await image.body()).subarray(1, 4).toString()).toBe("PNG");
+
+    // The numbers are frozen: stamping more does not change the card.
+    psql(
+      `insert into public.user_stamps (user_id, checkpoint_id, stamped_on) select u.id, c.id, '2026-06-02' from auth.users u, public.checkpoints c where u.email = '${email}' and c.stage = 3 and c.retired_on is null`,
+    );
+    await visitor.reload();
+    await expect(visitor.getByText(`${stamps} / 161`)).toBeVisible();
+
+    // A card with the name: the owner's display name is the title.
+    await page.reload();
+    await panel(page).getByLabel("Show my name on the card").check();
+    await panel(page).getByRole("button", { name: "Create a card" }).click();
+    await expect(panel(page).getByRole("listitem")).toHaveCount(2);
+    const named = panel(page).getByRole("listitem").filter({ hasText: "with your name" });
+    await expect(named).toHaveCount(1);
+    const name = psql(`select p.display_name from public.profiles p join auth.users u on u.id = p.id where u.email = '${email}'`);
+    await visitor.goto(new URL(await named.getByLabel("Link to the card").inputValue()).pathname);
+    await expect(visitor.getByRole("heading", { level: 1 })).toHaveText(`${name}'s Kéktúra progress`);
+
+    // Deleting asks first and then the link stops working at once.
+    await item.getByRole("button", { name: "Delete" }).click();
+    await item.getByRole("button", { name: "Cancel" }).click();
+    expect((await visitor.goto(path))?.status()).toBe(200);
+    await item.getByRole("button", { name: "Delete" }).click();
+    await item.getByRole("button", { name: "Yes, delete" }).click();
+    await expect(panel(page).getByRole("listitem")).toHaveCount(1);
+    expect((await visitor.goto(path))?.status()).toBe(404);
+    expect((await visitor.request.get(new URL(imageUrl!).pathname)).status()).toBe(404);
+    await visitorContext.close();
+  });
+
+  test("AC-6, AC-4: axe finds nothing serious on the stats page with the panel and a card, nor on the share page, at both widths", async ({ page, browser }) => {
+    const email = await signInAsNewUser(page);
+    stampStagesOn(email, 2, "2026-06-01");
+    setFeatureFlag("share", "on");
+    await page.goto("/en/stats");
+    await panel(page).getByRole("button", { name: "Create a card" }).click();
+    await expect(panel(page).getByRole("listitem")).toHaveCount(1);
+    await panel(page).getByRole("button", { name: "Delete" }).click(); // the open question is part of the panel too
+    await expect(panel(page).getByRole("button", { name: "Yes, delete" })).toBeVisible();
+    const path = new URL(await panel(page).getByLabel("Link to the card").inputValue()).pathname;
+    const visitor = await (await browser.newContext()).newPage();
+
+    for (const width of ["desktop", "phone"] as const) {
+      await page.setViewportSize(WIDTHS[width]);
+      await visitor.setViewportSize(WIDTHS[width]);
+      await visitor.goto(path);
+      await expect(visitor.getByRole("img", { name: "Map of the trail with the walked part in blue" })).toBeVisible();
+      for (const [name, target] of [["stats-share-panel", page], ["share-page", visitor]] as const) {
+        const { unlisted } = judge(name, await scan(target, width), []);
+        expect(describeFindings(unlisted), `${name} at ${width}`).toEqual([]);
+      }
+    }
+
+    // The panel is a list of wrapping buttons and a full-width field: at 375 px it must not widen the stats page (spec 0036 AC-5).
+    await page.setViewportSize(WIDTHS.phone);
+    for (const locale of ["de", "hu", "ru"]) {
+      await page.goto(`/${locale}/stats`);
+      await expect(page.locator("#share-title")).toBeVisible();
+      await expectNoSidewaysScroll(page, `the stats page with the share panel in ${locale} at 375 px`);
+    }
+  });
+
+  test("AC-4: a visitor who is not signed in can open a card in every language, and an unknown or malformed token is a 404", async ({ page, browser }) => {
+    await signInAsNewUser(page);
+    setFeatureFlag("share", "on");
+    await page.goto("/en/stats");
+    await panel(page).getByRole("button", { name: "Create a card" }).click();
+    const link = await panel(page).getByLabel("Link to the card").inputValue();
+    const token = link.split("/").pop()!;
+    const visitor = await (await browser.newContext()).newPage();
+    for (const [locale, title] of [["hu", "Kéktúra-haladás"], ["de", "Kéktúra-Fortschritt"], ["ru", "Прогресс на Кектуре"], ["en", "Kéktúra progress"]]) {
+      expect((await visitor.goto(`/${locale}/share/${token}`))?.status()).toBe(200);
+      await expect(visitor.getByRole("heading", { level: 1 })).toHaveText(title);
+    }
+    expect((await visitor.goto(`/en/share/${UNKNOWN_TOKEN}`))?.status()).toBe(404);
+    expect((await visitor.goto("/en/share/not-a-token"))?.status()).toBe(404);
+    expect((await visitor.request.get(`/api/share/${UNKNOWN_TOKEN}/image`)).status()).toBe(404);
+
+    // A phone: the page does not scroll sideways, in the language with the longest words as well.
+    for (const width of [375, 320]) {
+      await visitor.setViewportSize({ width, height: 800 });
+      for (const locale of ["de", "hu", "ru"]) {
+        await visitor.goto(`/${locale}/share/${token}`);
+        await expectNoSidewaysScroll(visitor, `the share page in ${locale} at ${width} px`);
+      }
+    }
   });
 });

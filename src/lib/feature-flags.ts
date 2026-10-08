@@ -16,6 +16,7 @@ type FlagDefinition = { description: string; default: FlagMode };
 export const FLAGS = {
   friends: { description: "Friends: share progress, compare with a friend (spec 0024)", default: "off" },
   restaurants: { description: "Restaurants layer on the trail map (spec 0003)", default: "off" },
+  share: { description: "Share cards: a public link to a snapshot of your progress (spec 0039)", default: "off" },
 } as const satisfies Record<string, FlagDefinition>;
 
 export type FlagKey = keyof typeof FLAGS;

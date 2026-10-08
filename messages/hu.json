@@ -157,7 +157,8 @@
     "data3": "A fiókodat és az összes bélyegzésedet bármikor törölheted a <account>Beállítások</account> oldalon. A már elküldött visszajelzések megmaradnak, de már nem kapcsolódnak hozzád.",
     "contactTitle": "Kérdésed vagy ötleted van?",
     "contactText": "Hibát találtál, vagy van ötleted a követőhöz? Írd meg a <feedback>visszajelzési űrlapon</feedback>.",
-    "data4": "Ha barátokkal kapcsolódsz, láthatják a megjelenített nevedet és a szakaszonkénti haladásodat (hivatalos bélyegzők, kilométerek, szakaszok). Nem láthatják a bélyegzések dátumát és az extra bélyegzőket. A haladásod megosztását bármikor leállíthatod a Barátok oldalon."
+    "data4": "Ha barátokkal kapcsolódsz, láthatják a megjelenített nevedet és a szakaszonkénti haladásodat (hivatalos bélyegzők, kilométerek, szakaszok). Nem láthatják a bélyegzések dátumát és az extra bélyegzőket. A haladásod megosztását bármikor leállíthatod a Barátok oldalon.",
+    "data5": "Ha megosztási kártyát készítesz, a linkjével bárki láthatja a haladásod pillanatképét: a százalékot, a bélyegzéseket, a kilométereket, a szakaszokat és a térkép bejárt részét, a megjelenített neved pedig csak akkor, ha te így döntöttél. A bélyegzések dátumát és az extra bélyegzőket soha. A kártyát bármikor törölheted a statisztikák oldalán, a fiókod törlésekor pedig az összes kártyád is törlődik."
   },
   "changelog": {
     "title": "Változások",
@@ -301,5 +302,36 @@
     "notWalked": "Még nem megtett",
     "mapLabel": "Az útvonal térképe: ki melyik szakaszt járta be",
     "legend": "Jelmagyarázat"
+  },
+  "share": {
+    "title": "Oszd meg a haladásod",
+    "intro": "Készíts kártyát a haladásodról, és küldd el a linkjét Telegramon vagy bármely üzenetküldőn. A kártya a mai számokat mutatja, és utána nem változik.",
+    "showName": "A nevem is legyen rajta a kártyán",
+    "notice": "A linkkel bárki látja a kártyát, a térképen a bejárt szakasz pedig nagyjából megmutatja, hol tartasz az útvonalon. Bármikor törölheted a kártyát, és a linkje megszűnik működni.",
+    "create": "Kártya készítése",
+    "yourCards": "Kártyáid",
+    "none": "Még nincs kártyád.",
+    "cardLine": "{percent}% · {done} / {total} bélyegzés",
+    "created": "Készült: {date}",
+    "withName": "névvel",
+    "anonymous": "névtelen",
+    "open": "Megnyitás",
+    "linkLabel": "A kártya linkje",
+    "copy": "Link másolása",
+    "copied": "Link másolva",
+    "telegram": "Küldés Telegramon",
+    "telegramText": "Eddig a Kéktúra {percent}%-át teljesítettem: {done} / {total} bélyegzés.",
+    "delete": "Törlés",
+    "deleteQuestion": "Törlöd ezt a kártyát? A linkje megszűnik működni.",
+    "deleteConfirm": "Igen, törlés",
+    "cancel": "Mégse",
+    "limit": "Már a legfeljebb megengedett {count} kártyád megvan. Törölj egyet, ha újat szeretnél.",
+    "failed": "Nem sikerült. Próbáld újra.",
+    "pageTitle": "Kéktúra-haladás",
+    "pageTitleNamed": "{name} Kéktúra-haladása",
+    "description": "{done} / {total} bélyegzés · {km} km megtéve",
+    "asOf": "Állapot: {date}",
+    "mapLabel": "Az útvonal térképe, a bejárt szakasz kékkel",
+    "cta": "Kövesd te is a saját Kéktúrádat"
   }
 }

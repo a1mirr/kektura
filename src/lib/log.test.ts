@@ -6,6 +6,7 @@ import {
   logFlagChange,
   logFeedbackNotifyFailure,
   logFriendsError,
+  logShareError,
   logStampActionError,
   logStampActionInvalidInput,
   logStampActionRefused,
@@ -107,6 +108,18 @@ describe("spec 0017: feedback and account-deletion log lines", () => {
   });
 });
 
+describe("spec 0039: share card log line", () => {
+  it("AC-13: is one line with the action, the code and the message, and no secret the error carries", () => {
+    logShareError("createShareCard", { code: "42501", message: "line one\nline two", details: "secret-details", hint: "secret-hint" });
+    expect(lineOf(errorLog)).toBe('[share] action=createShareCard code=42501 message="line one\\nline two"');
+  });
+
+  it("AC-13: an exception has no code", () => {
+    logShareError("deleteShareCard", new Error("boom"), "exception");
+    expect(lineOf(errorLog)).toBe('[share] action=deleteShareCard code=- message="boom"');
+  });
+});
+
 describe("spec 0035: feature flag log line", () => {
   it("AC-9: one line with the code and message, nothing else", () => {
     logFeatureFlagsError({ code: "57014", message: "timeout", details: "secret", hint: "secret" });
@@ -182,8 +195,17 @@ describe("spec 0008: failures reach Telegram", () => {
     expect(sentTexts().map((t) => t.split("\n")[1])).toEqual(["[friends] sendRequest write", "[friends] setSharing exception"]);
   });
 
+  it("spec 0039 AC-13: a share action is a write, or an exception when something threw", async () => {
+    enable();
+    logShareError("createShareCard", { message: "x" });
+    logShareError("deleteShareCard", { message: "x" }, "exception");
+    await flush();
+    expect(sentTexts().map((t) => t.split("\n")[1])).toEqual(["[share] createShareCard write", "[share] deleteShareCard exception"]);
+  });
+
   it("AC-6: a failed read, rejected input, a flag lookup and a failed notification are not sent", async () => {
     enable();
+    logShareError("loadOwnShareCards", { message: "x" }, "read");
     logStampActionError("setPlacesStamped", "read", { message: "x" }, "u-1");
     logStampActionInvalidInput("setPlacesStamped");
     logStampActionRefused("setStampDates");

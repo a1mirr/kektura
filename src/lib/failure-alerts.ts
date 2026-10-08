@@ -12,7 +12,7 @@ export const ALERT_STAGES = ["write", "exception"] as const;
 export type AlertStage = (typeof ALERT_STAGES)[number];
 
 export type Failure = {
-  tag: "stamp-action" | "feedback" | "account-delete" | "friends";
+  tag: "stamp-action" | "feedback" | "account-delete" | "friends" | "share";
   action: string;
   stage: AlertStage;
   // A short identifier such as `42501`; anything else is dropped before it gets here.

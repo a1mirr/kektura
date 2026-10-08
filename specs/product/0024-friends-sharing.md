@@ -8,7 +8,7 @@ Owner code: `src/lib/friends.ts`, `src/lib/friends-input.ts`, `src/lib/compare.t
 
 Hikers walk the Kéktúra in company or compete quietly. Let a signed-in user connect with a friend who also
 has an account, and let each see the other's progress inside the site: how many of the 161 places, how many
-kilometres, which stages. Nothing is public: only people you accepted can see anything, and you can stop
+kilometres, which stages. Nothing is public here (a share card, spec 0039, is a separate thing the owner publishes on purpose): only people you accepted can see anything, and you can stop
 sharing at any moment. Ships behind the feature flag `friends` (AC-15).
 
 ## Behaviour

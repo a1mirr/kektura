@@ -157,7 +157,8 @@
     "data3": "Du kannst dein Konto und alle deine Stempel jederzeit auf der Seite <account>Einstellungen</account> löschen. Feedback-Nachrichten, die du bereits gesendet hast, bleiben erhalten, sind aber nicht mehr mit dir verknüpft.",
     "contactTitle": "Fragen oder Ideen?",
     "contactText": "Hast du einen Fehler gefunden oder eine Idee für den Tracker? Schick sie uns über das <feedback>Feedback-Formular</feedback>.",
-    "data4": "Wenn du dich mit Freunden verbindest, können sie deinen Anzeigenamen und deinen Fortschritt Etappe für Etappe sehen (offizielle Stempel, Kilometer, Etappen). Deine Stempeldaten und Zusatzstempel sehen sie nicht. Du kannst das Teilen deines Fortschritts mit einem Freund jederzeit auf der Seite „Freunde“ beenden."
+    "data4": "Wenn du dich mit Freunden verbindest, können sie deinen Anzeigenamen und deinen Fortschritt Etappe für Etappe sehen (offizielle Stempel, Kilometer, Etappen). Deine Stempeldaten und Zusatzstempel sehen sie nicht. Du kannst das Teilen deines Fortschritts mit einem Freund jederzeit auf der Seite „Freunde“ beenden.",
+    "data5": "Wenn du eine Teilen-Karte erstellst, kann jeder mit ihrem Link eine Momentaufnahme deines Fortschritts sehen: Prozent, Stempel, Kilometer, Etappen und den gewanderten Teil der Karte, deinen Anzeigenamen nur, wenn du ihn zeigen willst. Nie deine Stempeldaten oder Extra-Stempel. Du kannst eine Karte jederzeit auf der Seite „Meine Statistik“ löschen, und mit dem Löschen deines Kontos werden alle deine Karten gelöscht."
   },
   "changelog": {
     "title": "Änderungen",
@@ -301,5 +302,36 @@
     "notWalked": "Noch nicht gewandert",
     "mapLabel": "Karte des Weges: wer welchen Abschnitt gewandert ist",
     "legend": "Legende"
+  },
+  "share": {
+    "title": "Teile deinen Fortschritt",
+    "intro": "Erstelle eine Karte mit deinem Fortschritt und schicke ihren Link per Telegram oder einen anderen Messenger. Die Karte zeigt die heutigen Zahlen und ändert sich danach nicht mehr.",
+    "showName": "Meinen Namen auf der Karte zeigen",
+    "notice": "Jeder mit dem Link kann die Karte sehen, und der gewanderte Teil der Karte zeigt ungefähr, wo du auf dem Weg bist. Du kannst eine Karte jederzeit löschen, dann funktioniert ihr Link nicht mehr.",
+    "create": "Karte erstellen",
+    "yourCards": "Deine Karten",
+    "none": "Noch keine Karten.",
+    "cardLine": "{percent} % · {done} / {total} Stempel",
+    "created": "Erstellt am {date}",
+    "withName": "mit Namen",
+    "anonymous": "anonym",
+    "open": "Öffnen",
+    "linkLabel": "Link zur Karte",
+    "copy": "Link kopieren",
+    "copied": "Link kopiert",
+    "telegram": "An Telegram senden",
+    "telegramText": "Ich habe bisher {percent} % des Blauen Wegs geschafft: {done} von {total} Stempeln.",
+    "delete": "Löschen",
+    "deleteQuestion": "Diese Karte löschen? Ihr Link funktioniert dann nicht mehr.",
+    "deleteConfirm": "Ja, löschen",
+    "cancel": "Abbrechen",
+    "limit": "Du hast schon die Höchstzahl von {count} Karten. Lösche eine, um eine neue zu erstellen.",
+    "failed": "Das hat nicht geklappt. Bitte versuche es erneut.",
+    "pageTitle": "Kéktúra-Fortschritt",
+    "pageTitleNamed": "Kéktúra-Fortschritt von {name}",
+    "description": "{done} von {total} Stempeln · {km} km gewandert",
+    "asOf": "Stand: {date}",
+    "mapLabel": "Karte des Wegs, der gewanderte Teil in Blau",
+    "cta": "Verfolge deine eigene Kéktúra"
   }
 }

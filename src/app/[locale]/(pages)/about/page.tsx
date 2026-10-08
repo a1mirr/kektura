@@ -37,7 +37,7 @@ export default async function AboutPage({ params }: Props) {
   setRequestLocale(locale);
   const t = await getTranslations("about");
   const format = await getFormatter();
-  const [showFriends, showRestaurants] = await Promise.all([flagOn("friends"), flagOn("restaurants")]);
+  const [showFriends, showRestaurants, showShare] = await Promise.all([flagOn("friends"), flagOn("restaurants"), flagOn("share")]);
   const sources = SOURCES.filter((s) => !("flag" in s) || showRestaurants);
 
   const facts = [
@@ -114,6 +114,7 @@ export default async function AboutPage({ params }: Props) {
             })}
           </p>
           {showFriends && <p>{t("data4")}</p>}
+          {showShare && <p>{t("data5")}</p>}
         </div>
       </section>
 

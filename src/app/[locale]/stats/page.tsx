@@ -1,15 +1,21 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { loadDashboardData } from "@/lib/dashboard-data";
+import { flagOn } from "@/lib/feature-flags-server";
 import { monthLines, monthlyProgress } from "@/lib/month-stats";
+import { originFromHeaders } from "@/lib/origin";
 import { buildPlaces, buildStages, countDone, progressSummary, stampedPlaceKeys, waivedPlaceKeys, walkedRanges } from "@/lib/progress";
+import { shareUrl, telegramShareUrl } from "@/lib/share-card";
+import { loadOwnShareCards } from "@/lib/share-card-server";
 import { createClient } from "@/lib/supabase/server";
 import MonthChart from "@/components/MonthChart";
 import PageShell from "@/components/PageShell";
+import SharePanel, { type ShareItem } from "@/components/SharePanel";
 import stagesData from "../../../../scripts/data/okt-stages.json";
 
 // See spec 0037.
@@ -38,7 +44,7 @@ export default async function StatsPage({ params }: Props) {
   if (!user) return redirect({ href: "/", locale });
 
   // The same reads as the dashboard (spec 0002 AC-15, AC-16): reference data from the shared cache, the user's own rows under RLS.
-  const { checkpoints, extras, stamps, extraStamps } = await loadDashboardData(supabase);
+  const [showShare, { checkpoints, extras, stamps, extraStamps }] = await Promise.all([flagOn("share"), loadDashboardData(supabase)]);
 
   // The figures come from the functions the dashboard uses, so the two pages say the same.
   const places = buildPlaces(checkpoints);
@@ -80,6 +86,25 @@ export default async function StatsPage({ params }: Props) {
     };
   });
 
+  // The user's share cards (spec 0039 AC-6), under RLS: only their own rows come back.
+  let shareItems: ShareItem[] = [];
+  if (showShare) {
+    const shareT = await getTranslations("share");
+    const origin = originFromHeaders(await headers(), "http://localhost");
+    shareItems = (await loadOwnShareCards(supabase)).map((card) => {
+      const url = shareUrl(origin, locale, card.token);
+      const text = shareT("telegramText", { percent: card.percent, done: card.stamps_done, total: card.stamps_total });
+      return {
+        id: card.id,
+        url,
+        telegramUrl: telegramShareUrl(url, text),
+        line: shareT("cardLine", { percent: card.percent, done: card.stamps_done, total: card.stamps_total }),
+        created: shareT("created", { date: format.dateTime(new Date(card.created_at), { dateStyle: "long", timeZone: "Europe/Budapest" }) }),
+        named: card.display_name !== null,
+      };
+    });
+  }
+
   return (
     <PageShell spaced>
       <header>
@@ -101,6 +126,8 @@ export default async function StatsPage({ params }: Props) {
         </h2>
         {months.length === 0 ? <p className="text-stone-500">{t("empty")}</p> : <MonthChart months={months} labelledBy="stats-per-month" />}
       </section>
+
+      {showShare && <SharePanel items={shareItems} />}
     </PageShell>
   );
 }

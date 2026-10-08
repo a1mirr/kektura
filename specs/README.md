@@ -99,6 +99,12 @@ checks, ships and is run). The headings below only group the index: moving a spe
 | --- | --- | --- |
 | [0024](product/0024-friends-sharing.md) | Sharing progress with friends | Done |
 
+#### Sharing
+
+| Spec | Area | Status |
+| --- | --- | --- |
+| [0039](product/0039-share-cards.md) | Share cards: a frozen snapshot of progress behind a public link, with a preview image of the map and the percentage for Telegram and other messengers | Done |
+
 #### Pages
 
 | Spec | Area | Status |

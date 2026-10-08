@@ -28,7 +28,7 @@ Everything it says is true of the app today.
   route, stage table), heyjoe.hu (extra stamps), OpenStreetMap contributors with MapLibre (map), and
   etteremhet.hu (restaurants, only while the restaurants layer is shown: spec 0003 AC-21). It also says the app is an independent project, not affiliated with MTSZ.
 - **AC-5**: "Your data" says what is stored and what deleting does, matching spec 0014 and migration
-  `0008_pages_settings.sql`:
+  `0008_pages_settings.sql` (and, only while the flag `share` is on, a paragraph on share cards: what a public card shows, that stamp dates and extra stamps are never on it, and that the user can delete a card or the account, spec 0039):
   - Google handles the sign-in; the app stores the account (email and name from the Google profile) and
     the stamps the user marks, with their dates, and the messages sent through the feedback form, which
     are delivered to the developer together with the email when signed in (spec 0017);
@@ -70,7 +70,7 @@ document).
 | AC-1 | `e2e/about.spec.ts` (footer link, title, headings; signed out) |
 | AC-2 | `src/lib/trail-facts.test.ts` (function and the real data file), `tests/trail-data.test.ts` (matches the seed), `e2e/about.spec.ts` (shown) |
 | AC-3 | `e2e/about.spec.ts` (four points, the rule's wording and the exception for a new stamp); the content against specs 0001 and 0002: manual (judgement): read the four points next to those specs. Last checked: never recorded. |
-| AC-5 | `e2e/about.spec.ts` (links), `e2e/friends.spec.ts` (friends paragraph, flag on); the wording against spec 0014 and migration 0008: manual (judgement): read it next to them. Last checked: never recorded. |
+| AC-5 | `e2e/about.spec.ts` (links), `e2e/friends.spec.ts` (friends paragraph, flag on), `e2e/feature-flags.spec.ts` (the share cards paragraph follows the `share` flag); the wording against spec 0014 and migration 0008: manual (judgement): read it next to them. Last checked: never recorded. |
 | AC-4 | `e2e/about.spec.ts` (every external link is `https:`, opens in a new tab with `noopener`), `e2e/feature-flags.spec.ts` (the etteremhet.hu credit follows the `restaurants` flag) |
 | AC-8 | `e2e/about.spec.ts` (the link to the feedback form) |
 | AC-9 | `e2e/about.spec.ts` (the line in English and Hungarian, from the generated file), `tests/stamp-moves.test.ts` (the file's date and its generator) |

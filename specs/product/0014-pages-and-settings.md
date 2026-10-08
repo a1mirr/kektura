@@ -43,8 +43,8 @@ pages of the signed-in area (My stats, Friends, Settings), so no page carries a 
   account menu has a "Settings" entry to it (AC-21).
 - **AC-8**: Removed. The "Stamps per month" chart moved to the stats page (spec 0037); `/account` has none.
 - **AC-9**: "Delete account" asks for confirmation first ("Are you sure? This cannot be undone." with a
-  confirm button and a cancel link). Confirming permanently deletes the account with all its stamps and
-  extra stamps, signs the user out and returns to the landing page. Cancelling changes nothing.
+  confirm button and a cancel link). Confirming permanently deletes the account with all its stamps,
+  extra stamps and share cards (spec 0039 AC-8), signs the user out and returns to the landing page. Cancelling changes nothing.
 - **AC-10**: Feedback the user sent before stays, but is no longer linked to them
   (`user_feedback.user_id` becomes null).
 - **AC-11**: When deleting fails (the server refuses or isn't reachable) the page says so in the user's

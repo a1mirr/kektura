@@ -119,6 +119,15 @@ export function logFriendsError(action: string, error: unknown, stage: Failure["
   alertFailure({ tag: "friends", action, stage, code });
 }
 
+// Share cards (spec 0039 AC-13): the action name and the error's own code and message, no user ids, names, tokens or
+// numbers of a card. `stage` is only for the Telegram message, as for the friends actions; a failed `read` is logged and
+// never sent (spec 0008 AC-6).
+export function logShareError(action: string, error: unknown, stage: Failure["stage"] | "read" = "write"): void {
+  const { code, message } = describeError(error);
+  console.error(`[share] action=${action} code=${code ?? "-"} message=${quote(message)}`);
+  if (stage !== "read") alertFailure({ tag: "share", action, stage, code });
+}
+
 // Feature flags (spec 0035 AC-9): a failed lookup.
 // The error's own code and message, never user ids, emails or the input.
 export function logFeatureFlagsError(error: unknown): void {
