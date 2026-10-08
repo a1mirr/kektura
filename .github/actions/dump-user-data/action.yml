@@ -51,7 +51,7 @@ runs:
           auth.oauth_clients auth.oauth_consents auth.one_time_tokens auth.refresh_tokens \
           auth.saml_providers auth.saml_relay_states auth.scim_tokens auth.scim_users \
           auth.sessions auth.sso_domains auth.sso_providers auth.webauthn_challenges \
-          auth.webauthn_credentials public.checkpoints public.extra_stamps public.applied_migrations public.user_feedback public.feature_flags public.feature_flag_users
+          auth.webauthn_credentials public.checkpoints public.extra_stamps public.applied_migrations public.user_feedback public.feature_flags public.feature_flag_users public.share_cards
         do
           exclude+=(-x "$table")
         done

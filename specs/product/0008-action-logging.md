@@ -1,11 +1,11 @@
 # 0008: Server-side logging of failed actions, and Telegram messages for them
 
 Status: Done
-Owner code: `src/lib/log.ts`, `src/lib/failure-alerts.ts`, `src/app/[locale]/dashboard/actions.ts` (the stamp actions)
+Owner code: `src/lib/log.ts`, `src/lib/failure-alerts.ts`, `src/app/[locale]/dashboard/actions.ts` (the stamp actions), `src/app/[locale]/stats/actions.ts` (the share actions)
 
 ## Goal
 
-Server actions (the stamp actions first, then feedback, account deletion and friends) deliberately turn every
+Server actions (the stamp actions first, then feedback, account deletion, friends and share cards) deliberately turn every
 error into a plain `failed` result for the client (spec 0002 AC-6, AC-7), so a failure would leave no trace.
 Each one is logged on the server instead, so production problems can be found in the host's logs. A line in a log
 nobody reads is not enough, so the failures that are not expected outcomes also reach the owner on Telegram, in the
@@ -24,9 +24,9 @@ chat where the feedback arrives (spec 0017), at most once per kind of failure an
 - **AC-4**: What the client receives doesn't change.
 - **AC-5**: The other server actions that turn errors into a result log through the same file, one line each, under their
   own tag and by the same rules as AC-2: `[feedback]` (spec 0017), `[account-delete]` (spec 0014), `[friends]` (spec
-  0024) and `[feature-flags]` (spec 0035: a failed lookup, and each change from the Telegram bot). Which failures each logs is in its own spec; the line formats are below.
-- **AC-6**: After logging, the stamp actions, feedback, account deletion and friends also send one Telegram message
-  for a failure at the `write` or `exception` stage (account deletion's `rpc` counts as `write`; a friends action is
+  0024), `[share]` (spec 0039) and `[feature-flags]` (spec 0035: a failed lookup, and each change from the Telegram bot). Which failures each logs is in its own spec; the line formats are below.
+- **AC-6**: After logging, the stamp actions, feedback, account deletion, friends and share cards also send one Telegram message
+  for a failure at the `write` or `exception` stage (account deletion's `rpc` counts as `write`; a friends or share action is
   a `write` unless something threw around it). Not sent: a failed `read`, a missing session, rejected input, a request the database refused (AC-3), a failed
   feature flag lookup or flag change, and a Telegram request that failed itself. The message goes to the chat of
   `TELEGRAM_CHAT_ID` through `TELEGRAM_BOT_TOKEN` (spec 0017) and only from a production build with both set: on a
@@ -76,6 +76,7 @@ Line formats (one `console.error` / `console.warn` call, or `console.info` for a
 [feedback] telegram notification failed reason=http_401
 [account-delete] stage=rpc user=<uuid> code=- message="..."
 [friends] action=sendRequest code=- message="..."
+[share] action=createShareCard code=- message="..."
 [alerts] telegram notification failed reason=http_401
 [feature-flags] lookup failed code=- message="..."
 [feature-flags] change key=friends change=on result=ok
@@ -99,9 +100,9 @@ Line formats (one `console.error` / `console.warn` call, or `console.info` for a
 | --- | --- |
 | AC-1 ... AC-4 | `src/app/[locale]/dashboard/actions.test.ts`, `describe("spec 0008: ...")` (spies on `console.error` / `console.warn`; the AC-2 test checks that the user's email, the place keys and the error's `details` / `hint` are absent) |
 | AC-1 ... AC-3 (line format, one-line guarantee, non-Error values) | `src/lib/log.test.ts` |
-| AC-5 | `src/lib/log.test.ts` (the `[feedback]`, `[account-delete]` and `[feature-flags]` lines, spec 0035 AC-24), the actions' own tests (`feedback/actions.test.ts`, `account/actions.test.ts`, `friends/actions.test.ts`) |
+| AC-5 | `src/lib/log.test.ts` (the `[feedback]`, `[account-delete]`, `[share]` and `[feature-flags]` lines, spec 0035 AC-24, spec 0039 AC-13), the actions' own tests (`feedback/actions.test.ts`, `account/actions.test.ts`, `friends/actions.test.ts`) |
 | AC-6 ... AC-10 (the rules) | `src/lib/failure-alerts.test.ts` (stages, kinds, the hourly limit, the outage summary, a throwing `send`, the message text) |
-| AC-6, AC-7, AC-8, AC-9, AC-10 (through the log functions) | `src/lib/log.test.ts`, `describe("spec 0008: failures reach Telegram")` (what is sent for each action and the chat and URL it goes to, nothing for the excluded failures, the limit, the summary, a hanging, failing or throwing fetch, no token in a log line, nothing without the config or outside production), `friends/actions.test.ts` (a thrown error is sent as `exception`, a database error as `write`) |
+| AC-6, AC-7, AC-8, AC-9, AC-10 (through the log functions) | `src/lib/log.test.ts`, `describe("spec 0008: failures reach Telegram")` (what is sent for each action and the chat and URL it goes to, nothing for the excluded failures, the limit, the summary, a hanging, failing or throwing fetch, no token in a log line, nothing without the config or outside production), `friends/actions.test.ts` (a thrown error is sent as `exception`, a database error as `write`), `stats/actions.test.ts` (the share actions' lines) |
 | AC-6 ... AC-10 (the real bot) | manual (it needs the real bot and a production build): see "Checking by hand" below. Last checked: never recorded. |
 
 ### Checking by hand

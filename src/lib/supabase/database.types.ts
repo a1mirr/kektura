@@ -92,6 +92,19 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"share_cards": {
+                  Row: {
+                    "created_at": string,"display_name": string | null,"id": string,"km_done": number,"km_left": number,"percent": number,"ranges": NonNullable<Json>,"stages_done": number,"stages_total": number,"stamps_done": number,"stamps_total": number,"token": string,"user_id": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"display_name"?: string | null,"id"?: string,"km_done": number,"km_left": number,"percent": number,"ranges": NonNullable<Json>,"stages_done": number,"stages_total": number,"stamps_done": number,"stamps_total": number,"token"?: string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"display_name"?: string | null,"id"?: string,"km_done"?: number,"km_left"?: number,"percent"?: number,"ranges"?: NonNullable<Json>,"stages_done"?: number,"stages_total"?: number,"stamps_done"?: number,"stamps_total"?: number,"token"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"user_extra_stamps": {
                   Row: {
                     "extra_id": number,"stamped_on": string,"user_id": string
@@ -171,8 +184,14 @@ isOneToOne: false
 "approve_request":
 { Args: { "requester_id": string }; Returns: undefined
                            },
+"create_share_card":
+{ Args: { "p_km_done": number,"p_km_left": number,"p_percent": number,"p_ranges": Json,"p_show_name": boolean,"p_stages_done": number,"p_stages_total": number,"p_stamps_done": number,"p_stamps_total": number }; Returns: string
+                           },
 "default_display_name":
 { Args: { "meta": Json,"uid": string }; Returns: string
+                           },
+"delete_share_card":
+{ Args: { "p_id": string }; Returns: undefined
                            },
 "delete_user_account":
 { Args: Record<PropertyKey, never>; Returns: undefined
@@ -199,6 +218,11 @@ isOneToOne: false
                            },
 "get_my_invite_token":
 { Args: Record<PropertyKey, never>; Returns: string
+                           },
+"get_share_card":
+{ Args: { "p_token": string }; Returns: {
+              "created_at": string,"display_name": string,"km_done": number,"km_left": number,"percent": number,"ranges": Json,"stages_done": number,"stages_total": number,"stamps_done": number,"stamps_total": number
+            }[]
                            },
 "ignore_request":
 { Args: { "requester_id": string }; Returns: undefined

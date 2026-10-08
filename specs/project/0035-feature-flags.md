@@ -2,7 +2,7 @@
 
 Status: Done
 Owner code: `src/lib/feature-flags.ts`, `src/lib/feature-flags-server.ts`, `supabase/migrations/0060_feature_flags.sql`,
-`supabase/migrations/0110_restaurants_flag.sql`,
+`supabase/migrations/0110_restaurants_flag.sql`, `supabase/migrations/0132_share_cards.sql`,
 `e2e/feature-flags.spec.ts`, `e2e/helpers.ts`, `playwright.config.ts`, `src/app/api/telegram/route.ts`, `src/lib/flag-commands.ts`,
 `src/lib/telegram-webhook.ts`, `src/lib/supabase/service.ts`, `scripts/telegram-webhook.mjs`,
 `supabase/migrations/0062_flag_admin.sql`, `supabase/migrations/0108_flag_admin_buttons.sql`, `src/lib/telegram.ts`
@@ -68,8 +68,8 @@ switch them from the phone by writing to the Telegram bot that already brings th
 - **AC-11**: End-to-end tests switch a flag in the local database with `setFeatureFlag` (`e2e/helpers.ts`). Flags are
   global, so the tests that switch a declared one are `e2e/feature-flags.spec.ts`, which is its own Playwright
   project (`flags`) that starts after the others have finished, runs its tests one after the other and leaves the
-  flags as the other tests expect them (`on`). They check each state of `friends`, for a signed-in user, a listed user and
-  a signed-out visitor, and of `restaurants`, for a user and a listed user.
+  flags as the other tests expect them (`on`; `share` goes back to `off`, as in production, because no other test needs it). They check each state of `friends`, for a signed-in user, a listed user and
+  a signed-out visitor, of `restaurants`, for a user and a listed user, and of `share` (spec 0039 AC-1).
 
 ### Switching from Telegram
 
@@ -160,7 +160,8 @@ environment settings (those stay environment variables); per-flag analytics; a v
 ## Notes
 
 - Flags today: `friends` (spec 0024; `on` in production, which the migration that adds the tables records) and
-  `restaurants` (the restaurants layer of the dashboard's map, spec 0003 AC-21; `on`, which its migration records). A flag
+  `restaurants` (the restaurants layer of the dashboard's map, spec 0003 AC-21; `on`, which its migration records) and
+  `share` (share cards, spec 0039; `off`, which its migration records). A flag
   is declared together with the feature it hides, never ahead of it.
 - `feature_flags_for_me()` returns the mode and a `listed` bit instead of the enabled keys, so the rules of AC-3 live
   in one place that unit tests reach without a database. The mode of a stored flag is not secret.
