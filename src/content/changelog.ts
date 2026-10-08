@@ -12,6 +12,26 @@ export type ChangelogEntry = { date: string; title: Localized; changes: Change[]
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-08",
+    title: {
+      en: "Share your progress: a card with a link and a preview for Telegram",
+      ru: "Поделитесь прогрессом: карточка со ссылкой и превью для Telegram",
+      hu: "Oszd meg a haladásod: kártya linkkel és előnézettel a Telegramhoz",
+      de: "Teile deinen Fortschritt: eine Karte mit Link und Vorschau für Telegram",
+    },
+    changes: [
+      {
+        kind: "new",
+        text: {
+          en: "Share your progress. On the \"My stats\" page, \"Share your progress\" makes a card: a snapshot of your percentage, stamps, kilometres, completed stages and the map of the trail with the part you have walked in blue, behind a link that anyone can open. Paste the link in Telegram or any messenger and it unfolds into a preview with the map and the percentage; \"Send to Telegram\" opens Telegram's own share dialog. A card does not change when you collect more stamps (make a new one), shows your name only if you tick it, and never shows stamp dates or extra stamps. You can delete it at any time and its link stops working. Keep in mind that the walked part of the map shows roughly where you are on the trail.",
+          ru: "Поделитесь прогрессом. На странице «Моя статистика» блок «Поделитесь прогрессом» создаёт карточку: снимок ваших процентов, печатей, километров, пройденных этапов и карты маршрута, на которой пройденная часть выделена синим, за ссылкой, которую может открыть любой. Вставьте ссылку в Telegram или другой мессенджер, и она раскроется превью с картой и процентами; «Отправить в Telegram» открывает окно отправки самого Telegram. Карточка не меняется, когда вы собираете новые печати (создайте новую), показывает ваше имя, только если вы это отметили, и никогда не показывает даты печатей и дополнительные печати. Её можно удалить в любой момент, и ссылка перестанет работать. Учтите: пройденная часть карты примерно показывает, где вы на маршруте.",
+          hu: "Oszd meg a haladásod. A „Statisztikáim” oldalon az „Oszd meg a haladásod” panelen kártyát készíthetsz: pillanatképet a százalékodról, a bélyegzéseidről, a kilométereidről, a teljesített szakaszokról és az útvonal térképéről, a bejárt résszel kékkel, egy olyan link mögött, amelyet bárki megnyithat. Illeszd be a linket a Telegramba vagy bármely üzenetküldőbe, és előnézet nyílik ki belőle a térképpel és a százalékkal; a „Küldés Telegramon” a Telegram saját megosztási ablakát nyitja meg. A kártya nem változik, ha később újabb bélyegzőket gyűjtesz (készíts újat), a nevedet csak akkor mutatja, ha bejelölöd, a bélyegzések dátumát és az extra bélyegzőket pedig soha. Bármikor törölheted, és a linkje megszűnik működni. Vedd figyelembe, hogy a térképen a bejárt rész nagyjából megmutatja, hol tartasz az útvonalon.",
+          de: "Teile deinen Fortschritt. Auf der Seite „Meine Statistik“ erstellst du mit „Teile deinen Fortschritt“ eine Karte: eine Momentaufnahme deines Fortschritts in Prozent, deiner Stempel, Kilometer und abgeschlossenen Etappen sowie der Karte des Wegs mit dem gewanderten Teil in Blau, hinter einem Link, den jeder öffnen kann. Füge den Link in Telegram oder einen anderen Messenger ein, und er klappt zu einer Vorschau mit Karte und Prozentzahl auf; „An Telegram senden“ öffnet den Teilen-Dialog von Telegram. Eine Karte ändert sich nicht, wenn du weitere Stempel sammelst (erstelle eine neue), zeigt deinen Namen nur, wenn du ihn ankreuzt, und nie Stempeldaten oder Extra-Stempel. Du kannst sie jederzeit löschen, dann funktioniert ihr Link nicht mehr. Beachte: Der gewanderte Teil der Karte zeigt ungefähr, wo du auf dem Weg bist.",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-10-07",
     title: {
       en: "Change the date of many stamps at once, a page of your stats, moved stamps on the map, an account menu and screenshots on the start page",
