@@ -8,13 +8,12 @@ import { useBulk } from "./BulkDatesProvider";
 
 export default function StageControls() {
   const t = useTranslations("dashboard");
-  const bulk = useBulk(); // only on the dashboard, where dates are set (spec 0016 AC-14)
-  const hydrated = useHydrated(); // "Set dates" needs JavaScript: without it only the single date fields are offered
+  const bulk = useBulk();
+  const hydrated = useHydrated();
   const button = useRef<HTMLButtonElement>(null);
   const active = bulk?.active ?? false;
   const wasActive = useRef(false);
   useEffect(() => {
-    // The mode closed (Cancel, Escape or a save): the button that opened it gets the focus back.
     if (wasActive.current && !active) button.current?.focus({ preventScroll: true });
     wasActive.current = active;
   }, [active]);

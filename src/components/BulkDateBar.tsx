@@ -10,9 +10,9 @@ import { isValidStampDate } from "@/lib/stamp-date";
 import { useBulk, type BulkApi } from "./BulkDatesProvider";
 import CalendarButton from "./CalendarButton";
 
-// The answer to a save (spec 0016 AC-19): "12 dates set". A status live region that is always in the page, so a screen reader
-// announces its text when it appears; empty, it takes no room. It has no role of its own: the page already has one status (the test
-// server's banner) and the others look for it.
+// The answer to a save ("12 dates set"): a status live region that is always in the page, so a screen reader
+// announces its text when it appears; empty, it takes no room. It has no role of its own: the page already has one
+// status (the test server's banner) and the others look for it.
 export function BulkMessage() {
   const bulk = useBulk();
   const t = useTranslations("dashboard");
@@ -24,8 +24,8 @@ export function BulkMessage() {
   );
 }
 
-// Hides the toolbar on a phone while the page is scrolled down and brings it back on the way up (or when something in it takes the
-// focus), so it does not cost the small screen a strip all the time. The scroll direction is read from window.scrollY.
+// Hides the toolbar on a phone while the page is scrolled down and brings it back on the way up (or when something in
+// it takes the focus), so it does not cost the small screen a strip all the time.
 function useHideOnScrollDown() {
   const [hidden, setHidden] = useState(false);
   useEffect(() => {
@@ -42,11 +42,9 @@ function useHideOnScrollDown() {
   return [hidden, () => setHidden(false)] as const;
 }
 
-// The toolbar of the stage list (spec 0016 AC-14): the list's controls, with the button into "Set dates", stuck to the top of the page
-// while the list scrolls, extra stamps included. In the mode the bar sits under it on a wide screen (on a phone it is fixed to the
-// bottom, spec 0016 AC-21). A friend's page has no provider and so no bar: the controls just stand there. From 1024 px it is at z-5:
-// above the rows' positioned controls (the date fields) and below the map's block of the other column (z-10), which holds the
-// fullscreen map, so the map covers it (spec 0003 AC-11).
+// From 1024 px the toolbar is at z-5: above the rows' positioned controls (the date fields) and below the map's block
+// of the other column (z-10), which holds the fullscreen map, so the map covers it. A friend's page has no provider
+// and so no bar: the controls just stand there.
 export function BulkToolbar({ children }: { children: ReactNode }) {
   const bulk = useBulk();
   const [hidden, show] = useHideOnScrollDown();
@@ -83,7 +81,6 @@ function useKeyboardInset() {
   return inset;
 }
 
-// On a phone the bar is fixed to the bottom of the screen; from 1024 px it stands under the toolbar, inside its sticky box.
 // Mounted only while the mode is on, so its date and its failure start empty every time the mode opens.
 function Bar({ bulk }: { bulk: BulkApi }) {
   const t = useTranslations("dashboard");
@@ -97,10 +94,9 @@ function Bar({ bulk }: { bulk: BulkApi }) {
   const conflicts = retiredConflicts(chosen, draft);
   const fresh = notStampedCount(chosen);
   const region = useRef<HTMLDivElement>(null);
-  useEffect(() => region.current?.focus({ preventScroll: true }), []); // opened by the button: the focus moves into the bar
+  useEffect(() => region.current?.focus({ preventScroll: true }), []);
   const ready = canApply(chosen, draft) && !pending;
 
-  // Nothing is sent before Apply, and never on `change` (spec 0016 AC-16).
   function apply() {
     if (!ready || sending.current) return;
     sending.current = true;
@@ -113,13 +109,13 @@ function Bar({ bulk }: { bulk: BulkApi }) {
       try {
         result = await setStampDates(placeKeys, extraIds, draft);
       } catch {
-        result = { ok: false, reason: "failed" }; // network error
+        result = { ok: false, reason: "failed" };
       }
       sending.current = false;
       bulk.setBusy(false);
       if (result.ok) bulk.finish(count);
-      else if (result.reason === "unauthorized") router.refresh(); // the session expired: the page sends the user to the landing page
-      else setFailed(true); // the dates and the choice stay as they were
+      else if (result.reason === "unauthorized") router.refresh();
+      else setFailed(true);
     });
   }
 
@@ -152,7 +148,7 @@ function Bar({ bulk }: { bulk: BulkApi }) {
       <form
         className="mt-1 flex flex-wrap items-center gap-2"
         onSubmit={(e) => {
-          e.preventDefault(); // Enter in the date field applies
+          e.preventDefault();
           apply();
         }}
       >
@@ -176,7 +172,7 @@ function Bar({ bulk }: { bulk: BulkApi }) {
           value={isValidStampDate(draft) ? draft : ""}
           max={bulk.max}
           onPick={(date) => {
-            if (date) setDraft(date); // a pick is a date, not a save: Apply sends it
+            if (date) setDraft(date);
           }}
         />
         <button
