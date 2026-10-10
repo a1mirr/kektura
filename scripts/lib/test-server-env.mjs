@@ -1,5 +1,3 @@
-// Kept apart from scripts/test-env.mjs so a unit test can call it without Docker or `supabase status`.
-
 // Next merges .env.local into the server's environment, and a variable that is already set (even to "") wins over it,
 // so blanking them here keeps tests away from the real service: without it every E2E run posts its feedback to the
 // developer's real Telegram (it is sent only when both values are non-empty). The webhook secret and the service role

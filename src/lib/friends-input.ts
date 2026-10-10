@@ -16,7 +16,6 @@ export type RequestRefusal = (typeof REQUEST_REFUSALS)[number];
 export const FRIEND_NOTICES = ["sent", "approved", "ignored", "removed", "regenerated", "name", "sharing_on", "sharing_off"] as const;
 export type FriendNotice = (typeof FRIEND_NOTICES)[number];
 
-// The path has no locale (the caller adds it, or the localized `redirect` does).
 export function friendsPath(result: { ok: true } | { ok: false; reason: string }, notice: FriendNotice): string {
   return result.ok ? `/friends?ok=${notice}` : `/friends?error=${result.reason}`;
 }

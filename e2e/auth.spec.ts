@@ -60,7 +60,6 @@ test.describe("spec 0006 + 0005: signing in and out on the test server", () => {
     expect(await go("code=not-a-real-code&locale=xx")).toBe(`${baseURL}/hu?error=auth`);
     expect(await go("code=not-a-real-code&locale=../evil.example")).toBe(`${baseURL}/hu?error=auth`);
     expect(await go("locale=en")).toBe(`${baseURL}/en?error=auth`);
-    // An `x-forwarded-host` the proxy would set is honoured, a malformed one is not
     const forwarded = await page.request.get("/auth/callback?code=x&locale=en", {
       maxRedirects: 0,
       headers: { "x-forwarded-host": "example.test", "x-forwarded-proto": "https" },

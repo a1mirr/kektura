@@ -1,5 +1,3 @@
-// No I/O here, so the tests can state every rule directly.
-
 const NOT_DEPLOYED = [/^specs\//, /^tests\//, /^e2e\//, /^\.github\//, /^\.claude\//, /^\.githooks\//, /\.md$/];
 
 export function needsDeploy(paths) {
@@ -23,14 +21,12 @@ export function planDeploy({ production, target, changed = [], targetIsBehind = 
   return { deploy: true, reason: `${changed.length} changed file${changed.length === 1 ? "" : "s"} since production's commit` };
 }
 
-// 0001_init.sql, 0024_friends.sql ...: four digits (the number of the task issue that adds it), then a slug.
 const MIGRATION_FILE = /^\d{4}_[a-z0-9_]+\.sql$/;
 
 export function migrationFiles(names) {
   return names.filter((name) => MIGRATION_FILE.test(name)).sort();
 }
 
-// A file that sorts before an applied one is still pending.
 export function pendingMigrations(files, applied) {
   return files.filter((file) => !applied.has(file));
 }

@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import { useHydrated } from "@/lib/use-hydrated";
 import { useBulk } from "./BulkDatesProvider";
 
-// Needs JavaScript, so it is not in the server's HTML.
 export default function BulkStageButton({ stage }: { stage: number }) {
   const t = useTranslations("dashboard");
   const bulk = useBulk();

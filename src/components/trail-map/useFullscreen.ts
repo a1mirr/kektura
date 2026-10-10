@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import type { MapHandleRef } from "./types";
 
-// Native Fullscreen API where available, a CSS overlay everywhere (Esc or the button leaves it), and the page behind
-// it doesn't scroll.
 export function useFullscreen(wrapper: RefObject<HTMLDivElement | null>, mapRef: MapHandleRef) {
   const [fullscreen, setFullscreen] = useState(false);
   const fullscreenRef = useRef(false);
@@ -12,7 +10,6 @@ export function useFullscreen(wrapper: RefObject<HTMLDivElement | null>, mapRef:
     document.body.style.overflow = fullscreen ? "hidden" : "";
     if (fullscreen) {
       wrapper.current?.requestFullscreen?.().catch(() => {
-        // not allowed / unsupported: the CSS overlay is enough
       });
     } else if (document.fullscreenElement) {
       document.exitFullscreen().catch(() => {});
@@ -27,7 +24,6 @@ export function useFullscreen(wrapper: RefObject<HTMLDivElement | null>, mapRef:
       window.addEventListener("keydown", onKey);
       document.addEventListener("fullscreenchange", onFullscreenChange);
     }
-    // The map's box changed size: let it measure itself again once the layout has settled.
     const timers = [50, 350].map((ms) => setTimeout(() => mapRef.current.map?.resize(), ms));
     return () => {
       window.removeEventListener("keydown", onKey);

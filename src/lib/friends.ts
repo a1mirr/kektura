@@ -59,8 +59,6 @@ export async function getFriends(supabase: SupabaseClient<Database>, uid: string
   });
 }
 
-// The friend's dates are not shared, so the places they were not missing (`waivedKeys`) are decided by the database
-// and come with the stamps.
 export function summarizeFriend(checkpoints: Checkpoint[], checkpointIds: number[], stagesMeta: StageMeta[], waivedKeys: string[] = []) {
   const places = buildPlaces(checkpoints);
   const stampedKeys = stampedPlaceKeys(places, checkpointIds.map((id) => ({ checkpoint_id: id, stamped_on: "" })));

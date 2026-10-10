@@ -1,12 +1,7 @@
-// Reads the JSON report of `npm audit --omit=dev --audit-level=high --json` and fails when it names a high or
-// critical advisory in a production dependency that the allow-list (`.github/audit-allowlist.json`) does not cover.
-// An allow-list entry has an advisory id, a reason and an expiry date; an expired entry (and one that is malformed,
-// or expires too far ahead) is a failure of its own, so an advisory without a fix can wait only for a while.
 // Usage: node scripts/check-audit.mjs [audit-report.json] [allowlist.json]
 import { readFileSync } from "node:fs";
 
 export const SEVERITIES_THAT_FAIL = ["high", "critical"];
-/** The longest an entry may be allowed to run from today: an advisory is looked at again at least this often. */
 export const MAX_DAYS_AHEAD = 90;
 
 const GHSA = /GHSA(?:-[2-9cfghjmpqrvwx]{4}){3}/i;

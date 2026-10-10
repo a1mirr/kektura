@@ -182,7 +182,6 @@ describe("spec 0037: the kilometres of a month", () => {
       "2026-08": 0,
       "2026-09": 20,
     });
-    // Had B been stamped in July, A-B would count in July and B-C in August.
     expect(kmOf(walk({ A: "2026-06-10", C: "2026-08-20", B: "2026-07-02" }).months)).toEqual({ "2026-06": 0, "2026-07": 10, "2026-08": 10 });
   });
 
@@ -214,7 +213,7 @@ describe("spec 0037: the kilometres of a month", () => {
     const stamped = stampedPlaceKeys(places, stamps);
     expect([...waivedPlaceKeys(places, stamped)]).toEqual(["N"]);
     const months = monthlyProgress({ places, stamps, stages: buildStages(places, []), extras: [], extraStamps: [] });
-    expect(kmOf(months)).toEqual({ "2025-03": 0, "2025-04": 20 }); // B-C is one stretch of 10 km, dated April; A-B too
+    expect(kmOf(months)).toEqual({ "2025-03": 0, "2025-04": 20 });
     const done = progressSummary(places, walkedRanges(places, stamped, waivedPlaceKeys(places, stamped))).doneKm;
     expect(done).toBe(20);
   });
@@ -240,7 +239,7 @@ describe("spec 0037: changing a date, removing a stamp", () => {
   });
 
   it("AC-8: a removed stamp takes the stretches it made walked out of the month they were in", () => {
-    const { months } = walk({ A: "2026-06-10", C: "2026-07-10" }); // B was stamped in July and is removed again
+    const { months } = walk({ A: "2026-06-10", C: "2026-07-10" });
     expect(months.reduce((sum, m) => sum + m.km, 0)).toBe(0);
     expect(walk({ A: "2026-06-10", B: "2026-06-11", C: "2026-07-10" }).months.map((m) => m.km)).toEqual([10, 10]);
   });

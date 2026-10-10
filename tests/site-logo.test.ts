@@ -31,7 +31,7 @@ describe("spec 0014: the site logo", () => {
   it("AC-19: the mark is one local SVG with no reference to another host", () => {
     const svg = read("public/logo.svg");
     expect(svg).toMatch(/^<svg\b/);
-    expect(svg).not.toMatch(/https?:\/\/(?!www\.w3\.org\/2000\/svg)/); // only the SVG namespace
+    expect(svg).not.toMatch(/https?:\/\/(?!www\.w3\.org\/2000\/svg)/);
     expect(svg).not.toMatch(/<(script|image|use)\b|href=|url\(/);
     expect(read("src/components/SiteLogo.tsx")).toContain('src="/logo.svg"');
   });

@@ -48,8 +48,7 @@ export function compareLines(route: Route, ranges: ComparisonRanges, view: Compa
   ]);
 }
 
-// `label` is the place's number in the list ("17.1"). `moved`: the stamp moved within the last 180 days, so its point
-// gets a ring.
+// `label` is the place's number in the list ("17.1").
 export type ComparePoint = { placeKey: string; label: string; name: string; lat: number; lng: number; who: Who; moved?: boolean };
 
 export function compareDots(points: ComparePoint[], view: CompareView): FeatureCollection<Point> {

@@ -21,8 +21,6 @@ import { approveRequest, ignoreRequest, regenerateInvite, removeFriend, setDispl
 // through): anything else in the URL is ignored, never shown.
 const ERRORS = [...REQUEST_REFUSALS, "unauthorized", "failed"] as const;
 
-// Every action ends by reloading the page: the answer to it is in the URL (`?ok=`, `?error=`), which also clears the
-// previous one.
 function done(locale: (typeof routing.locales)[number], result: ActionResult, notice: FriendNotice) {
   redirect({ href: friendsPath(result, notice), locale });
 }

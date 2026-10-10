@@ -1,8 +1,5 @@
-// Exit 2 puts stderr in front of Claude; any other outcome lets the call through.
-//
-// A hook can't move the session, only refuse: the message says how to make a worktree. It is a guard against the
-// usual mistake, not a sandbox: a shell redirect, `sed -i` or a script that writes files is not recognised (the
-// pre-push guard, CI and the review still stand behind it).
+// A guard against the usual mistake, not a sandbox: a shell redirect, `sed -i` or a script that writes files is not
+// recognised (the pre-push guard, CI and the review still stand behind it).
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -10,14 +7,11 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 export const PROTECTED_BRANCHES = ["main", "master"];
-// Reading (status, log, diff, fetch, show, worktree, branch -r) and pushing (the pre-push guard owns that) are not in
-// the list.
 export const MUTATING = new Set([
   "add", "am", "apply", "checkout", "cherry-pick", "clean", "commit", "merge", "mv", "pull", "rebase", "reset", "restore", "revert", "rm", "stash", "switch",
 ]);
 const FILE_TOOLS = new Set(["Edit", "Write", "NotebookEdit"]);
 
-// Injected in the tests.
 export function realGit(dir, args) {
   const result = spawnSync("git", ["-c", "core.quotepath=false", ...args], { cwd: dir, encoding: "utf8", timeout: 10_000, env: { ...process.env, GIT_TERMINAL_PROMPT: "0" } });
   return { status: result.status ?? 1, stdout: result.stdout ?? "" };
@@ -62,7 +56,6 @@ function simpleCommands(line) {
   return line.split(/&&|\|\||;|\||\r?\n/).map((s) => s.trim()).filter(Boolean);
 }
 const unquote = (s) => s.replace(/^["']|["']$/g, "");
-// A word may mix quoted and bare parts: FOO="a b" is one word.
 const words = (command) => [...command.matchAll(/(?:"[^"]*"|'[^']*'|[^\s"'])+/g)].map((m) => m[0]);
 
 /** Git Bash and WSL write C:\x as /c/x or /mnt/c/x, and ~ is the home directory; Node on Windows reads neither the way the shell meant it. */
@@ -75,7 +68,6 @@ export function toNative(p, platform = process.platform) {
 const resolveFrom = (dir, p) => path.resolve(dir, toNative(unquote(p)));
 
 export function gitInvocation(command, dir) {
-  // `FOO=1 git ...`, `command git ...` and `git.exe` are git too.
   const parts = words(command);
   while (parts.length && (/^[A-Za-z_][A-Za-z0-9_]*=/.test(parts[0]) || parts[0] === "command")) parts.shift();
   if (!/^(?:.*[\\/])?git(?:\.exe)?$/i.test(unquote(parts[0] ?? ""))) return null;
@@ -114,7 +106,7 @@ function staleBase(base, where, git) {
   }
   const remote = git(where, ["ls-remote", "--heads", "origin", "refs/heads/main"]);
   const remoteSha = remote.status === 0 ? remote.stdout.trim().split(/\s+/)[0] : "";
-  if (!remoteSha) return ""; // offline or no origin: nothing to compare with
+  if (!remoteSha) return "";
   const local = git(where, ["rev-parse", "--verify", "-q", "refs/remotes/origin/main"]).stdout.trim();
   if (local === remoteSha) return "";
   return `origin/main here is ${local.slice(0, 7) || "missing"} but GitHub's main is ${remoteSha.slice(0, 7)}: run \`git fetch origin\` first`;
@@ -128,7 +120,7 @@ function staleBase(base, where, git) {
 export function decide(input, { project = input.cwd ?? process.cwd(), git = realGit } = {}) {
   const cwd = input.cwd ?? project;
   const mine = inspect(project, git);
-  if (!mine) return ""; // not a git checkout: nothing to guard
+  if (!mine) return "";
 
   const refuse = (what, reason) => `Blocked: ${what}, but ${reason}. Changes are made in a linked worktree, not here.\n${HOW}`;
 
@@ -138,10 +130,10 @@ export function decide(input, { project = input.cwd ?? process.cwd(), git = real
     const file = resolveFrom(cwd, target);
     const dir = nearestExisting(file);
     const where = dir && inspect(dir, git);
-    if (!where || where.commonDir !== mine.commonDir) return ""; // another repository, or outside any
+    if (!where || where.commonDir !== mine.commonDir) return "";
     const reason = refusal(where);
     if (!reason) return "";
-    if (git(dir, ["check-ignore", "-q", file]).status === 0) return ""; // build output, .env.local
+    if (git(dir, ["check-ignore", "-q", file]).status === 0) return "";
     return refuse(`${input.tool_name} on ${path.relative(where.top, file).replace(/\\/g, "/")}`, reason);
   }
 

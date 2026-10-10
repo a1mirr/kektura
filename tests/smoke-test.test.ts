@@ -9,7 +9,6 @@ type Answers = Record<string, number>;
 let server: http.Server | undefined;
 const requests: string[] = [];
 const methods: string[] = [];
-// every language's page, the unknown route and the dummy login
 const CHECKS_PER_ROUND = LANGUAGES.length + 2;
 
 async function serve(answers: Answers, beforeReady = 0) {

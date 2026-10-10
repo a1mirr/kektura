@@ -3,10 +3,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 import { createPublicClient } from "@/lib/supabase/public";
 
-// Reference data (checkpoints, extra stamps) is the same for everybody: read through a cookie-less client and cached
-// on the server.
-// A user's own stamps are read per request through the cookie-based client, under RLS, and never cached.
-
 export const REFERENCE_DATA_TAG = "reference-data";
 export const REFERENCE_DATA_REVALIDATE_SECONDS = 60 * 60 * 24;
 

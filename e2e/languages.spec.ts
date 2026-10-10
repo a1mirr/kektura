@@ -6,9 +6,6 @@ import { CHANGELOG } from "../src/content/changelog";
 import { routing } from "../src/i18n/routing";
 import { accountButton, openAccountMenu, signInAsNewUser } from "./helpers";
 
-// The one test per behaviour that runs over every language: the expected texts are read from the
-// language's own messages file, so a new language needs no edit here. Other specs use the default language and
-// at most one other.
 type Messages = typeof en;
 const messages = (locale: string): Messages =>
   JSON.parse(fs.readFileSync(path.join(process.cwd(), "messages", `${locale}.json`), "utf8"));

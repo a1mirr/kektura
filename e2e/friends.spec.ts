@@ -3,8 +3,6 @@ import { routing } from "../src/i18n/routing";
 import { expandAllStages, measureDescriptions, openAccountMenu, signInAsNewUser, stat } from "./helpers";
 import { psql } from "./local-db";
 
-// Two people with their own browser contexts. Ana stamps two neighbouring places (8.1 km) and sets her name;
-// Bob signs in through her invite link and asks to connect. Nothing is approved yet.
 async function requestedFriendship(browser: Browser) {
   const anaPage = await (await browser.newContext()).newPage();
   const anaEmail = await signInAsNewUser(anaPage);
@@ -47,7 +45,6 @@ const alert = (page: Page) => page.getByRole("alert").filter({ hasText: /\S/ });
 
 const inviteLink = (page: Page) => page.locator("input[readonly]").inputValue();
 
-// The question is a <details>: its summary opens it, the confirming button inside is the real submit.
 async function confirmed(scope: Locator, label: string, yes: string) {
   await scope.locator("summary", { hasText: label }).click();
   await scope.getByRole("button", { name: yes }).click();
@@ -212,7 +209,7 @@ test.describe("spec 0024: friends", () => {
     await anaPage.goto(`/en/friends/${bobId}`);
     await expandAllStages(anaPage);
     const { measured, clipped } = await measureDescriptions(anaPage);
-    expect(measured).toBeGreaterThan(200); // every stamp of the 161 places, stamped or not
+    expect(measured).toBeGreaterThan(200);
     expect(clipped).toEqual([]);
 
     await anaPage.goto(`/ru/friends/${bobId}`);
@@ -331,7 +328,7 @@ test.describe("spec 0024: the Friends page buttons respond", () => {
     await expect(status(page)).toHaveText("Friend request approved.");
     await expect(page.getByRole("button", { name: "Cancel" })).toHaveCount(0); // no JavaScript, no Cancel button
 
-    await page.locator("summary", { hasText: "Remove" }).click(); // the browser opens a <details> itself
+    await page.locator("summary", { hasText: "Remove" }).click();
     await page.getByRole("button", { name: "Yes, remove" }).click();
     await expect(status(page)).toHaveText("Friend removed.");
     await expect(page.getByText("You haven't added any friends yet.")).toBeVisible();
@@ -349,7 +346,7 @@ test.describe("spec 0024: the Friends page buttons respond", () => {
         if (approved) await approve(anaPage);
         for (const locale of [routing.defaultLocale, "ru"]) {
           await anaPage.goto(`/${locale}/friends`);
-          await anaPage.locator("main summary").first().click(); // the open question is the widest state
+          await anaPage.locator("main summary").first().click();
           const small = await anaPage.locator("button:visible, summary:visible").evaluateAll((els) =>
             els.map((el) => ({ text: el.textContent, ...el.getBoundingClientRect().toJSON() })).filter((r) => r.width < 44 || r.height < 44),
           );

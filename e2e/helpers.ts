@@ -51,9 +51,6 @@ export async function expandAllStages(page: Page) {
   }).toPass();
 }
 
-// The page does not scroll sideways: its scroll width is no wider than the window's
-// client width. When it is, the failure names the elements that stick out. Polled, so a page that is still settling
-// (fonts, hydration) gets a moment.
 export async function expectNoSidewaysScroll(page: Page, message: string) {
   await expect
     .poll(
@@ -103,7 +100,6 @@ export function setFeatureFlag(key: string, mode: "off" | "allowlist" | "on", al
   );
 }
 
-// The map's canvas: a WebGL element, so stamps are reached through the app's own list -> map flow below.
 export const canvas = (page: Page) => page.locator(".maplibregl-canvas");
 
 // A click on 📍 does nothing until the map has loaded and attached its listener (a second or two over the network, more on a busy
@@ -147,19 +143,12 @@ export function stampStagesOn(email: string, stages: number, day: string) {
   );
 }
 
-// An extra stamp (by its id: 1 is Velem, 3.8 km from the start, in stage 1) on a day.
 export function stampExtraOn(email: string, extraId: number, day: string) {
   psql(
     `insert into public.user_extra_stamps (user_id, extra_id, stamped_on) select u.id, ${extraId}, '${day}' from auth.users u where u.email = '${email}'`,
   );
 }
 
-// The walk of the stats page tests: six months, one of them empty, one with only an extra stamp, and a stretch finished by a
-// stamp that is placed next to an earlier month's. Places 01 to 05 are 0, 8.1, 13.0, 28.7 and 38.4 km from the start.
-//   Dec 2025: 05 (1 stamp, stage 1, 0 km)      Jan 2026: 01 and 02 (2 stamps, 8.1 km)       Feb: nothing
-//   Mar: the extra stamp 1 only                  Apr: 04 (1 stamp, 9.7 km: 04-05 is walked now, 05 is older)
-//   May: 03 (1 stamp, 4.9 + 15.7 = 20.6 km: both its stretches are walked now, 02 and 04 are older)
-// Together 38.4 km, the dashboard's walked km, and 5 of the 161 places.
 export function seedStatsWalk(email: string) {
   stampPlacesOn(email, {
     OKTPH_05: "2025-12-30",

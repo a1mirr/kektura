@@ -5,16 +5,11 @@
 // npm run build:e2e && npm run start:e2e      (the test server's production build on :3002: no dev overlay in the
 // pictures)
 //   npm run screenshots                         (SCREENSHOTS_URL=http://localhost:3002 is the default)
-//
-// Every picture is taken and checked first, and only then are the files written: a page that shows an email address,
-// the test server's banner or an error stops the run and leaves the old pictures alone. The banner is part of every
-// page of the test server; the script removes it from the page just before the shot, after making sure it was there.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
 import { DEMO_EMAIL, demoSql, pageProblems, pngSize, SIZE } from "./lib/screenshots.mjs";
 
-/** A problem to tell the user about. Thrown, not process.exit(): see the Windows note in CLAUDE.md. */
 export class Problem extends Error {}
 
 const messages = JSON.parse(fs.readFileSync(new URL("../messages/en.json", import.meta.url), "utf8"));
@@ -30,11 +25,10 @@ function psql(sql) {
   return execFileSync("docker", ["exec", "supabase_db_kektura", "psql", "-U", "postgres", "-tA", "-c", sql], { encoding: "utf8" });
 }
 
-// The framing of the map pictures (place keys of scripts/data, mouse-wheel steps out from the zoom the 📍 button gives).
-const MAP_CENTRE = "OKTPH_22"; // Gyöngyösi csárda, between the walked and the unwalked part
+const MAP_CENTRE = "OKTPH_22";
 const MAP_ZOOM_OUT = 9;
-const FROM = "OKTPH_27"; // Tapolca: where the demo walk ends
-const TO = "OKTPH_30"; // Badacsonytördemic
+const FROM = "OKTPH_27";
+const TO = "OKTPH_30";
 const ROUTE_ZOOM_OUT = 2;
 
 const canvas = (page) => page.locator(".maplibregl-canvas");
@@ -50,8 +44,6 @@ async function mapSettled(page) {
   }
 }
 
-// 📍 on a place's row, then a click on the canvas centre until the stamp's popup shows the action (the same flow as
-// the E2E helper `openStampPopup`: the fly animation and the smooth scroll have to finish first).
 async function openStampPopup(page, placeKey, action) {
   const button = page.locator(`#place-${placeKey}`).getByRole("button", { name: "Show on map" });
   for (let attempt = 0; attempt < 30; attempt++) {
@@ -189,13 +181,12 @@ export async function takeScreenshots() {
     await page.getByRole("button", { name: "Exit fullscreen" }).waitFor();
     await zoomOut(page, ROUTE_ZOOM_OUT);
     await mapSettled(page);
-    await shoot(page, "route", shots, false); // the same page as the map's: its banner is gone already
+    await shoot(page, "route", shots, false);
   } finally {
     await browser.close();
   }
   return shots;
 }
-// Takes every picture first and writes the files only when all of them are good, so a broken run leaves the old pictures alone.
 export async function main({ take = takeScreenshots, out = OUT } = {}) {
   const shots = await take();
   fs.mkdirSync(out, { recursive: true });

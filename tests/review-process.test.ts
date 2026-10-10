@@ -1,5 +1,3 @@
-// The process lives in prose and in an agent definition, so these tests pin that it is written down where people and
-// agents look.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 
@@ -79,6 +77,15 @@ describe("spec 0022: fresh-context review", () => {
       expect(read("CLAUDE.md")).toMatch(/a migration in the diff that the code running in production could not live with while it is applied/);
     });
 
+    it("checks that comments earn their place, and its brief carries the Comments rule of CLAUDE.md verbatim", () => {
+      const rule = /^## Comments\n([\s\S]+?)\n\n## Gotchas/m.exec(read("CLAUDE.md"))?.[1];
+      expect(rule, "the Comments section of CLAUDE.md").toMatch(/strictly FORBIDDEN/);
+      expect(body).toContain(rule!);
+      expect(body).toMatch(/A comment that has not earned its place/);
+      expect(read("CLAUDE.md")).toMatch(/a comment that has not earned its place \(the Comments section below\)/);
+      expect(read("specs/project/0022-fresh-context-review.md")).toMatch(/comments that have not earned their place/);
+    });
+
     it("checks spec hygiene and reads (does not run) the E2E specs", () => {
       expect(body).toMatch(/Spec hygiene/);
       expect(body).toMatch(/marked `Removed`|instead of marked `Removed`/);
@@ -143,8 +150,6 @@ describe("spec 0022: fresh-context review", () => {
   });
 });
 
-// Whether an entry exists for a given change can't be computed, so the rule is written where authors and reviewers
-// look; the review checks it.
 describe("spec 0018: the changelog rule", () => {
   it("AC-7: CLAUDE.md asks for an entry, in every language, in the same pull request", () => {
     const claude = read("CLAUDE.md");

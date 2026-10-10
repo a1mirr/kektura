@@ -9,7 +9,7 @@ export function useRoutePlanner(mapRef: MapHandleRef, latest: RefObject<MapInput
   const [hops, setHops] = useState<Hop[]>([]);
   const [routeFrom, setRouteFrom] = useState<string | null>(null);
   const [routeTo, setRouteTo] = useState<string | null>(null);
-  const pairRef = useRef<[number, number] | null>(null); // km range of the chosen stretch
+  const pairRef = useRef<[number, number] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -19,7 +19,6 @@ export function useRoutePlanner(mapRef: MapHandleRef, latest: RefObject<MapInput
         if (!cancelled) setHops(items);
       })
       .catch(() => {
-        // route stats just stay unavailable (the highlight still works)
       });
     return () => {
       cancelled = true;
@@ -76,6 +75,6 @@ export function useRoutePlanner(mapRef: MapHandleRef, latest: RefObject<MapInput
     toName: nameOf(routeTo),
     stats,
     clear,
-    refreshSegment, // redraw the highlight (the geometry under it changed)
+    refreshSegment,
   };
 }

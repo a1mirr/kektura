@@ -2,8 +2,6 @@
 
 import { useShowRetired } from "@/lib/retired-toggle";
 
-// Listed when the user's own stamps say so (`listed`, decided on the server), or whenever "Show retired stamps" is
-// on. Muted, so it reads as a record, not a requirement.
 export default function RetiredRow({ id, listed, children }: { id: string; listed: boolean; children: React.ReactNode }) {
   const show = useShowRetired();
   const hidden = !listed && !show;

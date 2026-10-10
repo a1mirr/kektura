@@ -1,7 +1,4 @@
-// A clean working tree runs no checks, only the nudge, which also counts the branch's commits. E2E needs Docker and is
-// left to CI, which is the authority; `npm run e2e` only to reproduce a failure. On failure exit 2: stderr goes back to
-// Claude, which keeps working. After MAX_ATTEMPTS failed attempts in a row it lets the turn end and tells the user
-// instead of looping.
+// E2E needs Docker and is left to CI, which is the authority; `npm run e2e` only to reproduce a failure.
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
@@ -73,10 +70,9 @@ const committed = (() => {
 })();
 if (!changed.length && !committed.length) process.exit(0);
 
-// Both questions go in one message; the decision is in stop-nudges.mjs.
 function askOnce() {
   const head = spawnSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).stdout.trim();
-  const scope = `${head}:${fingerprint}`; // this commit and this working tree: a new state is asked about again
+  const scope = `${head}:${fingerprint}`;
   const message = input.stop_hook_active ? "" : nudgeToAsk(changed, committed, state.nudged, scope);
   if (!message) return;
   state.nudged = nudgeKey(scope, message);

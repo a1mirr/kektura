@@ -38,7 +38,7 @@ describe("spec 0026 AC-9: the failure message", () => {
   it("names the commit, the failed step and the run", () => {
     const text = failureMessage({ sha: SHA, runUrl: RUN, outcomes: { plan: "success", migrate: "failure", push: "skipped", smoke: "skipped" } });
     expect(text).toContain("0123456");
-    expect(text).not.toContain(SHA); // short sha only
+    expect(text).not.toContain(SHA);
     expect(text).toContain("applying migrations");
     expect(text).toContain(RUN);
     expect(text).toMatch(/Nothing was rolled back by itself/);

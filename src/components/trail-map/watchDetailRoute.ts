@@ -3,7 +3,6 @@ import { DETAIL_ZOOM } from "@/lib/map-layers";
 import type { Route } from "@/lib/route-geometry";
 import type { RouteState } from "./types";
 
-// The file is loaded on first need; if that fails the overview stays and the next zoom change tries again.
 export function watchDetailRoute(
   m: MapLibreMap,
   route: RouteState,

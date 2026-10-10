@@ -92,7 +92,7 @@ describe("spec 0003: the note and the report link of a stamp's popup", () => {
     const box = buildMenu("Lokó-pihenő", "679.5 km", [{ label: "Go", run: () => {} }], { note: `Moved on 30 September 2026. ${evil}` });
     const note = box.querySelector<HTMLElement>("[data-moved-note]")!;
     expect(note.textContent).toBe(`Moved on 30 September 2026. ${evil}`);
-    expect(note.querySelector("img")).toBeNull(); // Text, never markup
+    expect(note.querySelector("img")).toBeNull();
     expect([...box.children].indexOf(note)).toBeLessThan([...box.children].indexOf(box.querySelector("button")!));
   });
 

@@ -5,7 +5,6 @@ type LocalStatus = { API_URL: string; ANON_KEY?: string; PUBLISHABLE_KEY?: strin
 
 let status: LocalStatus | undefined;
 
-// Same source as scripts/test-env.mjs: `supabase status`, which prints the local URL and public key.
 export function localSupabase() {
   if (!status) {
     const out = execSync("npx supabase status -o json", { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
@@ -36,11 +35,6 @@ export function psql(sql: string): string {
   }).trim();
 }
 
-// ---- Skip or fail when the database is not there --------------------------------------------------
-// Every test file that needs the local database calls `requireDatabase(ctx, relations)` at the top of each test, and no
-// file decides on its own: without a database the tests skip and say why, except where `REQUIRE_LOCAL_DB` is set (only
-// the end-to-end job's database step sets it), where a missing database or schema fails the test.
-
 export const NOT_RUNNING_MESSAGE = "the local Supabase is not running: `npm run testdb:start`";
 
 type Env = Record<string, string | undefined>;
@@ -62,7 +56,6 @@ export function decideDatabase(state: DatabaseState, env: Env): DatabaseDecision
   return databaseRequired(env) ? { action: "fail", message: problem } : { action: "skip", reason: problem };
 }
 
-// "Reachable" is the probe of `localSupabase()`: `supabase status` answers. Asked once per test file.
 let reachable: boolean | undefined;
 export function databaseReachable(): boolean {
   if (reachable === undefined) {
@@ -87,8 +80,6 @@ function missingRelations(relations: string[]): string[] {
   return missingCache.get(key)!;
 }
 
-// What the current environment decides for a file that needs the given tables. The probes run only when needed; a
-// database that cannot be asked counts as not reachable.
 export function databaseDecision(relations: string[] = [], env: Env = process.env): DatabaseDecision {
   if (!databaseReachable()) return decideDatabase({ reachable: false, missing: [] }, env);
   let missing: string[] = [];
@@ -102,9 +93,6 @@ export function databaseDecision(relations: string[] = [], env: Env = process.en
   return decideDatabase({ reachable: true, missing }, env);
 }
 
-// First line of every database test: skips the test and says why, fails it with the message, or returns the connection
-// details of the local database. `relations` are the tables the file expects, so a running database without that
-// schema is the same problem as one that is not running.
 export function requireDatabase(ctx: SkippableTest, relations: string[] = [], env: Env = process.env) {
   enforceDecision(ctx, databaseDecision(relations, env));
   return localSupabase();

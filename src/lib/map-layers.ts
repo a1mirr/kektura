@@ -6,12 +6,11 @@ export const TODO_LINE = "#44403c"; // darker than the dots' grey so the dashes 
 export const EXTRA = "#d97706";
 export const RESTAURANT = "#7c3aed";
 export const SEGMENT = "#f59e0b";
-export const MOVED = "#b45309"; // the ring of a stamp that moved (amber-700): the ring is the sign, the colour only helps
+export const MOVED = "#b45309"; // amber-700
 
 // From this zoom on the ~3 m route replaces the ~30 m overview.
 export const DETAIL_ZOOM = 9;
 
-// GeoJSON sources, in the order they are added.
 export const SOURCE_IDS = ["todo", "done", "segment", "dots", "extras", "restaurants"] as const;
 
 export const STAMPS_LAYER = "dots";

@@ -1,5 +1,3 @@
-// The git side runs against a real temporary repository shaped like the checkout CI makes for a pull request (a merge
-// commit of the branch into its base); the script's output file is checked end to end.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -55,7 +53,6 @@ describe("spec 0007: which changes run the end-to-end job", () => {
       git("add", "-A");
       git("-c", "user.name=t", "-c", "user.email=t@example.com", "-c", "commit.gpgsign=false", "commit", "-m", message);
     };
-    // The checkout CI makes for a pull request: a merge commit of `topic` into `main`, with `main` as the first parent.
     const mergeOf = (topic: string) => {
       git("switch", "-q", "-C", "merge-ref", "main");
       git("-c", "user.name=t", "-c", "user.email=t@example.com", "-c", "commit.gpgsign=false", "merge", "--no-ff", "-q", "-m", "merge", topic);

@@ -41,10 +41,8 @@ export default async function StatsPage({ params }: Props) {
   } = await supabase.auth.getUser();
   if (!user) return redirect({ href: "/", locale });
 
-  // The same reads as the dashboard: reference data from the shared cache, the user's own rows under RLS.
   const [showShare, { checkpoints, extras, stamps, extraStamps }] = await Promise.all([flagOn("share"), loadDashboardData(supabase)]);
 
-  // The figures come from the functions the dashboard uses, so the two pages say the same.
   const places = buildPlaces(checkpoints);
   const stages = buildStages(places, stagesData.stages);
   const stamped = stampedPlaceKeys(places, stamps);
@@ -84,7 +82,6 @@ export default async function StatsPage({ params }: Props) {
     };
   });
 
-  // The user's share cards, under RLS: only their own rows come back.
   let shareItems: ShareItem[] = [];
   if (showShare) {
     const shareT = await getTranslations("share");

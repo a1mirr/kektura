@@ -22,7 +22,7 @@ export default function StageSection({
   kmText: string;
   done: number;
   total: number;
-  mark?: string; // a short note next to the count, e.g. the retired stamps the user collected in the stage
+  mark?: string;
   actions?: React.ReactNode;
   children: React.ReactNode;
 }) {
@@ -35,7 +35,6 @@ export default function StageSection({
       try {
         localStorage.setItem(storageKey(stage), next ? "1" : "0");
       } catch {
-        // not remembered
       }
     },
     [stage],
@@ -47,7 +46,6 @@ export default function StageSection({
       try {
         if (localStorage.getItem(storageKey(stage)) === "1") setOpen(true);
       } catch {
-        // storage unavailable: stages just start collapsed
       }
     });
     return () => cancelAnimationFrame(id);

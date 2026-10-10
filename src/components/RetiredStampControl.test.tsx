@@ -43,12 +43,12 @@ const type = (value: string) => act(() => void fireEvent.change(screen.getByPlac
 describe("spec 0001: the control of a retired stamp", () => {
   it("AC-25: collecting one asks for the day, and nothing is sent until it is a real day before it retired", async () => {
     setup();
-    expect(add().disabled).toBe(true); // no "today" to default to
+    expect(add().disabled).toBe(true);
     for (const bad of ["2014-11-21", "2026-10-05", "2014-02-30", "2014-9-5", "x"]) {
       type(bad);
       expect(add().disabled, bad).toBe(true);
     }
-    type("2014-11-20"); // the last day it was valid
+    type("2014-11-20");
     expect(add().disabled).toBe(false);
     await act(async () => void fireEvent.click(add()));
     expect(setPlacesStamped).toHaveBeenCalledWith(["R"], true, "2014-11-20");
@@ -64,7 +64,6 @@ describe("spec 0001: the control of a retired stamp", () => {
     setup({ stamped: true, date: "2014-06-01" });
     const field = screen.getByLabelText(messages.dashboard.stampDate) as HTMLInputElement;
     expect(field.value).toBe("2014-06-01");
-    // a later day is never saved, however long the user waits
     act(() => void fireEvent.change(field, { target: { value: "2014-11-21" } }));
     await act(async () => void (await vi.advanceTimersByTimeAsync(2000)));
     act(() => void fireEvent.blur(field));

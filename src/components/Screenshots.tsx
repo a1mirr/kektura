@@ -2,9 +2,6 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { SCREENSHOT_SIZE, SCREENSHOTS, screenshotPath } from "@/lib/screenshots";
 
-// Plain images in the English interface, each in a <figure> with a caption and an alternative text in the visitor's
-// language. No client JavaScript. The images carry their size (no layout shift), load lazily and are resized by
-// next/image to what is shown: one column on a phone, three from 768 px.
 export default function Screenshots() {
   const t = useTranslations("home.screenshots");
 

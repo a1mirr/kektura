@@ -35,7 +35,6 @@ beforeAll(async () => {
 
 afterAll(() => new Promise<void>((resolve) => server.close(() => resolve())));
 
-// Runs the script in an empty directory (so no .env.local is read) with exactly the given environment.
 function run(env: Record<string, string>, ...args: string[]) {
   return new Promise<{ code: number | null; out: string }>((resolve) => {
     const child = spawn(process.execPath, [script, ...args], {

@@ -3,8 +3,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { clickRow, selectedItems, type BulkItem } from "@/lib/bulk-dates";
 
-// The page hands over the stamped rows in the order it shows them (`items`); a chosen stamp that is no longer among
-// them (removed meanwhile) is no longer chosen.
 export type BulkApi = {
   items: readonly BulkItem[];
   max: string; // the latest date the server accepts (tomorrow, UTC)
@@ -26,7 +24,6 @@ export type BulkApi = {
 
 const Context = createContext<BulkApi | null>(null);
 
-// Null outside the dashboard's provider: the controls then are not offered.
 export const useBulk = () => useContext(Context);
 
 export default function BulkDatesProvider({ items, max, children }: { items: readonly BulkItem[]; max: string; children: ReactNode }) {
@@ -46,7 +43,7 @@ export default function BulkDatesProvider({ items, max, children }: { items: rea
   }, []);
 
   const exit = useCallback(() => {
-    if (busy) return; // a save is on its way: leaving now would hide its answer
+    if (busy) return;
     setActive(false);
     reset();
   }, [busy, reset]);
@@ -96,7 +93,6 @@ export default function BulkDatesProvider({ items, max, children }: { items: rea
     },
   };
 
-  // The wrapper of the list's blocks. On a phone the bar is fixed to the bottom of the screen: the last rows need room above it.
   return (
     <Context.Provider value={api}>
       <div className={`space-y-8${active ? " max-lg:pb-44" : ""}`}>{children}</div>

@@ -1,5 +1,4 @@
-// Popup contents for the trail map, built with DOM nodes and never innerHTML, so names in the data
-// Can't inject markup.
+// Built with DOM nodes and never innerHTML, so names in the data can't inject markup.
 import { RESTAURANT } from "./map-layers";
 
 export type MenuAction = {

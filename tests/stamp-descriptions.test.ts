@@ -29,7 +29,7 @@ describe("spec 0033: translated stamp descriptions", () => {
     expect(extras.length).toBe((read("supabase/seed_extra.sql").match(/^ {2}\(/gm) ?? []).length);
     expect(places.length).toBeGreaterThan(200);
     expect(extras.length).toBeGreaterThan(50);
-    expect(stamps.filter((s) => s.original).length).toBeGreaterThan(280); // descriptions were read, not just codes
+    expect(stamps.filter((s) => s.original).length).toBeGreaterThan(280);
   });
 
   it("AC-3: every stamp code of the seeds has an en, a ru and a de translation", () => {

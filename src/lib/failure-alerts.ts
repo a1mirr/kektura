@@ -11,7 +11,6 @@ export type Failure = {
   tag: "stamp-action" | "feedback" | "account-delete" | "friends" | "share";
   action: string;
   stage: AlertStage;
-  // A short identifier such as `42501`; anything else is dropped before it gets here.
   code?: string;
 };
 
@@ -45,12 +44,11 @@ export function createFailureAlerter({
   send,
   now = Date.now,
 }: {
-  // Fire and forget: what it does can never reach the caller.
   send: (text: string) => void;
   now?: () => number;
 }) {
   const lastSent = new Map<string, number>();
-  const recent = new Map<string, number>(); // kind -> when it last failed, within the burst window
+  const recent = new Map<string, number>();
   let quietUntil = 0;
 
   return {

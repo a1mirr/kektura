@@ -27,7 +27,7 @@ describe("spec 0035: the Telegram webhook helpers", () => {
   it("AC-15: only the configured chat, written by that same sender, is the owner", () => {
     const from = (chatId: string, fromId: string) => ({ updateId: 1, chatId, fromId, text: "x" });
     expect(isOwner(from("42", "42"), "42")).toBe(true);
-    expect(isOwner(from("42", "43"), "42")).toBe(false); // someone else in the owner's group chat
+    expect(isOwner(from("42", "43"), "42")).toBe(false);
     expect(isOwner(from("43", "42"), "42")).toBe(false);
     expect(isOwner(from("-42", "42"), "42")).toBe(false);
   });
@@ -36,7 +36,7 @@ describe("spec 0035: the Telegram webhook helpers", () => {
     const seen = createSeenUpdates(3);
     expect([seen.first(1), seen.first(1), seen.first(2)]).toEqual([true, false, true]);
     seen.first(3);
-    seen.first(4); // 1 is forgotten
+    seen.first(4);
     expect(seen.first(4)).toBe(false);
     expect(seen.first(1)).toBe(true);
   });

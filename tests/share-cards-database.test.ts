@@ -1,5 +1,3 @@
-// They talk to PostgREST the way a browser could, as signed-in users and as an anonymous visitor, so they prove what
-// a malicious client can and cannot do.
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { beforeAll, describe, expect, it } from "vitest";
@@ -157,7 +155,7 @@ describe("spec 0039: share cards database rules", { timeout: 30_000 }, () => {
     const bad: Record<string, unknown>[] = [
       { p_percent: 101 },
       { p_percent: -1 },
-      { p_stamps_done: 200 }, // more than the total
+      { p_stamps_done: 200 },
       { p_stamps_total: 0 },
       { p_km_done: -5 },
       { p_stages_done: 28 },

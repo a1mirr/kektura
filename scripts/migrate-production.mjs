@@ -1,17 +1,16 @@
 //
 //   node scripts/migrate-production.mjs [--dry-run] [--baseline <file>]
 //
-// Needs psql and SUPABASE_DB_URL (the session pooler connection string). What is applied is recorded by file name in
-// public.applied_migrations, in the same transaction as the file, so a file is never applied twice and a failing one
-// leaves nothing behind. The connection string and the password never reach the output. When $GITHUB_OUTPUT is set it
-// also writes `missing=true|false`: whether a file was missing when the run started.
+// Needs psql and SUPABASE_DB_URL (the session pooler connection string). A file is recorded in
+// public.applied_migrations in the same transaction as the file, so it is never applied twice and a failing one
+// leaves nothing behind. When $GITHUB_OUTPUT is set it also writes `missing=true|false`: whether a file was missing
+// when the run started.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { baselineFiles, dropDetails, migrationFiles, pendingMigrations, redact } from "./lib/deploy.mjs";
 
-/** A problem to tell the user about. Thrown, not process.exit(): see the Windows note in CLAUDE.md. */
 export class Problem extends Error {}
 
 /**
@@ -28,7 +27,7 @@ export function createPsql(url, spawn = spawnSync) {
   };
 }
 
-const quote = (name) => `'${name}'`; // file names are validated by migrationFiles(): letters, digits, `_` and `.sql`
+const quote = (name) => `'${name}'`;
 
 const BOOTSTRAP = `
 create table if not exists public.applied_migrations (

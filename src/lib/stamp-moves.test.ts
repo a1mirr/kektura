@@ -13,8 +13,8 @@ describe("spec 0001: a stamp that moved", () => {
     expect(MOVED_NOTE_DAYS).toBe(180);
     expect(isRecentlyMoved("2026-04-01", "2026-04-01")).toBe(true);
     expect(isRecentlyMoved("2026-04-01", "2026-09-26")).toBe(true);
-    expect(isRecentlyMoved("2026-04-01", "2026-09-27")).toBe(true); // 179 days: the last day
-    expect(isRecentlyMoved("2026-04-01", "2026-09-28")).toBe(false); // 180 days
+    expect(isRecentlyMoved("2026-04-01", "2026-09-27")).toBe(true);
+    expect(isRecentlyMoved("2026-04-01", "2026-09-28")).toBe(false);
     expect(isRecentlyMoved("2026-04-01", "2027-04-01")).toBe(false);
   });
 

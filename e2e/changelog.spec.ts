@@ -1,8 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { CHANGELOG } from "../src/content/changelog";
 
-// The expectations come from the data the page renders, so adding an entry on top
-// doesn't break them; what they check is that the page shows that data in order and in each language.
 const longDate = (locale: string, date: string) =>
   new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`));
 const newest = CHANGELOG[0];

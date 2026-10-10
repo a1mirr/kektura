@@ -82,7 +82,6 @@ test.describe("spec 0017: feedback form", () => {
   });
 });
 
-// The rules live in the database (migration 0008), so they are checked there, as an anonymous caller.
 test.describe("spec 0017 AC-2, AC-3 and spec 0014: database rules", () => {
   test("anonymous feedback is accepted", async ({ request }) => {
     const marker = randomUUID();

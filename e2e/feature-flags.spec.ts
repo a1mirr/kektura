@@ -30,7 +30,7 @@ test.describe("spec 0035: a flag that is off is off", () => {
     await page.goto("/en/about");
     await expect(page.getByText("If you connect with friends")).toHaveCount(0);
 
-    setFeatureFlag("friends", "on"); // No deploy, no restart, no cache to clear
+    setFeatureFlag("friends", "on");
     expect(await friendsAnswer(page)).toBe(200);
     await page.goto("/en/dashboard");
     await openAccountMenu(page);
@@ -55,7 +55,6 @@ test.describe("spec 0035: a flag that is off is off", () => {
 
     setFeatureFlag("friends", "on");
     expect(await friendsAnswer(other)).toBe(200);
-    // On means everybody: a signed-out visitor is sent to sign in instead of getting a 404.
     expect((await visitor.goto("/en/friends"))?.url()).not.toContain("/en/friends");
     await expect(visitor).toHaveURL(/\/en\/?$/);
   });
@@ -107,7 +106,7 @@ test.describe("spec 0035: the restaurants flag", () => {
     await expect(page.getByRole("link", { name: "etteremhet.hu" })).toHaveCount(0);
     await expect(page.getByRole("link", { name: "heyjoe.hu" })).toBeVisible();
 
-    setFeatureFlag("restaurants", "on"); // no deploy, no restart, no cache to clear
+    setFeatureFlag("restaurants", "on");
     const fetchedOn = await openMap(page);
     await expect(checkbox(page)).toBeVisible();
     expect(fetchedOn).toHaveLength(1);
@@ -119,7 +118,7 @@ test.describe("spec 0035: the restaurants flag", () => {
     const email = await signInAsNewUser(page);
     const other = await (await browser.newContext()).newPage();
     await signInAsNewUser(other);
-    await expect(checkbox(page)).toBeVisible(); // the first dashboards have loaded their data (the flag is on)
+    await expect(checkbox(page)).toBeVisible();
     await expect(checkbox(other)).toBeVisible();
 
     setFeatureFlag("restaurants", "allowlist", [email]);
@@ -148,7 +147,6 @@ test.describe("spec 0039: the share flag and share cards", () => {
     await page.goto("/en/about");
     await expect(page.getByText("If you create a share card")).toHaveCount(0);
 
-    // A card that exists answers 404 as well while the flag is off: the flag, not the data, decides.
     setFeatureFlag("share", "on");
     await page.goto("/en/about");
     await expect(page.getByText("If you create a share card")).toBeVisible();
@@ -255,7 +253,6 @@ test.describe("spec 0039: the share flag and share cards", () => {
       }
     }
 
-    // The panel is a list of wrapping buttons and a full-width field: at 375 px it must not widen the stats page.
     await page.setViewportSize(WIDTHS.phone);
     for (const locale of ["de", "hu", "ru"]) {
       await page.goto(`/${locale}/stats`);

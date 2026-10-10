@@ -29,8 +29,6 @@ const createUser = (n: number) =>
 // The seed's own transaction is inside the drill's: its begin and commit are commented out, the drill rolls back.
 const inner = (text: string) => text.replace(/^begin;$/m, "-- begin").replace(/commit;\s*$/, "-- commit");
 
-// The seed as the generator would write it after a new place was put in the middle of a stage: the new row takes the
-// seq of the row it goes before, and every row from there on moves one place down the trail.
 function seedWithInsertedPlace(beforeCode: string) {
   const lines = seed.split("\n");
   const at = lines.findIndex((l) => l.startsWith("  (") && l.includes(`'${beforeCode}'`));
@@ -71,7 +69,7 @@ describe("spec 0004: adding a stamp to the seed", () => {
     expect(get("ids_after")).toBe(get("ids_before"));
     expect(get("stamps_after")).toBe(get("stamps_before"));
     expect(get("stamps_before").split(",")).toHaveLength(17);
-    expect(Number(get("seq_after"))).toBe(Number(get("seq_before")) + 1); // the trail order shifted, the id did not
+    expect(Number(get("seq_after"))).toBe(Number(get("seq_before")) + 1);
     expect(get("new")).toBe("1");
     expect(get("total")).toBe("221");
   });
@@ -128,7 +126,7 @@ describe("spec 0024: a friend's waived places", () => {
     const checkpoints = loadCheckpoints();
     const dated = new Set(checkpoints.filter((c) => c.required_from !== null).map((c) => c.place_key));
     expect(dated.size).toBeGreaterThan(5);
-    const days = (i: number) => new Date(Date.UTC(2013, 0, 1) + i * 24 * 3600 * 1000 * 19).toISOString().slice(0, 10); // 2013 .. 2018
+    const days = (i: number) => new Date(Date.UTC(2013, 0, 1) + i * 24 * 3600 * 1000 * 19).toISOString().slice(0, 10);
     const scenarios = {
       "everything but the new stamps, in 2013": scenario(checkpoints, (_, key) => (dated.has(key) ? null : "2013-01-01")),
       "everything but the new stamps, in 2026": scenario(checkpoints, (_, key) => (dated.has(key) ? null : "2026-01-01")),
@@ -158,7 +156,7 @@ describe("spec 0024: a friend's waived places", () => {
   it("AC-25: a place is required from the earliest date of its variants, and from the beginning when one variant has none", (ctx) => {
     requireDatabase(ctx, RELATIONS);
     const checkpoints = loadCheckpoints();
-    const variants = checkpoints.filter((c) => c.place_key === "OKTPH_132_B"); // Encs: two variants, both dated 2022-05-01
+    const variants = checkpoints.filter((c) => c.place_key === "OKTPH_132_B");
     expect(variants).toHaveLength(2);
     const dated = new Set(checkpoints.filter((c) => c.required_from !== null).map((c) => c.place_key));
     const scene = (setup: string, edit: (c: Row) => Row) => {
@@ -191,8 +189,6 @@ describe("spec 0024: a friend's waived places", () => {
 
 import { stampMovesSql } from "../scripts/lib/stamp-moves.mjs";
 
-// The seed as the generator would write it after the MTSZ moved `code` to new coordinates: the row's lat and lng change and the
-// file's `moves` have an entry for it (the block replaces the committed one, which has none).
 function seedWithMove(code: string, lat: number, lng: number, moves: { code: string; moved_on: string }[]) {
   const lines = seed.split("\n").map((l) =>
     l.startsWith("  (") && l.includes(`'${code}'`) ? l.replace(/, (-?[\d.]+), (-?[\d.]+), (-?\d+), ([\d.]+)\)(,?)$/, `, ${lat}, ${lng}, $3, $4)$5`) : l,

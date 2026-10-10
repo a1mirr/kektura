@@ -12,7 +12,6 @@ export type ComparisonRanges = Record<Who, KmRange[]> & { mine: KmRange[]; their
 export type Comparison = {
   places: Record<Who, number>;
   placeWho: Map<string, Who>;
-  // The four figures add up to `total`: three are rounded to 0.1 and the fourth is what is left.
   km: Record<Who, number> & { total: number };
   ranges: ComparisonRanges;
   stages: StageComparison[];
@@ -88,10 +87,6 @@ export function stageState(me: number, them: number, total: number): StageState 
   return "partly";
 }
 
-// `mine` and `theirs` are the place keys each stamped (a place with several variants counts once); the walked
-// stretches use the dashboard's rule, so the comparison never disagrees with it.
-// `waived` are the places each was not missing: they are not counted as stamped, but a stage with only stamped and
-// waived places is complete and the stretch runs across them.
 export function compareProgress(
   places: Place[],
   mine: Stamped,

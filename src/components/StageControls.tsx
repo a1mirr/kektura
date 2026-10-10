@@ -8,8 +8,8 @@ import RetiredToggle from "./RetiredToggle";
 
 export default function StageControls({ withRetired = false }: { withRetired?: boolean }) {
   const t = useTranslations("dashboard");
-  const bulk = useBulk(); // only on the dashboard, where dates are edited
-  const hydrated = useHydrated(); // "Change dates" needs JavaScript: without it only the single date fields are offered
+  const bulk = useBulk();
+  const hydrated = useHydrated();
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">

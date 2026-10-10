@@ -23,7 +23,7 @@ export default function DeleteAccountButton() {
       result = { ok: false, reason: "failed" };
     }
     if (result.ok) {
-      router.replace("/"); // stays disabled while the page changes
+      router.replace("/");
       return;
     }
     setDeleting(false);

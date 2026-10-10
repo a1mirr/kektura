@@ -1,5 +1,3 @@
-// The workflow only runs on GitHub (and needs the production secret), so these tests pin the properties a later edit
-// could remove unnoticed.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -34,11 +32,9 @@ describe("spec 0012: the backup workflow", () => {
     expect(dump).toMatch(/npx supabase db dump --db-url "\$SUPABASE_DB_URL" --data-only --schema auth,public/);
     expect(dump).toContain('"${exclude[@]}"');
     expect(dump).toContain("--file");
-    // reference data and the deploy record are not user data
     for (const table of ["public.checkpoints", "public.extra_stamps", "public.applied_migrations", "auth.sessions", "auth.refresh_tokens"]) {
       expect(dump, table).toContain(table);
     }
-    // the six wanted tables are never excluded
     for (const table of ["auth.users", "auth.identities", "public.user_stamps", "public.user_extra_stamps", "public.profiles", "public.friendships"]) {
       expect(dump, table).not.toMatch(new RegExp(`${table.replace(".", "\\.")}(\\s|$)`));
     }
@@ -50,7 +46,7 @@ describe("spec 0012: the backup workflow", () => {
     expect(check).toContain("auth\\.(users|identities)|public\\.(user_stamps|user_extra_stamps|profiles|friendships)");
     expect(check).toContain("rm -rf backup");
     expect(check).toContain("exit 1");
-    expect(check).toContain(".github/actions/dump-user-data/action.yml"); // the error says where the exclude list is
+    expect(check).toContain(".github/actions/dump-user-data/action.yml");
   });
 
   it("AC-1: every table the migrations create in public is dumped (and checked for) or excluded", () => {
@@ -92,13 +88,13 @@ describe("spec 0012: the backup workflow", () => {
       ["backup.yml", workflow],
       ["the dump action", action],
     ]) {
-      const code = text.split("\n").filter((line) => !line.trim().startsWith("#")); // the header comments say "no set -x"
+      const code = text.split("\n").filter((line) => !line.trim().startsWith("#"));
       expect(code.join("\n"), file).not.toMatch(/\bset\s+-\w*x/);
-      expect(code.join("\n"), file).not.toMatch(/echo[^\n]*(\$\{?SUPABASE_DB_URL|\$\{\{)/); // a notice names the secret, never expands it
+      expect(code.join("\n"), file).not.toMatch(/echo[^\n]*(\$\{?SUPABASE_DB_URL|\$\{\{)/);
     }
     const code = lines.filter((line) => !line.trim().startsWith("#"));
     const secretUses = code.filter((line) => line.includes("secrets.SUPABASE_DB_URL"));
-    expect(secretUses.length).toBe(2); // the CONFIGURED flag and the dump step's env
+    expect(secretUses.length).toBe(2);
     expect(code.filter((line) => line.includes("secrets.BACKUP_PUBLIC_KEY")).length).toBe(2);
     expect(workflow).toMatch(/env:\s*\n\s+SUPABASE_DB_URL: \$\{\{ secrets\.SUPABASE_DB_URL \}\}\n\s+BACKUP_PUBLIC_KEY: \$\{\{ secrets\.BACKUP_PUBLIC_KEY \}\}/);
     expect(workflow).not.toMatch(/permissions:[\s\S]*write/);
@@ -111,7 +107,6 @@ describe("spec 0012 AC-5: one dump action for every workflow that takes a dump",
     for (const input of ["db-url", "artifact-name", "retention-days", "encryption-cert"]) {
       expect(action, input).toMatch(new RegExp(`^ {2}${input}:\\n {4}description: .*\\n {4}required: true`, "m"));
     }
-    // the string reaches the one step that dumps through its `env`, and nowhere else
     const code = action.split("\n").filter((line) => !line.trim().startsWith("#"));
     expect(code.filter((line) => line.includes("inputs.db-url"))).toEqual(["        SUPABASE_DB_URL: ${{ inputs.db-url }}"]);
     expect(stepOf(action, "Dump user data")).toMatch(/env:\s*\n\s+SUPABASE_DB_URL: \$\{\{ inputs\.db-url \}\}/);
@@ -140,7 +135,6 @@ describe("spec 0012 AC-5: one dump action for every workflow that takes a dump",
         .map((l) => l.trim().split(": ")[0]);
     expect(inputs(workflow, "Dump and store the user data")).toEqual(["db-url", "encryption-cert", "artifact-name", "retention-days"]);
     expect(inputs(deploy, "Back up the user data before migrating")).toEqual(["db-url", "encryption-cert", "artifact-name", "retention-days"]);
-    // the connection string comes from the caller's env, which holds the secret
     for (const [text, name] of [
       [workflow, "Dump and store the user data"],
       [deploy, "Back up the user data before migrating"],
@@ -221,7 +215,7 @@ describe("spec 0012 AC-6: the dump is encrypted before it is stored", () => {
     const sql = "INSERT INTO \"auth\".\"users\" VALUES ('a@b.hu', E'line\nbreak');\r\n-- PostgreSQL database dump complete\n";
     const { dir, result } = run(cert, { "user-data-2026-01-01.sql": sql });
     expect(result.status, result.stdout + result.stderr).toBe(0);
-    expect(fs.readdirSync(dir).sort()).toEqual(["backup-encrypted"]); // the plaintext folder and the certificate file are gone
+    expect(fs.readdirSync(dir).sort()).toEqual(["backup-encrypted"]);
     const files = fs.readdirSync(path.join(dir, "backup-encrypted"));
     expect(files).toEqual(["user-data-2026-01-01.sql.cms"]);
     const encrypted = fs.readFileSync(path.join(dir, "backup-encrypted", files[0]));

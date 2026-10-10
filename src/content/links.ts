@@ -1,6 +1,4 @@
-// A link's name is a proper noun and stays as is; its one-line description is the message `links.items.<id>` in every
-// language. Check a new link before adding it: `curl -sIL <url>` ends in 200 and the page says what the description
-// says.
+// Check a new link before adding it: `curl -sIL <url>` ends in 200 and the page says what the description says.
 
 export type LinkId =
   | "kekturaHu"

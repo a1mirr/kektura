@@ -35,7 +35,7 @@ describe("spec 0017: feedback form", () => {
     expect(send().disabled).toBe(true);
     expect(screen.getByText("0 / 2000")).toBeTruthy();
     type(box, "  😀 hi ");
-    expect(screen.getByText("4 / 2000")).toBeTruthy(); // trimmed, an emoji counts once
+    expect(screen.getByText("4 / 2000")).toBeTruthy();
     expect(send().disabled).toBe(false);
     type(box, "   ");
     expect(send().disabled).toBe(true);

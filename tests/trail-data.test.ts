@@ -14,7 +14,6 @@ const hops = hopsJson as Hop[];
 const read = (path: string) => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const round1 = (x: number) => Math.round(x * 10) / 10;
 
-// (seq, code, place_key, stage, stage_seq, name, ...) rows of supabase/seed.sql
 const seedRows = [...read("supabase/seed.sql").matchAll(/^ {2}\((\d+), '([^']+)', '([^']+)', (\d+), (\d+), '((?:[^']|'')*)'/gm)].map(
   (m) => ({ seq: Number(m[1]), code: m[2], placeKey: m[3], stage: Number(m[4]), stageSeq: Number(m[5]), name: m[6].replace(/''/g, "'") }),
 );
@@ -141,8 +140,7 @@ describe("spec 0004: the dates of new stamps (okt-stamp-dates.json)", () => {
       stampDatesSql: (entries: unknown[]) => string;
     };
     const block = stampDatesSql(readStampDates());
-    expect(read("supabase/seed.sql")).toContain(`\n${block}\n${stampMovesSql(readStampMoves())}\ncommit;`); // The dates, then the moves, then the end of the transaction
-    // ... and a date reaches the right row only: the block names every code of the file and no other
+    expect(read("supabase/seed.sql")).toContain(`\n${block}\n${stampMovesSql(readStampMoves())}\ncommit;`);
     const named = [...block.matchAll(/\('(OKTPH_[0-9A-Za-z_]+)', '\d{4}-\d{2}-\d{2}'\)/g)].map((m) => m[1]).sort();
     expect(named).toEqual(datesFile.stamps.map((e) => e.code).sort());
   });
@@ -208,8 +206,6 @@ describe("spec 0004: retired stamps (okt-retired-stamps.json)", () => {
   });
 });
 
-// The seed's coordinates, the route and the km all come from one run of the generator, so a moved stamp whose new
-// coordinates are wrong, or a route that no longer passes a stamp, fails here.
 const STAMP_LIMIT_M = 1000; // the farthest an alternative stamp (a village's pub or office) may be from the line; 801 m today
 const PLACE_LIMIT_M = 400; // the nearest stamp of a place: 325 m today (Ostffyasszonyfa)
 const KM_AGREEMENT = 0.5; // the km written in the seed against where the line is nearest to the stamp; 0.2 km at most today
@@ -218,7 +214,6 @@ const seedCoordinates = [
   ...read("supabase/seed.sql").matchAll(/^ {2}\(\d+, '([^']+)', '([^']+)', \d+, \d+, '(?:[^']|'')*', '(?:[^']|'')*', (-?[\d.]+), (-?[\d.]+), -?\d+, ([\d.]+)\)/gm),
 ].map((m) => ({ code: m[1], placeKey: m[2], lat: Number(m[3]), lng: Number(m[4]), km: Number(m[5]) }));
 
-// Metres from a stamp to the segment a-b ([lng, lat, km] points), on a local flat plane.
 function metersToSegment(p: { lat: number; lng: number }, a: number[], b: number[]) {
   const M = 111320;
   const cos = Math.cos((p.lat * Math.PI) / 180);
@@ -260,7 +255,7 @@ describe("spec 0004: the stamps and the drawn line", () => {
   it("AC-18: a stamp put a kilometre off its place is caught (the limits are not too loose to notice a wrong move)", () => {
     const s = seedCoordinates.find((c) => c.code === "OKTPH_84_B")!;
     expect(nearestOnRoute({ lat: s.lat, lng: s.lng }).m).toBeLessThan(PLACE_LIMIT_M);
-    expect(nearestOnRoute({ lat: s.lat + 0.01, lng: s.lng }).m).toBeGreaterThan(PLACE_LIMIT_M); // 1.1 km north
+    expect(nearestOnRoute({ lat: s.lat + 0.01, lng: s.lng }).m).toBeGreaterThan(PLACE_LIMIT_M);
   });
 });
 

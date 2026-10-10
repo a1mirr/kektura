@@ -6,7 +6,6 @@ import { requestOrigin } from "@/lib/origin";
 import { createClient } from "@/lib/supabase/server";
 import { isTestEmail, TEST_PASSWORD, testLoginEnabled } from "@/lib/test-login";
 
-// Any email, fixed password; the account is created on first use (the local Supabase doesn't confirm emails).
 export async function POST(request: Request) {
   if (!testLoginEnabled()) return new NextResponse(null, { status: 404 });
 

@@ -5,11 +5,9 @@ import { psql } from "./local-db";
 const place = (page: Page, key: string) => page.locator(`#place-${key}`);
 const dateField = (row: Locator) => row.getByLabel("Date of the stamp");
 
-// Local calendar day of the test browser (same machine and time zone as this process).
 const today = (timeZone?: string) =>
   new Date().toLocaleDateString("en-CA", timeZone ? { timeZone } : undefined);
 
-// Counts the server actions the page sends from now on (every Server Action is a POST with Next-Action).
 function countServerActions(page: Page) {
   const state = { count: 0 };
   page.on("request", (request) => {
@@ -155,7 +153,7 @@ test.describe("spec 0016 AC-1: the user's own day", () => {
   });
 });
 
-const RETIRED = "OKT_RETIRED_NYIRJESI"; // retired on 2014-11-21
+const RETIRED = "OKT_RETIRED_NYIRJESI";
 const bar = (page: Page) => page.getByRole("region", { name: "Change the date of several stamps" });
 const checkbox = (page: Page, key: string) => place(page, key).getByRole("checkbox");
 const bulkField = (page: Page) => bar(page).getByLabel("New date of the selected stamps");
@@ -171,7 +169,6 @@ async function stampStageOneAndAnExtra(page: Page) {
   return extraId;
 }
 
-// Opens the mode. The button is not in the server's HTML, so it is there once the page has hydrated (the locator waits for it).
 async function enterChangeDates(page: Page) {
   await changeDates(page).click();
   await expect(bar(page)).toBeVisible();
@@ -238,7 +235,6 @@ test.describe("spec 0016: change many dates at once", () => {
     expect(dates).toContain(`OKTPH_01_DDKPH_01=${today()}`);
     expect(dates).toContain(`extra${extraId}=${today()}`);
 
-    // The statistics move the stamps to their new month: the 8 places are March 2024's now
     await page.goto("/en/stats");
     await expect(page.getByRole("button", { name: /^March 2024: 8 stamps/ })).toBeVisible();
   });
@@ -255,7 +251,7 @@ test.describe("spec 0016: change many dates at once", () => {
     await bulkField(page).press("Enter");
     await expect(page.getByText("9 dates changed")).toBeVisible();
     await expect.poll(() => datesOf(email).filter((d) => d.endsWith("=2023-07-01")).length).toBe(9);
-    expect(datesOf(email)).toContain(`extra${extraId}=${today()}`); // the extra stamp is not a stage's
+    expect(datesOf(email)).toContain(`extra${extraId}=${today()}`);
   });
 
   test("AC-14, AC-16: Escape and Cancel leave the mode and forget the choice; Apply stays off for a date it cannot send", async ({ page }) => {
@@ -292,7 +288,7 @@ test.describe("spec 0016: change many dates at once", () => {
     await expect(bar(page).getByRole("alert")).toHaveText("Couldn't save, try again.");
     await expect(bar(page).getByRole("status")).toHaveText("2 selected");
     await expect(bulkField(page)).toHaveValue("2024-03-05");
-    expect(datesOf(email).some((d) => d.endsWith("=2024-03-05"))).toBe(false); // all or nothing: OKTPH_02 kept its date
+    expect(datesOf(email).some((d) => d.endsWith("=2024-03-05"))).toBe(false);
   });
 
   test("AC-18: a retired stamp cannot get a date from its retirement day on; the bar names it, and an earlier day goes through", async ({ page }) => {
@@ -338,10 +334,9 @@ test.describe("spec 0016: change many dates at once", () => {
 });
 
 // In two columns the map's block is a sticky stacking context (z-10) holding the fullscreen overlay, and the bar of the mode is a
-// Sticky box of the other column: the bar must sit below that block, or it paints over a fullscreen map.
+// sticky box of the other column: the bar must sit below that block, or it paints over a fullscreen map.
 test.describe("spec 0016: the bar and the fullscreen map", () => {
   test("AC-21: at 1280 px the fullscreen map is topmost over the bar of the mode", async ({ page }) => {
-    // Without the native Fullscreen API the CSS overlay is all there is, and it is the overlay that has to win the stacking.
     await page.addInitScript(() => {
       Object.defineProperty(Element.prototype, "requestFullscreen", { value: undefined, configurable: true });
     });

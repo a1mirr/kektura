@@ -1,9 +1,3 @@
-// The server actions turn every error into a plain `failed` result for the client, so this is the only trace a
-// failure leaves. It is the single place to hook an error-monitoring service in later.
-//
-// Only the action name, the stage, the user id and the error's own code/message are logged: never tokens, cookies,
-// emails, request input, or the extra `details` / `hint` a Supabase error can carry.
-
 import { createFailureAlerter, type Failure } from "./failure-alerts";
 import { sendTelegramMessage, telegramConfig } from "./telegram";
 
@@ -52,7 +46,6 @@ function alertFailure(failure: Failure): void {
     if (process.env.NODE_ENV !== "production" || !telegramConfig()) return;
     (alerts.__kekturaFailureAlerter ??= createFailureAlerter({ send: sendAlert })).report(failure);
   } catch {
-    // Never let the alert change what the action returns.
   }
 }
 
@@ -67,13 +60,11 @@ export function logStampActionError(action: StampAction, stage: StampStage, erro
   if (stage !== "read") alertFailure({ tag: "stamp-action", action, stage, code });
 }
 
-// The rejected input itself is never logged, only that something was rejected.
 export function logStampActionInvalidInput(action: StampAction): void {
   console.warn(`${TAG} invalid input action=${action}`);
 }
 
-// A refused request is an expected outcome (a stamp that is gone, a retired stamp's day): one warning with the action
-// name only. It is no failure of ours, so it is never sent to Telegram.
+// A refused request is an expected outcome, so it is never sent to Telegram.
 export function logStampActionRefused(action: StampAction): void {
   console.warn(`${TAG} request refused action=${action}`);
 }
@@ -86,8 +77,6 @@ export function logFeedbackError(stage: "write" | "exception", error: unknown, u
   alertFailure({ tag: "feedback", action: "submitFeedback", stage, code });
 }
 
-// Only a short reason such as http_401, timeout or network: the request URL holds the bot token and
-// the message text is the sender's, so neither is ever logged.
 export function logFeedbackNotifyFailure(reason: string): void {
   console.warn(`[feedback] telegram notification failed reason=${safeReason(reason)}`);
 }
@@ -100,30 +89,25 @@ export function logAccountDeletionError(stage: "rpc" | "exception", error: unkno
   alertFailure({ tag: "account-delete", action: "deleteAccount", stage: stage === "rpc" ? "write" : "exception", code });
 }
 
-// No user ids, names or tokens. `stage` is only for the Telegram message (the line has none): every friends action is
-// a database write, unless something threw around it.
+// `stage` is only for the Telegram message (the line has none).
 export function logFriendsError(action: string, error: unknown, stage: Failure["stage"] = "write"): void {
   const { code, message } = describeError(error);
   console.error(`[friends] action=${action} code=${code ?? "-"} message=${quote(message)}`);
   alertFailure({ tag: "friends", action, stage, code });
 }
 
-// No user ids, names, tokens or numbers of a card. `stage` is only for the Telegram message, as for the friends
-// actions; a failed `read` is logged and never sent.
+// `stage` is only for the Telegram message, as for the friends actions; a failed `read` is logged and never sent.
 export function logShareError(action: string, error: unknown, stage: Failure["stage"] | "read" = "write"): void {
   const { code, message } = describeError(error);
   console.error(`[share] action=${action} code=${code ?? "-"} message=${quote(message)}`);
   if (stage !== "read") alertFailure({ tag: "share", action, stage, code });
 }
 
-// Feature flags: a failed lookup.
-// The error's own code and message, never user ids, emails or the input.
 export function logFeatureFlagsError(error: unknown): void {
   const { code, message } = describeError(error);
   console.error(`[feature-flags] lookup failed code=${code ?? "-"} message=${quote(message)}`);
 }
 
-// Never the email, the user id, the message text or the bot token; a failure adds the error's code and message.
 export type FlagChange = "off" | "allowlist" | "on" | "allow" | "deny";
 export type FlagChangeResult = "ok" | "no_account" | "failed";
 

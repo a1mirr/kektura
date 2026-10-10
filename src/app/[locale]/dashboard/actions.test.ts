@@ -14,8 +14,8 @@ function fakeSupabase({
   checkpoints = [] as { id: number; place_key: string; retired_on?: string | null }[],
   readError = null as unknown,
   writeError = null as unknown,
-  updatedRows = [{ ok: 1 }] as unknown[], // what `update(...).select()` returns: the rows that were changed
-  rpcResult = { data: true, error: null } as { data: unknown; error: unknown }, // what a database function answers
+  updatedRows = [{ ok: 1 }] as unknown[],
+  rpcResult = { data: true, error: null } as { data: unknown; error: unknown },
 } = {}) {
   const calls: Call[] = [];
   const from = (table: string) => {
@@ -75,7 +75,6 @@ const withClient = useClient; // helpers outside `it` callbacks must not look li
 
 const writes = (calls: Call[]) => calls.filter((c) => c.op === "upsert" || c.op === "delete" || c.op === "update");
 
-// The actions log failures. Spying keeps the output quiet and lets the tests read it.
 const errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
 const warnLog = vi.spyOn(console, "warn").mockImplementation(() => {});
 
@@ -407,7 +406,7 @@ describe("spec 0016: setStampDate", () => {
     expect(await setStampDate(["OKTPH_03"], DAY)).toEqual({ ok: false, reason: "failed" });
     expect(calls.some((c) => c.op === "upsert")).toBe(false);
     expect(refresh).not.toHaveBeenCalled();
-    expect(errorLog).not.toHaveBeenCalled(); // a user error, not a failure of ours
+    expect(errorLog).not.toHaveBeenCalled();
   });
 
   it("AC-4: an unknown place fails without writing", async () => {
@@ -481,7 +480,6 @@ describe("spec 0016: setExtraStampDate", () => {
   });
 });
 
-// A retired stamp (Nyírjesi-erdészház, retired on 2014-11-21) is collected with a date before it retired and on its own.
 const RETIRED = [{ id: 900, place_key: "OKT_RETIRED_NYIRJESI", retired_on: "2014-11-21" }];
 
 describe("spec 0002: retired stamps", () => {
@@ -505,7 +503,7 @@ describe("spec 0002: retired stamps", () => {
       expect(writes(calls), String(date)).toEqual([]);
     }
     expect(refresh).not.toHaveBeenCalled();
-    expect(warnLog).toHaveBeenCalled(); // a rejected input is logged without the input
+    expect(warnLog).toHaveBeenCalled();
   });
 
   it("AC-17: a request that mixes a retired stamp with another is refused as a whole", async () => {

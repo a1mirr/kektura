@@ -163,7 +163,7 @@ describe("spec 0024: comparing with places someone was not missing", () => {
     const c = compareProgress(places, new Set(["A", "C"]), new Set(["A", "B", "C"]), stages, { mine: new Set(["B"]) });
     expect(c.ranges.mine).toEqual([[0, 20]]);
     expect(c.ranges.both).toEqual([[0, 20]]);
-    expect(c.places).toEqual({ both: 2, me: 0, them: 1, neither: 2 }); // B is only theirs: waived is not a stamp
+    expect(c.places).toEqual({ both: 2, me: 0, them: 1, neither: 2 });
     expect(c.stages[0]).toMatchObject({ stage: 1, me: 3, them: 3, state: "both" });
     expect(compareProgress(places, new Set(["A", "C"]), new Set(["A", "B", "C"]), stages).stages[0].state).toBe("them");
   });
@@ -202,7 +202,7 @@ describe("spec 0024: how a stage stands", () => {
 describe("spec 0024: operations on walked stretches", () => {
   it("AC-23: intersect, subtract and complement", () => {
     expect(intersectRanges([[0, 10], [20, 30]], [[5, 25]])).toEqual([[5, 10], [20, 25]]);
-    expect(intersectRanges([[0, 10]], [[10, 20]])).toEqual([]); // touching is not sharing
+    expect(intersectRanges([[0, 10]], [[10, 20]])).toEqual([]);
     expect(subtractRanges([[0, 30]], [[5, 10], [20, 25]])).toEqual([[0, 5], [10, 20], [25, 30]]);
     expect(subtractRanges([[0, 10]], [[0, 10]])).toEqual([]);
     expect(subtractRanges([[0, 10]], [])).toEqual([[0, 10]]);

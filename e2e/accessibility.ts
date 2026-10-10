@@ -7,7 +7,6 @@ import type { Page } from "@playwright/test";
 export const WIDTHS = { desktop: { width: 1280, height: 800 }, phone: { width: 375, height: 812 } } as const;
 export type Width = keyof typeof WIDTHS;
 
-// Only these impacts fail a test; "minor" and "moderate" findings are reported on the test, not enforced.
 const GATED = ["serious", "critical"];
 
 export interface Finding {
@@ -24,7 +23,6 @@ export interface Allowed {
   page: string;
   width?: Width;
   reason: string;
-  /** The task issue that fixes it, e.g. "#125". */
   task?: string;
 }
 
@@ -42,8 +40,6 @@ export function judge(page: string, findings: Finding[], allowList: readonly All
 // rules are left out (they are advice, not a standard, and they roughly double the time a scan takes on the dashboard).
 export const TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
-// Axe on the page as it is now, at the width the page was last set to.
-// `skip` leaves out rules by id, for the one rule that is both the slowest and independent of the width (see the dashboard's target).
 export async function scan(page: Page, width: Width, skip: string[] = []): Promise<Finding[]> {
   const results = await new AxeBuilder({ page }).withTags(TAGS).disableRules(skip).analyze();
   return results.violations.map((v) => ({

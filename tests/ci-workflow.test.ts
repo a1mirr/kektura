@@ -1,4 +1,3 @@
-// The workflow itself only runs on GitHub; this pins what it is made of.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 
@@ -180,7 +179,6 @@ describe("spec 0007: the security job", () => {
     it("runs for pull requests, for pushes to main and once a week (a cron expression for one day of the week)", () => {
       const cron = ci.match(/^ {4}- cron: "([^"]+)"$/m)?.[1] ?? "";
       expect(cron).toMatch(/^\d{1,2} \d{1,2} \* \* [0-6]$/);
-      // no condition and nothing to wait for: it runs for every trigger of the workflow, the weekly one included
       expect(header).not.toMatch(/^ {4}if:/m);
       expect(header).not.toContain("needs:");
       expect(header).toContain("name: Security checks");

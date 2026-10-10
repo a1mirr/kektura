@@ -1,7 +1,6 @@
 export const DEMO_EMAIL = "demo@kektura.test";
 
-// Fixed, so the pictures can be made again and look the same. Applied to the demo account only, in the local test
-// database, by deleting its stamps first.
+// Fixed, so the pictures can be made again and look the same.
 export const DEMO_WALK = {
   stages: [
     { upToStage: 1, day: "2026-09-12" },
@@ -15,7 +14,6 @@ export const DEMO_WALK = {
   ],
 };
 
-// src/lib/screenshots.ts gives the same size to the page; tests/screenshots.test.ts compares the two and the files.
 export const SIZE = { width: 780, height: 1520, scale: 2 };
 
 export function pngSize(png) {
@@ -25,7 +23,7 @@ export function pngSize(png) {
 
 const quote = (text) => `'${String(text).replaceAll("'", "''")}'`;
 
-// Every variant of a place gets a row, as the stamp button would (the same as `stampPlacesOn` of the E2E helpers).
+// Every variant of a place gets a row, as the stamp button would.
 /** @param {string} [email] @param {typeof DEMO_WALK} [walk] */
 export function demoSql(email = DEMO_EMAIL, walk = DEMO_WALK) {
   const user = `(select id from auth.users where email = ${quote(email)})`;
@@ -46,8 +44,6 @@ export function demoSql(email = DEMO_EMAIL, walk = DEMO_WALK) {
 
 const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+/;
 
-// `banner` is the test server's banner text and `errors` the app's own error messages, in English (read from
-// messages/en.json by the script).
 /**
  * @param {{ text: string, alerts?: number, banner?: string, errors?: string[] }} page
  * @returns {string[]}

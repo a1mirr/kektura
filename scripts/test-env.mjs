@@ -1,6 +1,5 @@
-// Its URL and key come from `supabase status`, the dummy login is switched on and Next builds into its own folder, so
-// the test server can run next to the normal dev server. Process env beats .env.local in Next, which is also how the
-// Telegram secrets from .env.local are kept out of it (scripts/lib/test-server-env.mjs).
+// Process env beats .env.local in Next, which is also how the Telegram secrets from .env.local are kept out of the
+// test server (scripts/lib/test-server-env.mjs).
 //
 // Usage: node scripts/test-env.mjs [--e2e] <command...>
 //   e.g. node scripts/test-env.mjs next dev --port 3001       (manual test server, .next-test)

@@ -3,7 +3,6 @@
 import { useTranslations } from "next-intl";
 import { setShowRetired, useShowRetired } from "@/lib/retired-toggle";
 
-// Lists every retired stamp, also for somebody who walked the old route without stamping its neighbours first.
 export default function RetiredToggle() {
   const t = useTranslations("dashboard");
   const show = useShowRetired();

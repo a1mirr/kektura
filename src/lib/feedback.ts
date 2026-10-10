@@ -32,10 +32,8 @@ export function formatFeedbackNotification({
 // can put words into the form.
 const STAMP_CODE = /^OKTPH_[0-9A-Za-z_]+$/;
 
-// Only the shape is checked here; whether it is one of the seed's is decided on the server.
 export const parseStampCode = (raw: unknown): string | null => (typeof raw === "string" && STAMP_CODE.test(raw) ? raw : null);
 
-// English, whatever the page's language.
 export const stampPrefix = (stamp: { code: string; name: string }) => `Stamp: ${stamp.name} (${stamp.code})\n\n`;
 
 export const messageLimit = (stamp?: { code: string; name: string } | null) => FEEDBACK_MAX - (stamp ? [...stampPrefix(stamp)].length : 0);

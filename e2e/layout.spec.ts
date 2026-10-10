@@ -2,7 +2,7 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 import { accountButton, expectNoSidewaysScroll, signInAsNewUser } from "./helpers";
 import { psql } from "./local-db";
 
-const PAGE_WIDTH = 1024; // 64 rem
+const PAGE_WIDTH = 1024;
 const WIDTHS = [375, 768, 1024, 1440, 1920];
 
 const box = async (locator: ReturnType<Page["locator"]>) => (await locator.boundingBox())!;
@@ -14,14 +14,13 @@ async function expectSharedEdges(page: Page, label: string, { footer: hasFooter 
   const width = await clientWidth(page);
   const strip = await box(page.locator("body > header"));
   const main = await box(page.locator("main"));
-  const footer = hasFooter ? await box(page.locator("footer nav")) : strip; // the 404 page has no footer
+  const footer = hasFooter ? await box(page.locator("footer nav")) : strip;
   const expected = Math.min(PAGE_WIDTH, width);
   for (const [name, b] of Object.entries({ strip, main, footer })) {
     expect(b.width, `${label}: ${name} width`).toBeCloseTo(expected, 0);
     expect(b.x, `${label}: ${name} left edge`).toBeCloseTo(strip.x, 0);
   }
   expect(main.x, `${label}: centred`).toBeCloseTo((width - expected) / 2, 0);
-  // the mark itself starts at the content's edge: the padding is 16 px up to 640 px and 24 px above
   const mark = await box(page.locator("body > header img"));
   expect(mark.x, `${label}: the logo's mark at the content edge`).toBeCloseTo(main.x + (width >= 640 ? 24 : 16), 0);
 }
@@ -158,7 +157,7 @@ test.describe("spec 0036: the page layout", () => {
       await page.goto(path);
       const main = await box(page.locator("main"));
       const block = await box(page.locator("main > div, main > h1").first());
-      expect(block.width, path).toBeLessThanOrEqual(672 + 0.5); // max-w-2xl
+      expect(block.width, path).toBeLessThanOrEqual(672 + 0.5);
       expect(block.x + block.width / 2, `${path}: centred`).toBeCloseTo(main.x + main.width / 2, 0);
     }
   });
@@ -169,7 +168,7 @@ test.describe("spec 0036: the page layout", () => {
     await page.goto("/en/friends/invite/not-a-real-token");
     const main = await box(page.locator("main"));
     const card = await box(page.locator("main > div"));
-    expect(card.width).toBeLessThanOrEqual(448 + 0.5); // max-w-md
+    expect(card.width).toBeLessThanOrEqual(448 + 0.5);
     expect(card.x + card.width / 2).toBeCloseTo(main.x + main.width / 2, 0);
   });
 });

@@ -18,9 +18,6 @@ function bringIntoView(map: HTMLElement) {
   map.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-// Brings the map into view if it is not in view already (the sticky map of the two columns is: scrolling then would
-// move the list from under the pointer); for an extra stamp the extra-stamps layer is switched on. Returns the
-// function that stops listening.
 export function listenForFocus(
   m: MapLibreMap,
   maplibregl: MapLibre,

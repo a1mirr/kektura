@@ -21,15 +21,15 @@ export default function StampDateInput({
   onSave,
 }: {
   value: string;
-  max: string; // the latest date the server accepts (tomorrow, UTC)
-  latest?: string; // a stricter last day, for a retired stamp: a later date is never sent
+  max: string;
+  latest?: string;
   onSave: (date: string) => Promise<ActionResult>;
 }) {
   const t = useTranslations("dashboard");
   const router = useRouter();
   const [draft, setDraft] = useState(value);
-  const [saved, setSaved] = useState(value); // the last date known to be saved: from the server or our own save
-  const [seen, setSeen] = useState(value); // the last `value` prop we looked at
+  const [saved, setSaved] = useState(value);
+  const [seen, setSeen] = useState(value);
   const valid = useCallback((date: string) => isValidStampDate(date) && (latest === undefined || date <= latest), [latest]);
   const [status, setStatus] = useState<"idle" | "saving" | "failed">("idle");
 
@@ -63,7 +63,7 @@ export default function StampDateInput({
         setStatus("idle");
       } else if (result.reason === "unauthorized") {
         setStatus("idle");
-        router.refresh(); // the session expired: the page sends the user to the landing page
+        router.refresh();
       } else {
         setDraft(saved);
         setStatus("failed");
@@ -72,7 +72,6 @@ export default function StampDateInput({
     [router, saved],
   );
 
-  // Save after a pause. One save at a time: when it ends this runs again for anything typed meanwhile.
   useEffect(() => {
     if (status === "saving" || draft === saved || !valid(draft)) return;
     const timer = setTimeout(() => void save(draft), SAVE_DELAY_MS);
@@ -88,8 +87,8 @@ export default function StampDateInput({
 
   function handleBlur() {
     if (draft === saved) return;
-    if (!valid(draft)) setDraft(saved); // empty, incomplete or out of range: back to the saved date
-    else if (status !== "saving") void save(draft); // leaving the field saves at once (and stops the pause)
+    if (!valid(draft)) setDraft(saved);
+    else if (status !== "saving") void save(draft);
   }
 
   return (

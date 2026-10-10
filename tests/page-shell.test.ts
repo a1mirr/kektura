@@ -44,7 +44,6 @@ describe("spec 0036: the page shell", () => {
       expect(read(file), file).toContain("${pageWidth}");
       expect(read(file), file).not.toMatch(/\bmax-w-/);
     }
-    // the page width is spelled out once: no other file carries 64rem or max-w-5xl
     const others = files("src", /\.(tsx?|css)$/).filter((file) => !/\.test\./.test(file) && file !== "src/app/globals.css");
     expect(others.filter((file) => /64rem|max-w-5xl/.test(read(file)))).toEqual([]);
   });

@@ -4,8 +4,6 @@ import { describe, expect, it } from "vitest";
 const read = (file: string) => fs.readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 const testFiles = fs.readdirSync(new URL("../tests/", import.meta.url)).filter((name) => name.endsWith(".test.ts"));
 
-// These two are about the helper and about this rule, so they name what they forbid and import the helper without
-// needing a database.
 const aboutTheRule = ["database-test-files.test.ts", "local-db-helper.test.ts"];
 
 const touchesDatabase = (text: string) =>

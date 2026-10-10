@@ -2,10 +2,6 @@ import fs from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 import { canvas, expandAllStages, openStampPopup, pressLocate, signInAsNewUser, stat } from "./helpers";
 
-// The map behaviours the DOM allows. The map is a WebGL canvas, so there
-// is no pixel clicking on stamps except through the app's own list -> map flow: the 📍 button flies
-// the map to a stamp and centres it, so a click on the canvas centre hits that stamp's dot.
-
 const expectNoSideways = async (page: Page) =>
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 
@@ -13,7 +9,6 @@ const mapSection = (page: Page) => page.locator("section", { has: canvas(page) }
 
 async function openDashboardWithMap(page: Page) {
   await signInAsNewUser(page);
-  // The map is created after hydration, so a visible canvas also means the toggles are interactive.
   await expect(canvas(page)).toBeVisible();
   // The list -> map listeners are attached when the map has loaded its first tiles, which takes a second or two over the network:
   // a click on 📍 before that does nothing. The tile requests are done when the network is quiet.
@@ -101,7 +96,7 @@ test.describe("spec 0003: the trail map", () => {
     await expandAllStages(page);
     const row = page.locator("#place-OKTPH_01_DDKPH_01");
     await row.getByRole("button", { name: "Add stamp" }).click();
-    const calendar = row.locator("span.relative.inline-flex"); // the date field's calendar button, a positioned element
+    const calendar = row.locator("span.relative.inline-flex");
     await expect(calendar).toBeVisible();
     await calendar.scrollIntoViewIfNeeded();
 
@@ -120,7 +115,7 @@ test.describe("spec 0003: the trail map", () => {
       return points.map(([x, y]) => !!document.elementFromPoint(x, y)?.closest(".fixed.inset-0"));
     }, at);
     expect(hits).toEqual([true, true, true, true, true, true]);
-    expect(at!.y).toBeGreaterThan(0); // the row's control really was in the window, under the overlay
+    expect(at!.y).toBeGreaterThan(0);
     expect(at!.y).toBeLessThan(720);
   });
 
@@ -150,7 +145,7 @@ test.describe("spec 0003: the trail map", () => {
   test("AC-13: the 📍 button brings the map back into view when the block it sits in has been scrolled so that the map is cut off", async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 1280, height: 600 }); // short enough that the route panel makes the block scroll over the map
+    await page.setViewportSize({ width: 1280, height: 600 });
     await openDashboardWithMap(page);
     await expandAllStages(page);
     await openStampPopup(page, "OKTPH_01_DDKPH_01", "Route from here");
@@ -173,7 +168,7 @@ test.describe("spec 0003: the trail map", () => {
       }, { message: "the map ends fully inside its block" })
       .toBe(true);
     await expect(canvas(page)).toBeInViewport({ ratio: 1 });
-    await page.waitForTimeout(500); // the list did not move: only the block scrolled
+    await page.waitForTimeout(500);
     expect(await page.evaluate(() => window.scrollY)).toBe(scrolled);
   });
 
@@ -213,7 +208,7 @@ test.describe("spec 0003: the trail map", () => {
   test("AC-13: in one column the 📍 button in a list row scrolls the map into view and labels the stamp", async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 768, height: 720 }); // Below 1024 px the map is not sticky
+    await page.setViewportSize({ width: 768, height: 720 });
     await openDashboardWithMap(page);
     await expandAllStages(page);
 
@@ -267,7 +262,6 @@ test.describe("spec 0003: the trail map", () => {
       await expect(row).toBeInViewport({ ratio: 1 });
       await expect(row).toHaveClass(/flash/);
       if (width >= 1024) {
-        // two columns: the map did not leave the window while the list moved, and the block stays inside it
         await expect(canvas(page)).toBeInViewport({ ratio: 1 });
         const aside = (await page.locator("[data-sticky-map]").boundingBox())!;
         expect(aside.y + aside.height).toBeLessThanOrEqual(720 + 0.5);
@@ -306,7 +300,6 @@ test.describe("spec 0003: the trail map", () => {
     await expandAllStages(page);
 
     await openStampPopup(page, "OKTPH_01_DDKPH_01", "Mark as walked");
-    // Server actions are POSTs to the page: refuse them, as a lost connection would.
     await page.route("**/en/dashboard", (route) => (route.request().method() === "POST" ? route.abort() : route.continue()));
     await page.getByRole("button", { name: "Mark as walked" }).dispatchEvent("click"); // the popup's buttons overlap in the small test window
     await expect(page.locator(".maplibregl-popup").getByText("Couldn't save, try again.")).toBeVisible();
@@ -343,7 +336,7 @@ test.describe("spec 0003: the trail map", () => {
       await locate.click();
       expect(requests).toBeGreaterThanOrEqual(1);
     }).toPass({ timeout: 45_000 });
-    await expect.poll(() => requests).toBe(1); // refused: the map stays on the overview
+    await expect.poll(() => requests).toBe(1);
 
     refuse = false;
     await page.locator(".maplibregl-ctrl-zoom-in").click();
@@ -352,7 +345,7 @@ test.describe("spec 0003: the trail map", () => {
     await page.locator(".maplibregl-ctrl-zoom-in").click();
     await page.locator(".maplibregl-ctrl-zoom-out").click();
     await page.waitForTimeout(1_000);
-    expect(requests).toBe(2); // loaded: never requested again
+    expect(requests).toBe(2);
   });
 
   test("AC-13: pressing 📍 on an extra stamp's row switches the extra stamps layer on", async ({ page }) => {

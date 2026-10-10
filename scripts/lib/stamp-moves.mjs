@@ -1,6 +1,3 @@
-// A current stamp whose coordinates changed by more than 100 m between two MTSZ files has a `moved_on` day, the
-// address of the publication that gives it, and `build-data.mjs` refuses to run without one. The row keeps its code
-// and id: only where it is changes.
 import fs from "node:fs";
 import { flatMeters } from "./geo.mjs";
 
@@ -37,7 +34,6 @@ export function seedCoordinates(seedSql) {
   return new Map([...rows].map((m) => [m[1], { lat: Number(m[2]), lng: Number(m[3]) }]));
 }
 
-// A code that is new, or gone, is not a move.
 export function unexplainedMoves(previous, current, moves, thresholdM = MOVE_THRESHOLD_M) {
   const explained = new Set(moves.map((e) => e.code));
   const found = [];

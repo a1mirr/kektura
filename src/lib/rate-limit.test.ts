@@ -22,7 +22,7 @@ describe("spec 0017: rate limiter", () => {
     limiter.allow("ip");
     t = 900;
     expect(limiter.allow("ip")).toBe(false);
-    t = 1001; // the call at t=0 has expired, the one at t=600 hasn't
+    t = 1001;
     expect(limiter.allow("ip")).toBe(true);
     expect(limiter.allow("ip")).toBe(false);
   });
@@ -32,7 +32,7 @@ describe("spec 0017: rate limiter", () => {
     const limiter = createRateLimiter({ limit: 1, windowMs: 1000, now: () => t });
     limiter.allow("ip");
     for (t = 100; t < 900; t += 100) expect(limiter.allow("ip")).toBe(false);
-    t = 1000; // only the first call counted: the window is clear again
+    t = 1000;
     expect(limiter.allow("ip")).toBe(true);
   });
 });

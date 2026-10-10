@@ -22,7 +22,6 @@ export type FlagAdminStore = {
 };
 
 export type BotReply = { text: string; keyboard?: InlineKeyboard };
-// The answer to a tap: the message is replaced by `reply` (or left alone), `notice` is the short toast Telegram shows.
 export type PressResult = { reply?: BotReply; notice?: string };
 
 const HELP = [
@@ -111,7 +110,6 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
     return `${key} is now ${mode}.`;
   }
 
-  // On is for everybody, signed-out visitors included: it takes a second message, typed or tapped.
   function askToConfirm(key: FlagKey): string {
     pending = { key, expiresAt: now() + CONFIRM_WINDOW_MS };
     return `${key} would be on for everybody, signed-out visitors included. Send /confirm within ${CONFIRM_WINDOW_MS / 1000} seconds to do it; anything else cancels.`;
@@ -130,7 +128,6 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
     try {
       let result = await store.setUser(key, email, allowed);
       if (result === "no_flag") {
-        // The flag has no row yet: it starts from its default, then the user is listed.
         await store.setMode(key, FLAGS[key].default);
         result = await store.setUser(key, email, allowed);
       }
@@ -162,7 +159,6 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
     return { reply: await flagPanel(key, done), notice: done };
   }
 
-  // Whoever is no longer listed is only a refreshed list.
   async function pressRemove(key: FlagKey, userId: string): Promise<PressResult> {
     let result: "ok" | "not_listed";
     try {
@@ -177,11 +173,10 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
   }
 
   return {
-    // Never throws: a database failure is a reply that says so.
     async handle(text: string): Promise<BotReply> {
       const [command, a, b] = words(text);
       const waiting = pending && pending.expiresAt > now() ? pending : null;
-      pending = null; // anything but /confirm cancels (and an expired one is gone)
+      pending = null;
       try {
         if (command === "/confirm") return { text: waiting ? await apply(waiting.key, "on") : "Nothing to confirm." };
         if (command === "/flags") return await panel();
@@ -195,9 +190,8 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
       }
     },
 
-    // Unknown or malformed data is ignored. Never throws.
     async press(data: string): Promise<PressResult> {
-      pending = null; // a tap cancels a pending /confirm like any other message
+      pending = null;
       const [kind, key, third, fourth] = data.split(":");
       try {
         if (kind === "p" && data === callbackData.panel) return { reply: await panel() };

@@ -168,7 +168,7 @@ describe("spec 0001: stages", () => {
     expect(findStageForKm(5, stages, placeKm)).toBe(1);
     expect(findStageForKm(10, stages, placeKm)).toBe(2);
     expect(findStageForKm(19.9, stages, placeKm)).toBe(2);
-    expect(findStageForKm(20, stages, placeKm)).toBeNull(); // s2 ends at 20, s3 starts at 21
+    expect(findStageForKm(20, stages, placeKm)).toBeNull();
     expect(findStageForKm(21, stages, placeKm)).toBe(3);
     expect(findStageForKm(30, stages, placeKm)).toBe(3);
     expect(findStageForKm(31, stages, placeKm)).toBeNull();
@@ -192,10 +192,8 @@ describe("spec 0001: stamps required from a date", () => {
   it("AC-17: a place nobody stamped is waived when the stretch was walked before its date, read from the later neighbour", () => {
     const places = lineWithNew("2025-05-08");
     expect([...waivedPlaceKeys(places, on(["B", "2025-01-01"], ["C", "2025-05-07"]))]).toEqual(["N"]);
-    // Walked on the date itself, or with the later neighbour on or after it: required.
     expect(waivedPlaceKeys(places, on(["B", "2025-01-01"], ["C", "2025-05-08"])).size).toBe(0);
     expect(waivedPlaceKeys(places, on(["B", "2025-01-01"], ["C", "2026-01-01"])).size).toBe(0);
-    // The earlier neighbour alone doesn't decide: B before the date, C after.
     expect(waivedPlaceKeys(places, on(["B", "2025-05-07"], ["C", "2025-05-09"])).size).toBe(0);
   });
 
@@ -217,9 +215,7 @@ describe("spec 0001: stamps required from a date", () => {
   it("AC-18: the stretch runs across a waived place, so the km, percent and ranges don't change when the stamp is added (R-8)", () => {
     const stamps = on(["B", "2024-01-01"], ["C", "2024-01-02"]);
     const without = lineWithNew(null);
-    // Before the place existed: B-C was one stretch of 10 km.
     expect(walkedRanges(buildPlaces([cp("A", 0), cp("B", 10), cp("C", 20), cp("D", 30)]), new Set(["B", "C"]))).toEqual([[10, 20]]);
-    // With the new place and its stamp missing, but walked before it was required: still 10 km.
     const places = lineWithNew("2025-05-08");
     const waived = waivedPlaceKeys(places, stamps);
     const ranges = walkedRanges(places, new Set(stamps.keys()), waived);
@@ -264,7 +260,6 @@ describe("spec 0001: retired stamps", () => {
     expect(places.map((p) => p.key)).toEqual(["A", "B", "C", "D"]);
     expect(progressSummary(places, [])).toEqual(progressSummary(buildPlaces(rows.slice(0, 4)), []));
     expect(buildStages(places, []).flatMap((s) => s.places.map((p) => p.key))).toEqual(["A", "B", "C", "D"]);
-    // and it is never a neighbour of a stretch
     expect(walkedRanges(places, new Set(["A", "B", "C", "D"]))).toEqual([[0, 30]]);
   });
 
@@ -288,14 +283,14 @@ describe("spec 0001: retired stamps", () => {
     expect(visible([["B", "2015-06-01"], ["C", "2014-06-01"]])).toEqual(["R"]);
     expect(visible([["B", "2015-06-01"], ["C", "2016-06-01"]])).toEqual([]);
     expect(visible([["B", "2014-11-21"], ["C", "2014-11-21"]])).toEqual([]); // on the day: no longer valid
-    expect(visible([["B", "2014-11-20"]])).toEqual(["R"]); // one neighbour is enough
+    expect(visible([["B", "2014-11-20"]])).toEqual(["R"]);
     expect(visible([["C", "2013-01-01"]])).toEqual(["R"]);
   });
 
   it("AC-23: the place it followed counts as before it, and the nearest stamped place on each side is read, however far", () => {
     expect(visible([["B", "2014-01-01"]])).toEqual(["R"]);
     expect(visible([["A", "2014-01-01"], ["D", "2020-01-01"]])).toEqual(["R"]);
-    expect(visible([["A", "2013-01-01"], ["B", "2020-01-01"]])).toEqual([]); // B is the nearest before: A is not read
+    expect(visible([["A", "2013-01-01"], ["B", "2020-01-01"]])).toEqual([]);
   });
 
   it("AC-23: with no stamped neighbour and no stamp of its own it is not listed", () => {

@@ -72,7 +72,7 @@ test.describe("spec 0005: the language dropdown", () => {
     expect(extra).toBeLessThanOrEqual(0);
     await select.focus();
     await expect(select).toBeFocused();
-    await page.keyboard.press("ArrowDown"); // en -> de, as a native dropdown does
+    await page.keyboard.press("ArrowDown");
     await expect(page).toHaveURL(/\/de$/);
   });
 });

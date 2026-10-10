@@ -7,7 +7,6 @@
 try {
   process.loadEnvFile(".env.local");
 } catch {
-  // no .env.local: the variables may come from the environment
 }
 
 const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
@@ -15,8 +14,6 @@ const chatId = process.env.TELEGRAM_CHAT_ID?.trim();
 const base = process.env.TELEGRAM_API_BASE?.trim() || "https://api.telegram.org";
 const findChatId = process.argv.includes("--find-chat-id");
 
-// A problem to tell the user about. Thrown, not process.exit(): on Windows, exiting while a fetch
-// connection is still closing crashes Node with a libuv assertion.
 class Problem extends Error {}
 
 async function call(method, body = {}) {

@@ -36,7 +36,7 @@ const { points: route, km } = readTrack(routePath);
 
 for (const r of items) {
   const { index, distance } = nearestVertex(route, (p) => haversine([r.lng, r.lat], p));
-  r.distKm = Math.round(distance * 10) / 10; // straight line to the nearest track point
+  r.distKm = Math.round(distance * 10) / 10;
   r.km = Math.round(km[index] * 10) / 10;
 }
 const MAX_DIST_KM = 5;

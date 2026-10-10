@@ -3,11 +3,6 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 import { accountButton, expandAllStages, expectNoSidewaysScroll, openAccountMenu, openStampPopup, seedStatsWalk, signInAsNewUser, stampPlacesOn, stat } from "./helpers";
 import { psql } from "./local-db";
 
-// The pages at a phone's width, in the `mobile` project (Chromium, 375 x 812, touch, mobile emulation,
-// see playwright.config.ts). The tag on the describe is what puts these tests there and keeps them out of the desktop
-// project. Each test checks that its page does not scroll sideways and that the page's main action is on the screen
-// and works when tapped (a tap needs a touch screen: `locator.tap()` fails in the desktop project).
-
 // The control is on the screen: visible, inside the window sideways, and big enough to hit with a thumb: at least 24 px
 // each way (WCAG 2.2's target size), or `minSize` where a spec promises more (44 px).
 async function expectTappable(page: Page, control: Locator, what: string, minSize = 24) {
@@ -77,7 +72,6 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
   });
 
-  // The trail map is a section of the dashboard (there is no page of its own), and its main action is going fullscreen.
   test("AC-10: the map does not scroll the page sideways, and fullscreen is entered and left with a tap", async ({ page }) => {
     await signInAsNewUser(page);
     await expect(page.locator(".maplibregl-canvas")).toBeVisible();
@@ -165,12 +159,10 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
     await expect(page).toHaveURL(/\/en$/);
   });
 
-  // The stats page. A long walk scrolls inside the chart's own frame, and a tap on a month opens its tooltip, a second tap
-  // closes it (no hover on a phone).
   test("AC-10: the stats page does not scroll sideways, and a month's tooltip is opened and closed with taps", async ({ page }) => {
     const email = await signInAsNewUser(page);
     seedStatsWalk(email);
-    stampPlacesOn(email, { OKTPH_06: "2025-01-05" }); // 17 months in all: the chart is wider than the phone
+    stampPlacesOn(email, { OKTPH_06: "2025-01-05" });
     await page.goto("/en/stats");
     await expect(page.locator("[data-month]").first()).toBeAttached();
     await expectNoSidewaysScroll(page, "sideways scroll on the stats page");
@@ -198,9 +190,6 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
     await expect(tooltip).toHaveCount(0);
   });
 
-  // "Change dates" on a phone. The bar is fixed to the bottom of the screen and fits at 320 px, the checkboxes
-  // are 44 x 44 px targets, and tapping is enough to choose and apply. (The bar above a real on-screen keyboard cannot be tested:
-  // manual row of spec 0016.)
   test("AC-10: Change dates does not scroll sideways, the bar fits at 375 and 320 px, and stamps are chosen and dated with taps", async ({ page }) => {
     const email = await signInAsNewUser(page);
     await expandAllStages(page);

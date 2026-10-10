@@ -15,7 +15,6 @@ export function fileDate(file) {
   return iso;
 }
 
-// The data is as fresh as the older of the two files it was built from.
 export const trailDataDate = (...files) => files.map(fileDate).sort()[0];
 
 export const trailMetaJson = (mtszFileDate) => JSON.stringify({ mtszFileDate }) + "\n";

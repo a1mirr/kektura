@@ -5,8 +5,6 @@ import type { Locale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { pageWidth } from "./PageShell";
 
-// Rendered once by the locale layout and by the 404 page, which has no locale layout and gives no children: a page
-// never draws its own copy.
 export default async function SiteLogo({ locale, children }: { locale: Locale; children?: ReactNode }) {
   const t = await getTranslations({ locale, namespace: "app" });
 

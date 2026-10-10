@@ -1,4 +1,4 @@
-export const MIN_STAMP_DATE = "1938-01-01"; // the trail's first year
+export const MIN_STAMP_DATE = "1938-01-01";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -28,5 +28,4 @@ export function newStampDate(now: Date = new Date()): string | undefined {
   return isValidStampDate(today, now) ? today : undefined;
 }
 
-// The last day a retired stamp could still be collected.
 export const dayBefore = (date: string): string => new Date(Date.parse(`${date}T00:00:00Z`) - DAY_MS).toISOString().slice(0, 10);

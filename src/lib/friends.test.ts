@@ -125,7 +125,7 @@ describe("spec 0024: a friend's numbers with a place they were not missing", () 
   it("AC-25: the stretch runs across the waived place and the stage is complete, as on the friend's own dashboard", () => {
     const friend = summarizeFriend(withNew, [11, 31], stagesMeta, ["P2"]);
     expect(friend.summary.doneKm).toBe(20);
-    expect(friend.completedStages).toBe(1); // stage 2 is P2 + P3
+    expect(friend.completedStages).toBe(1);
     expect([...friend.stampedKeys.keys()]).toEqual(["P1", "P3"]); // P2 is not a stamp: the count of stamps does not move
     expect([...friend.waived]).toEqual(["P2"]);
     const strict = summarizeFriend(withNew, [11, 31], stagesMeta);

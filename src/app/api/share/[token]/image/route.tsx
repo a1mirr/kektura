@@ -5,11 +5,8 @@ import { shareMapPaths } from "@/lib/share-card";
 import { loadShareCard } from "@/lib/share-card-server";
 import { TRAIL_ROUTE } from "@/lib/share-route";
 
-// Under /api, so the proxy and the language routing leave it alone.
-//
 // It carries only the trail's name, the percentage and two numbers: the font of `ImageResponse` has no Cyrillic, so
-// no word that needs a translation (and no display name) is drawn. Wording lives in the page's tags (title,
-// description).
+// no word that needs a translation (and no display name) is drawn.
 
 const BLUE = "#2563eb";
 const GREY = "#d6d3d1";

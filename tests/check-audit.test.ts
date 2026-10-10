@@ -60,7 +60,7 @@ describe("spec 0007: the check of npm audit's report", () => {
       const r = report(
         {
           "left-pad": { name: "left-pad", severity: "high", via: [advisory(A)] },
-          app: { name: "app", severity: "high", via: ["left-pad"] }, // the package that carries it: no advisory of its own
+          app: { name: "app", severity: "high", via: ["left-pad"] },
           other: { name: "other", severity: "high", via: [advisory(A, { name: "other" })] },
         },
         { high: 3 },

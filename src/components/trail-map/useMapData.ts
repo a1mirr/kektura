@@ -4,7 +4,6 @@ import { extrasData, placesData } from "@/lib/map-data";
 import { splitRoute } from "@/lib/route-geometry";
 import type { MapHandleRef, MapInputs } from "./types";
 
-// New data is pushed into the existing map, never a new one, so position and zoom stay.
 export function useMapData(
   mapRef: MapHandleRef,
   latest: RefObject<MapInputs>,

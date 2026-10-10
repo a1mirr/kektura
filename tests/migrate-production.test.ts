@@ -50,7 +50,7 @@ describe("spec 0026: migrations", () => {
       const files = calls.filter((args) => args.includes("-f"));
       expect(files).toHaveLength(2);
       for (const args of files) {
-        expect(args[0]).toBe("-1"); // --single-transaction: the file and the insert commit together or not at all
+        expect(args[0]).toBe("-1");
         expect(args.indexOf("-f")).toBeLessThan(args.indexOf("-c"));
       }
       expect(files[0].join(" ")).toMatch(/0008_pages\.sql.*values \('0008_pages\.sql'\)/);
@@ -136,7 +136,6 @@ describe("spec 0026: migrations", () => {
       const create = calls.find((args) => args.some((a) => a.includes("create table")))!.join(" ");
       expect(create).toContain("enable row level security");
       expect(create).toContain("revoke all on public.applied_migrations from anon, authenticated");
-      // the baseline files were not run: only 0024 was
       expect(calls.filter((args) => args.includes("-f"))).toHaveLength(1);
     });
 
@@ -249,7 +248,6 @@ describe("spec 0026: migrations", () => {
       const stderr = 'psql:0002_more.sql:3: ERROR:  duplicate key value violates unique constraint "users_email_key"\nDETAIL:  Key (email)=(someone@example.hu) already exists.';
       const psql = () => ({ status: 3, stdout: "", stderr });
       expect(dropDetails(stderr)).toBe('psql:0002_more.sql:3: ERROR:  duplicate key value violates unique constraint "users_email_key"');
-      // a value with a newline in it continues the DETAIL part; the next label ends it
       const multi = "ERROR:  new row violates check constraint \"c\"\nDETAIL:  Failing row contains (1, first line\nsecond line +36 30 123 4567).\nCONTEXT:  SQL statement \"x\"\nSTATEMENT:  alter table t add check (true);";
       expect(dropDetails(multi)).toBe("ERROR:  new row violates check constraint \"c\"\nCONTEXT:  SQL statement \"x\"\nSTATEMENT:  alter table t add check (true);");
       const fail = fakeDb({ applied: ["0001_init.sql"] });

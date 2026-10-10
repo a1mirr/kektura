@@ -1,6 +1,3 @@
-// The CI job "Review recorded". A pull request description must name, on a `Reviewed commit:` line, a commit that
-// exists and is the head of the pull request or an ancestor of it; when it is an ancestor, nothing but Markdown may
-// have changed after it. It proves that a review was recorded at a commit, not that it was good.
 // Usage (in CI, on a full clone): node scripts/check-review-recorded.mjs
 // Reads the pull request from the event file ($GITHUB_EVENT_PATH); the description is fetched fresh with `gh`
 // ($GH_TOKEN) so that re-running the job after editing the description sees the edit, not the description of the
@@ -16,12 +13,8 @@ export function reviewedSha(description) {
   return found.length ? found.at(-1)[1].toLowerCase() : null;
 }
 
-// Whether a file counts as documentation: nothing but wording may change after a reviewed commit.
 export const isMarkdown = (file) => file.endsWith(".md");
 
-// `reviewed` says what git knows about the named commit, and is null when it does not exist or is neither the head
-// nor an ancestor of it: { sha: its full sha, changedAfter: the files the pull request's own commits changed after it
-// }. The result is { ok, message }.
 export function checkReviewRecorded({ description, head, reviewed }) {
   const named = reviewedSha(description);
   if (!named) {
@@ -44,10 +37,8 @@ export function checkReviewRecorded({ description, head, reviewed }) {
   return { ok: true, message: `Review recorded at ${reviewed.sha.slice(0, 7)}; only Markdown changed after it (head ${head.slice(0, 7)}).` };
 }
 
-// `git(...args)` runs git and returns its stdout, and throws when git exits with an error. With `base` (the pull
-// request's base branch, such as `origin/main`) only what the pull request's own commits changed counts: files that
-// arrive by merging the base into the branch were reviewed with the pull request that put them there; a conflict
-// resolution in a merge commit is the author's own work and counts.
+// Files that arrive by merging the base into the branch were reviewed with the pull request that put them there; a
+// conflict resolution in a merge commit is the author's own work and counts.
 /**
  * @param {(...args: string[]) => string} git
  * @param {string} sha
@@ -79,7 +70,6 @@ export function inspectCommit(git, sha, head, base = null) {
   return { sha: full, changedAfter };
 }
 
-// The base branch as a remote-tracking ref, or null when the clone does not have it (then every file that differs counts).
 function baseRef(git, name) {
   try {
     git("rev-parse", "--verify", "--quiet", `origin/${name}`);

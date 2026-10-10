@@ -62,7 +62,6 @@ function Bar({ bulk }: { bulk: BulkApi }) {
   const conflicts = retiredConflicts(chosen, draft);
   const ready = canApply(chosen, draft) && !pending;
 
-  // Nothing is sent before Apply, and never on `change`.
   function apply() {
     if (!ready || sending.current) return;
     sending.current = true;
@@ -80,7 +79,7 @@ function Bar({ bulk }: { bulk: BulkApi }) {
       sending.current = false;
       bulk.setBusy(false);
       if (result.ok) bulk.finish(count);
-      else if (result.reason === "unauthorized") router.refresh(); // the session expired: the page sends the user to the landing page
+      else if (result.reason === "unauthorized") router.refresh();
       else setFailed(true);
     });
   }
@@ -135,7 +134,7 @@ function Bar({ bulk }: { bulk: BulkApi }) {
           value={isValidStampDate(draft) ? draft : ""}
           max={bulk.max}
           onPick={(date) => {
-            if (date) setDraft(date); // a pick is a date, not a save: Apply sends it
+            if (date) setDraft(date);
           }}
         />
         <button

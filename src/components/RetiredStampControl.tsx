@@ -8,8 +8,6 @@ import { useStampAction } from "@/lib/use-stamp-action";
 import ActionButton from "./ActionButton";
 import StampDateInput from "./StampDateInput";
 
-// There is no "today" to default to, so collecting it asks for the day the user collected it, which must be before it
-// retired (`latest`). Once collected it has the usual date field, with the same limit.
 export default function RetiredStampControl({
   placeKey,
   name,
@@ -22,7 +20,7 @@ export default function RetiredStampControl({
   name: string;
   stamped: boolean;
   date?: string;
-  latest: string; // the day before it retired, YYYY-MM-DD
+  latest: string;
   latestText: string;
 }) {
   const t = useTranslations("dashboard");

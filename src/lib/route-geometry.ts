@@ -6,7 +6,6 @@ export type Route = { points: [number, number, number][] };
 
 export const emptyLines: FeatureCollection<LineString> = { type: "FeatureCollection", features: [] };
 
-// First index of `pts` (sorted by km) at or after `km`, or just after it when `strict`.
 export function kmIndex(pts: Route["points"], km: number, strict = false) {
   let lo = 0;
   let hi = pts.length;
@@ -18,7 +17,6 @@ export function kmIndex(pts: Route["points"], km: number, strict = false) {
   return lo;
 }
 
-// With both ends interpolated between the neighbouring vertices.
 export function sliceRoute(route: Route, from: number, to: number): [number, number][] {
   const pts = route.points;
   const at = (km: number): [number, number] => {

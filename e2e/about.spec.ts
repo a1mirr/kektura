@@ -66,7 +66,7 @@ test.describe("spec 0015: about page", () => {
 
   test("AC-1: fits a phone screen without horizontal scrolling", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    await page.goto("/hu/about"); // the language with the longest words
+    await page.goto("/hu/about");
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBeLessThanOrEqual(0);
   });

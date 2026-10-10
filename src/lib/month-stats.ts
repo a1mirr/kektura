@@ -10,9 +10,9 @@ import {
 // `month` is "YYYY-MM": the calendar month of a stamp date as written (a day, not an instant: no time zone is involved).
 export type MonthStats = {
   month: string;
-  stamps: number; // places first stamped in the month
-  extraStamps: number; // extra stamps dated in the month, counted apart from the places
-  stages: number[]; // official stage numbers, ascending: the stages of the places first stamped and of the extra stamps
+  stamps: number;
+  extraStamps: number;
+  stages: number[];
   km: number; // kilometres that became walked in the month, unrounded
 };
 
@@ -77,7 +77,6 @@ export function monthlyProgress(input: {
     if (stage !== null) stageSets.get(month.month)!.add(stage);
   }
 
-  // The same neighbours as `walkedRanges`: the places a user was not missing are skipped, the stretch runs across them.
   const waived = waivedPlaceKeys(places, stampedOn);
   const ordered = places.filter((p) => !waived.has(p.key)).sort((a, b) => a.km - b.km || a.seq - b.seq);
   for (let i = 0; i < ordered.length - 1; i++) {

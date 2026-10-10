@@ -1,6 +1,3 @@
-// Newest entry first. To add an entry, put it at the top with every language and run `npm test`: the tests say what
-// is missing. If the newest entry has today's date, add the change to that entry instead: dates can't repeat. Keep it
-// short and only list what users see. Dates are plain YYYY-MM-DD (shown in UTC).
 import type { Locale } from "next-intl";
 
 export type ChangeKind = "new" | "improved" | "fixed";

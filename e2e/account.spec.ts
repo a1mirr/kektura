@@ -18,14 +18,12 @@ test.describe("spec 0014: the settings page", () => {
   test("AC-7, AC-15: signed-out visitors are sent to the landing page", async ({ page }) => {
     await page.goto("/en/account");
     await expect(page).toHaveURL(/\/en$/);
-    await page.goto("/en/settings"); // the address /settings: redirected to /account, then to the landing page
+    await page.goto("/en/settings");
     await expect(page).toHaveURL(/\/en$/);
   });
 
   test("AC-7, AC-15, AC-18: the account menu leads to the settings page, which has no chart; cancelling deletes nothing", async ({ page }) => {
     const email = await signInAsNewUser(page);
-    // The stamps-per-month chart is on the stats page, not on the dashboard (it renders in one piece, so once the
-    // account button is there, a missing chart really is missing).
     await expect(accountButton(page)).toBeVisible();
     await expect(page.getByRole("heading", { name: "Stamps per month" })).toHaveCount(0);
     await (await openAccountMenu(page)).getByRole("link", { name: "Settings", exact: true }).click();
@@ -60,7 +58,7 @@ test.describe("spec 0014: the settings page", () => {
     await page.getByRole("button", { name: "Yes, permanently delete my account" }).click();
     await expect(page).toHaveURL(/\/en$/);
     await expect(page.getByRole("button", { name: "Sign in with Google" })).toBeVisible();
-    await expect(accountButton(page)).toHaveCount(0); // The layout's strip follows the session: no account menu for a deleted account
+    await expect(accountButton(page)).toHaveCount(0);
 
     expect(count(`select count(*) from auth.users where id = '${userId}'`)).toBe(0);
     expect(count(`select count(*) from public.user_stamps where user_id = '${userId}'`)).toBe(0);

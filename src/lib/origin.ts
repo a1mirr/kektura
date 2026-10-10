@@ -1,6 +1,3 @@
-// The public origin of a request behind the reverse proxy. A route handler behind Caddy sees
-// `localhost` in request.url, so redirects must be built from the origin the user actually used.
-
 type Env = Record<string, string | undefined>;
 
 const first = (value: string | null) => value?.split(",")[0]?.trim() || undefined;
@@ -13,8 +10,6 @@ export function requestOrigin(request: Request, env: Env = process.env): string 
   return originFromHeaders(request.headers, new URL(request.url).origin, env);
 }
 
-// The same rules for code that has the headers but no Request (a Server Component): `own` is the answer
-// when neither SITE_URL nor the forwarded headers give a usable origin.
 export function originFromHeaders(headers: Headers, own: string, env: Env = process.env): string {
   const configured = env.SITE_URL?.trim();
   if (configured) {
@@ -22,7 +17,6 @@ export function originFromHeaders(headers: Headers, own: string, env: Env = proc
       const url = new URL(configured);
       if (url.protocol === "https:" || url.protocol === "http:") return url.origin;
     } catch {
-      // not a URL: fall through to the request's own headers
     }
   }
 

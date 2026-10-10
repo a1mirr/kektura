@@ -3,12 +3,6 @@ import { routing } from "../src/i18n/routing";
 import { signInAsNewUser } from "./helpers";
 import { psql } from "./local-db";
 
-// Two people with their own browser contexts, connected and sharing with each other through the database (the
-// invite flow has its own tests in friends.spec.ts). The places are the trail's first ones, in order:
-// P1 OKTPH_01_DDKPH_01 (0 km), P2 OKTPH_02 (8.1), P3 OKTPH_03 (13.0), P4 OKTPH_04 (28.7), all in stage 1.
-//   Ana (the friend) stamped P1, P2, P3: walked 0 to 13.0 km.
-//   Bob (the viewer, "me") stamped P2, P3, P4: walked 8.1 to 28.7 km.
-//   Both: 8.1 to 13.0 = 4.9 km; only Bob 13.0 to 28.7 = 15.7 km; only Ana 0 to 8.1 = 8.1 km.
 const userId = (email: string) => psql(`select id from auth.users where email = '${email}'`);
 
 function stamp(id: string, keys: string[]) {
@@ -25,7 +19,6 @@ async function connected(browser: Browser, { anaShares = true } = {}) {
   const bobId = userId(await signInAsNewUser(bobPage));
   psql(`update public.profiles set display_name = 'Ana' where id = '${anaId}'`);
   psql(`update public.profiles set display_name = 'Bob' where id = '${bobId}'`);
-  // user_is_sharing: Bob shows his progress to Ana; friend_is_sharing: Ana shows hers to Bob.
   psql(
     `insert into public.friendships (user_id, friend_id, status, user_is_sharing, friend_is_sharing) values ('${bobId}', '${anaId}', 'accepted', true, ${anaShares})`,
   );

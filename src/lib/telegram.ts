@@ -6,7 +6,6 @@ const DEFAULT_API = "https://api.telegram.org";
 
 export type TelegramConfig = { token: string; chatId: string; apiBase?: string };
 
-// Configured only when both values are set; otherwise feedback is just stored.
 export function telegramConfig(env: Record<string, string | undefined> = process.env): TelegramConfig | null {
   const token = env.TELEGRAM_BOT_TOKEN?.trim();
   const chatId = env.TELEGRAM_CHAT_ID?.trim();

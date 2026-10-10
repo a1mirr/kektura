@@ -1,4 +1,3 @@
-// That flag lives only in scripts/data/okt-stamp-dates.json.
 import type { Place } from "./progress";
 import stampDates from "../../scripts/data/okt-stamp-dates.json";
 

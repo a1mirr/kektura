@@ -15,7 +15,7 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
 
     await place(page, "OKTPH_01_DDKPH_01").getByRole("button", { name: "Add stamp" }).click();
     await expect(stat(page, "Stamps")).toHaveText("1 / 161");
-    await expect(stat(page, "Kilometres")).toHaveText("0"); // one place alone walks nothing
+    await expect(stat(page, "Kilometres")).toHaveText("0");
 
     await place(page, "OKTPH_02").getByRole("button", { name: "Add stamp" }).click();
     await expect(stat(page, "Stamps")).toHaveText("2 / 161");
@@ -33,7 +33,7 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
   test("0001 AC-7: stamping a stage includes its starting point; clearing it keeps the start", async ({ page }) => {
     await signInAsNewUser(page);
     await expandAllStages(page);
-    const stage2 = page.locator("#stage-2"); // Sárvár -> Sümeg: 9 own places, starts at Sárvár (1.9)
+    const stage2 = page.locator("#stage-2");
 
     await stage2.getByRole("button", { name: "Stamp stage" }).click();
     await expect(stat(page, "Stamps")).toHaveText("10 / 161");
@@ -53,14 +53,13 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
     await expandAllStages(page);
 
     const { measured, clipped } = await measureDescriptions(page);
-    expect(measured).toBeGreaterThan(200); // 161 places (220 stamps) + 72 extra stamps
+    expect(measured).toBeGreaterThan(200);
     expect(clipped).toEqual([]);
   });
 
   test("0033 AC-1: stamp descriptions follow the page language, the Hungarian original stays in hu", async ({ page }) => {
     await signInAsNewUser(page);
     const expected: Record<Locale, [string, string]> = {
-      // a place (Piliscsaba) and the first extra stamp (Velem, 3.8 km)
       en: ["Piliscsaba - At the junction of Wesselényi, Árpád vezér and Kálmán király streets, on an electricity pole. (OKTPH_66)", "At the Szent Vid chapel."],
       ru: ["Piliscsaba - На пересечении улиц Wesselényi, Árpád vezér и Kálmán király, на электрическом столбе. (OKTPH_66)", "У часовни Szent Vid."],
       de: ["Piliscsaba - An der Kreuzung der Wesselényi-, Árpád-vezér- und Kálmán-király-Straße, an einem Strommast. (OKTPH_66)", "An der Kapelle Szent Vid."],
@@ -95,7 +94,6 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
 
     await expectFits("every stage collapsed", false);
 
-    // A date field with its calendar button next to the buttons is the widest a row gets: stamp a place and an extra stamp.
     await page.goto("/en/dashboard");
     await expandAllStages(page);
     await place(page, "OKTPH_01_DDKPH_01").getByRole("button", { name: "Add stamp" }).click();
@@ -124,7 +122,7 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
     await expect(undo).toBeVisible(); // flipped at once (optimistic) ...
     await expect(undo).toBeDisabled(); // ... and disabled while the action runs
     await expect(row.getByLabel("Date of the stamp")).toHaveCount(0); // the date is the server's
-    await expect(stat(page, "Stamps")).toHaveText("0 / 161"); // no optimistic maths
+    await expect(stat(page, "Stamps")).toHaveText("0 / 161");
 
     release();
     await expect(row.getByLabel("Date of the stamp")).toBeVisible();
@@ -157,7 +155,7 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
     page,
   }) => {
     await signInAsNewUser(page);
-    await page.reload(); // makes sure the shared cache has been filled by now
+    await page.reload();
     // extra_stamps is read by the dashboard's reference data only, never by an action: its read counter
     // moves only when the cache misses (one read = the 72 rows).
     const reads = async () => {

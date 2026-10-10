@@ -6,7 +6,6 @@ import { createShareCard, deleteShareCard } from "@/app/[locale]/stats/actions";
 import { useRouter } from "@/i18n/navigation";
 import { SHARE_CARD_LIMIT } from "@/lib/share-card";
 
-// One of the user's cards, written out on the server (the dates and numbers in the page's language).
 export type ShareItem = { id: string; url: string; telegramUrl: string; line: string; created: string; named: boolean };
 
 type Notice = "limit" | "failed" | null;
@@ -15,7 +14,6 @@ const button = "rounded px-3 py-1 text-sm disabled:opacity-50";
 const primary = `${button} bg-blue-600 text-white hover:bg-blue-700`;
 const secondary = `${button} bg-stone-200 hover:bg-stone-300`;
 
-// The server action takes the numbers from the user's own stamps; this only says whether the name is shown.
 export default function SharePanel({ items }: { items: ShareItem[] }) {
   const t = useTranslations("share");
   const router = useRouter();

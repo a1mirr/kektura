@@ -29,7 +29,7 @@ describe("spec 0004: the moves of the dates file", () => {
     expect(moveProblems([fine, fine], codes, "2026-10-07").join()).toContain("A: listed twice");
     expect(problems({ moved_on: "2026-02-30" })).toContain("not a calendar day");
     expect(problems({ moved_on: "30 Sep 2026" })).toContain("not a calendar day");
-    expect(problems({ moved_on: "2026-13-40" })).toContain("not a calendar day"); // matches the shape, is no day: no throw
+    expect(problems({ moved_on: "2026-13-40" })).toContain("not a calendar day");
     expect(problems({ moved_on: undefined })).toContain("not a calendar day");
     expect(problems({ moved_on: "2026-10-08" })).toContain("in the future");
     expect(problems({ source: "https://example.com/news" })).toContain("source is not");
@@ -63,7 +63,7 @@ insert into public.checkpoints (seq, code, place_key, stage, stage_seq, name, de
   const was = new Map([["A", at(47)], ["B", at(47)], ["C", at(47)]]);
 
   it("AC-16: a coordinate that moved by more than 100 m without an entry is reported, with the distance", () => {
-    const now = new Map([["A", at(47.0015)], ["B", at(47)], ["C", at(47.0009)]]); // 167 m, 0 m, 100.2 m
+    const now = new Map([["A", at(47.0015)], ["B", at(47)], ["C", at(47.0009)]]);
     const found = unexplainedMoves(was, now, []);
     expect(found.map((m) => m.code)).toEqual(["A", "C"]);
     expect(found[0].meters).toBeGreaterThan(160);
@@ -71,7 +71,7 @@ insert into public.checkpoints (seq, code, place_key, stage, stage_seq, name, de
   });
 
   it("AC-16: up to 100 m is the MTSZ correcting a point: the coordinates are just replaced, no entry needed", () => {
-    expect(unexplainedMoves(was, new Map([["A", at(47.0008)]]), [])).toEqual([]); // 89 m
+    expect(unexplainedMoves(was, new Map([["A", at(47.0008)]]), [])).toEqual([]);
     expect(unexplainedMoves(was, new Map([["A", at(47)]]), [])).toEqual([]);
   });
 
@@ -190,7 +190,7 @@ describe("spec 0004: build-data.mjs on moved stamps (the script, run for real)",
   }
 
   const entry = (over: object = {}) => ({ code: "OKTPH_84_B", moved_on: "2026-09-30", source: SOURCE, ...over });
-  const metres = 1 / 111_320; // degrees of latitude per metre
+  const metres = 1 / 111_320;
 
   it("AC-16, AC-17: stamps where the last seed had them: it runs, writes the file's date, and the block has no day to set", () => {
     const run = build();
@@ -212,7 +212,7 @@ describe("spec 0004: build-data.mjs on moved stamps (the script, run for real)",
     const run = build({ shift: { OKTPH_84_B: { dLat: 80 * metres } } });
     expect(run.status, run.stderr).toBe(0);
     const row = run.seed().split("\n").find((l) => l.includes("'OKTPH_84_B', 'OKTPH_84_B'"))!;
-    expect(row).toContain(", 47.879948, 19.035783,"); // 47.879229 + 80 m
+    expect(row).toContain(", 47.879948, 19.035783,");
     expect(run.seed()).not.toContain("moved_on::date");
   }, 60_000);
 
@@ -222,7 +222,7 @@ describe("spec 0004: build-data.mjs on moved stamps (the script, run for real)",
     const seed = run.seed();
     expect(seed).toContain("from (values ('OKTPH_84_B', '2026-09-30')) as d(code, moved_on)");
     expect(seed).toContain("code <> all (array['OKTPH_84_B'])");
-    expect(seed.split("\n").find((l) => l.includes("'OKTPH_84_B', 'OKTPH_84_B'"))).toContain(", 47.880576, 19.035783,"); // the new place: 47.879229 + 150 m
+    expect(seed.split("\n").find((l) => l.includes("'OKTPH_84_B', 'OKTPH_84_B'"))).toContain(", 47.880576, 19.035783,");
     // it is the last of the seed's statements, inside its transaction
     expect(seed).toMatch(/where c\.code = d\.code and c\.moved_on is distinct from d\.moved_on::date;\n\ncommit;\n$/);
   }, 60_000);

@@ -5,11 +5,9 @@ import type en from "../messages/en.json";
 import { routing } from "../src/i18n/routing";
 import { expectNoSidewaysScroll, openAccountMenu, seedStatsWalk, signInAsNewUser, stampPlacesOn, stampStagesOn, stat } from "./helpers";
 
-// The expected texts are read from the language's own messages file, so a new language needs no edit here.
 const messages = (locale: string): typeof en => JSON.parse(fs.readFileSync(path.join(process.cwd(), "messages", `${locale}.json`), "utf8"));
 
-// The stats page and its monthly chart. Recharts has no layout in jsdom, so the chart is checked here, in a browser.
-// The walk of `seedStatsWalk` has six months (Dec 2025 to May 2026); see helpers.ts for what each holds.
+// Recharts has no layout in jsdom, so the chart is checked here, in a browser.
 
 const bars = (page: Page) => page.locator("[data-month]");
 const bar = (page: Page, name: RegExp | string) => page.getByRole("button", { name });
@@ -169,7 +167,7 @@ test.describe("spec 0037: the stats page", () => {
 
   test("AC-10: a long walk scrolls inside the chart's own frame, not the page, at 320 and 375 px, and names every month", async ({ page }) => {
     const email = await signInAsNewUser(page);
-    stampPlacesOn(email, { OKTPH_01_DDKPH_01: "2025-01-05", OKTPH_02: "2026-02-10" }); // 14 months
+    stampPlacesOn(email, { OKTPH_01_DDKPH_01: "2025-01-05", OKTPH_02: "2026-02-10" });
     await page.setViewportSize({ width: 1280, height: 900 });
     await openStats(page);
     await expect(page.locator("[data-tick=month]")).toHaveCount(14);
@@ -177,11 +175,10 @@ test.describe("spec 0037: the stats page", () => {
 
     for (const width of [375, 320]) {
       await page.setViewportSize({ width, height: 800 });
-      await openStats(page); // loaded at this width: the chart opens on its newest months
+      await openStats(page);
       await expectNoSidewaysScroll(page, `sideways scroll at ${width} px on /en/stats`);
       const f = await frame(page).evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth, left: el.scrollLeft }));
       expect(f.scroll, `the frame scrolls at ${width} px`).toBeGreaterThan(f.client);
-      // opened on the newest months, which is where the eye goes; the oldest are a scroll away
       expect(f.left).toBeGreaterThan(0);
       const newest = (await bars(page).last().boundingBox())!;
       const box = (await frame(page).boundingBox())!;

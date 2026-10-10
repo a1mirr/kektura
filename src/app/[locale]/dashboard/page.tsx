@@ -65,7 +65,6 @@ export default async function Dashboard({
   } = await supabase.auth.getUser();
   if (!user) return redirect({ href: "/", locale });
 
-  // Reference data comes from a shared server cache; only the user's own stamps hit the database.
   const [showRestaurants, { checkpoints, extras: extraList, stamps, extraStamps }] = await Promise.all([
     flagOn("restaurants"),
     loadDashboardData(supabase),
@@ -84,7 +83,6 @@ export default async function Dashboard({
   const stages = buildStages(placeList, stagesData.stages);
   const stampedPlaces = stampedPlaceKeys(placeList, stamps);
   const waived = waivedPlaceKeys(placeList, stampedPlaces);
-  // Retired stamps are no places: they never reach the count, the km, the stages' totals or the map.
   const retiredList = buildRetired(checkpoints);
   const stampedRetired = stampedPlaceKeys(retiredList, stamps);
   const listedRetired = retiredVisibleKeys(retiredList, placeList, stampedPlaces, stampedRetired);
@@ -111,7 +109,6 @@ export default async function Dashboard({
 
   const requiredFrom = new Map(placeList.map((p) => [p.key, p.requiredFrom]));
   const dateText = (iso: string) => format.dateTime(new Date(`${iso}T00:00:00Z`), { dateStyle: "long", timeZone: "UTC" });
-  // The data's own description of where a moved stamp is now, no more.
   const today = todayIso();
   const movedText = {
     on: (date: string) => t("movedOn", { date }),
@@ -193,8 +190,6 @@ export default async function Dashboard({
             {stages.map((stage) => {
               const { stage: n, meta, places: list } = stage;
               const keys = stageStampKeys(stage);
-              // A place the user was not missing counts as done for the stage's progress; the stage's button follows
-              // the stamps alone, so "Stamp stage" still marks a waived place.
               const done = countDone(list, stampedPlaces, waived);
               const stageExtras = extraListWithStage.filter((e) => e.stage === n);
               const stageRetired = retiredList.filter((r) => r.stage === n);

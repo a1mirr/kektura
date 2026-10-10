@@ -13,7 +13,7 @@ import StampDateInput from "./StampDateInput";
 
 // The first day the component rejects: the day after tomorrow (UTC), whenever the tests run.
 const PAST_MAX = new Date(Date.parse(maxStampDate()) + 86_400_000).toISOString().slice(0, 10);
-const MAX = "2999-12-31"; // the page passes tomorrow (UTC); anything above it is out of range for the field
+const MAX = "2999-12-31";
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => {
   cleanup();
@@ -137,9 +137,9 @@ describe("spec 0016: the date field", () => {
     const onSave = vi.fn(() => new Promise<ActionResult>((resolve) => resolvers.push(resolve)));
     const { input } = setup(onSave);
     await edit(input, "2026-09-10");
-    await wait(700); // first save starts
+    await wait(700);
     await edit(input, "2026-09-11");
-    await wait(2000); // the second must wait for the first
+    await wait(2000);
     expect(onSave.mock.calls).toEqual([["2026-09-10"]]);
     await act(async () => resolvers[0]({ ok: true }));
     await wait(700);

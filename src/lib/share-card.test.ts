@@ -139,9 +139,8 @@ describe("spec 0039: share cards", () => {
       // One degree of longitude is cos(47.5 degrees) = 0.675 of a degree of latitude here, so the 1 x 1 degree trail is
       // 0.675 wide and 1 tall: (400 - 24) / 0.675 + 24 = 581 px.
       expect(map.height).toBe(581);
-      // Coordinates are rounded to a tenth of a pixel.
-      expect(map.start).toEqual([12, 568.6]); // the south-west end: left and at the bottom
-      expect(map.end[0]).toBeCloseTo(388, 0); // the north-east end: right and at the top
+      expect(map.start).toEqual([12, 568.6]);
+      expect(map.end[0]).toBeCloseTo(388, 0);
       expect(map.end[1]).toBe(12);
       expect(map.trail.startsWith("M12 568.6L")).toBe(true);
     });

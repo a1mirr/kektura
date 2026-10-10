@@ -10,7 +10,7 @@ const files = [
 
 describe("spec 0003: how the map code is structured", () => {
   it("AC-17: TrailMap.tsx, the trail-map pieces and the map-*.ts helpers are each at most 300 lines", () => {
-    expect(files.length).toBeGreaterThan(15); // the pieces are really found
+    expect(files.length).toBeGreaterThan(15);
     const big = files
       .map((file) => [file, fs.readFileSync(new URL(file, src), "utf8").split("\n").length] as const)
       .filter(([, lines]) => lines > 300);

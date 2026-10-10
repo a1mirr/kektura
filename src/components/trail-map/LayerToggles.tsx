@@ -23,7 +23,6 @@ function Toggle({
   );
 }
 
-// Extra stamps and restaurants are offered only when there are some (the restaurants once their data has loaded).
 export default function LayerToggles({
   fullscreen,
   toggles,

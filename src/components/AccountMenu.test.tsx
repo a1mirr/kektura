@@ -55,7 +55,7 @@ describe("spec 0014: the account menu", () => {
     expect(details.open).toBe(false);
     expect(summary.tagName).toBe("SUMMARY");
     expect(summary.textContent).toBe(s.label);
-    expect(screen.getByRole("group")).toBe(details); // a <details> is a group, not role=menu
+    expect(screen.getByRole("group")).toBe(details);
     expect(details.querySelector("[role=menu], [role=menuitem]")).toBeNull();
     expect(details.querySelector("ul")).not.toBeNull();
   });
@@ -176,8 +176,8 @@ describe("spec 0014: the account menu before hydration", () => {
     const host = document.createElement("div");
     document.body.appendChild(host);
     host.innerHTML = renderToString(element);
-    host.querySelector("details")!.open = true; // the browser's own toggle...
-    await new Promise((resolve) => setTimeout(resolve)); // ...whose `toggle` event is dispatched, and unheard, before hydration starts
+    host.querySelector("details")!.open = true;
+    await new Promise((resolve) => setTimeout(resolve)); // the browser's own toggle, whose `toggle` event is dispatched, and unheard, before hydration starts
     let root!: Root;
     await act(async () => {
       root = hydrateRoot(host, element);

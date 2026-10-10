@@ -1,6 +1,4 @@
-// They talk to PostgREST the way a browser could, as a signed-in user and as an anonymous visitor, so they prove what
-// a malicious client can and cannot do. Each test works on flags of its own (`dbtest-...`), never on the declared
-// ones that the E2E tests switch.
+// Each test works on flags of its own (`dbtest-...`), never on the declared ones that the E2E tests switch.
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";

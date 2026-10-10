@@ -4,7 +4,6 @@
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
 
-/** A problem to tell the user about. Thrown, not process.exit(): see the Windows note in CLAUDE.md. */
 export class Problem extends Error {}
 
 // The languages of the site are its message files, so a new `messages/<language>.json` is requested here without an

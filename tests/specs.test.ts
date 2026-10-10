@@ -14,7 +14,7 @@ const specFiles = SPEC_FOLDERS.flatMap((folder) =>
     .readdirSync(new URL(`${folder}/`, specsDir))
     .filter((name) => /^\d{4}-.+\.md$/.test(name))
     .map((name) => `${folder}/${name}`),
-); // "product/0001-progress.md": relative to specs/
+);
 
 const indexOf = (readme: string) =>
   new Map(
@@ -211,8 +211,6 @@ describe("spec 0034: the rules are written where authors and the reviewer look",
   });
 });
 
-// Whether an AC is really satisfied only a person or the reviewer can tell; these catch the drift that leaves a
-// trace.
 describe("spec 0034: specs and the repository agree", () => {
   const skipDirs = new Set(["node_modules", ".git", ".next", ".next-test", ".next-e2e", ".claude", "playwright-report", "test-results"]);
   const walk = (dir: string): string[] =>
@@ -295,8 +293,6 @@ describe("spec 0034: manual checks", () => {
   });
 });
 
-// Fixtures with made-up names are not allowed either. The old flat path (before the specs moved into product/ and
-// project/) is not used anywhere.
 describe("spec 0034: spec paths and links resolve", () => {
   const root = new URL("..", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1").replace(/\/$/, "");
   const tracked = execFileSync("git", ["ls-files", "-z"], { cwd: root, encoding: "utf8" })

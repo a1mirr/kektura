@@ -127,7 +127,6 @@ describe("spec 0008: Telegram messages for failed actions", () => {
     expect(text).toContain("[stamp-action] setPlacesStamped write, code 42501");
     expect(text).toContain("pm2 logs kektura");
     expect(formatFailureAlert({ ...stamp, code: undefined })).toContain("setPlacesStamped write\n");
-    // Whatever else a caller might know (the error message, user ids, input) has no place in a Failure.
     const secret = { ...stamp, message: "key (email)=(a@b.c)", userId: "u-1", details: "secret" } as Failure;
     expect(formatFailureAlert(secret)).not.toMatch(/a@b\.c|u-1|secret/);
   });

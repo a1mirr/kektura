@@ -40,7 +40,7 @@ author's context, and wants that to be part of how work is done here, not someth
   - it looks for: requirements of the task that do not hold, ACs not implemented or built twice, ACs without a test that really asserts them, behaviour
     that no AC describes, specs that describe behaviour that is not built, changes users can see that are missing from the changelog or described untruly
     there (spec 0018 AC-7), leftovers of what was renamed or moved (code, messages in every language,
-    docs, specs, links), the gotchas listed in `CLAUDE.md`, regressions for signed-out visitors, other
+    docs, specs, links), comments that have not earned their place (`CLAUDE.md`, Comments; the agent's brief carries that section verbatim), the gotchas listed in `CLAUDE.md`, regressions for signed-out visitors, other
     locales, small screens and the no-JS paths, and security and privacy (authorization, secrets in logs,
     redirects);
   - it re-checks the `manual` coverage rows of the areas the change touches (spec 0034 AC-11): a row without a

@@ -5,7 +5,6 @@ import { useFormatter, useTranslations } from "next-intl";
 
 const MARK = "⁣"; // an invisible separator standing in for the date while the message is split around it
 
-// The date is a button that opens the explanation, so it is reachable by tap and by keyboard, not by hover only.
 export default function RequiredFrom({
   requiredFrom,
   waived,
@@ -25,7 +24,6 @@ export default function RequiredFrom({
   const date = format.dateTime(new Date(`${requiredFrom}T00:00:00Z`), { dateStyle: "long", timeZone: "UTC" });
 
   const explanation = t("requiredWhy") + (tolerance ? ` ${t("requiredTolerance")}` : "");
-  // The sentence is a translated message with the date in it; the date itself is the button.
   const [before, after] = t("requiredFrom", { date: MARK }).split(MARK);
 
   return (
@@ -60,7 +58,6 @@ export default function RequiredFrom({
       <p id={explanationId} hidden={!open} className="mt-1 rounded bg-stone-50 p-2">
         {explanation}
       </p>
-      {/* Without JavaScript the button does nothing: the note is plain text then. */}
       <noscript>
         <p className="mt-1 rounded bg-stone-50 p-2">{explanation}</p>
       </noscript>

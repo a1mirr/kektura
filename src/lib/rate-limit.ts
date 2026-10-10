@@ -23,7 +23,6 @@ export function createRateLimiter({
         return false;
       }
       hits.set(key, [...inWindow, at]);
-      // Keep the map from growing without bound: drop keys whose hits have all expired.
       if (hits.size > 5000) for (const k of hits.keys()) if (recent(k, at).length === 0) hits.delete(k);
       return true;
     },

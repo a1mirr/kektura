@@ -23,8 +23,6 @@ export type FriendTone = keyof typeof tones;
 
 export const friendButtonClass = (tone: FriendTone) => `${base} ${tones[tone]}`;
 
-// While the request runs the label stays in the layout and the accessibility tree, transparent, so the button does
-// not change size. It is a plain submit button, so it works before hydration and without JavaScript.
 export default function FriendActionButton({ children, tone = "neutral" }: { children: ReactNode; tone?: FriendTone }) {
   const { pending } = useFormStatus();
   const group = useActionGroup();

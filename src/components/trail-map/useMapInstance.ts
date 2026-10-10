@@ -9,7 +9,6 @@ import { attachStampPopups } from "./stampPopups";
 import type { LayerToggles, MapContext, MapHandleRef, MapInputs, RouteState } from "./types";
 import { watchDetailRoute } from "./watchDetailRoute";
 
-// The map lives in `mapRef` (not in React state), so later data changes update it in place.
 export function useMapInstance({
   container,
   mapRef,
@@ -29,7 +28,7 @@ export function useMapInstance({
 }) {
   useEffect(() => {
     if (!container.current) return;
-    const h = mapRef.current; // one object for the map's whole life
+    const h = mapRef.current;
     let cancelled = false;
     let stopListeningForFocus: (() => void) | undefined;
 

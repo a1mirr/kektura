@@ -37,7 +37,7 @@ describe("spec 0002: row level security of the stamp tables", () => {
     const policies = rows(
       "select tablename || '|' || cmd || '|' || roles::text || '|' || coalesce(qual, with_check) from pg_policies where schemaname = 'public' and tablename in ('user_stamps', 'user_extra_stamps') order by 1",
     ).split("\n");
-    expect(policies.length).toBe(8); // select, insert, update, delete on both tables
+    expect(policies.length).toBe(8);
     for (const policy of policies) {
       expect(policy).toMatch(/\|\{authenticated\}\|\(\( SELECT auth\.uid\(\) AS uid\) = user_id\)$/);
     }
@@ -78,7 +78,7 @@ describe("spec 0002: row level security of the stamp tables", () => {
 });
 
 describe("spec 0016: set_stamp_dates (many dates in one transaction)", { timeout: 30_000 }, () => {
-  const RETIRED = "OKT_RETIRED_NYIRJESI"; // retired on 2014-11-21
+  const RETIRED = "OKT_RETIRED_NYIRJESI";
   const dates = (person: Person) =>
     rows(
       `select coalesce(string_agg(k || '=' || d, ',' order by k), '') from (

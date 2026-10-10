@@ -21,7 +21,7 @@ describe("spec 0007: the gitleaks configuration", () => {
     expect(code.match(/^\[\[?allowlists?\]\]/gm)).toEqual(["[[allowlists]]"]);
     const keys = code.split("\n").filter((line) => /^[a-zA-Z]+ = /.test(line)).map((line) => line.split(" = ")[0]);
     expect(keys).toEqual(["title", "useDefault", "description", "regexTarget", "regexes"]);
-    expect(code).toContain('regexTarget = "secret"'); // the value of the finding, not the line around it
+    expect(code).toContain('regexTarget = "secret"');
     expect(regexes.length).toBeGreaterThan(0);
   });
 
@@ -32,7 +32,6 @@ describe("spec 0007: the gitleaks configuration", () => {
       expect(key, "only the characters of a token, no pattern").toMatch(/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);
       const payload = JSON.parse(Buffer.from(key.split(".")[1], "base64url").toString("utf8"));
       expect(payload.iss, "a key of the local Supabase").toBe("supabase-demo");
-      // the entry matches the key, and nothing that only contains it or is a part of it
       const re = new RegExp(regex);
       expect(re.test(key)).toBe(true);
       expect(re.test(`${key}x`)).toBe(false);

@@ -5,7 +5,6 @@ import CompareMapLoader from "./CompareMapLoader";
 import CompareSwatch from "./CompareSwatch";
 import { TRAIL_DATA_DATE } from "@/lib/trail-meta";
 
-// Only what the friend shares: which places they stamped, never dates.
 export default async function CompareSection({ comparison, points }: { comparison: Comparison; points: ComparePoint[] }) {
   const t = await getTranslations("compare");
   const tDash = await getTranslations("dashboard");

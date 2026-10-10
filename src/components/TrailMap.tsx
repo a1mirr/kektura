@@ -20,7 +20,6 @@ import { useRoutePlanner } from "./trail-map/useRoutePlanner";
 
 export type { MapExtra, MapPoint };
 
-// The map itself lives outside React state, the hooks keep it in step.
 export default function TrailMap({
   points,
   extras = [],
@@ -30,7 +29,6 @@ export default function TrailMap({
   points: MapPoint[];
   extras?: MapExtra[];
   doneRanges: KmRange[];
-  // The `restaurants` flag, read on the server: without it the layer has no data and no toggle.
   withRestaurants?: boolean;
 }) {
   const t = useTranslations("dashboard");

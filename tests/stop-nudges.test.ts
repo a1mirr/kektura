@@ -1,4 +1,3 @@
-// The hook itself (a Claude Code session) is the manual row of the spec.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { changedForNudge, isUserVisible, nudgeMessage, nudgeKey, nudgeTargets, nudgeToAsk } from "../.claude/hooks/stop-nudges.mjs";
@@ -77,7 +76,6 @@ describe("spec 0034: the Stop hook's turn-end nudge", () => {
     const committed = ["src/components/FriendActionButton.tsx", "messages/en.json"];
     expect(nudgeMessage(changedForNudge([], committed))).toMatch(/files users can see changed without a changelog entry/);
     expect(nudgeMessage(changedForNudge([], []))).toBe("");
-    // The union has each path once, and the changelog among the committed files silences the question.
     expect(changedForNudge(["a.ts", "b.ts"], ["b.ts", "c.ts"])).toEqual(["a.ts", "b.ts", "c.ts"]);
     expect(nudgeMessage(changedForNudge([], [...committed, "src/content/changelog.ts"]))).not.toMatch(/changelog entry/);
   });
@@ -88,7 +86,6 @@ describe("spec 0034: the Stop hook's turn-end nudge", () => {
     expect(first).toMatch(/files users can see changed without a changelog entry/);
     const asked = nudgeKey("abc:1", first);
     expect(nudgeToAsk([], committed, asked, "abc:1")).toBe("");
-    // The same file names in another task (another commit, or another working tree) are asked about again.
     expect(nudgeToAsk([], committed, asked, "def:1")).toBe(first);
     expect(nudgeToAsk([], committed, asked, "abc:2")).toBe(first);
     expect(nudgeToAsk([], [...committed, "src/components/CompareMap.tsx"], asked, "abc:1")).not.toBe("");

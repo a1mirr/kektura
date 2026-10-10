@@ -57,7 +57,7 @@ describe.each(Object.keys(messageFiles) as (keyof typeof messageFiles)[])("spec 
       expect(image.getAttribute("height")).toBe(String(SCREENSHOT_SIZE.height));
       expect(image.getAttribute("loading")).toBe("lazy");
       expect(image.getAttribute("src")).toMatch(new RegExp(`^/_next/image\\?url=${encodeURIComponent(`/screenshots/${SCREENSHOTS[i]}.png`)}&w=\\d+&q=\\d+$`));
-      expect(image.getAttribute("srcset")).toMatch(/ \d+w,/); // a width per size: the browser takes the one it needs
+      expect(image.getAttribute("srcset")).toMatch(/ \d+w,/);
       expect(image.getAttribute("sizes")).toContain("304px");
     });
   });

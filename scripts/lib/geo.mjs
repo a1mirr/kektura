@@ -3,7 +3,6 @@ import fs from "node:fs";
 const R = 6371.0088;
 const rad = Math.PI / 180;
 
-// Numeric attribute of a GPX tag, e.g. attr('lat="47.1" lon="16.2"', "lat") -> 47.1
 export const attr = (src, a) => Number(src.match(new RegExp(`${a}="([^"]+)"`))[1]);
 
 export function haversine(a, b) {

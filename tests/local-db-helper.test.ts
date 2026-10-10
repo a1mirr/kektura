@@ -1,4 +1,3 @@
-// The decision is a pure function of the state of the database and the environment, so none of this needs Docker.
 import { describe, expect, it } from "vitest";
 import { databaseRequired, decideDatabase, enforceDecision, NOT_RUNNING_MESSAGE } from "../e2e/local-db";
 

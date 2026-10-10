@@ -2,8 +2,6 @@ import { expect, test } from "@playwright/test";
 import { expandAllStages, signInAsNewUser, stat } from "./helpers";
 import { psql } from "./local-db";
 
-// Vércverés (OKTPH_103, stage 20) is required from 2014-11-21; its neighbours on the trail are Galyatető (OKTPH_102)
-// and Vörösmarty fogadó (OKTPH_104).
 const stampNeighbours = (email: string, day: string) =>
   psql(
     `insert into public.user_stamps (user_id, checkpoint_id, stamped_on) select u.id, c.id, '${day}' from auth.users u, public.checkpoints c where u.email = '${email}' and c.place_key in ('OKTPH_102', 'OKTPH_104')`,
@@ -26,7 +24,7 @@ test.describe("spec 0001: stamps required from a date", () => {
     await expect(row.getByRole("button", { name: "Add stamp" })).toBeVisible();
     await expect(stat(page, "Stamps")).toHaveText("2 / 161");
     await expect(stat(page, "Kilometres")).toHaveText(kmBetweenNeighbours());
-    const stage = page.locator("#stage-20"); // Mátraverebély -> Mátraháza: 6 places, 2 stamped, Vércverés waived
+    const stage = page.locator("#stage-20");
     await expect(stage.locator("[aria-expanded]").first()).toContainText("3/6");
     await expect(stage.getByRole("button", { name: "Stamp stage" })).toBeVisible();
 
@@ -57,7 +55,6 @@ test.describe("spec 0001: stamps required from a date", () => {
   });
 
   test("AC-19, AC-20: a friend's page shows the date and the waiver as theirs, with their figures", async ({ page, browser }) => {
-    // The viewer and a friend who shares with them: an accepted friendship made in the database (the invite flow has its own tests).
     const viewer = await signInAsNewUser(page);
     const friendPage = await (await browser.newContext()).newPage();
     const friend = await signInAsNewUser(friendPage);
@@ -81,7 +78,7 @@ test.describe("spec 0001: stamps required from a date", () => {
     await signInAsNewUser(page);
     await page.goto("/en/dashboard");
     await expandAllStages(page);
-    const row = page.locator("#place-OKTPH_30_B"); // Badacsony, required from 2025-05-08
+    const row = page.locator("#place-OKTPH_30_B");
     await row.getByRole("button", { name: /May 8, 2025/ }).click();
     await expect(row.getByText(/one-month tolerance/)).toBeVisible();
   });

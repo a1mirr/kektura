@@ -5,7 +5,7 @@ test.describe("spec 0001: extra stamps in stages", () => {
   test("AC-12, AC-13: every extra stamp that lies on a stage names it, in order along the trail", async ({ page }) => {
     await signInAsNewUser(page);
     const rows = page.locator("#extra-stamps li");
-    expect(await rows.count()).toBeGreaterThan(50); // the 72 extra stamps
+    expect(await rows.count()).toBeGreaterThan(50);
     const stages = await rows.evaluateAll((els) =>
       els.map((e) => Number(/· Stage (\d+)/.exec(e.textContent ?? "")?.[1] ?? 0)),
     );
@@ -14,7 +14,6 @@ test.describe("spec 0001: extra stamps in stages", () => {
     for (const n of labelled) expect(n).toBeGreaterThanOrEqual(1);
     for (const n of labelled) expect(n).toBeLessThanOrEqual(27);
     expect(labelled).toEqual([...labelled].sort((a, b) => a - b));
-    // The first extra stamps (Velem, 3.8 km) lie between the first two places: stage 1.
     expect(stages[0]).toBe(1);
   });
 

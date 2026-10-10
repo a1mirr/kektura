@@ -7,10 +7,6 @@ import { accountMenuEntries, isCurrentPage } from "@/lib/account-menu";
 
 const noSubscribe = () => () => {};
 
-// A disclosure, not an application menu. A native `<details>` opens and closes without script, so before hydration
-// and with JavaScript off the entries are reachable; once hydrated it adds `aria-expanded`, Escape, a click outside
-// and closing on a followed link. The layout decides `friends` per request, so a flagged entry never reaches a page
-// that must answer 404.
 export default function AccountMenu({ friends }: { friends: boolean }) {
   const t = useTranslations("accountMenu");
   const locale = useLocale();

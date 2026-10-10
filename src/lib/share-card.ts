@@ -8,14 +8,11 @@ import {
   type Stage,
 } from "./progress";
 
-// A user keeps at most this many cards (the same number is enforced in `create_share_card`).
 export const SHARE_CARD_LIMIT = 20;
 
-// The token of a card: 128 random bits as hex, the format the database enforces.
 const SHARE_TOKEN = /^[0-9a-f]{32}$/;
 export const isShareToken = (value: string): boolean => SHARE_TOKEN.test(value);
 
-// What a card freezes. No stamp, no date, no note: only totals and the walked stretches.
 export type ShareSnapshot = {
   stampsDone: number;
   stampsTotal: number;
@@ -27,7 +24,6 @@ export type ShareSnapshot = {
   ranges: KmRange[];
 };
 
-// Built from the same functions as the dashboard and the stats page, so a card never disagrees with them.
 export function buildShareSnapshot(
   places: Place[],
   stages: Stage[],
@@ -107,7 +103,6 @@ export const telegramShareUrl = (url: string, text: string): string =>
 export type ShareMapPaths = {
   width: number;
   height: number;
-  // `d` of the whole trail and of the walked stretches (separate sub-paths); empty when there is nothing to draw.
   trail: string;
   walked: string;
   start: [number, number];

@@ -1,6 +1,3 @@
-// Needs the test stack (`npm run testdb:start`, Docker); the local database is built from supabase/migrations, the
-// source of truth.
-//
 // Usage: node scripts/db-types.mjs gen     rewrite the committed file (npm run types:gen)
 //        node scripts/db-types.mjs check   fail when the committed file is stale (npm run types:check)
 import { spawnSync } from "node:child_process";

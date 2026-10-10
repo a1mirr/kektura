@@ -3,15 +3,13 @@ import type { GeoJSONSource } from "maplibre-gl";
 import { restaurantsData, type Restaurant } from "@/lib/map-data";
 import type { MapHandleRef } from "./types";
 
-// The ref lets the map's load callback seed its source when the data arrived first. With the `restaurants` flag off
-// nothing is fetched and the layer stays empty.
+// The ref lets the map's load callback seed its source when the data arrived first.
 export function useRestaurants(mapRef: MapHandleRef, enabled: boolean) {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const restaurantsRef = useRef<Restaurant[]>([]);
 
   useEffect(() => {
     if (!enabled) {
-      // Switched off while the page is open: the layer is emptied now, not at the next full load.
       restaurantsRef.current = [];
       const { map, ready } = mapRef.current;
       if (ready && map) (map.getSource("restaurants") as GeoJSONSource | undefined)?.setData(restaurantsData([]));
@@ -30,7 +28,6 @@ export function useRestaurants(mapRef: MapHandleRef, enabled: boolean) {
         }
       })
       .catch(() => {
-        // the layer simply stays unavailable
       });
     return () => {
       cancelled = true;

@@ -40,7 +40,6 @@ const place = (key: string, stage: number, retiredOn?: string): BulkItem => ({
 });
 const extra = (id: number): BulkItem => ({ id: extraItemId(id), kind: "extra", extraId: id, name: `Extra ${id}` });
 
-// Four stamped places in two stages and an extra stamp; the page also shows a row U that is not stamped, so it has no checkbox.
 const ITEMS: BulkItem[] = [place("A", 1), place("B", 1), place("C", 1), place("D", 2), extra(7)];
 const ROWS = [place("A", 1), place("B", 1), place("U", 1), place("C", 1), place("D", 2), extra(7)];
 
@@ -177,7 +176,7 @@ describe("spec 0016: the bar above the on-screen keyboard", () => {
     expect(listeners).toEqual(["resize", "scroll"]);
     click(screen.getByRole("button", { name: "Cancel" }));
     expect(remove.mock.calls.map((c) => c[0]).sort()).toEqual(["resize", "scroll"]);
-    expect(new Set(remove.mock.calls.map((c) => c[1]))).toEqual(new Set(add.mock.calls.map((c) => c[1]))); // the very functions that were added
+    expect(new Set(remove.mock.calls.map((c) => c[1]))).toEqual(new Set(add.mock.calls.map((c) => c[1])));
   });
 
   it("AC-21: a pinch-zoomed page (scale above 1.01) gets no gap: the zoomed viewport is not a keyboard", () => {
@@ -245,7 +244,7 @@ describe("spec 0016: choosing stamps", () => {
     choose("Place B");
     click(box("Extra 7"), { shiftKey: true });
     expect(chosen()).toEqual(["Place B", "Place C", "Place D", "Extra 7"]);
-    click(box("Place C"), { shiftKey: true }); // C is chosen: the range from the anchor (the extra) down to C is cleared
+    click(box("Place C"), { shiftKey: true });
     expect(chosen()).toEqual(["Place B"]);
   });
 
@@ -298,7 +297,7 @@ describe("spec 0016: the bar", () => {
     expect(within(bar()).getByRole("button", { name: "Open calendar" })).toBeTruthy();
     const picker = bar().querySelector("input[type=date]") as HTMLInputElement;
     expect(picker.min).toBe("1938-01-01");
-    expect(picker.max).toBe("2999-01-01"); // what the page gives: tomorrow in UTC
+    expect(picker.max).toBe("2999-01-01");
   });
 
   it("AC-16: Apply is disabled for nothing chosen, and for an empty, incomplete, other-format, impossible or out-of-range date", () => {
@@ -367,7 +366,7 @@ describe("spec 0016: the bar", () => {
     act(() => void fireEvent.submit(field().closest("form")!));
     expect(setStampDates).toHaveBeenCalledOnce();
     expect(bar().getAttribute("aria-busy")).toBe("true");
-    act(() => void fireEvent.keyDown(window, { key: "Escape" })); // leaving now would hide the answer
+    act(() => void fireEvent.keyDown(window, { key: "Escape" }));
     expect(bar()).toBeTruthy();
     await act(async () => finish({ ok: true }));
     await waitFor(() => expect(noBar()).toBeNull());
@@ -440,7 +439,7 @@ describe("spec 0016: a retired stamp in the choice", () => {
     expect(screen.getByText(/cannot get a date on or after the day it retired: Old house\./)).toBeTruthy();
     expect(apply().disabled).toBe(true);
     expect(field().getAttribute("aria-describedby")).toBe("bulk-conflict");
-    type("2014-11-20"); // the day before it retired
+    type("2014-11-20");
     expect(screen.queryByText(/cannot get a date/)).toBeNull();
     expect(apply().disabled).toBe(false);
     type("2014-11-21");

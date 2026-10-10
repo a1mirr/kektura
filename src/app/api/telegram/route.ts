@@ -4,8 +4,6 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { answerTelegramCallback, editTelegramMessage, sendTelegramMessage, telegramConfig } from "@/lib/telegram";
 import { createSeenUpdates, isOwner, MAX_UPDATE_BYTES, parseCallback, parseUpdate, secretMatches } from "@/lib/telegram-webhook";
 
-// Under /api, so the proxy (and the language routing) leaves it alone.
-
 const seen = createSeenUpdates();
 const limiter = createRateLimiter({ limit: 30, windowMs: 60_000 });
 
@@ -15,7 +13,6 @@ function database() {
   return supabase;
 }
 
-// The service role client, through the functions of migrations 0062 and 0108.
 const store: FlagAdminStore = {
   async list() {
     const { data, error } = await database().rpc("admin_list_feature_flags");
@@ -64,7 +61,6 @@ export const OPTIONS = GET;
 export async function POST(request: Request): Promise<Response> {
   const config = telegramConfig();
   const secret = process.env.TELEGRAM_WEBHOOK_SECRET?.trim();
-  // Without the secret configured, or without the right header, the address does not exist.
   if (!config || !secret || !secretMatches(request.headers.get("x-telegram-bot-api-secret-token"), secret)) return empty(404);
 
   // From here on Telegram always gets a 200, whatever the command did, so it does not retry.
@@ -79,12 +75,9 @@ export async function POST(request: Request): Promise<Response> {
     const configured = createServiceClient() !== null;
     if (message) {
       const reply = configured ? await bot.handle(message.text) : { text: NOT_CONFIGURED };
-      // The answer goes out after the database has accepted the change. Its failure is only a missing reply.
       await sendTelegramMessage(reply.text, config, { keyboard: reply.keyboard });
     } else if (tap) {
       const { reply, notice } = configured ? await bot.press(tap.data) : { reply: undefined, notice: "Not configured" };
-      // The panel is edited after the database accepted the change, and every tap is answered so the button stops
-      // spinning.
       try {
         if (reply) await editTelegramMessage(tap.messageId, reply.text, config, { keyboard: reply.keyboard });
       } finally {

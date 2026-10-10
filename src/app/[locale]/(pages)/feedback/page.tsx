@@ -18,9 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function FeedbackPage({ params, searchParams }: Props) {
   const { locale } = await params;
-  // Only a code of the seed counts, and the name shown is the seed's, never the address's.
   const { stamp: rawStamp } = await searchParams;
-  // A seed that cannot be read gives the plain form: the page never fails for a link.
   const stamp = typeof rawStamp === "string" ? await findStamp(rawStamp).catch(() => null) : null;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);

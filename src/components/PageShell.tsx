@@ -1,21 +1,12 @@
 import type { ReactNode } from "react";
 
-// The header strip with the logo, the page and the footer all take `pageWidth`, so their edges cannot disagree: below
-// `--page-width` (globals.css, 64 rem) the content fills the window minus the padding, above it the box is centred.
 export const pageWidth = "mx-auto w-full max-w-(--page-width) px-4 sm:px-6";
 
 export type PageVariant = "wide" | "reading" | "hero" | "card";
 
-// `hero` fills the space above the footer with flex-1, not min-h-screen. A hero page may give `below`, content that
-// follows the block at the full content width (the landing page's gallery): the page is then as tall as its content,
-// starts at the top and the footer comes after it, below the first screen.
-//
-// A wide page made of independent blocks gives `aside` (the left column) next to its children (the right one) and
-// `header` (the title row, above both): from 1024 px they stand side by side, below it they are one column in the
-// DOM's order, header, aside, children. `stretch` makes the aside as tall as the children, so that a block inside it
-// can stick (`lg:sticky`) and stay in view while they scroll: the dashboard's map. A sticky box is a stacking context
-// of its own, so it takes a z-index (`lg:z-10`) that lifts it, and the fullscreen map (`fixed z-50`) inside it, over
-// the positioned controls of the children (the date fields).
+// `hero` fills the space above the footer with flex-1, not min-h-screen. A sticky box is a stacking context of its
+// own, so the `aside` of a `stretch` page takes a z-index (`lg:z-10`) that lifts it, and the fullscreen map (`fixed
+// z-50`) inside it, over the positioned controls of the children (the date fields).
 export default function PageShell({
   variant = "wide",
   spaced = false,

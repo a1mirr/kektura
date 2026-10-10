@@ -1,11 +1,8 @@
-// Kept apart from stop-check.mjs so that the decision is a pure function of the changed paths and a test can call it
-// (the hook itself runs on import). Paths are repository-relative with forward slashes, as `git status --porcelain`
-// prints them.
+// Kept apart from stop-check.mjs so that a test can call the decision (the hook itself runs on import).
 
 const isTest = (f) => /\.test\.[cm]?[jt]sx?$/.test(f) || f.startsWith("tests/") || f.startsWith("e2e/");
 const isCode = (f) => /\.(ts|tsx)$/.test(f) && !isTest(f) && !f.endsWith(".types.ts");
 
-/** App code: a non-test TypeScript file under src/ (generated `.types.ts` excluded). */
 export const isAppCode = (f) => f.startsWith("src/") && isCode(f);
 
 export const isUserVisible = (f) =>
@@ -15,7 +12,6 @@ export const isUserVisible = (f) =>
 
 export const CHANGELOG = "src/content/changelog.ts";
 
-// Work is usually committed before a turn ends, and a nudge that only saw the working tree never fired.
 export const changedForNudge = (uncommitted, committed) => [...new Set([...uncommitted, ...committed])];
 
 export function nudgeTargets(changed) {
@@ -49,8 +45,6 @@ export function nudgeMessage(changed) {
 
 export const nudgeKey = (scope, message) => `${scope}\n${message}`;
 
-// The same question is not repeated every turn, but a new commit or a changed working tree is a new state: the same
-// file names in another task are asked about again.
 export function nudgeToAsk(changed, committed, lastAsked, scope) {
   const message = nudgeMessage(changedForNudge(changed, committed));
   return message && nudgeKey(scope, message) !== lastAsked ? message : "";

@@ -1,10 +1,9 @@
 //
-//   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID  the bot and the chat (both optional: without them nothing is sent)
-//   DEPLOY_SHA, RUN_URL                    what failed and where to look
-//   MIGRATE_OUTCOME, PUSH_OUTCOME, ...     the outcome of each step (`failure` names the failed one)
-//
 // The request URL contains the token, so it is never printed, and neither is an error object (its message can contain
 // the URL): only what Telegram answers. Exits with 0 even when sending fails: the workflow has already failed.
+//
+// Environment: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID (both optional: without them nothing is sent), DEPLOY_SHA,
+// RUN_URL, and MIGRATE_OUTCOME, PUSH_OUTCOME, ... (the outcome of each step).
 import { pathToFileURL } from "node:url";
 import { failureMessage } from "./lib/deploy.mjs";
 

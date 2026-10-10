@@ -9,7 +9,6 @@ interface Target {
   signedIn: boolean;
   open: (page: Page) => Promise<void>;
   seed?: (email: string) => void;
-  /** Rules left out at the phone width: the colours do not change with the width, so a rule that costs a lot is run once. */
   skipAtPhone?: string[];
 }
 
@@ -29,7 +28,6 @@ const TARGETS: Target[] = [
     signedIn: true,
     // Axe takes about half of its time on this page (2,900 elements) for the contrast of the text; the list's colours are the same at every width.
     skipAtPhone: ["color-contrast"],
-    // every stage open and one place stamped, so that the rows' controls (stamp, date, remove) are on the page too
     open: async (page) => {
       await page.goto("/en/dashboard");
       await expect(page.locator(".maplibregl-canvas")).toBeVisible();
@@ -80,8 +78,6 @@ const TARGETS: Target[] = [
     },
   },
   {
-    // The account menu open (the list is not there for a scan of the page as it loads): its entries, the marked
-    // current page and the sign-out button, with the contrast and the roles axe checks
     name: "account-menu-open",
     signedIn: true,
     open: async (page) => {

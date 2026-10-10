@@ -1,6 +1,4 @@
-// They call the functions through PostgREST as the service role (what the webhook does) and as an anonymous visitor
-// and a signed-in user (what nobody may do). Each test works on flags of its own (`dbtest-...`), never on the
-// declared ones.
+// Each test works on flags of its own (`dbtest-...`), never on the declared ones.
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
@@ -9,7 +7,6 @@ import type { Database } from "@/lib/supabase/database.types";
 
 type Client = SupabaseClient<Database>;
 
-// The route is the real one, against the real database; only the message to Telegram is caught.
 const sent = vi.hoisted(() => [] as string[]);
 const edited = vi.hoisted(() => [] as { messageId: number; text: string; callbacks: string[] }[]);
 const answered = vi.hoisted(() => [] as { id: string; text: string | undefined }[]);

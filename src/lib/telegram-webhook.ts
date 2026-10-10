@@ -27,8 +27,7 @@ export function parseUpdate(body: string): TelegramUpdate | null {
   return { updateId: update.update_id as number, chatId: String(message.chat!.id), fromId: String(message.from!.id), text: message.text };
 }
 
-// Only the owner is obeyed: the chat and the sender must both be the configured chat id (in a private chat they are
-// the same number). Anyone can find the bot and write to it.
+// Anyone can find the bot and write to it.
 export const isOwner = (update: { chatId: string; fromId: string }, ownerChatId: string): boolean =>
   update.chatId === ownerChatId && update.fromId === ownerChatId;
 

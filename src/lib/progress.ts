@@ -20,7 +20,6 @@ export type Place = {
   variants: Checkpoint[];
 };
 
-// [fromKm, toKm] along the trail.
 export type KmRange = [number, number];
 
 export type StageMeta = { stage: number; start: string; end: string; km: number };
@@ -36,13 +35,12 @@ export type Stage = {
 export const placeKeyOf = (c: Pick<Checkpoint, "place_key" | "code" | "id">) =>
   c.place_key ?? c.code ?? String(c.id);
 
-// A stamp that no longer exists: kept so the people who collected it keep it. It is outside the 161 places and the
-// trail order; `afterKey` is the current place it followed, which gives it its position in the stage list.
+// `afterKey` is the current place it followed, which gives it its position in the stage list.
 export type RetiredStamp = Place & {
   retiredOn: string; // the first day it is no longer valid
   replacedBy: string | null;
   afterKey: string | null;
-  approximate: boolean; // its position is not from an official source
+  approximate: boolean;
 };
 
 export function buildPlaces(checkpoints: Checkpoint[]): Place[] {
@@ -60,7 +58,6 @@ export function buildPlaces(checkpoints: Checkpoint[]): Place[] {
       if (c.required_from == null) p.requiredFrom = null;
       else if (p.requiredFrom !== null && c.required_from < p.requiredFrom) p.requiredFrom = c.required_from;
     } else {
-      // "<stage>.<n>" per the official 27 sections; falls back to the trail order if unset.
       const label = c.stage != null && c.stage_seq != null ? `${c.stage}.${c.stage_seq}` : String(c.seq);
       places.set(key, { key, seq: c.seq, stage: c.stage ?? 0, label, name: c.name, km, requiredFrom: c.required_from ?? null, variants: [c] });
     }
@@ -154,8 +151,6 @@ export function waivedPlaceKeys(places: Place[], stampedOn: ReadonlyMap<string, 
   return waived;
 }
 
-// A stretch counts as walked only when BOTH of its neighbouring places are stamped; a waived place is not a
-// neighbour: the stretch runs across it.
 export function walkedRanges(
   places: Place[],
   stamped: { has: (key: string) => boolean },
@@ -174,7 +169,6 @@ export function walkedRanges(
   return ranges;
 }
 
-// A stage can be complete without a stamp the user was not missing.
 export const countDone = (places: Place[], stamped: { has: (key: string) => boolean }, waived: { has: (key: string) => boolean }) =>
   places.filter((p) => stamped.has(p.key) || waived.has(p.key)).length;
 
@@ -215,8 +209,6 @@ export function buildStages(places: Place[], stagesMeta: StageMeta[]): Stage[] {
   });
 }
 
-// Marking adds the stage's own places plus its starting point (so the first stretch counts as walked); unmarking
-// removes only the stage's own places.
 export function stageStampKeys(stage: Stage): { stamp: string[]; unstamp: string[] } {
   const own = stage.places.map((p) => p.key);
   return { stamp: stage.startKey ? [stage.startKey, ...own] : own, unstamp: own };

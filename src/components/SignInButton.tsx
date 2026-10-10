@@ -3,7 +3,6 @@
 import { useLocale, useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 
-// `next` is the path (without locale) to land on after sign-in: the dashboard unless a page asks otherwise.
 export default function SignInButton({ next = "/dashboard" }: { next?: string }) {
   const t = useTranslations("home");
   const locale = useLocale();

@@ -87,7 +87,6 @@ describe("spec 0004: seeds that clean up after themselves", () => {
       [
         "begin;",
         createUser,
-        // a placeholder row (code null) with a stamp on it, and a place the seed does not know
         "insert into public.checkpoints (seq, code, place_key, stage, stage_seq, name, lat, lng, km_from_start) values (9001, null, 'GONE_PLACE', 1, 99, 'Gone', 47, 17, 0), (9002, 'GONE_PLACE_1', 'GONE_PLACE_X', 1, 98, 'Gone too', 47, 17, 0);",
         `insert into public.user_stamps (user_id, checkpoint_id) select '${USER}', id from public.checkpoints where seq in (9001, 9002);`,
         inner(seed),
@@ -101,6 +100,6 @@ describe("spec 0004: seeds that clean up after themselves", () => {
     expect(lines).toContain("stamps:0");
     expect(lines).toContain("rows:0");
     expect(lines).toContain("total:220");
-    expect(lines).toContain("retired:1"); // A retired stamp is never one of the rows the cleanup removes
+    expect(lines).toContain("retired:1");
   });
 });

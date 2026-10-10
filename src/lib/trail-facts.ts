@@ -1,5 +1,3 @@
-// Computed from the MTSZ stage table (scripts/data/okt-stages.json) so it can't drift from the data the rest of the
-// app uses.
 import stagesData from "../../scripts/data/okt-stages.json";
 
 type StageRow = { km: number; places: readonly unknown[] };

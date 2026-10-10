@@ -49,6 +49,6 @@ export function useLayerToggles(mapRef: MapHandleRef) {
       showExtras: setShowExtras,
       showRestaurants: setShowRestaurants,
     },
-    latest, // the toggles as of the last render, for the map's load callback
+    latest,
   };
 }

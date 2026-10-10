@@ -11,15 +11,10 @@ import { buildShareSnapshot } from "@/lib/share-card";
 import { createClient } from "@/lib/supabase/server";
 import stagesData from "../../../../scripts/data/okt-stages.json";
 
-// Like the stamp and friends actions these never throw: a thrown error reaches the client as an opaque message. Each
-// checks the flag first, then the session.
 export type CreateShareResult = ActionResult | { ok: false; reason: "limit" };
 
-// One hourly budget per user for creating cards (the database caps how many a user keeps).
 const limiter = createRateLimiter({ limit: 20, windowMs: 60 * 60_000 });
 
-// Takes the numbers from the user's own stamps on the server, never from the client: the browser only says whether
-// the name is shown.
 export async function createShareCard(showName: boolean): Promise<CreateShareResult> {
   if (!(await flagOn("share"))) return { ok: false, reason: "disabled" };
   try {

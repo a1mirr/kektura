@@ -1,4 +1,3 @@
-// The workflow itself only runs on GitHub; the scripts it calls have their own tests.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -35,7 +34,7 @@ describe("spec 0026: the deploy workflow", () => {
     it("the job runs only for a successful push to main of this very repository (or by hand)", () => {
       const condition = workflow.slice(workflow.indexOf("    if: >-"), workflow.indexOf("    runs-on:"));
       for (const part of [
-        "github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'", // by hand: from main only
+        "github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'",
         "github.event.workflow_run.conclusion == 'success'",
         "github.event.workflow_run.event == 'push'",
         "github.event.workflow_run.head_branch == 'main'",
@@ -50,7 +49,7 @@ describe("spec 0026: the deploy workflow", () => {
       expect(triggers).not.toMatch(/pull_request/);
       expect(triggers).not.toMatch(/^ {2}push:/m);
       expect(step("Notice when the secrets are missing")).toBeTruthy();
-      expect(workflow).not.toMatch(/^\s+ref:/m); // no pinned ref: the tip of main, with its whole history
+      expect(workflow).not.toMatch(/^\s+ref:/m);
       expect(workflow).toContain("fetch-depth: 0");
       expect(workflow).toContain("persist-credentials: false");
     });
@@ -71,8 +70,8 @@ describe("spec 0026: the deploy workflow", () => {
       expect(pick.indexOf('git checkout --detach "$sha"')).toBeGreaterThan(pick.indexOf("git merge-base --is-ancestor"));
       expect(pick.indexOf('git checkout --detach "$sha"')).toBeLessThan(pick.indexOf('echo "TARGET_SHA=$sha"'));
       expect(pick).toContain('echo "TARGET_SHA=$sha" >> "$GITHUB_ENV"');
-      expect(pick).toContain('sha="$GITHUB_SHA"'); // by hand: the tip of main (CI is checked in the next step)
-      expect(workflow).not.toMatch(/^ {6}TARGET_SHA:/m); // not fixed by the run that started the workflow
+      expect(pick).toContain('sha="$GITHUB_SHA"');
+      expect(workflow).not.toMatch(/^ {6}TARGET_SHA:/m);
       const order = ["- name: Pick the commit to deploy", "- name: Check that CI passed on this commit", "- name: Reach production and decide what to deploy"].map((name) => workflow.indexOf(name));
       expect([...order].sort((a, b) => a - b)).toEqual(order);
     });
@@ -89,8 +88,6 @@ describe("spec 0026: the deploy workflow", () => {
       const body = /<<'EOF'\n([\s\S]*?)\n {10}EOF/.exec(text)![1];
       return body.replace(/^ {10}/gm, "");
     };
-    // Runs `gh_retry gh ...` with a stub `gh` that fails `failures` times (exit 22, after printing "partial" on stdout
-    // and a 504 on stderr) and then prints "ok", and a stub `sleep` that only records its argument.
     const run = (failures: number) => {
       const dir = fs.mkdtempSync(path.join(os.tmpdir(), "retry-"));
       const slash = (p: string) => p.replace(/\\/g, "/");
@@ -148,7 +145,7 @@ describe("spec 0026: the deploy workflow", () => {
         expect(result.status).toBe(22);
         expect(result.stdout).toBe("");
         expect(result.calls).toBe(4);
-        expect(result.naps).toEqual(["5", "10", "15"]); // no pause after the last attempt
+        expect(result.naps).toEqual(["5", "10", "15"]);
         expect(result.stderr).toContain("HTTP 504");
       });
     });
@@ -225,7 +222,6 @@ describe("spec 0026: the deploy workflow", () => {
       expect(push).toContain('2>&1 | tee "$RUNNER_TEMP/push.log"');
       expect(push).toMatch(/if ! grep -Eq "remote: Deployed \$\{TARGET_SHA:0:7\}\[0-9a-f\]\*\\\." "\$RUNNER_TEMP\/push\.log"; then/);
       expect(push).toMatch(/exit 1\n\s+fi\n\s+echo "### Deployed"/); // the summary says "Deployed" only after the check
-      // ... and the hook prints exactly that line when it is done
       expect(read("deploy/post-receive")).toContain('echo "Deployed $(git --git-dir="$GIT_DIR" rev-parse --short main)."');
     });
 
@@ -301,7 +297,7 @@ describe("spec 0026: the deploy workflow", () => {
     });
 
     it("never echoes a secret: no tracing, and the variables only go to files", () => {
-      const code = lines.filter((line) => !line.trim().startsWith("#")).join("\n"); // the header comment says "no set -x"
+      const code = lines.filter((line) => !line.trim().startsWith("#")).join("\n");
       expect(code).not.toMatch(/set -x|set -o xtrace|ACTIONS_STEP_DEBUG|ACTIONS_RUNNER_DEBUG/);
       for (const line of lines.filter((l) => /\$\{?(DEPLOY_SSH_KEY|DEPLOY_KNOWN_HOSTS|SUPABASE_DB_URL|TELEGRAM_BOT_TOKEN)\b/.test(l))) {
         expect(line, line).toMatch(/> ~\/\.ssh\/(deploy_key|known_hosts)$/);
@@ -326,10 +322,10 @@ describe("spec 0026: the deploy workflow", () => {
       expect(missing).toContain("args=(--dry-run)");
       expect(missing).toContain('if [ -n "$BASELINE" ]; then args+=(--baseline "$BASELINE"); fi'); // a first run with a baseline would be refused without it
       expect(missing).toContain('node scripts/migrate-production.mjs "${args[@]}"');
-      expect(missing).toContain("env -u GITHUB_STEP_SUMMARY"); // the step that applies writes the summary section
+      expect(missing).toContain("env -u GITHUB_STEP_SUMMARY");
       expect(missing).toContain("SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}");
       expect(missing).toContain("env.CONFIGURED == 'true' && (steps.plan.outputs.deploy == 'true' || env.BASELINE != '')");
-      expect(missing).not.toContain("DRY_RUN"); // a dry run of the deploy asks too, to say whether a dump would be taken
+      expect(missing).not.toContain("DRY_RUN");
       expect(missing).toMatch(/timeout-minutes: \d+/);
     });
 
@@ -349,7 +345,6 @@ describe("spec 0026: the deploy workflow", () => {
       expect(backup).toContain("artifact-name: pre-migration-${{ env.TARGET_SHA7 }}");
       expect(backup).toContain("retention-days: 30");
       expect(backup).toMatch(/timeout-minutes: \d+/); // a hang fails the step, which still reaches the failure message
-      // the short sha is set where the commit is picked, from the same commit
       expect(step("Pick the commit to deploy")).toContain('echo "TARGET_SHA7=${sha:0:7}" >> "$GITHUB_ENV"');
     });
 
@@ -366,7 +361,7 @@ describe("spec 0026: the deploy workflow", () => {
       expect(say).toContain("would be taken");
       expect(say).not.toContain("uses:");
       expect(say).not.toContain("secrets.");
-      expect(workflow.match(/uses: \.\/\.github\/actions\/dump-user-data/g)).toHaveLength(1); // the only dump, and it needs DRY_RUN != 'true'
+      expect(workflow.match(/uses: \.\/\.github\/actions\/dump-user-data/g)).toHaveLength(1);
     });
 
     it("AC-14: a dump that fails stops the chain: nothing makes the backup step optional, and no later step runs after a failure except the message", () => {
@@ -377,7 +372,6 @@ describe("spec 0026: the deploy workflow", () => {
         .filter((line) => /^ {8}if: /.test(line));
       expect(migrateIf).toHaveLength(1);
       expect(migrateIf[0]).not.toMatch(/\b(always|failure|cancelled)\(\)/);
-      // only the failure message runs after a failed step
       const conditions = lines.filter((line) => /^ {8}if: /.test(line) && /\b(always|failure|cancelled)\(\)/.test(line));
       expect(conditions).toEqual(["        if: failure()"]);
       expect(step("Tell the developer, and say how to roll back")).toContain("BACKUP_OUTCOME: ${{ steps.backup.outcome }}");
@@ -386,7 +380,7 @@ describe("spec 0026: the deploy workflow", () => {
 
     it("AC-14: no dump runs when no migration is missing: the backup step reads the output of the dry run and nothing else decides", () => {
       const ifs = lines.filter((line) => line.includes("steps.missing.outputs.missing"));
-      expect(ifs).toHaveLength(2); // the dump and the dry-run notice
+      expect(ifs).toHaveLength(2);
       expect(step("Find out whether a migration is missing")).toContain("--dry-run");
     });
   });
@@ -412,8 +406,6 @@ describe("spec 0026: the deploy workflow", () => {
   });
 });
 
-// The gate script is the forced command of the deploy key. Run it for real wherever a POSIX shell and git exist
-// (Linux and the CI runners; Git Bash on Windows).
 const hasShell = spawnSync("sh", ["-c", "command -v git-upload-pack >/dev/null && command -v git-receive-pack >/dev/null"]).status === 0;
 
 describe("spec 0026 AC-7: deploy/ssh-gate.sh", () => {

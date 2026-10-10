@@ -5,8 +5,6 @@ import { useTranslations } from "next-intl";
 import type { ActionResult } from "@/lib/action-result";
 import { useStampAction } from "@/lib/use-stamp-action";
 
-// On click it shows the new state at once (optimistic): the other label and style until the server answers; a failed
-// action puts the old state back. The stats and the map are never touched optimistically.
 export default function ActionButton({
   action,
   done,
@@ -20,7 +18,7 @@ export default function ActionButton({
   doneLabel: string;
   todoLabel: string;
   accent?: "blue" | "amber";
-  ariaLabel?: string; // the accessible name, when the visible label alone does not say what it acts on
+  ariaLabel?: string;
 }) {
   const t = useTranslations("dashboard");
   const { pending, failed, run } = useStampAction();
