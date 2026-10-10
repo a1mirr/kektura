@@ -303,7 +303,7 @@ describe("spec 0016: choosing rows", () => {
     expect((box("Extra 7") as HTMLInputElement).checked).toBe(false); // the extras are not a stage's
   });
 
-  it("AC-20: outside the mode a stage has no button: the way in is the floating one", () => {
+  it("AC-15: outside the mode a stage has no button: the way in is the floating one (AC-14)", () => {
     render(<Page />);
     expect(screen.queryByRole("button", { name: /stage/i })).toBeNull();
     expect(screen.queryByRole("button", { name: /Set date:/ })).toBeNull();

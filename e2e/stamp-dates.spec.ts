@@ -285,7 +285,7 @@ test.describe("spec 0016: set many dates at once", () => {
     );
   });
 
-  test("AC-15, AC-20, AC-16: a stage's 'Select stage' takes its places stamped or not, and Enter in the date field applies", async ({ page }) => {
+  test("AC-15, AC-16: a stage's 'Select stage' takes its places stamped or not, and Enter in the date field applies", async ({ page }) => {
     const email = await signInAsNewUser(page);
     await stampFirstPlaces(page);
     await expect(page.locator("#stage-1").getByRole("button", { name: /Select stage|Set date/ })).toHaveCount(0); // not outside the mode
