@@ -69,9 +69,9 @@ export function unlinkNodeModules(worktree) {
   if (!stat.isSymbolicLink()) return false;
   const target = fs.readlinkSync(nm);
   try {
-    fs.unlinkSync(nm);
+    fs.unlinkSync(nm); // a symlink on any system
   } catch {
-    fs.rmdirSync(nm);
+    fs.rmdirSync(nm); // a Windows junction; either way only the link goes, not what it points to
   }
   return { target };
 }
@@ -174,7 +174,7 @@ function main() {
       continue;
     }
     run(`deleting ${name}`, git(cwd, ["update-ref", "-d", `refs/heads/${name}`, sha]));
-    git(cwd, ["config", "--remove-section", `branch.${name}`]);
+    git(cwd, ["config", "--remove-section", `branch.${name}`]); // its tracking settings; fine when there are none
   }
   if (remote) {
     // With a lease on the sha that was checked: a commit pushed since the fetch is not thrown away.

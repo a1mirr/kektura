@@ -122,8 +122,7 @@ export async function openStampPopup(page: Page, placeKey: string, action: strin
   await expect(page.getByRole("button", { name: action })).toBeVisible();
 }
 
-// Stamps places for a user straight in the database, each on its own day (`{ OKTPH_02: "2026-01-25" }`): every variant of the
-// place gets a row, as the stamp button would. Faster than clicking, and the only way to put stamps in the past or in many months.
+// The only way to put stamps in the past or in many months.
 export function stampPlacesOn(email: string, dates: Record<string, string>) {
   for (const [key, day] of Object.entries(dates)) {
     psql(

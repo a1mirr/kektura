@@ -65,7 +65,6 @@ export function buildMenu(title: string, subtitle: string | null, actions: MenuA
   return box;
 }
 
-// Only https: URLs become links, so a javascript: URL in the data does nothing.
 export function buildRestaurantPopup(restaurant: {
   name: string;
   city: string;

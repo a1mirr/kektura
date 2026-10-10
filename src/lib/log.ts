@@ -21,7 +21,6 @@ function describeError(error: unknown): { code?: string; message: string } {
 
 const safeReason = (reason: string) => (/^[\w-]{1,32}$/.test(reason) ? reason : "unknown");
 
-// Does not wait for Telegram: an action never waits for it, or fails because of it.
 function sendAlert(text: string): void {
   const config = telegramConfig();
   if (!config) return;
@@ -92,7 +91,7 @@ export function logFriendsError(action: string, error: unknown, stage: Failure["
   alertFailure({ tag: "friends", action, stage, code });
 }
 
-// `stage` is only for the Telegram message, as for the friends actions; a failed `read` is logged and never sent.
+// `stage` is only for the Telegram message; a failed `read` is logged and never sent.
 export function logShareError(action: string, error: unknown, stage: Failure["stage"] | "read" = "write"): void {
   const { code, message } = describeError(error);
   console.error(`[share] action=${action} code=${code ?? "-"} message=${quote(message)}`);

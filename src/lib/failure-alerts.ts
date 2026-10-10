@@ -44,7 +44,6 @@ export function createFailureAlerter({
   let quietUntil = 0;
 
   return {
-    // Never throws: a failing `send` must not change what a server action returns.
     report(failure: Failure): void {
       try {
         if (!ALERT_STAGES.includes(failure.stage)) return;

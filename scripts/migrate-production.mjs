@@ -19,7 +19,7 @@ export function createPsql(url, spawn = spawnSync) {
   };
 }
 
-const quote = (name) => `'${name}'`;
+const quote = (name) => `'${name}'`; // file names are validated by migrationFiles(): letters, digits, `_` and `.sql`
 
 const BOOTSTRAP = `
 create table if not exists public.applied_migrations (

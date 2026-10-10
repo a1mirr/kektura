@@ -129,8 +129,8 @@ describe("spec 0016: set_stamp_dates (one date for many rows, in one transaction
     stamp(cleo, ["OKTPH_03"], [1], "2025-01-01");
     const before = dates(cleo);
     for (const [places, extras] of [
-      [["OKTPH_03", "NO_SUCH_PLACE"], []], // a place that does not exist
-      [["OKTPH_07"], [1, 999999]], // an extra stamp that does not exist, next to a place that would be stamped
+      [["OKTPH_03", "NO_SUCH_PLACE"], []],
+      [["OKTPH_07"], [1, 999999]],
     ] as [string[], number[]][]) {
       const { data, error } = await call(cleo, places, extras, "2026-03-04");
       expect([data, error], JSON.stringify([places, extras])).toEqual([false, null]);

@@ -1,4 +1,5 @@
 export const TEST_EMAIL = "tester@kektura.test";
+// Every dummy account shares this password; the accounts only exist in the local test database.
 export const TEST_PASSWORD = "kektura-test-password";
 
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);

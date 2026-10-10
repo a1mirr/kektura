@@ -13,9 +13,6 @@ export function localSupabase() {
   return { url: status.API_URL, anonKey: (status.ANON_KEY ?? status.PUBLISHABLE_KEY)!, serviceKey: (status.SERVICE_ROLE_KEY ?? status.SECRET_KEY)! };
 }
 
-// REST call as the anonymous role (the public key, no user session). Goes through Playwright's request
-// context: Node's own fetch leaves keep-alive sockets open, and on Windows that makes the worker die
-// with a libuv assertion at teardown.
 export async function anonRest(
   request: APIRequestContext,
   path: string,

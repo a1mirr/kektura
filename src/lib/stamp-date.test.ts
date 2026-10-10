@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { isCalendarDate, isValidStampDate, localToday, maxStampDate, MIN_STAMP_DATE, newStampDate } from "./stamp-date";
 
-// 2026-10-02 12:00 UTC; "tomorrow" is 2026-10-03.
 const NOW = new Date("2026-10-02T12:00:00Z");
 
 describe("spec 0016: valid stamp dates", () => {

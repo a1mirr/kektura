@@ -6,7 +6,7 @@ export const TODO_LINE = "#44403c"; // darker than the dots' grey so the dashes 
 export const EXTRA = "#d97706";
 export const RESTAURANT = "#7c3aed";
 export const SEGMENT = "#f59e0b";
-export const MOVED = "#b45309"; // amber-700
+export const MOVED = "#b45309";
 
 // From this zoom on the ~3 m route replaces the ~30 m overview.
 export const DETAIL_ZOOM = 9;
