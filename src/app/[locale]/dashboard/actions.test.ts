@@ -599,7 +599,7 @@ describe("spec 0016: setStampDates (many dates at once)", () => {
     expect(refresh).not.toHaveBeenCalled();
   });
 
-  it("AC-17: when the function changed nothing (a stamp is gone, or a retired stamp's day) it is `failed`, nothing is refreshed, and it is no error of ours", async () => {
+  it("AC-17: when the function changed nothing (a place or extra stamp that does not exist, or a retired stamp's day) it is `failed`, nothing is refreshed, and it is no error of ours", async () => {
     useClient(fakeSupabase({ rpcResult: { data: false, error: null } }));
     expect(await setStampDates(["OKTPH_03"], [7], DAY)).toEqual(FAILED);
     expect(refresh).not.toHaveBeenCalled();

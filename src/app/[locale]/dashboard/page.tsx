@@ -98,7 +98,7 @@ export default async function Dashboard({
   }));
 
 
-  // The stamped rows that "Change dates" can choose, in the order the page lists them (spec 0016 AC-14, AC-15).
+  // The rows that "Set dates" can choose, stamped or not, in the order the page lists them (spec 0016 AC-14, AC-15).
   const bulkItems = buildBulkItems({
     stages: stages.map((st) => ({
       stage: st.stage,
