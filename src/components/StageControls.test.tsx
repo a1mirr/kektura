@@ -7,27 +7,16 @@ import StageControls from "./StageControls";
 
 afterEach(cleanup);
 
-const setup = (withRetired?: boolean) =>
+const setup = () =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <StageControls withRetired={withRetired} />
+      <StageControls />
     </NextIntlClientProvider>,
   );
 
 describe("spec 0001: the stage controls", () => {
-  it("AC-24: the 'Show retired stamps' checkbox exists only while there is a retired stamp", () => {
-    setup(false);
-    expect(screen.queryByLabelText("Show retired stamps")).toBeNull();
-    cleanup();
-    setup();
-    expect(screen.queryByLabelText("Show retired stamps")).toBeNull();
-    cleanup();
-    setup(true);
-    expect(screen.getByLabelText("Show retired stamps")).toBeTruthy();
-  });
-
   it("AC-9: expand all and collapse all are always there", () => {
-    setup(false);
+    setup();
     expect(screen.getByRole("button", { name: "Expand all" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Collapse all" })).toBeTruthy();
   });

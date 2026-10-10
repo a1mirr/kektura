@@ -20,7 +20,7 @@ chat where the feedback arrives (spec 0017), at most once per kind of failure an
 - **AC-2**: Log lines never contain tokens, cookies, emails or request bodies beyond the action name
   and ids.
 - **AC-3**: Rejected input (0002 AC-1) is logged once with `console.warn` (`[stamp-action] invalid
-  input`) without echoing the input. A missing session (`unauthorized`) is expected and not logged. A request with valid input that the database refused (`setStampDates`: a stamp that is gone, a retired stamp's day, spec 0016 AC-17) is logged once with `console.warn` (`[stamp-action] request refused action=setStampDates`), also without input or ids.
+  input`) without echoing the input. A missing session (`unauthorized`) is expected and not logged. A request with valid input that the database refused (`setStampDates`: a place or extra stamp that does not exist, a retired stamp's day, spec 0016 AC-17) is logged once with `console.warn` (`[stamp-action] request refused action=setStampDates`), also without input or ids.
 - **AC-4**: What the client receives doesn't change.
 - **AC-5**: The other server actions that turn errors into a result log through the same file, one line each, under their
   own tag and by the same rules as AC-2: `[feedback]` (spec 0017), `[account-delete]` (spec 0014), `[friends]` (spec

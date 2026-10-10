@@ -3,14 +3,17 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { clickRow, selectedItems, type BulkItem } from "@/lib/bulk-dates";
 
+// The state of "Set dates" (spec 0016 AC-14 to AC-21) shared by the toolbar button, the rows' checkboxes, the stage headers and
+// the bar: whether the mode is on, which rows are chosen, and the answer to the last save. The page hands over the rows that can be
+// chosen, stamped or not, in the order it shows them (`items`); a chosen row that is no longer among them is no longer chosen.
 export type BulkApi = {
   items: readonly BulkItem[];
   max: string; // the latest date the server accepts (tomorrow, UTC)
   active: boolean;
-  chosen: BulkItem[];
+  chosen: BulkItem[]; // the chosen rows, in the page's order
   isSelected: (id: string) => boolean;
-  has: (id: string) => boolean;
-  enter: (ids?: string[]) => void;
+  has: (id: string) => boolean; // the row can be chosen
+  enter: () => void;
   exit: () => void;
   toggle: (id: string, shift: boolean) => void;
   selectMany: (ids: string[]) => void;
@@ -18,12 +21,13 @@ export type BulkApi = {
   clear: () => void;
   busy: boolean;
   setBusy: (busy: boolean) => void;
-  saved: { count: number } | null;
-  finish: (count: number) => void;
+  saved: { count: number } | null; // the last save that went through
+  finish: (count: number) => void; // a save went through: leave the mode and say how many dates were set
 };
 
 const Context = createContext<BulkApi | null>(null);
 
+// Null outside the dashboard's provider: the controls then are not offered.
 export const useBulk = () => useContext(Context);
 
 export default function BulkDatesProvider({ items, max, children }: { items: readonly BulkItem[]; max: string; children: ReactNode }) {
@@ -43,19 +47,18 @@ export default function BulkDatesProvider({ items, max, children }: { items: rea
   }, []);
 
   const exit = useCallback(() => {
-    if (busy) return;
+    if (busy) return; // a save is on its way: leaving now would hide its answer
     setActive(false);
     reset();
   }, [busy, reset]);
 
-  const enter = useCallback((preselect: string[] = []) => {
+  const enter = useCallback(() => {
     setActive(true);
     setSaved(null);
-    setSelected(new Set(preselect));
-    setAnchor(null);
-  }, []);
+    reset();
+  }, [reset]);
 
-  // Escape leaves the mode, unless something else took it first: a row's note closes on Escape and says so with
+  // Escape leaves the mode (spec 0016 AC-14), unless something else took it first: a row's note closes on Escape and says so with
   // preventDefault, and closing it must not cost the choice.
   useEffect(() => {
     if (!active) return;
@@ -93,6 +96,7 @@ export default function BulkDatesProvider({ items, max, children }: { items: rea
     },
   };
 
+  // The wrapper of the list's blocks. On a phone the bar is fixed to the bottom of the screen: the last rows need room above it.
   return (
     <Context.Provider value={api}>
       <div className={`space-y-8${active ? " max-lg:pb-44" : ""}`}>{children}</div>

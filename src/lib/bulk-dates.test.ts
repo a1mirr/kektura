@@ -5,6 +5,7 @@ import {
   clickRow,
   extraItemId,
   MAX_BULK_STAMPS,
+  notStampedCount,
   placeItemId,
   rangeIds,
   requestOf,
@@ -13,19 +14,20 @@ import {
   type BulkItem,
 } from "./bulk-dates";
 
-const place = (key: string, stage = 1, retiredOn?: string): BulkItem => ({
+const place = (key: string, stage = 1, retiredOn?: string, stamped = true): BulkItem => ({
   id: placeItemId(key),
   kind: "place",
   placeKey: key,
   stage,
   name: key,
+  stamped,
   ...(retiredOn ? { retiredOn } : {}),
 });
-const extra = (id: number): BulkItem => ({ id: extraItemId(id), kind: "extra", extraId: id, name: `extra ${id}` });
+const extra = (id: number, stamped = true): BulkItem => ({ id: extraItemId(id), kind: "extra", extraId: id, name: `extra ${id}`, stamped });
 
 const ITEMS = [place("A"), place("B"), place("C"), place("D"), extra(1), extra(2)];
 
-describe("spec 0016: change dates (logic)", () => {
+describe("spec 0016: set dates (logic)", () => {
   describe("buildBulkItems", () => {
     const stages = [
       {
@@ -44,21 +46,34 @@ describe("spec 0016: change dates (logic)", () => {
     ];
     const all = () => true;
 
-    it("AC-15: lists the stamped rows in the page's order: places, a retired stamp after the place it followed, the loose ones last, then the extras", () => {
+    it("AC-15: lists the rows in the page's order: places, a retired stamp after the place it followed, the loose ones last, then the extras", () => {
       const items = buildBulkItems({ stages, isStamped: all, extras: [{ id: 7, name: "Castle" }, { id: 9, name: "Museum" }], isExtraStamped: all });
       expect(items.map((i) => i.id)).toEqual(["p:P1", "p:P2", "p:R_AFTER_P2", "p:P3", "p:R_LOOSE", "p:P4", "e:7", "e:9"]);
       expect(items[2]).toMatchObject({ kind: "place", stage: 1, retiredOn: "2014-01-01" });
       expect(items[0]).not.toHaveProperty("retiredOn");
     });
 
-    it("AC-14: leaves out what is not stamped: it cannot be chosen", () => {
+    it("AC-14: lists the places and extra stamps that are not stamped yet, marked as such: they can be chosen for a date", () => {
       const items = buildBulkItems({
         stages,
         isStamped: (key) => key === "P2" || key === "P4",
         extras: [{ id: 7, name: "Castle" }, { id: 9, name: "Museum" }],
         isExtraStamped: (id) => id === 9,
       });
-      expect(items.map((i) => i.id)).toEqual(["p:P2", "p:P4", "e:9"]);
+      expect(items.map((i) => [i.id, i.stamped])).toEqual([
+        ["p:P1", false],
+        ["p:P2", true],
+        ["p:P3", false],
+        ["p:P4", true],
+        ["e:7", false],
+        ["e:9", true],
+      ]);
+    });
+
+    it("AC-14: leaves out a retired stamp that is not stamped (it is collected on its own, with a strict date) and lists one that is", () => {
+      const items = buildBulkItems({ stages, isStamped: (key) => key === "R_LOOSE", extras: [], isExtraStamped: () => false });
+      expect(items.map((i) => i.id)).toEqual(["p:P1", "p:P2", "p:P3", "p:R_LOOSE", "p:P4"]);
+      expect(items.find((i) => i.id === "p:R_LOOSE")).toMatchObject({ stamped: true, retiredOn: "2015-01-01" });
     });
   });
 
@@ -107,6 +122,12 @@ describe("spec 0016: change dates (logic)", () => {
 
     it("AC-16: requestOf splits the chosen stamps into place keys and extra ids", () => {
       expect(requestOf([place("A"), extra(2), place("C"), extra(1)])).toEqual({ placeKeys: ["A", "C"], extraIds: [2, 1] });
+    });
+
+    it("AC-16: notStampedCount counts the chosen rows Apply will stamp for the first time", () => {
+      expect(notStampedCount([])).toBe(0);
+      expect(notStampedCount([place("A"), extra(1)])).toBe(0);
+      expect(notStampedCount([place("A"), place("B", 1, undefined, false), extra(1, false), extra(2)])).toBe(2);
     });
 
     it("AC-18: retired stamps on or after their retirement day stand in the way of a date, others do not", () => {

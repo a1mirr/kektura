@@ -80,7 +80,7 @@ walked before it retired collected it, and it belongs in their record.
   past its position before it retired. That is read from the stamp dates of the nearest stamped places on either side of the position
   (the place it followed counts as before it, nothing is read from places that were not stamped): the **earlier** of the two (the one
   there is, with a single neighbour) is before `retired_on`. With no stamped neighbour and no stamp of its own it is not listed.
-- **AC-24**: A checkbox on the stage controls, "Show retired stamps", is off by default, is remembered in localStorage like the open state
+- **AC-24**: A checkbox with the stage controls ("Expand all", "Collapse all"; on the dashboard just above them, because they stick to the top of the page, spec 0016 AC-14), "Show retired stamps", is off by default, is remembered in localStorage like the open state
   of the stages (also when storage refuses a write: the page then follows the choice without remembering it) and lists every retired
   stamp, for a user who walked the old route without stamping its neighbours first. It exists only while there is a retired stamp.
 - **AC-25**: A retired stamp has no "today": collecting it opens a date field and the stamp is created with the day the user enters, which
@@ -176,7 +176,7 @@ stage is AC-12 to AC-15); moving extra stamps into the stage's place list; chang
 | AC-3, AC-4, AC-7 on the real dashboard | `e2e/stamping.spec.ts` |
 | AC-8, AC-9 | `src/components/StageSection.test.tsx` |
 | AC-22, AC-23 | `src/lib/progress.test.ts` (a retired row is no place and no neighbour; the rows read; listed with a stamp, by the earlier neighbour's date, on and after the retirement day, one neighbour, none) |
-| AC-24 | `src/components/RetiredRow.test.tsx` (hidden by default, the checkbox shows it, remembered, storage refusing), `src/components/StageControls.test.tsx` (the checkbox only while there is a retired stamp) |
+| AC-24 | `src/components/RetiredRow.test.tsx` (hidden by default, the checkbox shows it, remembered, storage refusing), `e2e/retired-stamps.spec.ts` (the checkbox is on the dashboard while there is a retired stamp; that it is absent without one is the condition in `dashboard/page.tsx`, which no test can show: the test database always holds a retired stamp) |
 | AC-25 | `src/components/RetiredStampControl.test.tsx` (no default day, disabled until a real day before the retirement, the date field keeps to it, the remove button), `e2e/retired-stamps.spec.ts` (the count, km, stage totals and "Stamp stage" ignore it; the collected line and the stage mark), `src/lib/month-stats.test.ts` (a stamp on a retired row is no month's stamp and does not stretch the months) |
 | AC-26, AC-27 | `e2e/retired-stamps.spec.ts` (the note, badge, link, approximate position, the replacing stamp's line; 375 px in English, Hungarian, German and Russian) |
 | AC-16, AC-17, AC-18, AC-20 | `src/lib/progress.test.ts` (the earliest date of the variants; the later neighbour decides, on and after the date, one neighbour, none; a stamped place never waived; the stretch across a waived place and the opposite case; a waived place is done for its stage but no stamp), `src/lib/friends.test.ts` and `src/lib/compare.test.ts` (the same on a friend's page) |
