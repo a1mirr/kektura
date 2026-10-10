@@ -1,5 +1,3 @@
-// The MTSZ's published dates for new stamps (scripts/data/okt-stamp-dates.json, spec 0004), as the SQL a seed
-// carries: one statement clears every date the file no longer has, one sets the file's.
 import fs from "node:fs";
 
 const q = (s) => `'${String(s).replace(/'/g, "''")}'`;

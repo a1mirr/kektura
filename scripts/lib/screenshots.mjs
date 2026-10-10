@@ -1,12 +1,6 @@
-// The pure parts of `npm run screenshots` (spec 0038), kept apart from scripts/screenshots.mjs so a unit test can call them
-// without a browser or a database: the demo account's data, and the checks that decide whether a page is fit to be
-// photographed.
-
-// The demo account of the pictures: a made-up address of the test server (`*.kektura.test`), no real name, email or friend.
 export const DEMO_EMAIL = "demo@kektura.test";
 
-// The demo dataset (fixed, so the pictures can be made again and look the same): the first three stages walked on
-// two weekends and the start of the fourth, and two extra stamps. Applied to the demo account only, in the local test
+// Fixed, so the pictures can be made again and look the same. Applied to the demo account only, in the local test
 // database, by deleting its stamps first.
 export const DEMO_WALK = {
   stages: [
@@ -21,11 +15,9 @@ export const DEMO_WALK = {
   ],
 };
 
-// The size of every picture: 390 x 760 CSS pixels (a phone) at a device scale of 2. src/lib/screenshots.ts gives the same size
-// to the page; tests/screenshots.test.ts compares the two and the files.
+// src/lib/screenshots.ts gives the same size to the page; tests/screenshots.test.ts compares the two and the files.
 export const SIZE = { width: 780, height: 1520, scale: 2 };
 
-// The width and height of a PNG, read from its IHDR chunk.
 export function pngSize(png) {
   if (png.length < 24 || png.readUInt32BE(0) !== 0x89504e47) throw new Error("not a PNG");
   return { width: png.readUInt32BE(16), height: png.readUInt32BE(20) };
@@ -33,8 +25,7 @@ export function pngSize(png) {
 
 const quote = (text) => `'${String(text).replaceAll("'", "''")}'`;
 
-// The SQL that gives the demo account exactly the stamps of DEMO_WALK, whatever it had before. Every variant of a place gets a
-// row, as the stamp button would (the same as `stampPlacesOn` of the E2E helpers).
+// Every variant of a place gets a row, as the stamp button would (the same as `stampPlacesOn` of the E2E helpers).
 /** @param {string} [email] @param {typeof DEMO_WALK} [walk] */
 export function demoSql(email = DEMO_EMAIL, walk = DEMO_WALK) {
   const user = `(select id from auth.users where email = ${quote(email)})`;
@@ -55,9 +46,8 @@ export function demoSql(email = DEMO_EMAIL, walk = DEMO_WALK) {
 
 const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+/;
 
-// What is wrong with a page that is about to be photographed (spec 0038 AC-11), as a list of sentences: empty when the
-// page is fit. `text` is the page's visible text, `alerts` the number of `role="alert"` elements; `banner` is the test
-// server's banner text and `errors` the app's own error messages, in English (read from messages/en.json by the script).
+// `banner` is the test server's banner text and `errors` the app's own error messages, in English (read from
+// messages/en.json by the script).
 /**
  * @param {{ text: string, alerts?: number, banner?: string, errors?: string[] }} page
  * @returns {string[]}

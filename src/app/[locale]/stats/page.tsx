@@ -18,8 +18,6 @@ import PageShell from "@/components/PageShell";
 import SharePanel, { type ShareItem } from "@/components/SharePanel";
 import stagesData from "../../../../scripts/data/okt-stages.json";
 
-// See spec 0037.
-
 type Props = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -43,7 +41,7 @@ export default async function StatsPage({ params }: Props) {
   } = await supabase.auth.getUser();
   if (!user) return redirect({ href: "/", locale });
 
-  // The same reads as the dashboard (spec 0002 AC-15, AC-16): reference data from the shared cache, the user's own rows under RLS.
+  // The same reads as the dashboard: reference data from the shared cache, the user's own rows under RLS.
   const [showShare, { checkpoints, extras, stamps, extraStamps }] = await Promise.all([flagOn("share"), loadDashboardData(supabase)]);
 
   // The figures come from the functions the dashboard uses, so the two pages say the same.
@@ -86,7 +84,7 @@ export default async function StatsPage({ params }: Props) {
     };
   });
 
-  // The user's share cards (spec 0039 AC-6), under RLS: only their own rows come back.
+  // The user's share cards, under RLS: only their own rows come back.
   let shareItems: ShareItem[] = [];
   if (showShare) {
     const shareT = await getTranslations("share");

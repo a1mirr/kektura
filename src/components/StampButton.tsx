@@ -6,8 +6,6 @@ import { newStampDate } from "@/lib/stamp-date";
 import ActionButton from "./ActionButton";
 import StampDateInput from "./StampDateInput";
 
-// Stamp / unstamp one place, and edit the date of a stamp (specs 0002, 0016). A new stamp gets the
-// user's own day.
 export default function StampButton({
   placeKey,
   stamped,
@@ -16,8 +14,8 @@ export default function StampButton({
 }: {
   placeKey: string;
   stamped: boolean;
-  date?: string; // the stamp's date, when stamped
-  maxDate: string; // the latest date the server accepts
+  date?: string;
+  maxDate: string;
 }) {
   const t = useTranslations("dashboard");
 

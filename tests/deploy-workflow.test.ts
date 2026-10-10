@@ -1,5 +1,4 @@
-// Spec 0026: the properties of the deploy workflow that keep production safe, so a later edit can't remove them
-// unnoticed. The workflow itself only runs on GitHub; the scripts it calls have their own tests.
+// The workflow itself only runs on GitHub; the scripts it calls have their own tests.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -11,7 +10,6 @@ const hasBash = spawnSync("bash", ["-c", "true"]).status === 0;
 const workflow = read(".github/workflows/deploy.yml");
 const lines = workflow.split("\n");
 
-// The text of one step of the job, from its `- name:` line to the next step.
 function step(name: string) {
   const start = lines.findIndex((line) => line.includes(`- name: ${name}`));
   expect(start, `a step named "${name}"`).toBeGreaterThan(-1);
@@ -68,7 +66,7 @@ describe("spec 0026: the deploy workflow", () => {
       expect(pick).toContain("id: pick");
       expect(pick).toContain('gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --branch main --event push --status success --limit 1');
       expect(pick).toContain("--json headSha");
-      expect(pick).toContain('git merge-base --is-ancestor "$sha" HEAD'); // part of main's history
+      expect(pick).toContain('git merge-base --is-ancestor "$sha" HEAD');
       // migrations, scripts and the pushed code all come from that one commit, not from the tip of main
       expect(pick.indexOf('git checkout --detach "$sha"')).toBeGreaterThan(pick.indexOf("git merge-base --is-ancestor"));
       expect(pick.indexOf('git checkout --detach "$sha"')).toBeLessThan(pick.indexOf('echo "TARGET_SHA=$sha"'));
@@ -86,7 +84,6 @@ describe("spec 0026: the deploy workflow", () => {
   });
 
   describe("task 0038: the reads of GitHub's API retry before they fail the deploy (no AC states this; AC-9 still holds: a real failure fails the run)", () => {
-    // The helper is written to a file by its own step; this is that file, as the shell will see it.
     const helper = () => {
       const text = step("Define the retry helper for GitHub API calls");
       const body = /<<'EOF'\n([\s\S]*?)\n {10}EOF/.exec(text)![1];
@@ -121,7 +118,7 @@ describe("spec 0026: the deploy workflow", () => {
       expect(step("Define the retry helper for GitHub API calls")).toContain("if: env.CONFIGURED == 'true'");
       const code = lines.filter((line) => !line.trim().startsWith("#"));
       const calls = code.filter((line) => /(^|[\s($`])gh\s/.test(line));
-      expect(calls.length).toBeGreaterThanOrEqual(2); // the pick and the CI check
+      expect(calls.length).toBeGreaterThanOrEqual(2);
       for (const line of calls) expect(line, line).toMatch(/gh_retry gh /);
       for (const name of ["Pick the commit to deploy", "Check that CI passed on this commit"]) {
         expect(step(name), name).toContain('source "$RUNNER_TEMP/gh-retry.sh"');
@@ -178,7 +175,7 @@ describe("spec 0026: the deploy workflow", () => {
       expect(ci).toContain("env.DRY_RUN != 'true'");
       expect(ci).toContain('gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --commit "$TARGET_SHA"');
       expect(ci).toContain('select(.conclusion == "success")');
-      // the weekly run of CI (spec 0007 AC-14) only runs the security job: it never counts as a passed CI
+      // The weekly run of CI only runs the security job: it never counts as a passed CI
       expect(ci).toContain("--commit \"$TARGET_SHA\" --event push --json conclusion");
       expect(ci).toContain("exit 1");
       expect(workflow.indexOf("- name: Check that CI passed on this commit")).toBeLessThan(workflow.indexOf("- name: Reach production and decide what to deploy"));
@@ -331,7 +328,7 @@ describe("spec 0026: the deploy workflow", () => {
       expect(missing).toContain('node scripts/migrate-production.mjs "${args[@]}"');
       expect(missing).toContain("env -u GITHUB_STEP_SUMMARY"); // the step that applies writes the summary section
       expect(missing).toContain("SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}");
-      expect(missing).toContain("env.CONFIGURED == 'true' && (steps.plan.outputs.deploy == 'true' || env.BASELINE != '')"); // when the migrations step runs
+      expect(missing).toContain("env.CONFIGURED == 'true' && (steps.plan.outputs.deploy == 'true' || env.BASELINE != '')");
       expect(missing).not.toContain("DRY_RUN"); // a dry run of the deploy asks too, to say whether a dump would be taken
       expect(missing).toMatch(/timeout-minutes: \d+/);
     });
@@ -383,7 +380,7 @@ describe("spec 0026: the deploy workflow", () => {
       // only the failure message runs after a failed step
       const conditions = lines.filter((line) => /^ {8}if: /.test(line) && /\b(always|failure|cancelled)\(\)/.test(line));
       expect(conditions).toEqual(["        if: failure()"]);
-      expect(step("Tell the developer, and say how to roll back")).toContain("BACKUP_OUTCOME: ${{ steps.backup.outcome }}"); // the failure is reported like any failed step (AC-9)
+      expect(step("Tell the developer, and say how to roll back")).toContain("BACKUP_OUTCOME: ${{ steps.backup.outcome }}");
       expect(step("Tell the developer, and say how to roll back")).toContain("MISSING_OUTCOME: ${{ steps.missing.outcome }}");
     });
 
@@ -395,7 +392,7 @@ describe("spec 0026: the deploy workflow", () => {
   });
 
   it("AC-4: the weekly backup leaves the record table out (it is not user data, and the dump check fails on any unexpected table)", () => {
-    const backup = read(".github/actions/dump-user-data/action.yml"); // the dump lives in the action, shared with the weekly run
+    const backup = read(".github/actions/dump-user-data/action.yml");
     expect(backup).toMatch(/public\.extra_stamps public\.applied_migrations( |\n)/);
     expect(read("specs/project/0012-backups.md")).toContain("`public.applied_migrations`");
   });
@@ -405,7 +402,7 @@ describe("spec 0026: the deploy workflow", () => {
     expect(claude).toContain("The merge itself deploys (spec 0026, `.github/workflows/deploy.yml`)");
     expect(claude).toContain("only for a rollback or when the workflow is broken");
     expect(claude).toMatch(/never push to `production` unless the user asks/);
-    expect(claude).toContain("insert into public.applied_migrations (file_name) values ('0031_x.sql')"); // the fallback records what it applied
+    expect(claude).toContain("insert into public.applied_migrations (file_name) values ('0031_x.sql')");
     expect(claude).toContain("regenerated trail seeds (spec 0004) are not applied by the workflow");
     expect(claude).not.toContain("Nothing deploys by itself");
     const readme = read("deploy/README.md");
@@ -432,7 +429,6 @@ describe("spec 0026 AC-7: deploy/ssh-gate.sh", () => {
   });
 
   describe.skipIf(!hasShell)("run for real", () => {
-    // A server home with a bare repository holding one commit on main.
     function serverHome() {
       const home = fs.mkdtempSync(path.join(os.tmpdir(), "gate-"));
       const repo = path.join(home, "kektura.git");
@@ -458,7 +454,7 @@ describe("spec 0026 AC-7: deploy/ssh-gate.sh", () => {
       const home = server.home;
       const result = gateRun(home, `git-upload-pack '${spelling}'`);
       expect(result.status, result.stderr).toBe(0);
-      expect(result.stdout).toMatch(/refs\/heads\/main/); // the advertisement lists main
+      expect(result.stdout).toMatch(/refs\/heads\/main/);
     });
 
     it.each(["~/kektura.git", "/home/a1mirr/kektura.git", "kektura.git"])("lets git push to %s (the receive side answers)", (spelling) => {

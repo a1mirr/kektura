@@ -1,4 +1,3 @@
-// Spec 0003 AC-17: the map code is a composition of focused pieces, none of them big.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 

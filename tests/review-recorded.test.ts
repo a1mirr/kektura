@@ -1,5 +1,3 @@
-// Spec 0022 AC-5: the CI job "Review recorded" and the script behind it. The decisions are a pure function; the git
-// side is exercised against a real temporary repository; the workflow's trigger and name are pinned as text.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -164,7 +162,7 @@ describe("spec 0022: Review recorded", () => {
       commit("messages/en.json", "main", "main changes code and messages");
       commit("src/shared.ts", "main version", "main changes a shared file");
       git("switch", "-q", "topic");
-      git(...ident, "merge", "--no-edit", "main"); // brings main's files in, without a conflict
+      git(...ident, "merge", "--no-edit", "main");
       afterMerge = git("rev-parse", "HEAD").trim();
       afterDocs = commit("specs/x.md", "1", "wording");
       afterCode = commit("src/topic.ts", "2", "a code change after the review");

@@ -1,9 +1,9 @@
-// Decides whether a commit of main is deployed (spec 0026 AC-12): compares it with the commit production runs.
+// Compares it with the commit production runs.
 //
 //   node scripts/deploy-plan.mjs <target sha> [remote]      (remote defaults to `production`)
 //
-// Reads production's main through `git ls-remote` (so the deploy key and GIT_SSH_COMMAND must be set), looks at
-// the paths that differ and writes `deploy=true|false` to $GITHUB_OUTPUT and the reason to the job summary.
+// Reads production's main through `git ls-remote` (so the deploy key and GIT_SSH_COMMAND must be set), looks at the
+// paths that differ and writes `deploy=true|false` to $GITHUB_OUTPUT and the reason to the job summary.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";

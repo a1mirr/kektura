@@ -2,10 +2,9 @@ import { randomUUID } from "node:crypto";
 import { expect, type Locator, type Page } from "@playwright/test";
 import { psql } from "./local-db";
 
-// Signs in through the dummy login with this email; the account is created on first use (spec 0006 AC-3).
-// Posts to the route the form submits to instead of loading the landing page and filling in the form
-// (spec 0006 AC-8): the session cookies land in the page's browser context, and the 303 is not followed so
-// the dashboard is rendered once, by the goto.
+// Signs in through the dummy login with this email; the account is created on first use.
+// Posts to the route the form submits to instead of loading the landing page and filling in the form: the session
+// cookies land in the page's browser context, and the 303 is not followed so the dashboard is rendered once, by the goto.
 export async function signInWithEmail(page: Page, email: string) {
   const response = await page.request.post("/auth/test-login", { form: { email, locale: "en" }, maxRedirects: 0 });
   const location = response.headers()["location"] ?? "";
@@ -16,7 +15,6 @@ export async function signInWithEmail(page: Page, email: string) {
   await expect(page).toHaveURL(/\/en\/dashboard$/);
 }
 
-// The same sign-in through the page itself: landing page, email field, button (spec 0006 AC-9).
 export async function signInThroughForm(page: Page, email: string) {
   await page.goto("/en");
   await page.getByLabel(/^Test login/).fill(email);
@@ -24,19 +22,16 @@ export async function signInThroughForm(page: Page, email: string) {
   await expect(page).toHaveURL(/\/en\/dashboard$/);
 }
 
-// Signs in as a brand-new user (spec 0006 AC-3, AC-6), so every test starts from an empty dashboard
-// and tests can run in parallel.
 export async function signInAsNewUser(page: Page) {
   const email = `e2e-${randomUUID()}@kektura.test`;
   await signInWithEmail(page, email);
   return email;
 }
 
-// The account menu's button (spec 0014 AC-20): a <summary>, named Account in English.
 export const accountButton = (page: Page) => page.locator("body > header summary");
 
 // Opens the account menu and returns its list. Waits until the page has hydrated first (the button then carries
-// `aria-expanded`, spec 0014 AC-22), so the click is the one the script listens to.
+// `aria-expanded`), so the click is the one the script listens to.
 export async function openAccountMenu(page: Page) {
   const button = accountButton(page);
   await expect(button).toHaveAttribute("aria-expanded", "false");
@@ -45,7 +40,6 @@ export async function openAccountMenu(page: Page) {
   return page.locator("body > header details ul");
 }
 
-// The value of a dashboard stat card, e.g. stat(page, "Stamps") -> "0 / 161".
 export const stat = (page: Page, label: string) =>
   page.locator("dl > div", { has: page.locator("dt", { hasText: new RegExp(`^${label}$`) }) }).locator("dd");
 
@@ -57,7 +51,7 @@ export async function expandAllStages(page: Page) {
   }).toPass();
 }
 
-// The page does not scroll sideways (spec 0036 AC-5, spec 0006 AC-10): its scroll width is no wider than the window's
+// The page does not scroll sideways: its scroll width is no wider than the window's
 // client width. When it is, the failure names the elements that stick out. Polled, so a page that is still settling
 // (fonts, hydration) gets a moment.
 export async function expectNoSidewaysScroll(page: Page, message: string) {
@@ -76,7 +70,7 @@ export async function expectNoSidewaysScroll(page: Page, message: string) {
     .toBe("");
 }
 
-// Spec 0001 AC-10: the ids of the place and extra-stamp rows whose description is cut off, nowrap or sticks
+// The ids of the place and extra-stamp rows whose description is cut off, nowrap or sticks
 // out of its row, plus how many descriptions were measured (so a changed selector can't pass vacuously).
 export function measureDescriptions(page: Page) {
   return page.locator("li[id^=place-], #extra-stamps li").evaluateAll((lis) => {
@@ -95,7 +89,7 @@ export function measureDescriptions(page: Page) {
   });
 }
 
-// Switches a feature flag in the local database (spec 0035 AC-11): its mode, and for `allowlist` the users it is on
+// Switches a feature flag in the local database: its mode, and for `allowlist` the users it is on
 // for. The change shows on the next request. The flags are global, so a test that changes a declared flag belongs
 // in e2e/feature-flags.spec.ts (a project that runs alone, after the others) and puts it back when it is done.
 export function setFeatureFlag(key: string, mode: "off" | "allowlist" | "on", allowedEmails: string[] = []) {
@@ -109,7 +103,7 @@ export function setFeatureFlag(key: string, mode: "off" | "allowlist" | "on", al
   );
 }
 
-// The map's canvas (spec 0003): a WebGL element, so stamps are reached through the app's own list -> map flow below.
+// The map's canvas: a WebGL element, so stamps are reached through the app's own list -> map flow below.
 export const canvas = (page: Page) => page.locator(".maplibregl-canvas");
 
 // A click on 📍 does nothing until the map has loaded and attached its listener (a second or two over the network, more on a busy
@@ -121,8 +115,6 @@ export async function pressLocate(page: Page, button: Locator) {
   }).toPass({ timeout: 45_000 });
 }
 
-// 📍 on a list row, then a click on the canvas centre until the stamp's popup opens (the fly animation
-// and the smooth scroll have to finish first, so the click is retried).
 export async function openStampPopup(page: Page, placeKey: string, action: string) {
   await pressLocate(page, page.locator(`#place-${placeKey}`).getByRole("button", { name: "Show on map" }));
   // The stamp's name label sits on the dot: once it stops moving the fly animation and the scroll are
@@ -149,7 +141,6 @@ export function stampPlacesOn(email: string, dates: Record<string, string>) {
   }
 }
 
-// Every place of the first `stages` stages stamped on one day.
 export function stampStagesOn(email: string, stages: number, day: string) {
   psql(
     `insert into public.user_stamps (user_id, checkpoint_id, stamped_on) select u.id, c.id, '${day}' from auth.users u, public.checkpoints c where u.email = '${email}' and c.stage <= ${stages} and c.retired_on is null`,
@@ -163,7 +154,7 @@ export function stampExtraOn(email: string, extraId: number, day: string) {
   );
 }
 
-// The walk of spec 0037's tests: six months, one of them empty, one with only an extra stamp, and a stretch finished by a
+// The walk of the stats page tests: six months, one of them empty, one with only an extra stamp, and a stretch finished by a
 // stamp that is placed next to an earlier month's. Places 01 to 05 are 0, 8.1, 13.0, 28.7 and 38.4 km from the start.
 //   Dec 2025: 05 (1 stamp, stage 1, 0 km)      Jan 2026: 01 and 02 (2 stamps, 8.1 km)       Feb: nothing
 //   Mar: the extra stamp 1 only                  Apr: 04 (1 stamp, 9.7 km: 04-05 is walked now, 05 is older)

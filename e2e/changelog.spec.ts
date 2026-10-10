@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { CHANGELOG } from "../src/content/changelog";
 
-// The expectations come from the data the page renders, so adding an entry on top (spec 0018 AC-7)
+// The expectations come from the data the page renders, so adding an entry on top
 // doesn't break them; what they check is that the page shows that data in order and in each language.
 const longDate = (locale: string, date: string) =>
   new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`));
@@ -28,7 +28,6 @@ test.describe("spec 0018: changelog page", () => {
       await expect(page.getByText(labels[kind], { exact: true }).first()).toBeVisible();
     }
     await expect(page.getByRole("article").first().getByText(newest.changes[0].text.en, { exact: true })).toBeVisible();
-    // The oldest entry is the first version (AC-6).
     await expect(page.getByRole("article").last().getByText("Sign in with Google.")).toBeVisible();
   });
 

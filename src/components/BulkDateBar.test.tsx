@@ -122,7 +122,7 @@ describe("spec 0016: the mode", () => {
       expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
       expect(noBar()).toBeNull();
       enter();
-      expect(chosen()).toEqual([]); // not remembered
+      expect(chosen()).toEqual([]);
       click(screen.getByRole("button", { name: "Cancel" }));
     }
   });
@@ -132,7 +132,7 @@ describe("spec 0016: the mode", () => {
     expect(html).not.toContain("Change dates");
     expect(html).not.toContain("Set date");
     expect(html).not.toContain("checkbox");
-    expect(html).toContain("Expand all"); // the rest of the controls are there
+    expect(html).toContain("Expand all");
   });
 
   it("AC-14: a page without the provider (a friend's page) has no mode button", () => {
@@ -159,23 +159,23 @@ describe("spec 0016: the bar above the on-screen keyboard", () => {
   afterEach(() => Reflect.deleteProperty(window, "visualViewport"));
 
   it("AC-21: the bar's bottom follows the part of the screen the keyboard covers, and its listeners go with the bar", () => {
-    const { viewport, add, remove } = stubViewport({ height: window.innerHeight }); // no keyboard
+    const { viewport, add, remove } = stubViewport({ height: window.innerHeight });
     render(<Page />);
     enter();
     expect(gap()).toBe("0px");
-    viewport.height = window.innerHeight - 300; // the keyboard opens
+    viewport.height = window.innerHeight - 300;
     act(() => void viewport.dispatchEvent(new Event("resize")));
     expect(gap()).toBe("300px");
-    viewport.offsetTop = 40; // the visual viewport scrolled inside the layout one
+    viewport.offsetTop = 40;
     act(() => void viewport.dispatchEvent(new Event("scroll")));
     expect(gap()).toBe("260px");
     viewport.height = window.innerHeight;
     viewport.offsetTop = 0;
-    act(() => void viewport.dispatchEvent(new Event("resize"))); // the keyboard closes
+    act(() => void viewport.dispatchEvent(new Event("resize")));
     expect(gap()).toBe("0px");
     const listeners = add.mock.calls.map((c) => c[0]).sort();
     expect(listeners).toEqual(["resize", "scroll"]);
-    click(screen.getByRole("button", { name: "Cancel" })); // the bar goes: so do its listeners
+    click(screen.getByRole("button", { name: "Cancel" }));
     expect(remove.mock.calls.map((c) => c[0]).sort()).toEqual(["resize", "scroll"]);
     expect(new Set(remove.mock.calls.map((c) => c[1]))).toEqual(new Set(add.mock.calls.map((c) => c[1]))); // the very functions that were added
   });
@@ -218,10 +218,10 @@ describe("spec 0016: Escape", () => {
     click(note);
     expect(note.getAttribute("aria-expanded")).toBe("true");
     act(() => void fireEvent.keyDown(note, { key: "Escape" }));
-    expect(note.getAttribute("aria-expanded")).toBe("false"); // the note is closed...
-    expect(bar()).toBeTruthy(); // ...and the mode and the choice are as they were
+    expect(note.getAttribute("aria-expanded")).toBe("false");
+    expect(bar()).toBeTruthy();
     expect(chosen()).toEqual(["Place A"]);
-    act(() => void fireEvent.keyDown(note, { key: "Escape" })); // nothing open any more: Escape leaves the mode
+    act(() => void fireEvent.keyDown(note, { key: "Escape" }));
     expect(noBar()).toBeNull();
   });
 });
@@ -265,8 +265,8 @@ describe("spec 0016: choosing stamps", () => {
     choose("Place D");
     click(screen.getByRole("button", { name: "Select stage: Stage 1" }));
     expect(chosen()).toEqual(["Place A", "Place B", "Place C", "Place D"]);
-    expect(screen.queryByRole("button", { name: /Stage 3/ })).toBeNull(); // no stamp in stage 3: no button
-    expect((box("Extra 7") as HTMLInputElement).checked).toBe(false); // the extras are not a stage's
+    expect(screen.queryByRole("button", { name: /Stage 3/ })).toBeNull();
+    expect((box("Extra 7") as HTMLInputElement).checked).toBe(false);
   });
 
   it("AC-20: outside the mode a stage's button opens the mode with that stage's stamps chosen", () => {
@@ -274,7 +274,7 @@ describe("spec 0016: choosing stamps", () => {
     click(screen.getByRole("button", { name: "Set date: Stage 2" }));
     expect(bar()).toBeTruthy();
     expect(chosen()).toEqual(["Place D"]);
-    expect(screen.queryByRole("button", { name: /Set date/ })).toBeNull(); // in the mode the same place offers "Select stage"
+    expect(screen.queryByRole("button", { name: /Set date/ })).toBeNull();
     expect(screen.getByRole("button", { name: "Select stage: Stage 2" })).toBeTruthy();
   });
 
@@ -305,7 +305,7 @@ describe("spec 0016: the bar", () => {
     render(<Page />);
     enter();
     type("2026-09-15");
-    expect(apply().disabled).toBe(true); // nothing chosen
+    expect(apply().disabled).toBe(true);
     choose("Place A");
     type("");
     expect(apply().disabled).toBe(true);
@@ -315,7 +315,7 @@ describe("spec 0016: the bar", () => {
     }
     type("2026-09-15");
     expect(apply().disabled).toBe(false);
-    choose("Place A"); // unchosen again
+    choose("Place A");
     expect(apply().disabled).toBe(true);
   });
 
@@ -326,7 +326,7 @@ describe("spec 0016: the bar", () => {
     for (const part of ["2", "20", "2026-0", "2026-09-1", "2026-09-15"]) type(part);
     act(() => void fireEvent.blur(field()));
     act(() => void fireEvent.change(bar().querySelector("input[type=date]")!, { target: { value: "2026-09-16" } }));
-    expect(field().value).toBe("2026-09-16"); // a pick fills the field
+    expect(field().value).toBe("2026-09-16");
     expect(setStampDates).not.toHaveBeenCalled();
     await act(async () => void fireEvent.click(apply()));
     expect(setStampDates).toHaveBeenCalledOnce();
@@ -382,7 +382,7 @@ describe("spec 0016: the bar", () => {
     await waitFor(() => expect(noBar()).toBeNull());
     expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
     expect(screen.getByText("3 dates changed").getAttribute("aria-live")).toBe("polite");
-    enter(); // a new visit starts clean, without the old message
+    enter();
     expect(chosen()).toEqual([]);
     expect(screen.queryByText("3 dates changed")).toBeNull();
   });
@@ -445,7 +445,7 @@ describe("spec 0016: a retired stamp in the choice", () => {
     expect(apply().disabled).toBe(false);
     type("2014-11-21");
     expect(apply().disabled).toBe(true);
-    choose("Old house"); // taken out of the choice
+    choose("Old house");
     expect(screen.queryByText(/cannot get a date/)).toBeNull();
     expect(apply().disabled).toBe(false);
     await act(async () => void fireEvent.click(apply()));

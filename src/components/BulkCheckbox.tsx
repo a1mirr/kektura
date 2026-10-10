@@ -3,9 +3,8 @@
 import { useTranslations } from "next-intl";
 import { useBulk } from "./BulkDatesProvider";
 
-// The checkbox of a stamped row in "Change dates" (spec 0016 AC-14, AC-15). Nothing for a row that is not stamped, and nothing
-// outside the mode. A click with Shift held selects the range up to the last chosen row; the click's event says so (a change event
-// does not). The label is a 44 x 44 px target (AC-21).
+// A click with Shift held selects the range up to the last chosen row; the click's event says so (a change event does
+// not).
 export default function BulkCheckbox({ id, name }: { id: string; name: string }) {
   const t = useTranslations("dashboard");
   const bulk = useBulk();

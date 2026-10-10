@@ -16,7 +16,6 @@ import {
 } from "./progress";
 
 let nextId = 1;
-// One checkpoint row; variants of a place share `key`.
 function cp(key: string, km: number, over: Partial<Checkpoint> = {}): Checkpoint {
   const id = nextId++;
   return {
@@ -41,7 +40,6 @@ function cp(key: string, km: number, over: Partial<Checkpoint> = {}): Checkpoint
   };
 }
 
-// Four places A..D, 10 km apart, in trail order.
 function line() {
   return buildPlaces([cp("A", 0), cp("B", 10), cp("C", 20), cp("D", 30)]);
 }
@@ -172,12 +170,11 @@ describe("spec 0001: stages", () => {
     expect(findStageForKm(19.9, stages, placeKm)).toBe(2);
     expect(findStageForKm(20, stages, placeKm)).toBeNull(); // s2 ends at 20, s3 starts at 21
     expect(findStageForKm(21, stages, placeKm)).toBe(3);
-    expect(findStageForKm(30, stages, placeKm)).toBe(3); // inclusive
+    expect(findStageForKm(30, stages, placeKm)).toBe(3);
     expect(findStageForKm(31, stages, placeKm)).toBeNull();
   });
 });
 
-// A place that gets a stamp only on `from`: "N" sits at 15 km between B (10) and C (20).
 function lineWithNew(from: string | null) {
   return buildPlaces([cp("A", 0), cp("B", 10), cp("N", 15, { required_from: from }), cp("C", 20), cp("D", 30)]);
 }
@@ -204,9 +201,9 @@ describe("spec 0001: stamps required from a date", () => {
 
   it("AC-17: the nearest stamped places count, however far; one neighbour is enough, none waives nothing", () => {
     const places = lineWithNew("2025-05-08");
-    expect(waivedPlaceKeys(places, on(["A", "2024-06-01"], ["D", "2024-06-02"])).has("N")).toBe(true); // B and C unstamped
-    expect(waivedPlaceKeys(places, on(["B", "2024-06-01"])).has("N")).toBe(true); // only a neighbour before
-    expect(waivedPlaceKeys(places, on(["D", "2024-06-01"])).has("N")).toBe(true); // only one after
+    expect(waivedPlaceKeys(places, on(["A", "2024-06-01"], ["D", "2024-06-02"])).has("N")).toBe(true);
+    expect(waivedPlaceKeys(places, on(["B", "2024-06-01"])).has("N")).toBe(true);
+    expect(waivedPlaceKeys(places, on(["D", "2024-06-01"])).has("N")).toBe(true);
     expect(waivedPlaceKeys(places, on(["B", "2026-06-01"])).has("N")).toBe(false);
     expect(waivedPlaceKeys(places, on()).size).toBe(0);
   });
@@ -256,7 +253,6 @@ describe("spec 0001: stamps required from a date", () => {
   });
 });
 
-// A retired stamp that followed B (10 km) on the line A..D; it retired on 2014-11-21.
 const retiredRow = (over: Partial<Checkpoint> = {}) =>
   cp("R", 10, { stage_seq: null, retired_on: "2014-11-21", replaced_by: "C", after_place_key: "B", position_approximate: true, ...over });
 const lineWithRetired = () => [cp("A", 0), cp("B", 10), cp("C", 20), cp("D", 30), retiredRow()];
@@ -288,9 +284,9 @@ describe("spec 0001: retired stamps", () => {
   });
 
   it("AC-23: it is listed when the user walked past before it retired: the earlier neighbour's date decides", () => {
-    expect(visible([["B", "2014-06-01"], ["C", "2015-06-01"]])).toEqual(["R"]); // earlier is before: collectable
+    expect(visible([["B", "2014-06-01"], ["C", "2015-06-01"]])).toEqual(["R"]);
     expect(visible([["B", "2015-06-01"], ["C", "2014-06-01"]])).toEqual(["R"]);
-    expect(visible([["B", "2015-06-01"], ["C", "2016-06-01"]])).toEqual([]); // both after
+    expect(visible([["B", "2015-06-01"], ["C", "2016-06-01"]])).toEqual([]);
     expect(visible([["B", "2014-11-21"], ["C", "2014-11-21"]])).toEqual([]); // on the day: no longer valid
     expect(visible([["B", "2014-11-20"]])).toEqual(["R"]); // one neighbour is enough
     expect(visible([["C", "2013-01-01"]])).toEqual(["R"]);
@@ -298,7 +294,7 @@ describe("spec 0001: retired stamps", () => {
 
   it("AC-23: the place it followed counts as before it, and the nearest stamped place on each side is read, however far", () => {
     expect(visible([["B", "2014-01-01"]])).toEqual(["R"]);
-    expect(visible([["A", "2014-01-01"], ["D", "2020-01-01"]])).toEqual(["R"]); // B and C unstamped: A and D
+    expect(visible([["A", "2014-01-01"], ["D", "2020-01-01"]])).toEqual(["R"]);
     expect(visible([["A", "2013-01-01"], ["B", "2020-01-01"]])).toEqual([]); // B is the nearest before: A is not read
   });
 

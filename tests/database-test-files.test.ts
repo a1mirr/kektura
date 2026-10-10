@@ -1,5 +1,3 @@
-// Spec 0007 AC-12 and AC-13: every test file under tests/ that needs the local database decides what a missing one means
-// through `requireDatabase` of e2e/local-db.ts and nowhere else, and CI's database step runs every one of them.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 
@@ -10,7 +8,6 @@ const testFiles = fs.readdirSync(new URL("../tests/", import.meta.url)).filter((
 // needing a database.
 const aboutTheRule = ["database-test-files.test.ts", "local-db-helper.test.ts"];
 
-// What makes a file a database test: the helper's import, or a way of its own to reach the database.
 const touchesDatabase = (text: string) =>
   /e2e\/local-db/.test(text) || /execFileSync\(\s*"docker"/.test(text) || /\bhasDatabase\b/.test(text);
 

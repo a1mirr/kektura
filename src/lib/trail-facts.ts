@@ -1,5 +1,5 @@
-// The trail in numbers for the about page (spec 0015 AC-2), computed from the MTSZ stage table
-// (scripts/data/okt-stages.json) so it can't drift from the data the rest of the app uses.
+// Computed from the MTSZ stage table (scripts/data/okt-stages.json) so it can't drift from the data the rest of the
+// app uses.
 import stagesData from "../../scripts/data/okt-stages.json";
 
 type StageRow = { km: number; places: readonly unknown[] };

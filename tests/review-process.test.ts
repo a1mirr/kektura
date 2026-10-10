@@ -1,5 +1,5 @@
-// Spec 0022: every change is reviewed by an agent with no context before it is merged. The process lives in
-// prose and in an agent definition, so these tests pin that it is written down where people and agents look.
+// The process lives in prose and in an agent definition, so these tests pin that it is written down where people and
+// agents look.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 
@@ -143,8 +143,8 @@ describe("spec 0022: fresh-context review", () => {
   });
 });
 
-// Spec 0018 AC-7: what users can see always reaches the changelog page. Whether an entry exists for a given
-// change can't be computed, so the rule is written where authors and reviewers look; the review checks it.
+// Whether an entry exists for a given change can't be computed, so the rule is written where authors and reviewers
+// look; the review checks it.
 describe("spec 0018: the changelog rule", () => {
   it("AC-7: CLAUDE.md asks for an entry, in every language, in the same pull request", () => {
     const claude = read("CLAUDE.md");

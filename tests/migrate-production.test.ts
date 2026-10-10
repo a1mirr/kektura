@@ -1,4 +1,3 @@
-// Spec 0026 AC-4, AC-6, AC-13: the migration script, against a fake psql that behaves like the record table.
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -10,7 +9,6 @@ const URL_WITH_SECRET = "postgresql://postgres.abcd:p%40ss%2Fword@aws-0-eu.poole
 
 const ok = (stdout = "") => ({ status: 0, stdout, stderr: "" });
 
-// A database that knows the record table and the files it was asked to apply.
 function fakeDb({ table = true, applied = [] as string[], failing = [] as string[] } = {}) {
   const db = { table, applied: new Set(applied) };
   const calls: string[][] = [];
@@ -70,7 +68,7 @@ describe("spec 0026: migrations", () => {
     it("stops at the first failing file: later ones are not tried and the failed one is not recorded", () => {
       const { db, calls, psql } = fakeDb({ applied: ["0001_init.sql"], failing: ["0002_more.sql"] });
       expect(() => run({ psql })).toThrow(/Migration 0002_more\.sql failed and was rolled back; nothing was recorded/);
-      expect(calls.filter((args) => args.includes("-f"))).toHaveLength(1); // 0008 and 0024 were never tried
+      expect(calls.filter((args) => args.includes("-f"))).toHaveLength(1);
       expect(db.applied.has("0002_more.sql")).toBe(false);
     });
 
@@ -134,7 +132,7 @@ describe("spec 0026: migrations", () => {
       const { db, calls, psql } = fakeDb({ table: false });
       const { result } = run({ psql, baseline: "0008_pages.sql" });
       expect(result.baselined).toEqual(["0001_init.sql", "0002_more.sql", "0008_pages.sql"]);
-      expect([...db.applied].sort()).toEqual(["0001_init.sql", "0002_more.sql", "0008_pages.sql", "0024_friends.sql"]); // 0024 is applied after the baseline
+      expect([...db.applied].sort()).toEqual(["0001_init.sql", "0002_more.sql", "0008_pages.sql", "0024_friends.sql"]);
       const create = calls.find((args) => args.some((a) => a.includes("create table")))!.join(" ");
       expect(create).toContain("enable row level security");
       expect(create).toContain("revoke all on public.applied_migrations from anon, authenticated");

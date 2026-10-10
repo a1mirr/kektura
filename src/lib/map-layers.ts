@@ -1,4 +1,3 @@
-// Colours, zoom threshold and the MapLibre layer definitions of the trail map (spec 0003).
 import type { ExpressionSpecification, LayerSpecification } from "maplibre-gl";
 
 export const DONE = "#2563eb";
@@ -9,13 +8,12 @@ export const RESTAURANT = "#7c3aed";
 export const SEGMENT = "#f59e0b";
 export const MOVED = "#b45309"; // the ring of a stamp that moved (amber-700): the ring is the sign, the colour only helps
 
-// From this zoom on the ~3 m route replaces the ~30 m overview (spec 0003 AC-9).
+// From this zoom on the ~3 m route replaces the ~30 m overview.
 export const DETAIL_ZOOM = 9;
 
 // GeoJSON sources, in the order they are added.
 export const SOURCE_IDS = ["todo", "done", "segment", "dots", "extras", "restaurants"] as const;
 
-// The layers a toggle shows or hides.
 export const STAMPS_LAYER = "dots";
 export const MOVED_RING_LAYER = "moved-ring"; // follows the stamps' toggle
 export const EXTRAS_LAYER = "extras";
@@ -29,8 +27,7 @@ export type InitialVisibility = {
 
 const visibility = (on: boolean) => (on ? "visible" : "none");
 const dotRadius: ExpressionSpecification = ["interpolate", ["linear"], ["zoom"], 6, 3, 12, 7];
-// A ring around a stamp that moved (spec 0003 AC-26): an empty circle a few pixels wider than the dot, so it reads as a ring
-// at every zoom and is a shape, not a colour.
+// An empty circle a few pixels wider than the dot, so it reads as a ring at every zoom and is a shape, not a colour.
 const ringRadius: ExpressionSpecification = ["interpolate", ["linear"], ["zoom"], 6, 7, 12, 12];
 const ringPaint = {
   "circle-radius": ringRadius,
@@ -40,8 +37,7 @@ const ringPaint = {
   "circle-stroke-width": 2.5,
 } as const;
 
-// Bottom to top. White casings keep the lines readable over busy map tiles; the highlight for "route
-// between two stamps" sits above the walked line and below the points.
+// White casings keep the lines readable over busy map tiles.
 export function trailLayers(initial: InitialVisibility): LayerSpecification[] {
   return [
     {
@@ -137,9 +133,7 @@ export function trailLayers(initial: InitialVisibility): LayerSpecification[] {
   ];
 }
 
-// The comparison map on a friend's page (spec 0003 AC-18): one source of lines whose features say how to draw
-// them (`style`, `color`), and one of points (`fill`, `stroke`). Dashes can't depend on a feature, so there is one layer
-// per line style.
+// Dashes can't depend on a feature, so there is one layer per line style.
 export const COMPARE_SOURCE_IDS = ["compare-lines", "compare-dots"] as const;
 export const COMPARE_DOTS_LAYER = "compare-dots";
 export const COMPARE_MOVED_RING_LAYER = "compare-moved-ring";
@@ -147,8 +141,6 @@ export const COMPARE_MOVED_RING_LAYER = "compare-moved-ring";
 const ofStyle = (style: string): ExpressionSpecification => ["==", ["get", "style"], style];
 const byColor: ExpressionSpecification = ["get", "color"];
 
-// Bottom to top: a white casing under every line, the faint "nobody" line, then the dashed "not walked yet" line of
-// a single person's view, dotted, dashed and solid, and the points on top.
 export function compareLayers(): LayerSpecification[] {
   const line = (id: string, style: string, paint: Record<string, unknown>, cap?: "round"): LayerSpecification =>
     ({

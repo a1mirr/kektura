@@ -14,7 +14,7 @@ describe("spec 0035: the Telegram webhook helpers", () => {
 
   it("AC-16: a text message is read, anything else (no text, no ids, bad JSON, too long) is not", () => {
     expect(parseUpdate(update())).toEqual({ updateId: 7, chatId: "42", fromId: "42", text: "/flags" });
-    expect(parseUpdate(update({ message: { chat: { id: 42 }, from: { id: 42 } } }))).toBeNull(); // a photo, a sticker
+    expect(parseUpdate(update({ message: { chat: { id: 42 }, from: { id: 42 } } }))).toBeNull();
     expect(parseUpdate(update({ message: { text: "x", chat: { id: "42" }, from: { id: 42 } } }))).toBeNull();
     expect(parseUpdate(update({ message: { text: 5, chat: { id: 42 }, from: { id: 42 } } }))).toBeNull();
     expect(parseUpdate(update({ update_id: undefined }))).toBeNull();

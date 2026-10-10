@@ -1,6 +1,5 @@
-// Spec 0007 AC-10: the decision behind "does the end-to-end job run": a pull request that changes only Markdown skips it.
-// The decision is a pure function; the git side runs against a real temporary repository shaped like the checkout CI
-// makes for a pull request (a merge commit of the branch into its base); the script's output file is checked end to end.
+// The git side runs against a real temporary repository shaped like the checkout CI makes for a pull request (a merge
+// commit of the branch into its base); the script's output file is checked end to end.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -77,7 +76,6 @@ describe("spec 0007: which changes run the end-to-end job", () => {
       mergeOf("docs-only");
       expect(changedFiles(git)?.sort()).toEqual(["README.md", "specs/x.md"]);
       expect(pr(changedFiles(git))).toBe(false);
-      // and the script, run in that checkout the way the workflow runs it
       const output = path.join(os.tmpdir(), `ci-changes-output-${path.basename(dir)}`);
       try {
         execFileSync("node", [script], { cwd: dir, encoding: "utf8", env: { ...process.env, GITHUB_EVENT_NAME: "pull_request", GITHUB_OUTPUT: output } });

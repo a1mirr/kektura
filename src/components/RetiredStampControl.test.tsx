@@ -64,12 +64,12 @@ describe("spec 0001: the control of a retired stamp", () => {
     setup({ stamped: true, date: "2014-06-01" });
     const field = screen.getByLabelText(messages.dashboard.stampDate) as HTMLInputElement;
     expect(field.value).toBe("2014-06-01");
-    // a later day is never saved, however long the user waits (spec 0016 AC-13)
+    // a later day is never saved, however long the user waits
     act(() => void fireEvent.change(field, { target: { value: "2014-11-21" } }));
     await act(async () => void (await vi.advanceTimersByTimeAsync(2000)));
     act(() => void fireEvent.blur(field));
     expect(setStampDate).not.toHaveBeenCalled();
-    expect(field.value).toBe("2014-06-01"); // restored
+    expect(field.value).toBe("2014-06-01");
     act(() => void fireEvent.change(field, { target: { value: "2014-10-01" } }));
     await act(async () => void (await vi.advanceTimersByTimeAsync(800)));
     expect(setStampDate).toHaveBeenCalledWith(["R"], "2014-10-01");

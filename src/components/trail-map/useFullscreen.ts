@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import type { MapHandleRef } from "./types";
 
-// Spec 0003 AC-11: native Fullscreen API where available, a CSS overlay everywhere (Esc or the
-// button leaves it), and the page behind it doesn't scroll.
+// Native Fullscreen API where available, a CSS overlay everywhere (Esc or the button leaves it), and the page behind
+// it doesn't scroll.
 export function useFullscreen(wrapper: RefObject<HTMLDivElement | null>, mapRef: MapHandleRef) {
   const [fullscreen, setFullscreen] = useState(false);
   const fullscreenRef = useRef(false);

@@ -13,7 +13,6 @@ test.describe("spec 0005: the default language", () => {
     });
   });
 
-  // The one test that runs over every language: a browser in that language gets it.
   for (const locale of routing.locales) {
     test.describe(`a browser in ${locale}`, () => {
       test.use({ locale });
@@ -44,7 +43,7 @@ test.describe("spec 0005: the language dropdown", () => {
       ...routing.locales,
     ]);
     const codes = new RegExp(`^(${routing.locales.map((locale) => locale.toUpperCase()).join("|")})$`);
-    await expect(page.getByRole("button", { name: codes })).toHaveCount(0); // no row of buttons any more
+    await expect(page.getByRole("button", { name: codes })).toHaveCount(0);
   });
 
   test("AC-10: choosing a language opens the same page in it, and the dropdown follows", async ({ page }) => {

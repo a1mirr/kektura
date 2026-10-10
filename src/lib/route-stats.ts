@@ -1,6 +1,3 @@
-// Route planner numbers: distance, ascent, descent and walking time between two stamping places,
-// summed from public/data/okt-hops.json (MTSZ table). See spec 0003.
-
 // One hop between neighbouring stamping places: length km, ascent/descent m when walking west->east,
 // time in minutes forward/back (null for the Visegrád-Nagymaros ferry).
 export type Hop = {
@@ -45,5 +42,4 @@ export function routeStats(hops: Hop[], order: Map<string, number>, from: string
   return stats;
 }
 
-// Minutes -> "h:mm".
 export const fmtTime = (min: number) => `${Math.floor(min / 60)}:${String(min % 60).padStart(2, "0")}`;

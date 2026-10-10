@@ -57,7 +57,7 @@ export default async function Dashboard({
   setRequestLocale(locale);
   const t = await getTranslations("dashboard");
   const format = await getFormatter();
-  const maxDate = maxStampDate(); // the latest stamp date the server accepts: the date fields' `max`
+  const maxDate = maxStampDate();
 
   const supabase = await createClient();
   const {
@@ -65,7 +65,7 @@ export default async function Dashboard({
   } = await supabase.auth.getUser();
   if (!user) return redirect({ href: "/", locale });
 
-  // Reference data comes from a shared server cache; only the user's own stamps hit the database (spec 0002 AC-15, AC-16).
+  // Reference data comes from a shared server cache; only the user's own stamps hit the database.
   const [showRestaurants, { checkpoints, extras: extraList, stamps, extraStamps }] = await Promise.all([
     flagOn("restaurants"),
     loadDashboardData(supabase),
@@ -84,7 +84,7 @@ export default async function Dashboard({
   const stages = buildStages(placeList, stagesData.stages);
   const stampedPlaces = stampedPlaceKeys(placeList, stamps);
   const waived = waivedPlaceKeys(placeList, stampedPlaces);
-  // Retired stamps (spec 0001 AC-22 to AC-26) are no places: they never reach the count, the km, the stages' totals or the map.
+  // Retired stamps are no places: they never reach the count, the km, the stages' totals or the map.
   const retiredList = buildRetired(checkpoints);
   const stampedRetired = stampedPlaceKeys(retiredList, stamps);
   const listedRetired = retiredVisibleKeys(retiredList, placeList, stampedPlaces, stampedRetired);
@@ -98,7 +98,6 @@ export default async function Dashboard({
   }));
 
 
-  // The stamped rows that "Change dates" can choose, in the order the page lists them (spec 0016 AC-14, AC-15).
   const bulkItems = buildBulkItems({
     stages: stages.map((st) => ({
       stage: st.stage,
@@ -112,8 +111,7 @@ export default async function Dashboard({
 
   const requiredFrom = new Map(placeList.map((p) => [p.key, p.requiredFrom]));
   const dateText = (iso: string) => format.dateTime(new Date(`${iso}T00:00:00Z`), { dateStyle: "long", timeZone: "UTC" });
-  // A stamp the MTSZ moved in the last 180 days says so, in its row and in its popup (spec 0001 AC-29, spec 0003 AC-26): the data's own
-  // description of where it is now, no more.
+  // The data's own description of where a moved stamp is now, no more.
   const today = todayIso();
   const movedText = {
     on: (date: string) => t("movedOn", { date }),
@@ -163,8 +161,8 @@ export default async function Dashboard({
           </dl>
 
           {mapPoints.length > 0 && (
-            // From 1024 px the map's block stays in view while the stage list scrolls (spec 0001 AC-28). A sticky box is a
-            // stacking context, so it has a z-index: the fullscreen map inside it must cover the list's controls (spec 0003 AC-11).
+            // From 1024 px the map's block stays in view while the stage list scrolls. A sticky box is a stacking
+            // context, so it has a z-index: the fullscreen map inside it must cover the list's controls.
             <div
               data-sticky-map
               className="lg:sticky lg:top-4 lg:z-10 lg:-m-1 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:p-1"
@@ -195,8 +193,8 @@ export default async function Dashboard({
             {stages.map((stage) => {
               const { stage: n, meta, places: list } = stage;
               const keys = stageStampKeys(stage);
-              // A place the user was not missing (spec 0001 AC-17) counts as done for the stage's progress (AC-20); the stage's
-              // button follows the stamps alone, so "Stamp stage" still marks a waived place.
+              // A place the user was not missing counts as done for the stage's progress; the stage's button follows
+              // the stamps alone, so "Stamp stage" still marks a waived place.
               const done = countDone(list, stampedPlaces, waived);
               const stageExtras = extraListWithStage.filter((e) => e.stage === n);
               const stageRetired = retiredList.filter((r) => r.stage === n);

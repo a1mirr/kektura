@@ -1,5 +1,4 @@
-// Spec 0006 AC-12: how the accessibility allow-list judges what axe found. The browser part is e2e/accessibility.spec.ts;
-// this is the rule that makes the list shrink only.
+// The browser part is e2e/accessibility.spec.ts; this is the rule that makes the list shrink only.
 import { describe, expect, it } from "vitest";
 import { judge, type Allowed, type Finding } from "../e2e/accessibility";
 import { ALLOWED } from "../e2e/accessibility-allowlist";

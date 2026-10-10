@@ -5,10 +5,8 @@ import { useTranslations } from "next-intl";
 import type { ActionResult } from "@/lib/action-result";
 import { useStampAction } from "@/lib/use-stamp-action";
 
-// Button that runs a stamp server action: disabled while it runs, with a short message on failure.
-// `done` = the thing is already stamped, so the button offers to undo it. On click it shows the new
-// state at once (optimistic, spec 0002 AC-13): the other label and style until the server answers; a
-// failed action puts the old state back. The stats and the map are never touched optimistically.
+// On click it shows the new state at once (optimistic): the other label and style until the server answers; a failed
+// action puts the old state back. The stats and the map are never touched optimistically.
 export default function ActionButton({
   action,
   done,
@@ -19,8 +17,8 @@ export default function ActionButton({
 }: {
   action: () => Promise<ActionResult>;
   done: boolean;
-  doneLabel: string; // shown while `done` (the undo label)
-  todoLabel: string; // shown while not `done`
+  doneLabel: string;
+  todoLabel: string;
   accent?: "blue" | "amber";
   ariaLabel?: string; // the accessible name, when the visible label alone does not say what it acts on
 }) {

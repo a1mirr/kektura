@@ -1,6 +1,4 @@
-// Spec 0004 AC-15 (a stamp that becomes retired keeps every user's stamp), spec 0024 AC-26 (a friend's page counts no retired
-// stamp) and the rules of the retired columns, against the real local database (`npm run testdb:start`). Skips itself when it
-// isn't running (it fails where CI requires one, `REQUIRE_LOCAL_DB`, spec 0007 AC-12); CI's end-to-end job runs it. Every drill is one transaction that is rolled back.
+// Every drill is one transaction that is rolled back.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import { beforeAll, describe, expect, it } from "vitest";
@@ -8,7 +6,6 @@ import { databaseDecision, requireDatabase } from "../e2e/local-db";
 
 const seed = fs.readFileSync(new URL("../supabase/seed.sql", import.meta.url), "utf8");
 
-// Runs a script in one psql session; throws on the first error.
 function run(sql: string): string[] {
   return execFileSync("docker", ["exec", "-i", "supabase_db_kektura", "psql", "-U", "postgres", "-At", "-v", "ON_ERROR_STOP=1", "-q"], {
     input: sql,
@@ -122,7 +119,7 @@ describe("spec 0024: what a friend sees of retired stamps", () => {
       ].join("\n"),
     );
     const get = (name: string) => lines.find((l) => l.startsWith(`${name}:`))!.slice(name.length + 1);
-    expect(get("stamps")).toBe("OKTPH_102_1"); // never the retired one
+    expect(get("stamps")).toBe("OKTPH_102_1");
     expect(get("waived")).not.toContain("RETIRED");
   });
 });

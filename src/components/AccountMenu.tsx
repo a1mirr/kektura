@@ -7,11 +7,10 @@ import { accountMenuEntries, isCurrentPage } from "@/lib/account-menu";
 
 const noSubscribe = () => () => {};
 
-// The account menu of the header strip (spec 0014 AC-20 to AC-26): a disclosure, not an application menu. A native
-// `<details>` opens and closes without script, so before hydration and with JavaScript off the entries are reachable (AC-23);
-// once hydrated it adds `aria-expanded`, Escape, a click outside and closing on a followed link (AC-22). The list is plain
-// links followed by the sign-out form, which is a plain POST like the one on the settings page (AC-26). The layout decides
-// `friends` per request (flag `friends`, spec 0035), so a flagged entry never reaches a page that must answer 404.
+// A disclosure, not an application menu. A native `<details>` opens and closes without script, so before hydration
+// and with JavaScript off the entries are reachable; once hydrated it adds `aria-expanded`, Escape, a click outside
+// and closing on a followed link. The layout decides `friends` per request, so a flagged entry never reaches a page
+// that must answer 404.
 export default function AccountMenu({ friends }: { friends: boolean }) {
   const t = useTranslations("accountMenu");
   const locale = useLocale();
@@ -20,8 +19,8 @@ export default function AccountMenu({ friends }: { friends: boolean }) {
   const summary = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const [openOn, setOpenOn] = useState(pathname);
-  // `aria-expanded` is a script-time enhancement: the server's copy must not claim "closed" while the browser has opened
-  // the `<details>` natively (AC-22).
+  // `aria-expanded` is a script-time enhancement: the server's copy must not claim "closed" while the browser has
+  // opened the `<details>` natively.
   const hydrated = useSyncExternalStore(noSubscribe, () => true, () => false);
 
   // A tap before hydration opened the `<details>` natively and its `toggle` event went unheard: take the state from the element.
@@ -36,7 +35,6 @@ export default function AccountMenu({ friends }: { friends: boolean }) {
     setOpen(false);
   }
 
-  // A click or tap outside closes the list (AC-22). Subscribed only while it is open.
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (event: PointerEvent) => {

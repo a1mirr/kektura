@@ -1,6 +1,6 @@
-// Stamps that moved (the `moves` of scripts/data/okt-stamp-dates.json, spec 0004 AC-16): a current stamp whose coordinates changed by more
-// than 100 m between two MTSZ files has a `moved_on` day, the address of the publication that gives it, and `build-data.mjs` refuses to run
-// without one. The row keeps its code and id: only where it is changes (spec 0001 AC-29).
+// A current stamp whose coordinates changed by more than 100 m between two MTSZ files has a `moved_on` day, the
+// address of the publication that gives it, and `build-data.mjs` refuses to run without one. The row keeps its code
+// and id: only where it is changes.
 import fs from "node:fs";
 import { flatMeters } from "./geo.mjs";
 
@@ -17,8 +17,6 @@ export function readStampMoves(file = "scripts/data/okt-stamp-dates.json") {
   return JSON.parse(fs.readFileSync(file, "utf8")).moves ?? [];
 }
 
-// What is wrong with the entries, as sentences (none: they are fine): a code the stamps file lacks, a code twice, a day that is not a
-// real calendar day or is after `today`, a source that is not the MTSZ's own site.
 export function moveProblems(moves, codes, today) {
   const known = new Set(codes);
   const seen = new Set();
@@ -34,14 +32,12 @@ export function moveProblems(moves, codes, today) {
   return problems;
 }
 
-// The rows of a seed as { code -> { lat, lng } } (what the generator wrote last time).
 export function seedCoordinates(seedSql) {
   const rows = seedSql.matchAll(/^ {2}\(\d+, '([^']+)', '[^']+', \d+, \d+, '(?:[^']|'')*', '(?:[^']|'')*', (-?[\d.]+), (-?[\d.]+),/gm);
   return new Map([...rows].map((m) => [m[1], { lat: Number(m[2]), lng: Number(m[3]) }]));
 }
 
-// The codes whose coordinates moved by more than `thresholdM` since the previous seed and that have no entry (AC-16). A code that is
-// new, or gone, is not a move. `current` and `previous` are Maps of code -> { lat, lng }.
+// A code that is new, or gone, is not a move.
 export function unexplainedMoves(previous, current, moves, thresholdM = MOVE_THRESHOLD_M) {
   const explained = new Set(moves.map((e) => e.code));
   const found = [];
@@ -54,7 +50,6 @@ export function unexplainedMoves(previous, current, moves, thresholdM = MOVE_THR
   return found;
 }
 
-// One block of the seed: the days the file gives, and nothing for a code it no longer names.
 export function stampMovesSql(moves) {
   const sorted = [...moves].sort((a, b) => a.code.localeCompare(b.code));
   const clear =

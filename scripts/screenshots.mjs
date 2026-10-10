@@ -1,14 +1,14 @@
-// Takes the pictures of the landing page's gallery (spec 0038): the dashboard, the map and the route planner of a demo account on
-// the test server, at a phone's size, into public/screenshots/. Run it on a developer machine when the interface changed, then
-// look at the pictures and commit them; it is not part of CI (the map needs OpenStreetMap's tiles).
+// Run it on a developer machine when the interface changed, then look at the pictures and commit them; it is not part
+// of CI (the map needs OpenStreetMap's tiles).
 //
 //   npm run testdb:start                        (local Supabase, needs Docker)
-//   npm run build:e2e && npm run start:e2e      (the test server's production build on :3002: no dev overlay in the pictures)
+// npm run build:e2e && npm run start:e2e      (the test server's production build on :3002: no dev overlay in the
+// pictures)
 //   npm run screenshots                         (SCREENSHOTS_URL=http://localhost:3002 is the default)
 //
-// Every picture is taken and checked first, and only then are the files written: a page that shows an email address, the test
-// server's banner or an error stops the run and leaves the old pictures alone (AC-11). The banner is part of every page of the
-// test server (spec 0006 AC-5); the script removes it from the page just before the shot, after making sure it was there.
+// Every picture is taken and checked first, and only then are the files written: a page that shows an email address,
+// the test server's banner or an error stops the run and leaves the old pictures alone. The banner is part of every
+// page of the test server; the script removes it from the page just before the shot, after making sure it was there.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
@@ -39,7 +39,6 @@ const ROUTE_ZOOM_OUT = 2;
 
 const canvas = (page) => page.locator(".maplibregl-canvas");
 
-// Waits until the map has drawn its tiles: the network is quiet and the canvas has not changed for a moment.
 async function mapSettled(page) {
   await page.waitForLoadState("networkidle").catch(() => {});
   let before = "";
@@ -51,8 +50,8 @@ async function mapSettled(page) {
   }
 }
 
-// 📍 on a place's row, then a click on the canvas centre until the stamp's popup shows the action (the same flow as the
-// E2E helper `openStampPopup`: the fly animation and the smooth scroll have to finish first).
+// 📍 on a place's row, then a click on the canvas centre until the stamp's popup shows the action (the same flow as
+// the E2E helper `openStampPopup`: the fly animation and the smooth scroll have to finish first).
 async function openStampPopup(page, placeKey, action) {
   const button = page.locator(`#place-${placeKey}`).getByRole("button", { name: "Show on map" });
   for (let attempt = 0; attempt < 30; attempt++) {
@@ -73,7 +72,6 @@ async function openStampPopup(page, placeKey, action) {
   throw new Problem(`The popup of ${placeKey} with "${action}" did not open.`);
 }
 
-// 📍 on a place's row: the map flies to it and labels it.
 async function showPlace(page, placeKey) {
   const button = page.locator(`#place-${placeKey}`).getByRole("button", { name: "Show on map" });
   for (let attempt = 0; attempt < 30; attempt++) {
@@ -91,7 +89,6 @@ async function closePopups(page) {
   await page.evaluate(() => document.querySelectorAll(".maplibregl-popup").forEach((el) => el.remove()));
 }
 
-// Mouse-wheel steps over the middle of the map (`delta` is the wheel's distance: the bigger, the further each step zooms out).
 async function zoomOut(page, steps, delta = 240) {
   const box = await canvas(page).boundingBox();
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
@@ -151,14 +148,12 @@ export async function takeScreenshots() {
     });
     const page = await context.newPage();
 
-    // The demo account: signed in through the dummy login (which only the test server has), then given the demo dataset.
     const login = await page.request.post("/auth/test-login", { form: { email: DEMO_EMAIL, locale: "en" }, maxRedirects: 0 });
     if (login.status() !== 303 || !(login.headers()["location"] ?? "").endsWith("/en/dashboard")) {
       throw new Problem(`The dummy login was refused (${login.status()}): ${BASE} is not a test server.`);
     }
     psql(demoSql());
 
-    // 1. The dashboard: the numbers and the stage list (the map has its own picture, so its block is left out).
     await page.goto("/en/dashboard");
     await page.getByRole("button", { name: "Expand all" }).waitFor();
     await page.addStyleTag({ content: "[data-sticky-map] { display: none !important; }" });
@@ -171,7 +166,6 @@ export async function takeScreenshots() {
     await wait(500);
     await shoot(page, "dashboard", shots);
 
-    // 2. The map: full screen, over the stretches the demo account has walked.
     await page.goto("/en/dashboard");
     await page.getByRole("button", { name: "Expand all" }).click();
     await page.waitForFunction(() => document.querySelector("#stage-1 [aria-expanded]")?.getAttribute("aria-expanded") === "true");
@@ -184,7 +178,6 @@ export async function takeScreenshots() {
     await mapSettled(page);
     await shoot(page, "map", shots);
 
-    // 3. The route planner: the next stretch of the walk, picked in the page as a user would, then shown full screen.
     await page.getByRole("button", { name: "Exit fullscreen" }).click();
     await openStampPopup(page, FROM, "Route from here");
     await popupAction(page, "Route from here");

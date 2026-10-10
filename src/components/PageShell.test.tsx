@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-// Spec 0036 AC-2 to AC-4 and the blocks of spec 0001 AC-28: what each variant of the shell renders.
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import PageShell, { pageWidth } from "./PageShell";
@@ -42,7 +41,7 @@ describe("spec 0036: PageShell", () => {
     expect(block.textContent).toBe("hello");
     expect(below.textContent).toBe("gallery");
     expect(below.className).not.toContain("max-w-2xl"); // the content's own width, not the block's
-    expect(main.className).not.toContain("justify-center"); // taller than a screen: it starts at the top
+    expect(main.className).not.toContain("justify-center");
     expect(main.className).not.toContain("min-h-screen");
   });
 

@@ -5,11 +5,11 @@ import { shareMapPaths } from "@/lib/share-card";
 import { loadShareCard } from "@/lib/share-card-server";
 import { TRAIL_ROUTE } from "@/lib/share-route";
 
-// The preview image of a share card (spec 0039 AC-5): what Telegram and other messengers show when the link is pasted.
 // Under /api, so the proxy and the language routing leave it alone.
 //
-// It carries only the trail's name, the percentage and two numbers: the font of `ImageResponse` has no Cyrillic, so no
-// word that needs a translation (and no display name) is drawn. Wording lives in the page's tags (title, description).
+// It carries only the trail's name, the percentage and two numbers: the font of `ImageResponse` has no Cyrillic, so
+// no word that needs a translation (and no display name) is drawn. Wording lives in the page's tags (title,
+// description).
 
 const BLUE = "#2563eb";
 const GREY = "#d6d3d1";
@@ -23,7 +23,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
   if (!(await flagOn("share"))) return NOT_FOUND();
   const card = await loadShareCard(token);
   if (!card) return NOT_FOUND();
-  // Only a drawn image is charged (AC-14): an unknown token costs a lookup, not a drawing, so it cannot use up the budget.
+  // Only a drawn image is charged: an unknown token costs a lookup, not a drawing, so it cannot use up the budget.
   if (!limiter.allow("images")) return new Response("Too many requests", { status: 429, headers: { "retry-after": "60" } });
 
   const map = shareMapPaths(TRAIL_ROUTE, card.ranges, 560);

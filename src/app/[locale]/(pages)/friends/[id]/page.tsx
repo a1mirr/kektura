@@ -44,7 +44,6 @@ export default async function FriendPage({
   const { summary, places, stages, stampedKeys, waived } = progress;
   const t = await getTranslations('dashboard');
   const format = await getFormatter();
-  // A stamp that moved in the last 180 days says so on the friend's list too (spec 0024 AC-29), as on the dashboard (spec 0001 AC-29).
   const today = todayIso();
   const dateText = (iso: string) => format.dateTime(new Date(`${iso}T00:00:00Z`), { dateStyle: 'long', timeZone: 'UTC' });
   const movedText = {

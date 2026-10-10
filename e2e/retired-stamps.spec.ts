@@ -19,7 +19,7 @@ test.describe("spec 0001: retired stamps", () => {
   test("AC-23, AC-24, AC-26: hidden until asked for, with a note that says what it was and what replaced it; the choice is remembered", async ({ page }) => {
     await signInAsNewUser(page);
     await expandAllStages(page);
-    await expect(row(page)).toBeHidden(); // nothing stamped near it: not listed
+    await expect(row(page)).toBeHidden();
     await expect(page.locator("#place-OKTPH_103")).toContainText("Replaces the retired stamp Nyírjesi-erdészház (valid until November 20, 2014).");
 
     await page.getByLabel("Show retired stamps").check();
@@ -29,7 +29,7 @@ test.describe("spec 0001: retired stamps", () => {
     await expect(row(page)).toContainText("Retired stamp: valid until November 20, 2014. Replaced by Vércverés.");
     await expect(row(page)).toContainText("Its position in the list is approximate.");
     await expect(row(page).getByRole("link", { name: "Vércverés" })).toHaveAttribute("href", "#place-OKTPH_103");
-    await expect(stat(page, "Stamps")).toHaveText("0 / 161"); // never one of the 161
+    await expect(stat(page, "Stamps")).toHaveText("0 / 161");
 
     await page.reload();
     await expandAllStages(page);
@@ -62,9 +62,9 @@ test.describe("spec 0001: retired stamps", () => {
     const add = row(page).getByRole("button", { name: "Add retired stamp Nyírjesi-erdészház" });
     const field = row(page).getByLabel(/Date you collected it, by November 20, 2014/);
 
-    await expect(add).toBeDisabled(); // no default day
+    await expect(add).toBeDisabled();
     await field.fill("2014-11-21");
-    await expect(add).toBeDisabled(); // the day it retired: no longer valid
+    await expect(add).toBeDisabled();
     await field.fill("2026-10-05");
     await expect(add).toBeDisabled();
     await field.fill("2014-06-01");
@@ -78,10 +78,9 @@ test.describe("spec 0001: retired stamps", () => {
     const stage = page.locator("#stage-20");
     await expect(stage).toContainText("Retired stamps collected: 1");
     await expect(stage.locator("[aria-expanded]").first()).toContainText("+1 retired");
-    await expect(stage.locator("[aria-expanded]").first()).toContainText("0/6"); // the stage's own count is places only
+    await expect(stage.locator("[aria-expanded]").first()).toContainText("0/6");
     expect(retiredStampsOf(email)).toBe("1");
 
-    // the stage button stamps and clears the stage's places, never the retired stamp
     await stage.getByRole("button", { name: "Stamp stage" }).click();
     await expect(stat(page, "Stamps")).toHaveText("7 / 161"); // 6 own places and the starting point
     await expect(stage.locator("[aria-expanded]").first()).toContainText("6/6");
@@ -89,7 +88,6 @@ test.describe("spec 0001: retired stamps", () => {
     await expect(stat(page, "Stamps")).toHaveText("1 / 161");
     expect(retiredStampsOf(email)).toBe("1");
 
-    // collected, it can be taken away again
     await row(page).getByRole("button", { name: "Remove retired stamp Nyírjesi-erdészház" }).click();
     await expect(stage).not.toContainText("Retired stamps collected");
     expect(retiredStampsOf(email)).toBe("0");
@@ -105,7 +103,7 @@ test.describe("spec 0001: retired stamps", () => {
     await expandAllStages(page);
     await expect(row(page)).toBeVisible();
     await expect(row(page).getByLabel("Date of the stamp")).toHaveValue("2013-05-05");
-    await expect(stat(page, "Stamps")).toHaveText("1 / 161"); // Galyatető only
+    await expect(stat(page, "Stamps")).toHaveText("1 / 161");
   });
 
   test("AC-26 + spec 0024 AC-26: a friend's page lists no retired stamp and counts none", async ({ page, browser }) => {
@@ -130,7 +128,7 @@ test.describe("spec 0001: retired stamps", () => {
       await page.setViewportSize({ width, height: 800 });
       await signInAsNewUser(page);
       await page.goto("/en/dashboard");
-      await expandAllStages(page); // the open stages and the toggle are remembered across languages
+      await expandAllStages(page);
       await page.getByLabel("Show retired stamps").check();
       for (const locale of ["en", "hu", "de", "ru"]) {
         await page.goto(`/${locale}/dashboard`);

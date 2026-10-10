@@ -1,5 +1,5 @@
-// A small in-memory sliding-window limiter (spec 0017 AC-7). One server process, forgotten on
-// restart: it only blunts abuse of the public feedback form, the database constraints are the real limit.
+// One server process, forgotten on restart: it only blunts abuse of the public feedback form, the database
+// constraints are the real limit.
 
 export function createRateLimiter({
   limit,
@@ -15,7 +15,6 @@ export function createRateLimiter({
   const recent = (key: string, at: number) => (hits.get(key) ?? []).filter((t) => at - t < windowMs);
 
   return {
-    // True and counted when `key` has made fewer than `limit` calls in the last `windowMs`.
     allow(key: string): boolean {
       const at = now();
       const inWindow = recent(key, at);

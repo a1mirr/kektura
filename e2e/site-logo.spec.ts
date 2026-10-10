@@ -23,7 +23,7 @@ async function expectLogo(page: Page, locale: Locale) {
   const box = await link.boundingBox();
   expect(box!.width).toBeGreaterThanOrEqual(44);
   expect(box!.height).toBeGreaterThanOrEqual(44);
-  // top-left corner of the content width (spec 0036 AC-1): the page's left edge on a phone, 64 rem centred on a wide window
+  // Top-left corner of the content width: the page's left edge on a phone, 64 rem centred on a wide window
   const viewport = await page.evaluate(() => document.documentElement.clientWidth);
   expect(box!.x).toBeLessThan(Math.max(0, (viewport - 1024) / 2) + 40);
   expect(box!.y).toBeLessThan(80); // below the test banner, above any page content

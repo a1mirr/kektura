@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// unstable_cache is replaced by a pass-through that remembers its options, so the tests can check what
-// would be cached and for how long without a Next runtime.
+// unstable_cache needs a Next runtime: a pass-through that remembers its options stands in for it.
 const cacheOptions = vi.hoisted(() => ({
   calls: [] as { keyParts: string[]; options: { tags?: string[]; revalidate?: number } }[],
 }));
@@ -16,7 +15,6 @@ vi.mock("@/lib/supabase/public", () => ({ createPublicClient: vi.fn() }));
 import { createPublicClient } from "@/lib/supabase/public";
 import { REFERENCE_DATA_REVALIDATE_SECONDS, REFERENCE_DATA_TAG, loadDashboardData } from "./dashboard-data";
 
-// A client stand-in that records which tables are read and answers each from `tables`.
 function fakeClient(tables: Record<string, { data?: unknown[]; error?: unknown }>) {
   const read: string[] = [];
   const client = {
@@ -55,7 +53,7 @@ describe("spec 0002: dashboard data", () => {
     expect(entry).toBeDefined();
     expect(entry!.options.revalidate).toBe(REFERENCE_DATA_REVALIDATE_SECONDS);
     expect(REFERENCE_DATA_REVALIDATE_SECONDS).toBeLessThanOrEqual(60 * 60 * 24);
-    expect(cacheOptions.calls).toHaveLength(1); // the only cached read is the reference data
+    expect(cacheOptions.calls).toHaveLength(1);
   });
 
   it("AC-15: the cache key carries a version, so rows cached before a deploy that changed their shape are not served to the new code", () => {

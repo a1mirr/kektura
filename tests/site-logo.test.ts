@@ -1,4 +1,3 @@
-// Spec 0014 AC-19: the site logo is one component, drawn by the locale layout and the 404 page, never by a page.
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";

@@ -4,15 +4,10 @@ import { describeFindings, judge, scan, WIDTHS, type Finding, type Width } from 
 import { ALLOWED } from "./accessibility-allowlist";
 import { expandAllStages, openAccountMenu, seedStatsWalk, signInAsNewUser } from "./helpers";
 
-// Spec 0006 AC-11, AC-12: axe on the main pages, at the desktop width and at the phone width. A "serious" or "critical"
-// violation that is not in the allow-list fails the page's test, and so does an allow-list entry that no longer fires.
-
-// Each page: its name (what the allow-list says), how to open it and what to wait for so that the scan sees the finished page.
 interface Target {
   name: string;
   signedIn: boolean;
   open: (page: Page) => Promise<void>;
-  /** What a signed-in page needs in the database before it is opened (the stats page: months to draw). */
   seed?: (email: string) => void;
   /** Rules left out at the phone width: the colours do not change with the width, so a rule that costs a lot is run once. */
   skipAtPhone?: string[];
@@ -47,7 +42,6 @@ const TARGETS: Target[] = [
     },
   },
   {
-    // "Change dates" (spec 0016 AC-14 to AC-21): the mode with its checkboxes, the stage buttons and the bar, one stamp chosen
     name: "dashboard-change-dates",
     signedIn: true,
     skipAtPhone: ["color-contrast"],
@@ -69,7 +63,6 @@ const TARGETS: Target[] = [
     },
   },
   {
-    // Spec 0037: the chart drawn (six months, one empty), its bars are buttons in a scrollable frame
     name: "stats",
     signedIn: true,
     seed: seedStatsWalk,
@@ -87,7 +80,7 @@ const TARGETS: Target[] = [
     },
   },
   {
-    // Spec 0014 AC-22: the account menu open (the list is not there for a scan of the page as it loads): its entries, the marked
+    // The account menu open (the list is not there for a scan of the page as it loads): its entries, the marked
     // current page and the sign-out button, with the contrast and the roles axe checks
     name: "account-menu-open",
     signedIn: true,

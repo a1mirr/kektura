@@ -1,7 +1,7 @@
-// Spec 0007 AC-14, AC-15: reads the JSON report of `npm audit --omit=dev --audit-level=high --json` and fails when it names
-// a high or critical advisory in a production dependency that the allow-list (`.github/audit-allowlist.json`) does not
-// cover. An allow-list entry has an advisory id, a reason and an expiry date; an expired entry (and one that is
-// malformed, or expires too far ahead) is a failure of its own, so an advisory without a fix can wait only for a while.
+// Reads the JSON report of `npm audit --omit=dev --audit-level=high --json` and fails when it names a high or
+// critical advisory in a production dependency that the allow-list (`.github/audit-allowlist.json`) does not cover.
+// An allow-list entry has an advisory id, a reason and an expiry date; an expired entry (and one that is malformed,
+// or expires too far ahead) is a failure of its own, so an advisory without a fix can wait only for a while.
 // Usage: node scripts/check-audit.mjs [audit-report.json] [allowlist.json]
 import { readFileSync } from "node:fs";
 
@@ -56,7 +56,6 @@ export function readAllowlist(allowlist, now) {
   return { active, problems };
 }
 
-/** The advisories of high or critical severity in a report: one per advisory id, whichever package they reach. */
 export function advisoriesOf(report) {
   const found = new Map();
   for (const [name, vulnerability] of Object.entries(report.vulnerabilities ?? {})) {
@@ -72,7 +71,6 @@ export function advisoriesOf(report) {
   return [...found.entries()].map(([key, advisory]) => ({ key, ...advisory }));
 }
 
-/** What is wrong, as a list of sentences; empty when the report has no advisory the allow-list does not cover. */
 export function auditProblems(report, allowlist, now = new Date()) {
   if (!report || typeof report !== "object" || report.error || typeof report.vulnerabilities !== "object" || !report.metadata?.vulnerabilities) {
     const why = report?.error ? ` (${[report.error.code, report.error.summary].filter(Boolean).join(": ")})` : "";

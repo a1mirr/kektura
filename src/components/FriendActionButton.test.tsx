@@ -68,7 +68,7 @@ describe("spec 0024: the Friends page buttons respond", () => {
     await press("Approve");
     expect(screen.getByRole("button", { name: "Ignore" })).toHaveProperty("disabled", true);
     expect(screen.getByRole("button", { name: "Other row" })).toHaveProperty("disabled", false);
-    await press("Ignore"); // disabled: nothing happens
+    await press("Ignore");
     expect(ignore.action).not.toHaveBeenCalled();
     await approve.finish();
     expect(screen.getByRole("button", { name: "Ignore" })).toHaveProperty("disabled", false);

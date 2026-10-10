@@ -38,7 +38,7 @@ test.describe("spec 0006 + 0005: signing in and out on the test server", () => {
 
   test("0005 AC-6, AC-3: signing out returns to the landing page, after which the dashboard redirects there", async ({ page }) => {
     await signInAsNewUser(page);
-    const menu = await openAccountMenu(page); // spec 0014 AC-26: sign out is in the account menu (and on the settings page, AC-16)
+    const menu = await openAccountMenu(page);
     await menu.getByRole("button", { name: "Sign out" }).click();
     await expect(page).toHaveURL(/\/en$/);
     await page.goto("/en/dashboard");
@@ -57,10 +57,10 @@ test.describe("spec 0006 + 0005: signing in and out on the test server", () => {
     expect(await go("code=not-a-real-code&locale=en")).toBe(`${baseURL}/en?error=auth`);
     expect(await go("code=not-a-real-code&locale=hu")).toBe(`${baseURL}/hu?error=auth`);
     expect(await go("code=not-a-real-code&locale=de")).toBe(`${baseURL}/de?error=auth`);
-    expect(await go("code=not-a-real-code&locale=xx")).toBe(`${baseURL}/hu?error=auth`); // unknown: the default locale
+    expect(await go("code=not-a-real-code&locale=xx")).toBe(`${baseURL}/hu?error=auth`);
     expect(await go("code=not-a-real-code&locale=../evil.example")).toBe(`${baseURL}/hu?error=auth`);
-    expect(await go("locale=en")).toBe(`${baseURL}/en?error=auth`); // no code at all
-    // an `x-forwarded-host` the proxy would set is honoured, a malformed one is not (spec 0020 AC-1, AC-2)
+    expect(await go("locale=en")).toBe(`${baseURL}/en?error=auth`);
+    // An `x-forwarded-host` the proxy would set is honoured, a malformed one is not
     const forwarded = await page.request.get("/auth/callback?code=x&locale=en", {
       maxRedirects: 0,
       headers: { "x-forwarded-host": "example.test", "x-forwarded-proto": "https" },

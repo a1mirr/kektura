@@ -1,5 +1,4 @@
-// Spec 0034 AC-10, AC-12: what the Stop hook asks once the checks pass is a pure function of the changed paths
-// (.claude/hooks/stop-nudges.mjs); the hook itself (a Claude Code session) is the manual row of the spec.
+// The hook itself (a Claude Code session) is the manual row of the spec.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { changedForNudge, isUserVisible, nudgeMessage, nudgeKey, nudgeTargets, nudgeToAsk } from "../.claude/hooks/stop-nudges.mjs";
@@ -63,15 +62,14 @@ describe("spec 0034: the Stop hook's turn-end nudge", () => {
     expect(message).toMatch(/^Checks pass, but app code changed without a spec change:/);
     expect(message).toMatch(/\n\nAnd files users can see changed without a changelog entry:/);
     expect(message.match(/Checks pass/g)).toHaveLength(1);
-    // only the changelog question when a spec changed too
     expect(nudgeMessage(["src/lib/progress.ts", "messages/en.json", "specs/product/0001-progress.md"])).not.toMatch(/without a spec change/);
   });
 
   it("AC-10, AC-12: the hook asks through this module, once per turn end", () => {
     const hook = readRoot(".claude/hooks/stop-check.mjs");
     expect(hook).toMatch(/input\.stop_hook_active \? "" : nudgeToAsk\(changed, committed, state\.nudged, scope\)/);
-    expect(hook).toMatch(/scope = `\$\{head\}:\$\{fingerprint\}`/); // the commit and the working tree
-    expect(hook).toMatch(/"merge-base", "HEAD", "origin\/main"/); // work committed on the branch counts
+    expect(hook).toMatch(/scope = `\$\{head\}:\$\{fingerprint\}`/);
+    expect(hook).toMatch(/"merge-base", "HEAD", "origin\/main"/);
     expect(hook).toMatch(/WATCHED = \[[^\]]*"messages",/);
   });
 
@@ -89,12 +87,12 @@ describe("spec 0034: the Stop hook's turn-end nudge", () => {
     const first = nudgeToAsk([], committed, undefined, "abc:1");
     expect(first).toMatch(/files users can see changed without a changelog entry/);
     const asked = nudgeKey("abc:1", first);
-    expect(nudgeToAsk([], committed, asked, "abc:1")).toBe(""); // the same state, already asked
+    expect(nudgeToAsk([], committed, asked, "abc:1")).toBe("");
     // The same file names in another task (another commit, or another working tree) are asked about again.
     expect(nudgeToAsk([], committed, asked, "def:1")).toBe(first);
     expect(nudgeToAsk([], committed, asked, "abc:2")).toBe(first);
-    expect(nudgeToAsk([], [...committed, "src/components/CompareMap.tsx"], asked, "abc:1")).not.toBe(""); // more files
+    expect(nudgeToAsk([], [...committed, "src/components/CompareMap.tsx"], asked, "abc:1")).not.toBe("");
     expect(nudgeToAsk([], [], asked, "abc:1")).toBe("");
-    expect(nudgeToAsk([], [...committed, "src/content/changelog.ts", "specs/product/0003-map-route-planner.md"], undefined, "abc:1")).toBe(""); // the entry and the spec are there
+    expect(nudgeToAsk([], [...committed, "src/content/changelog.ts", "specs/product/0003-map-route-planner.md"], undefined, "abc:1")).toBe("");
   });
 });

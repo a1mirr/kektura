@@ -1,4 +1,4 @@
-// Spec 0035 AC-23: the service role client bypasses row level security, so only the Telegram webhook may import it.
+// The service role client bypasses row level security, so only the Telegram webhook may import it.
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";

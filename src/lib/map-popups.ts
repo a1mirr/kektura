@@ -1,5 +1,5 @@
 // Popup contents for the trail map, built with DOM nodes and never innerHTML, so names in the data
-// can't inject markup (spec 0003 AC-15).
+// Can't inject markup.
 import { RESTAURANT } from "./map-layers";
 
 export type MenuAction = {
@@ -8,15 +8,11 @@ export type MenuAction = {
 };
 
 export type MenuExtras = {
-  // Spec 0003 AC-26: the note of a stamp that moved, a paragraph of its own under the subtitle.
   note?: string | null;
-  // Spec 0003 AC-27: "Report a wrong location", a link of at least 44 x 44 px that opens in a new tab. Only an https: or same-site
-  // path becomes a link, so nothing in the data can make a javascript: one.
+  // Only an https: or same-site path becomes a link, so nothing in the data can make a javascript: one.
   link?: { label: string; href: string } | null;
 };
 
-// A stamp's popup: title, optional subtitle, optional note, one button per action, an optional link and a hidden error line that an
-// action can reveal.
 export function buildMenu(title: string, subtitle: string | null, actions: MenuAction[], extras: MenuExtras = {}) {
   const box = document.createElement("div");
   box.style.minWidth = "200px";
@@ -71,8 +67,7 @@ export function buildMenu(title: string, subtitle: string | null, actions: MenuA
   return box;
 }
 
-// A restaurant's pinned popup: name (city), distance and a link to its page. Only https: URLs become
-// links, so a javascript: URL in the data does nothing.
+// Only https: URLs become links, so a javascript: URL in the data does nothing.
 export function buildRestaurantPopup(restaurant: {
   name: string;
   city: string;

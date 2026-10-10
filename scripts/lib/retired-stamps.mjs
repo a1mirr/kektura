@@ -1,5 +1,3 @@
-// Stamps that no longer exist (scripts/data/okt-retired-stamps.json, spec 0004): kept as rows of `checkpoints` with a
-// `retired_on` date, so users' stamps on them survive every regeneration of the seed.
 import fs from "node:fs";
 
 const q = (s) => `'${String(s).replace(/'/g, "''")}'`;

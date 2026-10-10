@@ -2,8 +2,8 @@
 
 import { useShowRetired } from "@/lib/retired-toggle";
 
-// A retired stamp's row in a stage list (spec 0001 AC-23, AC-24, AC-26): listed when the user's own stamps say so (`listed`, decided
-// on the server), or whenever "Show retired stamps" is on. Muted, so it reads as a record, not a requirement.
+// Listed when the user's own stamps say so (`listed`, decided on the server), or whenever "Show retired stamps" is
+// on. Muted, so it reads as a record, not a requirement.
 export default function RetiredRow({ id, listed, children }: { id: string; listed: boolean; children: React.ReactNode }) {
   const show = useShowRetired();
   const hidden = !listed && !show;

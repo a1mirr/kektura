@@ -17,9 +17,9 @@ describe("spec 0017: rate limiter", () => {
   it("AC-7: the window slides: old calls stop counting", () => {
     let t = 0;
     const limiter = createRateLimiter({ limit: 2, windowMs: 1000, now: () => t });
-    limiter.allow("ip"); // t=0
+    limiter.allow("ip");
     t = 600;
-    limiter.allow("ip"); // t=600
+    limiter.allow("ip");
     t = 900;
     expect(limiter.allow("ip")).toBe(false);
     t = 1001; // the call at t=0 has expired, the one at t=600 hasn't

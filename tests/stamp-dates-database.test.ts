@@ -1,5 +1,3 @@
-// Spec 0004 AC-12 (adding a stamp keeps what users have) and spec 0024 AC-25 (the waived places a friend shares) against
-// the real local database (`npm run testdb:start`). Skips itself when it isn't running (it fails where CI requires one, `REQUIRE_LOCAL_DB`, spec 0007 AC-12); CI's end-to-end job runs it.
 // Every drill is one transaction that is rolled back, so the reference data other tests read is never changed.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -9,7 +7,6 @@ import { buildPlaces, stampedPlaceKeys, waivedPlaceKeys, type Checkpoint } from 
 
 const seed = fs.readFileSync(new URL("../supabase/seed.sql", import.meta.url), "utf8");
 
-// Runs a script in one psql session; throws on the first error.
 function run(sql: string): string[] {
   return execFileSync("docker", ["exec", "-i", "supabase_db_kektura", "psql", "-U", "postgres", "-At", "-v", "ON_ERROR_STOP=1", "-q"], {
     input: sql,
@@ -82,7 +79,6 @@ describe("spec 0004: adding a stamp to the seed", () => {
 
 type Row = Checkpoint & { id: number };
 
-// A friend's stamps (place -> date) in a transaction; what get_friend_waived_places answers to their friend.
 function waivedAccordingToDatabase(
   stampDates: Map<number, string>,
   friendship: { status: string; sharing: boolean } = { status: "accepted", sharing: true },
@@ -114,7 +110,6 @@ describe("spec 0024: a friend's waived places", () => {
       )[0],
     );
 
-  // Each place gets a date from `dateOf`, none for the places `skip` names: the places the friend stamped, with the days.
   function scenario(checkpoints: Row[], dateOf: (index: number, key: string) => string | null) {
     const places = buildPlaces(checkpoints);
     const firstVariant = new Map(places.map((p) => [p.key, p.variants[0].id]));
@@ -144,14 +139,14 @@ describe("spec 0024: a friend's waived places", () => {
     for (const [name, { stampDates, expected }] of Object.entries(scenarios)) {
       expect(waivedAccordingToDatabase(stampDates), name).toEqual(expected);
     }
-    expect(scenarios["everything but the new stamps, in 2013"].expected.length).toBe(dated.size); // all of them, in this one
+    expect(scenarios["everything but the new stamps, in 2013"].expected.length).toBe(dated.size);
     expect(scenarios["everything but the new stamps, after all dates"].expected).toEqual([]);
   }, 60_000);
 
   it("AC-25: a stamped new place is not waived, and only an accepted friend who shares is asked about", (ctx) => {
     requireDatabase(ctx, RELATIONS);
     const checkpoints = loadCheckpoints();
-    const stamped = scenario(checkpoints, () => "2013-01-01"); // every place, the new ones too
+    const stamped = scenario(checkpoints, () => "2013-01-01");
     expect(waivedAccordingToDatabase(stamped.stampDates)).toEqual([]);
     const dated = new Set(checkpoints.filter((c) => c.required_from !== null).map((c) => c.place_key));
     const walked = scenario(checkpoints, (_, key) => (dated.has(key) ? null : "2013-01-01"));
@@ -194,7 +189,6 @@ describe("spec 0024: a friend's waived places", () => {
   });
 });
 
-// ---- a stamp that moved (spec 0001 AC-29, spec 0004 AC-16, AC-19) -------------------------------------------------------
 import { stampMovesSql } from "../scripts/lib/stamp-moves.mjs";
 
 // The seed as the generator would write it after the MTSZ moved `code` to new coordinates: the row's lat and lng change and the
@@ -236,16 +230,16 @@ describe("spec 0004: a stamp that moved", () => {
     const get = (name: string) => lines.find((l) => l.startsWith(`${name}:`))!.slice(name.length + 1);
     const [id, , , required, movedOn] = get("after").split("|");
     const [idBefore, , , requiredBefore, movedBefore] = get("before").split("|");
-    expect(id).toBe(idBefore); // the same row
-    expect(get("after")).toContain("|47.123456|18.654321|"); // in its new place
-    expect(movedBefore).toBe("-"); // it had not moved
+    expect(id).toBe(idBefore);
+    expect(get("after")).toContain("|47.123456|18.654321|");
+    expect(movedBefore).toBe("-");
     expect(movedOn).toBe("2026-09-30");
     expect(required).toBe(requiredBefore); // a move is no new stamp: no date of requirement
     expect(requiredBefore).toBe("-");
     expect(get("stamps_after")).toBe(get("stamps_before"));
     expect(get("stamps_before").split(",").length).toBeGreaterThan(5);
-    expect(get("total_after")).toBe(get("total_before")); // nothing added, nothing dropped
-    expect(get("moved_rows")).toBe(code); // the day reached that code only
+    expect(get("total_after")).toBe(get("total_before"));
+    expect(get("moved_rows")).toBe(code);
   });
 
   it("AC-16: a day removed from the file leaves the database with the next seed, and a day that changed is replaced", (ctx) => {

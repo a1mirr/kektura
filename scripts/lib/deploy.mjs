@@ -1,16 +1,13 @@
-// The pure decisions of the automatic deploy (spec 0026): what is deployed, which migrations are missing,
-// what a failure message says. No I/O here, so the tests can state every rule directly.
+// No I/O here, so the tests can state every rule directly.
 
-// Changes that don't need a deploy (AC-12): documentation, specs, tests and repository tooling.
 const NOT_DEPLOYED = [/^specs\//, /^tests\//, /^e2e\//, /^\.github\//, /^\.claude\//, /^\.githooks\//, /\.md$/];
 
-/** True when at least one changed path is something production runs. */
 export function needsDeploy(paths) {
   return paths.some((path) => !NOT_DEPLOYED.some((pattern) => pattern.test(path)));
 }
 
 /**
- * What to do for `target` (a commit of main), given what production runs (AC-12).
+ * What to do for `target` (a commit of main), given what production runs.
  * `changed` are the paths that differ between production's commit and the target;
  * `targetIsBehind` is true when the target is an ancestor of production's commit.
  * @param {{ production: string, target: string, changed?: string[], targetIsBehind?: boolean }} input
@@ -29,17 +26,15 @@ export function planDeploy({ production, target, changed = [], targetIsBehind = 
 // 0001_init.sql, 0024_friends.sql ...: four digits (the number of the task issue that adds it), then a slug.
 const MIGRATION_FILE = /^\d{4}_[a-z0-9_]+\.sql$/;
 
-/** The migration files among `names`, in the order they are applied: by name (AC-4). */
 export function migrationFiles(names) {
   return names.filter((name) => MIGRATION_FILE.test(name)).sort();
 }
 
-/** The files still to apply, in name order. A file that sorts before an applied one is still pending (AC-6). */
+// A file that sorts before an applied one is still pending.
 export function pendingMigrations(files, applied) {
   return files.filter((file) => !applied.has(file));
 }
 
-/** `baseline` and every file that sorts before it (AC-13). */
 export function baselineFiles(files, baseline) {
   if (!files.includes(baseline)) {
     throw new Error(`The baseline ${JSON.stringify(baseline)} is not a file in supabase/migrations/.`);
@@ -47,11 +42,9 @@ export function baselineFiles(files, baseline) {
   return files.filter((file) => file <= baseline);
 }
 
-/**
- * `text` without psql's `DETAIL:` part, which quotes the values of the row that failed (AC-13: a public repository's
- * logs are public). A value can hold newlines, so the part runs from the `DETAIL:` line to the next line that starts
- * with one of psql's other labels (or to the end).
- */
+// `text` without psql's `DETAIL:` part, which quotes the values of the row that failed (a public repository's logs
+// are public). A value can hold newlines, so the part runs from the `DETAIL:` line to the next line that starts with
+// one of psql's other labels (or to the end).
 export function dropDetails(text) {
   let inDetail = false;
   return text
@@ -64,7 +57,6 @@ export function dropDetails(text) {
     .join("\n");
 }
 
-/** `text` with the connection string, the password and the user:password part replaced (AC-13). */
 export function redact(text, connectionString) {
   const secrets = new Set([connectionString]);
   try {
@@ -83,7 +75,7 @@ export function redact(text, connectionString) {
 const STEPS = { pick: "choosing the commit to deploy", ci: "checking that CI passed", plan: "reaching production", missing: "checking which migrations are missing", backup: "backing up the user data before the migrations (no migration was applied)", migrate: "applying migrations", push: "pushing the code to production", smoke: "the smoke test" };
 
 /**
- * The Telegram message for a failed run (AC-9): the commit, the failed step, a link. `outcomes` maps step id to its outcome.
+ * The Telegram message for a failed run: the commit, the failed step, a link. `outcomes` maps step id to its outcome.
  * @param {{ sha: string, runUrl: string, outcomes: Record<string, string | undefined> }} input
  */
 export function failureMessage({ sha, runUrl, outcomes }) {

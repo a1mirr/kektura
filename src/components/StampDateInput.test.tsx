@@ -54,7 +54,7 @@ describe("spec 0016: the date field", () => {
     expect(onSave).toHaveBeenCalledTimes(1);
     expect(onSave).toHaveBeenCalledWith("2026-09-15");
     await wait(5000);
-    expect(onSave).toHaveBeenCalledTimes(1); // and not again
+    expect(onSave).toHaveBeenCalledTimes(1);
   });
 
   it("AC-6: typing a date key by key is one save: only the final date is sent", async () => {
@@ -155,7 +155,7 @@ describe("spec 0016: the date field", () => {
     expect(screen.getByRole("alert").textContent).toBe(messages.dashboard.actionFailed);
     await wait(5000);
     expect(onSave).toHaveBeenCalledTimes(1);
-    await edit(input, "2026-09-16"); // trying again clears the message
+    await edit(input, "2026-09-16");
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
@@ -208,7 +208,7 @@ describe("spec 0016: the yyyy-mm-dd text field and the calendar button", () => {
     const showPicker = vi.fn();
     picker.showPicker = showPicker;
     expect(picker.type).toBe("date");
-    expect(picker.value).toBe("2026-09-01"); // opens on the date of the field
+    expect(picker.value).toBe("2026-09-01");
     expect(picker.min).toBe("1938-01-01");
     expect(picker.max).toBe("2026-10-03");
     expect(picker.getAttribute("aria-hidden")).toBe("true");
@@ -241,7 +241,7 @@ describe("spec 0016: the yyyy-mm-dd text field and the calendar button", () => {
     const onSave = ok();
     const { input, picker } = setup(onSave);
     await edit(picker, "2026-09-12");
-    expect(onSave.mock.calls).toEqual([["2026-09-12"]]); // no pause
+    expect(onSave.mock.calls).toEqual([["2026-09-12"]]);
     expect(input.value).toBe("2026-09-12");
     await wait(3000);
     expect(onSave).toHaveBeenCalledTimes(1);

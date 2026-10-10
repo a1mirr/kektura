@@ -1,11 +1,9 @@
-// Checks the Telegram setup of the feedback form (spec 0017 AC-9) and whether the webhook of the flag commands is
-// registered (spec 0035 AC-26).
 //
 //   npm run telegram:check                   verify the token, send a test message to TELEGRAM_CHAT_ID
 //   npm run telegram:check -- --find-chat-id list the chats that recently wrote to the bot
 //
-// Reads TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID from .env.local (or the environment). The request URL
-// contains the token, so it is never printed: only what Telegram answers.
+// Reads TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID from .env.local (or the environment). The request URL contains the
+// token, so it is never printed: only what Telegram answers.
 try {
   process.loadEnvFile(".env.local");
 } catch {

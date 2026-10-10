@@ -4,9 +4,7 @@ import { useTranslations } from "next-intl";
 import { useHydrated } from "@/lib/use-hydrated";
 import { useBulk } from "./BulkDatesProvider";
 
-// On a stage's header (spec 0016 AC-15, AC-20). Outside the mode: "Set date" opens the mode with the stage's stamped places chosen,
-// the quick way to date a whole stage. In the mode: "Select stage" adds them to the choice. A stage without a stamp has neither.
-// Needs JavaScript, so it is not in the server's HTML (AC-14).
+// Needs JavaScript, so it is not in the server's HTML.
 export default function BulkStageButton({ stage }: { stage: number }) {
   const t = useTranslations("dashboard");
   const bulk = useBulk();

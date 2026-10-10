@@ -23,7 +23,6 @@ const place = (key: string, km: number, stage: number): Place => ({
   variants: [],
 });
 
-// Four places in two stages: 0, 10, 20 and 40 km.
 const places = [place("a", 0, 1), place("b", 10, 1), place("c", 20, 2), place("d", 40, 2)];
 const stages: Stage[] = [
   { stage: 1, meta: undefined, places: places.slice(0, 2), startKey: null },
@@ -126,7 +125,6 @@ describe("spec 0039: share cards", () => {
   });
 
   describe("AC-5: the map", () => {
-    // A trail that runs east and then north: 3 vertices, 0 / 10 / 20 km.
     const route: Route = {
       points: [
         [16, 47, 0],

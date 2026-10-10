@@ -1,4 +1,4 @@
-// The public origin of a request behind the reverse proxy (spec 0020). A route handler behind Caddy sees
+// The public origin of a request behind the reverse proxy. A route handler behind Caddy sees
 // `localhost` in request.url, so redirects must be built from the origin the user actually used.
 
 type Env = Record<string, string | undefined>;

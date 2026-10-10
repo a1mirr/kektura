@@ -10,9 +10,9 @@ import { isValidStampDate } from "@/lib/stamp-date";
 import { useBulk, type BulkApi } from "./BulkDatesProvider";
 import CalendarButton from "./CalendarButton";
 
-// The bar of "Change dates" (spec 0016 AC-15 to AC-19, AC-21) and the answer to a save. The answer ("12 dates changed") is a status
-// live region that is always in the page, so a screen reader announces its text when it appears; empty, it takes no room. It has no
-// role of its own: the page already has one status (the test server's banner) and the others look for it.
+// The answer ("12 dates changed") is a status live region that is always in the page, so a screen reader announces
+// its text when it appears; empty, it takes no room. It has no role of its own: the page already has one status (the
+// test server's banner) and the others look for it.
 export default function BulkDateBar() {
   const bulk = useBulk();
   const t = useTranslations("dashboard");
@@ -27,8 +27,9 @@ export default function BulkDateBar() {
   );
 }
 
-// How far the on-screen keyboard covers the bottom of the layout viewport: the bar is fixed to the bottom on a phone, and a
-// keyboard that only shrinks the visual viewport (Chrome and Safari do) would hide it. Not while the page is pinch-zoomed.
+// How far the on-screen keyboard covers the bottom of the layout viewport: the bar is fixed to the bottom on a phone,
+// and a keyboard that only shrinks the visual viewport (Chrome and Safari do) would hide it. Not while the page is
+// pinch-zoomed.
 function useKeyboardInset() {
   const [inset, setInset] = useState(0);
   useEffect(() => {
@@ -46,8 +47,8 @@ function useKeyboardInset() {
   return inset;
 }
 
-// From 1024 px the bar is sticky at z-5: above the rows' positioned controls (the date fields) and below the map's block of the other
-// column (z-10), which holds the fullscreen map, so the map covers the bar (spec 0016 AC-21, spec 0003 AC-11).
+// From 1024 px the bar is sticky at z-5: above the rows' positioned controls (the date fields) and below the map's
+// block of the other column (z-10), which holds the fullscreen map, so the map covers the bar.
 // Mounted only while the mode is on, so its date and its failure start empty every time the mode opens.
 function Bar({ bulk }: { bulk: BulkApi }) {
   const t = useTranslations("dashboard");
@@ -61,7 +62,7 @@ function Bar({ bulk }: { bulk: BulkApi }) {
   const conflicts = retiredConflicts(chosen, draft);
   const ready = canApply(chosen, draft) && !pending;
 
-  // Nothing is sent before Apply, and never on `change` (spec 0016 AC-16).
+  // Nothing is sent before Apply, and never on `change`.
   function apply() {
     if (!ready || sending.current) return;
     sending.current = true;
@@ -74,13 +75,13 @@ function Bar({ bulk }: { bulk: BulkApi }) {
       try {
         result = await setStampDates(placeKeys, extraIds, draft);
       } catch {
-        result = { ok: false, reason: "failed" }; // network error
+        result = { ok: false, reason: "failed" };
       }
       sending.current = false;
       bulk.setBusy(false);
       if (result.ok) bulk.finish(count);
       else if (result.reason === "unauthorized") router.refresh(); // the session expired: the page sends the user to the landing page
-      else setFailed(true); // the dates and the choice stay as they were
+      else setFailed(true);
     });
   }
 
@@ -110,7 +111,7 @@ function Bar({ bulk }: { bulk: BulkApi }) {
       <form
         className="mt-1 flex flex-wrap items-center gap-2"
         onSubmit={(e) => {
-          e.preventDefault(); // Enter in the date field applies
+          e.preventDefault();
           apply();
         }}
       >

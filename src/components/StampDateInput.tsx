@@ -7,13 +7,10 @@ import type { ActionResult } from "@/lib/action-result";
 import { isValidStampDate } from "@/lib/stamp-date";
 import CalendarButton from "./CalendarButton";
 
-// The date field of a stamp (spec 0016 AC-5 to AC-12): a yyyy-mm-dd text field, so the date reads
-// the same in every browser, plus a button that opens the browser's calendar.
-//
-// It must not save on every change: typing one date over another passes through other complete dates
-// (2026-09-02 on the way to 2026-09-26), and a disabled field would lose focus mid-typing. So a valid,
-// changed value is saved after a pause or when the field is left; anything else is never sent and is
-// restored on leaving. (A day picked in the calendar is one complete date and is saved at once.)
+// It must not save on every change: typing one date over another passes through other complete dates (2026-09-02 on
+// the way to 2026-09-26), and a disabled field would lose focus mid-typing. So a valid, changed value is saved after
+// a pause or when the field is left; anything else is never sent and is restored on leaving. (A day picked in the
+// calendar is one complete date and is saved at once.)
 
 const SAVE_DELAY_MS = 700;
 
@@ -23,9 +20,9 @@ export default function StampDateInput({
   latest,
   onSave,
 }: {
-  value: string; // the saved date, as the server has it
+  value: string;
   max: string; // the latest date the server accepts (tomorrow, UTC)
-  latest?: string; // a stricter last day, for a retired stamp (spec 0016 AC-13): a later date is never sent
+  latest?: string; // a stricter last day, for a retired stamp: a later date is never sent
   onSave: (date: string) => Promise<ActionResult>;
 }) {
   const t = useTranslations("dashboard");
@@ -59,7 +56,7 @@ export default function StampDateInput({
       try {
         result = await onSaveRef.current(date);
       } catch {
-        result = { ok: false, reason: "failed" }; // network error
+        result = { ok: false, reason: "failed" };
       }
       if (result.ok) {
         setSaved(date);
@@ -82,7 +79,6 @@ export default function StampDateInput({
     return () => clearTimeout(timer);
   }, [draft, saved, status, save, valid]);
 
-  // A day picked in the calendar (spec 0016 AC-9) is one complete date, so it is saved at once instead of after the pause.
   function handlePick(date: string) {
     if (!valid(date)) return;
     setDraft(date);

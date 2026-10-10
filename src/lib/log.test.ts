@@ -75,7 +75,7 @@ describe("spec 0008: the other actions' lines", () => {
     logFriendsError("sendRequest", error);
     const lines = errorLog.mock.calls.map((call) => call[0] as string);
     expect(lines.map((line) => line.split(" ")[0])).toEqual(["[feedback]", "[account-delete]", "[friends]"]);
-    expect(lines[2]).not.toContain("u-1"); // the friends line carries no user id
+    expect(lines[2]).not.toContain("u-1");
     for (const line of lines) {
       expect(line).not.toContain("\n");
       expect(line).toContain('message="line one\\nline two"');
@@ -271,7 +271,6 @@ describe("spec 0008: failures reach Telegram", () => {
     logStampActionError("setStampDate", "write", { message: "x" }, "u-1");
     await flush();
     expect(fetchMock).not.toHaveBeenCalled();
-    // ...and those two did not use up the budget of their kinds.
     vi.stubEnv("NODE_ENV", "production");
     logStampActionError("setPlacesStamped", "write", { message: "x" }, "u-1");
     await flush();

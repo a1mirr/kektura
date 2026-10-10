@@ -15,8 +15,7 @@ const button = "rounded px-3 py-1 text-sm disabled:opacity-50";
 const primary = `${button} bg-blue-600 text-white hover:bg-blue-700`;
 const secondary = `${button} bg-stone-200 hover:bg-stone-300`;
 
-// The "share your progress" panel of the stats page (spec 0039 AC-6): create a card, copy its link, send it to Telegram,
-// delete it. The server action takes the numbers from the user's own stamps; this only says whether the name is shown.
+// The server action takes the numbers from the user's own stamps; this only says whether the name is shown.
 export default function SharePanel({ items }: { items: ShareItem[] }) {
   const t = useTranslations("share");
   const router = useRouter();

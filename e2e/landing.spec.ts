@@ -6,7 +6,6 @@ import { routing } from "../src/i18n/routing";
 import { SCREENSHOT_SIZE, SCREENSHOTS } from "../src/lib/screenshots";
 import { expectNoSidewaysScroll, signInAsNewUser } from "./helpers";
 
-// Spec 0038: the landing page's gallery of screenshots. The expected texts are read from each language's own messages file.
 type Messages = typeof en;
 const messages = (locale: string): Messages =>
   JSON.parse(fs.readFileSync(path.join(process.cwd(), "messages", `${locale}.json`), "utf8"));
@@ -59,7 +58,7 @@ test.describe("spec 0038: the landing page's gallery", () => {
         const figure = region.getByRole("figure").nth(i);
         await expect(figure.getByRole("img")).toHaveAttribute("alt", t[`${name}Alt`]);
         await expect(figure.locator("figcaption")).toHaveText(t[`${name}Caption`]);
-        await expect(figure.getByRole("img")).toHaveAttribute("src", new RegExp(`url=${encodeURIComponent(`/screenshots/${name}.png`)}&`)); // one set of files
+        await expect(figure.getByRole("img")).toHaveAttribute("src", new RegExp(`url=${encodeURIComponent(`/screenshots/${name}.png`)}&`));
       }
     });
   }
@@ -81,7 +80,7 @@ test.describe("spec 0038: the landing page's gallery", () => {
 
   test("AC-5: the headline, the subtitle and the sign-in button are on the first screen of a phone (375 x 667), whatever the pictures do", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-    await page.route("**/_next/image*", (route) => route.abort()); // pictures that never arrive
+    await page.route("**/_next/image*", (route) => route.abort());
     await page.goto("/en");
     const t = messages("en").home;
     for (const target of [page.getByRole("heading", { level: 1 }), page.getByText(t.subtitle), page.getByRole("button", { name: t.signIn })]) {
@@ -144,7 +143,7 @@ test.describe("spec 0038: the landing page's gallery", () => {
       expect(footer.y, `${width} px`).toBeGreaterThanOrEqual(last.y + last.height);
       expect(footer.y, `${width} px: below the first screen`).toBeGreaterThan(height);
       await page.getByRole("contentinfo").scrollIntoViewIfNeeded();
-      await expect(page.getByRole("contentinfo")).toBeInViewport({ ratio: 0.9 }); // reachable by scrolling
+      await expect(page.getByRole("contentinfo")).toBeInViewport({ ratio: 0.9 });
     }
   });
 

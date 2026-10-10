@@ -6,7 +6,8 @@ vi.mock("@/lib/feature-flags-server", () => ({ flagOn: (key: string) => mockFlag
 const mockLoad = vi.fn();
 vi.mock("@/lib/share-card-server", () => ({ loadShareCard: (token: string) => mockLoad(token) }));
 
-// Built at run time, from a repeated pair: a 32-character hex literal, or one with many different characters, assigned to a constant is what the secret scanner (spec 0007 AC-16) takes for an API key.
+// Built at run time, from a repeated pair: a 32-character hex literal, or one with many different characters,
+// assigned to a constant is what the secret scanner takes for an API key.
 const TOKEN = "ab".repeat(16);
 const CARD: ShareCard = {
   createdAt: "2026-10-08T10:00:00Z",

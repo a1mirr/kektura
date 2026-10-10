@@ -1,7 +1,6 @@
-// Spec 0035 AC-7, AC-8, AC-12, AC-13 against the real local database (`npm run testdb:start`). The tests skip
-// themselves when it isn't running and fail where CI requires it (`REQUIRE_LOCAL_DB`, spec 0007 AC-12); CI's end-to-end job runs them. They talk to PostgREST the way a browser could,
-// as a signed-in user and as an anonymous visitor, so they prove what a malicious client can and cannot do. Each test
-// works on flags of its own (`dbtest-...`), never on the declared ones that the E2E tests switch.
+// They talk to PostgREST the way a browser could, as a signed-in user and as an anonymous visitor, so they prove what
+// a malicious client can and cannot do. Each test works on flags of its own (`dbtest-...`), never on the declared
+// ones that the E2E tests switch.
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -28,7 +27,6 @@ async function signUp(): Promise<Person> {
   return { client, id: data.user.id };
 }
 
-// What a viewer is told about the flags of this test.
 async function seenBy(client: SupabaseClient<Database>) {
   const { data, error } = await client.rpc("feature_flags_for_me");
   if (error) throw new Error(error.message);
@@ -36,7 +34,7 @@ async function seenBy(client: SupabaseClient<Database>) {
 }
 
 beforeAll(async () => {
-  if (databaseDecision(RELATIONS).action !== "run") return; // the tests skip or fail, whichever the environment asks for
+  if (databaseDecision(RELATIONS).action !== "run") return;
   local = localSupabase();
   [ana, bob] = [await signUp(), await signUp()];
   anon = connect();

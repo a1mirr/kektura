@@ -1,6 +1,3 @@
-// Share cards (spec 0039): a frozen snapshot of a user's progress behind a public link. Pure functions: what a card
-// holds, how its link is written, and how the trail is drawn from the walked ranges. The database rules are in
-// `supabase/migrations/0132_share_cards.sql`, the page and the image read a card and call these.
 import { sliceRoute, type Route } from "./route-geometry";
 import {
   countDone,
@@ -30,8 +27,7 @@ export type ShareSnapshot = {
   ranges: KmRange[];
 };
 
-// The numbers of the dashboard and the stats page (spec 0001, spec 0037 AC-3), from the same functions, so a card never
-// disagrees with them.
+// Built from the same functions as the dashboard and the stats page, so a card never disagrees with them.
 export function buildShareSnapshot(
   places: Place[],
   stages: Stage[],
@@ -52,7 +48,6 @@ export function buildShareSnapshot(
   };
 }
 
-// One card as `get_share_card` returns it (numbers arrive as numbers or, for `numeric`, as numbers too through PostgREST).
 export type ShareCardRow = {
   created_at: string;
   display_name: string | null;
@@ -67,7 +62,7 @@ export type ShareCardRow = {
 };
 
 export type ShareCard = {
-  createdAt: string; // ISO timestamp
+  createdAt: string;
   name: string | null;
   stampsDone: number;
   stampsTotal: number;
@@ -104,14 +99,10 @@ export function toShareCard(row: ShareCardRow): ShareCard {
   };
 }
 
-// The public address of a card: `/<locale>/share/<token>`. The language is the one the link is opened in.
 export const shareUrl = (origin: string, locale: string, token: string): string => `${origin}/${locale}/share/${token}`;
 
-// Telegram's own share dialog (spec 0039 AC-9): opens with the link and a line of text to send.
 export const telegramShareUrl = (url: string, text: string): string =>
   `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
-
-// ---- The map -------------------------------------------------------------------------------------------------------
 
 export type ShareMapPaths = {
   width: number;
@@ -126,7 +117,6 @@ export type ShareMapPaths = {
 const PADDING = 12;
 const MIN_STEP = 1.5; // px: a vertex closer than this to the last kept one adds nothing visible
 
-// The trail and the walked stretches as SVG paths in a box `width` wide (the height follows the trail's shape).
 // Longitude is scaled by the cosine of the middle latitude, so Hungary is not stretched sideways.
 export function shareMapPaths(route: Route, ranges: KmRange[], width: number): ShareMapPaths {
   const points = route.points;
@@ -146,7 +136,6 @@ export function shareMapPaths(route: Route, ranges: KmRange[], width: number): S
     Math.round((PADDING + (maxLat - lat) * scale) * 10) / 10,
   ];
 
-  // Keeps the first and the last vertex and every vertex that moved at least MIN_STEP from the last one kept.
   const thin = (line: [number, number][]): [number, number][] => {
     const kept: [number, number][] = [];
     line.forEach((point, i) => {

@@ -22,7 +22,6 @@ function useTypedHooks() {
   // @ts-expect-error unknown nested key
   root("dashboard.stampp");
 
-  // `useLocale` returns the routing locales, not a plain string.
   const locale: "hu" | "en" | "de" | "ru" = useLocale();
   return locale;
 }

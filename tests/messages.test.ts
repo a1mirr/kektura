@@ -1,5 +1,3 @@
-// Every UI string exists in every locale with the same ICU placeholders (CLAUDE.md: "Add every
-// new string to every file").
 import { describe, expect, it } from "vitest";
 import { routing } from "../src/i18n/routing";
 import { messageFiles as byLocale } from "./message-files";
@@ -45,8 +43,8 @@ describe("spec 0005: translations", () => {
 });
 
 describe("spec 0015: about page text", () => {
-  // The app has no manifest or service worker, so the progressive web app claim is not true, and the page
-  // makes no open source claim. Whoever adds either edits spec 0015 AC-6 and this test.
+  // The app has no manifest or service worker, so the progressive web app claim is not true, and the page makes no
+  // open source claim. Whoever adds either edits the About page's spec and this test.
   const claims = /open[- ]source|progressive|\bPWA\b|открыт[а-яё]* исходн|nyílt forrás|quelloffen/i; // (\w doesn't match Cyrillic)
 
   it.each(Object.entries({ en: reference, ...locales }))("AC-6: %s makes no open-source or PWA claim", (_, messages) => {

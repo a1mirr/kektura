@@ -1,7 +1,5 @@
 import { setStageOpen } from "@/lib/stage-events";
 
-// "Show in list" (spec 0003 AC-12): scroll the matching list row (`place-<key>` / `extra-<id>`) into
-// view and flash it.
 export function revealInList(kind: string, key: string) {
   const el = document.getElementById(`${kind}-${key}`);
   if (!el) return;

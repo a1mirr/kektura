@@ -23,11 +23,10 @@ async function requestedFriendship(browser: Browser) {
   }).toPass();
   const inviteUrl = await inviteLink(anaPage);
 
-  // AC-3: signed out, the link sends the visitor through sign-in and back to it.
   const bobPage = await (await browser.newContext()).newPage();
   await bobPage.goto(inviteUrl);
   await expect(bobPage.getByText("Sign in to continue")).toBeVisible();
-  await expect(bobPage.getByText("Ana", { exact: true })).toHaveCount(0); // nothing about the owner before sign-in
+  await expect(bobPage.getByText("Ana", { exact: true })).toHaveCount(0);
   const bobEmail = `e2e-bob-${Date.now()}-${Math.random().toString(16).slice(2)}@kektura.test`;
   await bobPage.getByLabel(/^Test login/).fill(bobEmail);
   await bobPage.getByRole("button", { name: "Sign in as test user" }).click();
@@ -36,20 +35,19 @@ async function requestedFriendship(browser: Browser) {
 
   await bobPage.getByRole("button", { name: "Send request" }).click();
   await expect(bobPage).toHaveURL(/\/en\/friends\?ok=sent$/);
-  await expect(status(bobPage)).toContainText("Request sent."); // AC-3: the requester is told
+  await expect(status(bobPage)).toContainText("Request sent.");
   const userId = (email: string) => psql(`select id from auth.users where email = '${email}'`);
   return { anaPage, bobPage, anaId: userId(anaEmail), bobId: userId(bobEmail), inviteUrl };
 }
 
-// The page's own answer (spec 0024 AC-18): the test server's banner is a `status` too, and Next's route
+// The page's own answer: the test server's banner is a `status` too, and Next's route
 // announcer an (empty) `alert`.
 const status = (page: Page) => page.locator("[role=status][aria-live=polite]");
 const alert = (page: Page) => page.getByRole("alert").filter({ hasText: /\S/ });
 
 const inviteLink = (page: Page) => page.locator("input[readonly]").inputValue();
 
-// Spec 0024 AC-19: remove and regenerate ask first. The question is a <details>: its summary opens it, the
-// confirming button inside is the real submit.
+// The question is a <details>: its summary opens it, the confirming button inside is the real submit.
 async function confirmed(scope: Locator, label: string, yes: string) {
   await scope.locator("summary", { hasText: label }).click();
   await scope.getByRole("button", { name: yes }).click();
@@ -59,20 +57,18 @@ async function approve(anaPage: Page) {
   await anaPage.goto("/en/friends");
   await anaPage.getByRole("button", { name: "Approve" }).click();
   await expect(anaPage.getByRole("button", { name: "Approve" })).toHaveCount(0);
-  await expect(status(anaPage)).toHaveText("Friend request approved."); // AC-18
+  await expect(status(anaPage)).toHaveText("Friend request approved.");
 }
 
 test.describe("spec 0024: friends", () => {
   test("AC-4, AC-5, AC-7, AC-8, AC-9, AC-10: request, approval, what a friend sees, the switch and removal", async ({ browser }) => {
     const { anaPage, bobPage, anaId } = await requestedFriendship(browser);
 
-    // AC-4: the request is only visible to the inviter, and shares nothing yet.
     await expect(bobPage.getByText("You haven't added any friends yet.")).toBeVisible();
-    expect((await bobPage.request.get(`/en/friends/${anaId}`)).status()).toBe(404); // not a friend yet
+    expect((await bobPage.request.get(`/en/friends/${anaId}`)).status()).toBe(404);
     await anaPage.goto("/en/friends");
     await expect(anaPage.getByRole("heading", { name: "Pending requests" })).toBeVisible();
 
-    // AC-5, AC-7: after approval both see each other, with the numbers of Ana's dashboard.
     await approve(anaPage);
     await bobPage.goto("/en/friends");
     const row = bobPage.getByRole("listitem").filter({ hasText: "Ana" });
@@ -85,26 +81,24 @@ test.describe("spec 0024: friends", () => {
     await expect(bobPage.getByRole("heading", { name: "Ana" })).toBeVisible();
     await expect(stat(bobPage, "Stamps")).toHaveText("2 / 161");
     await expect(stat(bobPage, "Kilometres")).toHaveText("8.1");
-    await expect(bobPage.getByLabel("Date of the stamp")).toHaveCount(0); // no stamp dates
+    await expect(bobPage.getByLabel("Date of the stamp")).toHaveCount(0);
     const friendPage = bobPage.url();
 
-    // AC-9: Ana stops sharing; Bob sees "not sharing" and cannot open her page. The switch is hers alone.
     await anaPage.getByRole("button", { name: "Stop sharing" }).click();
     await expect(anaPage.getByRole("button", { name: "Start sharing" })).toBeVisible();
-    await expect(status(anaPage)).toHaveText("Sharing stopped."); // AC-18
+    await expect(status(anaPage)).toHaveText("Sharing stopped.");
     await bobPage.goto("/en/friends");
     await expect(bobPage.getByRole("listitem").filter({ hasText: "Ana" })).toContainText("Not sharing with you");
     await expect(bobPage.getByRole("link", { name: "Ana" })).toHaveCount(0);
     expect((await bobPage.request.get(friendPage)).status()).toBe(404);
     await anaPage.getByRole("button", { name: "Start sharing" }).click();
     await expect(anaPage.getByRole("button", { name: "Stop sharing" })).toBeVisible();
-    await expect(status(anaPage)).toHaveText("You are sharing your progress with this friend."); // AC-18
+    await expect(status(anaPage)).toHaveText("You are sharing your progress with this friend.");
 
-    // AC-10: Bob removes Ana; both lists are empty, and Ana's page is closed to him.
     await bobPage.goto("/en/friends");
     await confirmed(bobPage.getByRole("listitem").filter({ hasText: "Ana" }), "Remove", "Yes, remove");
     await expect(bobPage.getByText("You haven't added any friends yet.")).toBeVisible();
-    await expect(status(bobPage)).toHaveText("Friend removed."); // AC-18
+    await expect(status(bobPage)).toHaveText("Friend removed.");
     await anaPage.reload();
     await expect(anaPage.getByText("You haven't added any friends yet.")).toBeVisible();
     expect((await bobPage.request.get(friendPage)).status()).toBe(404);
@@ -113,7 +107,7 @@ test.describe("spec 0024: friends", () => {
   test("AC-2: regenerating the link invalidates the old one", async ({ browser }) => {
     const { anaPage, bobPage, inviteUrl } = await requestedFriendship(browser);
     await confirmed(anaPage.locator("section", { hasText: "Your invite link" }), "Regenerate", "Yes, create a new link");
-    await expect(status(anaPage)).toContainText("The old one no longer works."); // AC-18
+    await expect(status(anaPage)).toContainText("The old one no longer works.");
     await expect(async () => {
       await anaPage.reload();
       expect(await inviteLink(anaPage)).not.toBe(inviteUrl);
@@ -169,11 +163,11 @@ test.describe("spec 0024: friends", () => {
     await other.goto("/en/friends?error=Your%20account%20is%20suspended");
     await expect(other.getByText("suspended")).toHaveCount(0);
     await other.goto("/en/friends?error=already_friends");
-    await expect(alert(other)).toHaveText("You are already friends."); // AC-18: a failure is an alert
+    await expect(alert(other)).toHaveText("You are already friends.");
     await other.goto("/en/friends?ok=Everything%20is%20fine");
-    await expect(status(other)).toHaveCount(0); // AC-18: an unknown ?ok= is not shown either
+    await expect(status(other)).toHaveCount(0);
     await other.goto("/en/friends?sent=1");
-    await expect(status(other)).toHaveCount(0); // the old way of saying "request sent" is gone
+    await expect(status(other)).toHaveCount(0);
   });
 
   test("AC-7: the friends pages fit a phone screen, also with the longest names", async ({ browser }) => {
@@ -184,9 +178,9 @@ test.describe("spec 0024: friends", () => {
     await anaPage.setViewportSize({ width: 375, height: 812 });
 
     const approveLabel: Record<string, string> = { hu: "Elfogadás", ru: "Одобрить" };
-    const longWords = [routing.defaultLocale, "ru"]; // the default and one other
+    const longWords = [routing.defaultLocale, "ru"];
     for (const locale of longWords) {
-      await anaPage.goto(`/${locale}/friends`); // the longest words; Bob's request is pending
+      await anaPage.goto(`/${locale}/friends`);
       await expect(anaPage.getByRole("button", { name: approveLabel[locale] })).toBeVisible();
       expect(await overflow(anaPage), `${locale} pending`).toBeLessThanOrEqual(0);
     }
@@ -197,7 +191,6 @@ test.describe("spec 0024: friends", () => {
       await anaPage.goto(`/${locale}/friends`);
       expect(await overflow(anaPage), `${locale} friend`).toBeLessThanOrEqual(0);
     }
-    // A friend's page and the invite page show the (long) name in their headings.
     await anaPage.goto(`/en/friends/${bobId}`);
     await expect(anaPage.getByRole("heading", { name: "W".repeat(40) })).toBeVisible();
     // The stage list is the dashboard's, and Ana left every stage open there: close them to measure the heading.
@@ -233,7 +226,6 @@ test.describe("spec 0024: friends", () => {
     await page.getByRole("button", { name: "Save" }).click();
     await expect(page.getByText("Something went wrong, please try again.")).toBeVisible();
 
-    // The message goes away with the next action that works.
     await page.getByLabel("Your name (shown to friends)").fill("Anna");
     await page.getByRole("button", { name: "Save" }).click();
     await expect(page.getByText("Something went wrong, please try again.")).toHaveCount(0);
@@ -267,7 +259,7 @@ test.describe("spec 0024: the Friends page buttons respond", () => {
     await page.route("**/en/friends", async (route) => {
       if (route.request().method() === "POST") {
         posts++;
-        await new Promise((resolve) => setTimeout(resolve, 1_500)); // a slow server
+        await new Promise((resolve) => setTimeout(resolve, 1_500));
       }
       await route.continue();
     });
@@ -278,7 +270,7 @@ test.describe("spec 0024: the Friends page buttons respond", () => {
     }).toPass();
     const save = page.getByRole("button", { name: "Save" });
     await expect(save).toHaveAttribute("aria-busy", "true");
-    await save.click({ force: true }); // a disabled button takes no press
+    await save.click({ force: true });
     await expect(status(page)).toHaveText("Name saved.");
     await expect(save).toBeEnabled();
     expect(posts).toBe(1);
@@ -311,7 +303,6 @@ test.describe("spec 0024: the Friends page buttons respond", () => {
     const row = bobPage.getByRole("listitem").filter({ hasText: "Ana" });
     const details = row.locator("details");
 
-    // The first press only asks: nothing is removed. Cancel and Escape close the question.
     await expect(async () => {
       await row.locator("summary", { hasText: "Remove" }).click();
       await expect(row.getByText("Remove Ana from your friends?")).toBeVisible({ timeout: 1_000 });
@@ -328,7 +319,7 @@ test.describe("spec 0024: the Friends page buttons respond", () => {
     const link = await inviteLink(bobPage);
     await regenerate.locator("summary", { hasText: "Regenerate" }).click();
     await expect(regenerate.getByText("The old link stops working at once")).toBeVisible();
-    expect(await inviteLink(bobPage)).toBe(link); // asked, not done
+    expect(await inviteLink(bobPage)).toBe(link);
   });
 
   test("AC-21: with JavaScript off the buttons are plain forms that still act, and the question still opens", async ({ browser }) => {

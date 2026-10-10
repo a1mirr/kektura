@@ -19,7 +19,7 @@ describe("spec 0001: the stage controls", () => {
     setup(false);
     expect(screen.queryByLabelText("Show retired stamps")).toBeNull();
     cleanup();
-    setup(); // the default: nothing retired
+    setup();
     expect(screen.queryByLabelText("Show retired stamps")).toBeNull();
     cleanup();
     setup(true);

@@ -6,10 +6,10 @@ import { CHANGELOG } from "../src/content/changelog";
 import { routing } from "../src/i18n/routing";
 import { accountButton, openAccountMenu, signInAsNewUser } from "./helpers";
 
-// The one test per behaviour that runs over every language (task 0068): the expected texts are read from the
+// The one test per behaviour that runs over every language: the expected texts are read from the
 // language's own messages file, so a new language needs no edit here. Other specs use the default language and
 // at most one other.
-type Messages = typeof en; // every language has the keys of English (spec 0005 AC-5)
+type Messages = typeof en;
 const messages = (locale: string): Messages =>
   JSON.parse(fs.readFileSync(path.join(process.cwd(), "messages", `${locale}.json`), "utf8"));
 const longDate = (locale: string, date: string) =>
@@ -22,7 +22,7 @@ test.describe("spec 0005: every language", () => {
     test(`AC-10, AC-11, 0014 AC-1, 0015 AC-1, 0015 AC-7, 0018 AC-3, 0019 AC-2: the public pages are in ${locale}`, async ({ page }) => {
       await page.goto(`/${locale}`);
       await expect(page.locator("html")).toHaveAttribute("lang", locale);
-      await expect(page.getByRole("combobox", { name: m.app.language })).toHaveValue(locale); // the dropdown (AC-10)
+      await expect(page.getByRole("combobox", { name: m.app.language })).toHaveValue(locale);
       await expect(page.getByRole("contentinfo").getByRole("link")).toHaveText([
         m.footer.about,
         m.footer.changelog,

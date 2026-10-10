@@ -5,15 +5,12 @@ import { segmentLines, sliceRoute } from "@/lib/route-geometry";
 import { hopOrder, routeStats, type Hop } from "@/lib/route-stats";
 import type { MapHandleRef, MapInputs } from "./types";
 
-// The route planner (spec 0003 AC-3 to AC-8): two chosen stamps, the amber highlight between them
-// (and a zoom to it) and the numbers for the stretch.
 export function useRoutePlanner(mapRef: MapHandleRef, latest: RefObject<MapInputs>, points: MapPoint[]) {
   const [hops, setHops] = useState<Hop[]>([]);
   const [routeFrom, setRouteFrom] = useState<string | null>(null);
   const [routeTo, setRouteTo] = useState<string | null>(null);
   const pairRef = useRef<[number, number] | null>(null); // km range of the chosen stretch
 
-  // Hops (distance / ascent / descent / time between neighbouring stamps).
   useEffect(() => {
     let cancelled = false;
     fetch("/data/okt-hops.json")
@@ -29,7 +26,6 @@ export function useRoutePlanner(mapRef: MapHandleRef, latest: RefObject<MapInput
     };
   }, []);
 
-  // Highlight the stretch between the two chosen stamps.
   const refreshSegment = useCallback(() => {
     const { map, ready, route } = mapRef.current;
     if (!ready || !map || !route) return;
@@ -38,7 +34,6 @@ export function useRoutePlanner(mapRef: MapHandleRef, latest: RefObject<MapInput
     src.setData(segmentLines(route.showingDetail && route.detail ? route.detail : route.overview, pairRef.current));
   }, [mapRef]);
 
-  // Chosen stamps -> highlighted stretch on the map (+ zoom to it).
   useEffect(() => {
     const kmOf = (key: string | null) =>
       key === null ? undefined : latest.current.points.find((p) => p.placeKey === key)?.km;

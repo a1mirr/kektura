@@ -8,7 +8,7 @@ import RetiredToggle from "./RetiredToggle";
 
 export default function StageControls({ withRetired = false }: { withRetired?: boolean }) {
   const t = useTranslations("dashboard");
-  const bulk = useBulk(); // only on the dashboard, where dates are edited (spec 0016 AC-14)
+  const bulk = useBulk(); // only on the dashboard, where dates are edited
   const hydrated = useHydrated(); // "Change dates" needs JavaScript: without it only the single date fields are offered
 
   return (

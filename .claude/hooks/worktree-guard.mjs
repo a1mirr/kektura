@@ -1,7 +1,4 @@
-// Claude Code PreToolUse hook (spec 0021, AC-7): changes are made in a linked git worktree on a topic branch,
-// never in the primary checkout and never on `main`. Blocks Edit, Write and NotebookEdit on a tracked or
-// untracked-but-not-ignored file there, and Bash commands that run a git command that rewrites the working tree,
-// the index or the branch there. Exit 2 puts stderr in front of Claude; any other outcome lets the call through.
+// Exit 2 puts stderr in front of Claude; any other outcome lets the call through.
 //
 // A hook can't move the session, only refuse: the message says how to make a worktree. It is a guard against the
 // usual mistake, not a sandbox: a shell redirect, `sed -i` or a script that writes files is not recognised (the
@@ -13,20 +10,19 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 export const PROTECTED_BRANCHES = ["main", "master"];
-// Git commands that change the working tree, the index or what a branch points at. Reading (status, log, diff,
-// fetch, show, worktree, branch -r) and pushing (the pre-push guard owns that) are not in the list.
+// Reading (status, log, diff, fetch, show, worktree, branch -r) and pushing (the pre-push guard owns that) are not in
+// the list.
 export const MUTATING = new Set([
   "add", "am", "apply", "checkout", "cherry-pick", "clean", "commit", "merge", "mv", "pull", "rebase", "reset", "restore", "revert", "rm", "stash", "switch",
 ]);
 const FILE_TOOLS = new Set(["Edit", "Write", "NotebookEdit"]);
 
-/** Runs `git <args>` in `dir`; returns { status, stdout }. Injected in the tests. */
+// Injected in the tests.
 export function realGit(dir, args) {
   const result = spawnSync("git", ["-c", "core.quotepath=false", ...args], { cwd: dir, encoding: "utf8", timeout: 10_000, env: { ...process.env, GIT_TERMINAL_PROMPT: "0" } });
   return { status: result.status ?? 1, stdout: result.stdout ?? "" };
 }
 
-/** Where `dir` sits: null when it is not in a git repository, else the repo's common dir, whether it is the primary checkout and its branch. */
 export function inspect(dir, git = realGit) {
   const revs = git(dir, ["rev-parse", "--path-format=absolute", "--git-dir", "--git-common-dir", "--show-toplevel"]);
   if (revs.status !== 0) return null;
@@ -37,7 +33,6 @@ export function inspect(dir, git = realGit) {
 
 const norm = (p) => path.resolve(p ?? "").replace(/\\/g, "/").toLowerCase();
 
-/** The reason a change in `where` is refused, or "" when it is fine. */
 function refusal(where) {
   if (where.primary) return `${where.top} is the primary checkout, which every session shares`;
   if (PROTECTED_BRANCHES.includes(where.branch)) return `${where.top} is on ${where.branch}`;
@@ -79,7 +74,6 @@ export function toNative(p, platform = process.platform) {
 }
 const resolveFrom = (dir, p) => path.resolve(dir, toNative(unquote(p)));
 
-/** The git subcommand of a simple command and the directory it runs in (`git -C dir`), or null when it is not a git command. */
 export function gitInvocation(command, dir) {
   // `FOO=1 git ...`, `command git ...` and `git.exe` are git too.
   const parts = words(command);
@@ -95,7 +89,6 @@ export function gitInvocation(command, dir) {
   return { subcommand: parts[i] ?? "", where, rest: parts.slice(i + 1) };
 }
 
-/** For `git worktree add -b <topic> <path> <base>`: whether it starts a new branch, and from what. Null for any other command. */
 export function newBranchBase(invocation) {
   if (invocation.subcommand !== "worktree" || invocation.rest[0] !== "add") return null;
   let creates = false;
@@ -104,7 +97,7 @@ export function newBranchBase(invocation) {
     const word = invocation.rest[i];
     if (word === "-b" || word === "-B") {
       creates = true;
-      i++; // the branch name
+      i++;
     } else if (/^-[bB]./.test(word)) creates = true; // -bNAME
     else if (word === "--reason") i++;
     else if (!word.startsWith("-")) positional.push(unquote(word));
@@ -115,7 +108,6 @@ export function newBranchBase(invocation) {
   return null;
 }
 
-/** The refusal for a new branch that does not start from the current origin/main, or "". */
 function staleBase(base, where, git) {
   if (base !== "origin/main") {
     return `a new branch starts from origin/main, not ${base ? `"${base}"` : "from wherever HEAD is"}: a local main or a branch can be days behind`;
@@ -172,7 +164,7 @@ export function decide(input, { project = input.cwd ?? process.cwd(), git = real
         continue;
       }
       if (!MUTATING.has(invocation.subcommand)) continue;
-      if (invocation.subcommand === "stash" && /^(list|show)$/.test(invocation.rest[0] ?? "")) continue; // a read
+      if (invocation.subcommand === "stash" && /^(list|show)$/.test(invocation.rest[0] ?? "")) continue;
       // Bringing a checkout that is on main up to date, forward only, is upkeep and not a change of work.
       if ((invocation.subcommand === "pull" || invocation.subcommand === "merge") && invocation.rest.includes("--ff-only") && where.branch === "main") continue;
       const reason = refusal(where);
@@ -182,7 +174,6 @@ export function decide(input, { project = input.cwd ?? process.cwd(), git = real
   return "";
 }
 
-// Run as the hook: the tool call arrives as JSON on stdin.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   let input = {};
   try {

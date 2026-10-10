@@ -1,5 +1,4 @@
-// The deployment files (spec 0020): the properties that make a deploy safe, so they can't be edited away
-// unnoticed. The scripts themselves only run on the server.
+// The scripts themselves only run on the server.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";

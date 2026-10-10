@@ -39,7 +39,6 @@ for (const r of items) {
   r.distKm = Math.round(distance * 10) / 10; // straight line to the nearest track point
   r.km = Math.round(km[index] * 10) / 10;
 }
-// Only restaurants within reach of the trail (straight line).
 const MAX_DIST_KM = 5;
 const nearby = items.filter((r) => r.distKm <= MAX_DIST_KM).sort((a, b) => a.km - b.km);
 fs.mkdirSync("public/data", { recursive: true });

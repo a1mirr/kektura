@@ -34,7 +34,6 @@ async function connected(browser: Browser, { anaShares = true } = {}) {
   return { anaPage, bobPage, anaId, bobId };
 }
 
-// How far the page scrolls sideways (0: not at all), with the elements that stick out for the failure message.
 const overflow = (page: Page) =>
   page.evaluate(() => {
     const width = document.documentElement.clientWidth;
@@ -87,7 +86,7 @@ test.describe("spec 0024: comparing with a friend", () => {
     await expect(card(bobPage, "them")).toContainText("1 stamp");
     await expect(card(bobPage, "neither")).toContainText(`${neither} km`);
     await expect(card(bobPage, "neither")).toContainText("157 stamps");
-    await expect(bobPage.getByLabel("Date of the stamp")).toHaveCount(0); // never dates
+    await expect(bobPage.getByLabel("Date of the stamp")).toHaveCount(0);
   });
 
   test("AC-22, AC-24: every stage says how it stands and links to its section below", async ({ browser }) => {
@@ -105,7 +104,7 @@ test.describe("spec 0024: comparing with a friend", () => {
 
   test("AC-22: a friend who is not sharing, a pending friend and an unknown id still end on 404", async ({ browser }) => {
     const { bobPage, anaId, bobId } = await connected(browser, { anaShares: false });
-    expect((await bobPage.request.get(`/en/friends/${anaId}`)).status()).toBe(404); // she does not share with him
+    expect((await bobPage.request.get(`/en/friends/${anaId}`)).status()).toBe(404);
     expect((await bobPage.request.get("/en/friends/00000000-0000-0000-0000-000000000000")).status()).toBe(404);
     psql(`update public.friendships set status = 'pending', friend_is_sharing = true where user_id = '${bobId}'`);
     expect((await bobPage.request.get(`/en/friends/${anaId}`)).status()).toBe(404);
@@ -152,7 +151,6 @@ test.describe("spec 0003: the comparison map", () => {
     await group.getByRole("button", { name: "Both" }).click();
     await expect(legend.getByRole("listitem")).toHaveCount(4);
 
-    // AC-20: read-only: a click on the map (which opens a stamp menu on the dashboard) opens nothing.
     await bobPage.locator("canvas.maplibregl-canvas").click();
     await expect(bobPage.locator(".maplibregl-popup")).toHaveCount(0);
     await expect(bobPage.getByRole("button", { name: "Add stamp" })).toHaveCount(0);
@@ -171,7 +169,7 @@ test.describe("spec 0003: the comparison map", () => {
     const map = bobPage.locator(".maplibregl-map");
     await map.scrollIntoViewIfNeeded();
     const stage = bobPage.locator("#stage-1 button[aria-expanded]");
-    await expect(stage).toHaveAttribute("aria-expanded", "false"); // collapsed: the click has to open it
+    await expect(stage).toHaveAttribute("aria-expanded", "false");
     // Retried: the points are drawn a moment after the map loads, and a click before that finds nothing.
     await expect(async () => {
       const box = (await map.boundingBox())!;

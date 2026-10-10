@@ -1,19 +1,13 @@
-// Server-side logging for the server actions (spec 0008): the stamp actions, feedback,
-// account deletion and friends. They turn every error into a plain `failed` result for the client, so
-// this is the only trace a failure leaves. It is the single place to hook an error-monitoring service in later.
+// The server actions turn every error into a plain `failed` result for the client, so this is the only trace a
+// failure leaves. It is the single place to hook an error-monitoring service in later.
 //
-// One line per event, plain `key=value` text that is easy to grep in the host's logs. Only the action
-// name, the stage, the user id and the error's own code/message are logged: never tokens, cookies,
+// Only the action name, the stage, the user id and the error's own code/message are logged: never tokens, cookies,
 // emails, request input, or the extra `details` / `hint` a Supabase error can carry.
-//
-// A failure that is not an expected outcome also goes to Telegram (spec 0008 AC-6 to AC-10), through
-// `src/lib/failure-alerts.ts`, once per kind of failure and hour.
 
 import { createFailureAlerter, type Failure } from "./failure-alerts";
 import { sendTelegramMessage, telegramConfig } from "./telegram";
 
 export type StampAction = "setPlacesStamped" | "setStampDate" | "setStampDates" | "setExtraStamped" | "setExtraStampDate";
-// Where it failed: reading the checkpoints, writing the stamps, or something that threw.
 export type StampStage = "read" | "write" | "exception";
 
 const TAG = "[stamp-action]";
@@ -35,8 +29,7 @@ function describeError(error: unknown): { code?: string; message: string } {
 // holds the bot token and the message text can hold what the sender wrote.
 const safeReason = (reason: string) => (/^[\w-]{1,32}$/.test(reason) ? reason : "unknown");
 
-// Sends the text to the feedback chat (spec 0017) without waiting for it: an action never waits for, or fails
-// because of, Telegram (spec 0008 AC-9).
+// Does not wait for Telegram: an action never waits for it, or fails because of it.
 function sendAlert(text: string): void {
   const config = telegramConfig();
   if (!config) return;
@@ -79,13 +72,12 @@ export function logStampActionInvalidInput(action: StampAction): void {
   console.warn(`${TAG} invalid input action=${action}`);
 }
 
-// A request with valid input that the database refused (spec 0016 AC-17: a stamp that is gone, a retired stamp's day): an
-// expected outcome, one warning with the action name only. It is no failure of ours, so it is never sent to Telegram (spec 0008 AC-6).
+// A refused request is an expected outcome (a stamp that is gone, a retired stamp's day): one warning with the action
+// name only. It is no failure of ours, so it is never sent to Telegram.
 export function logStampActionRefused(action: StampAction): void {
   console.warn(`${TAG} request refused action=${action}`);
 }
 
-// Feedback form (spec 0017) and account deletion (spec 0014): same one-line format, their own tags.
 export function logFeedbackError(stage: "write" | "exception", error: unknown, userId?: string): void {
   const { code, message } = describeError(error);
   console.error(
@@ -105,37 +97,32 @@ export function logAccountDeletionError(stage: "rpc" | "exception", error: unkno
   console.error(
     `[account-delete] stage=${stage} user=${userId ?? "unknown"} code=${code ?? "-"} message=${quote(message)}`,
   );
-  // The database function is the write; the message names the stage the way the other actions do.
   alertFailure({ tag: "account-delete", action: "deleteAccount", stage: stage === "rpc" ? "write" : "exception", code });
 }
 
-// Friends actions (spec 0024 AC-14): the action name and the error's own code and message, no user ids,
-// names or tokens.
-// `stage` is only for the Telegram message (the line has none): every friends action is a database write, unless
-// something threw around it.
+// No user ids, names or tokens. `stage` is only for the Telegram message (the line has none): every friends action is
+// a database write, unless something threw around it.
 export function logFriendsError(action: string, error: unknown, stage: Failure["stage"] = "write"): void {
   const { code, message } = describeError(error);
   console.error(`[friends] action=${action} code=${code ?? "-"} message=${quote(message)}`);
   alertFailure({ tag: "friends", action, stage, code });
 }
 
-// Share cards (spec 0039 AC-13): the action name and the error's own code and message, no user ids, names, tokens or
-// numbers of a card. `stage` is only for the Telegram message, as for the friends actions; a failed `read` is logged and
-// never sent (spec 0008 AC-6).
+// No user ids, names, tokens or numbers of a card. `stage` is only for the Telegram message, as for the friends
+// actions; a failed `read` is logged and never sent.
 export function logShareError(action: string, error: unknown, stage: Failure["stage"] | "read" = "write"): void {
   const { code, message } = describeError(error);
   console.error(`[share] action=${action} code=${code ?? "-"} message=${quote(message)}`);
   if (stage !== "read") alertFailure({ tag: "share", action, stage, code });
 }
 
-// Feature flags (spec 0035 AC-9): a failed lookup.
+// Feature flags: a failed lookup.
 // The error's own code and message, never user ids, emails or the input.
 export function logFeatureFlagsError(error: unknown): void {
   const { code, message } = describeError(error);
   console.error(`[feature-flags] lookup failed code=${code ?? "-"} message=${quote(message)}`);
 }
 
-// A flag change made from the Telegram bot (spec 0035 AC-24): the flag, what was asked and what happened, one line.
 // Never the email, the user id, the message text or the bot token; a failure adds the error's code and message.
 export type FlagChange = "off" | "allowlist" | "on" | "allow" | "deny";
 export type FlagChangeResult = "ok" | "no_account" | "failed";

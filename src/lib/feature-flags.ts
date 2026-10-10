@@ -1,9 +1,4 @@
-// Feature flags (spec 0035): a feature can be merged and deployed dark, then switched on for the developer, for
-// chosen testers and for everybody, without a deploy. Which flags exist is declared here, once; how each is
-// switched lives in the database (`feature_flags`, `feature_flag_users`). A flag is temporary: when its feature is
-// live for everyone, the flag, its checks and its rows are deleted.
-//
-// This file is pure (no database, no Next); the server side that reads the state is `feature-flags-server.ts`.
+// A flag is temporary: when its feature is live for everyone, the flag, its checks and its rows are deleted.
 
 export const FLAG_MODES = ["off", "allowlist", "on"] as const;
 // `off`: nobody. `allowlist`: only the listed users. `on`: everybody, signed-out visitors included.
@@ -30,14 +25,12 @@ export function isEnabled(mode: FlagMode, listed: boolean): boolean {
   return mode === "on" || (mode === "allowlist" && listed);
 }
 
-// One stored flag as `feature_flags_for_me()` returns it for the viewer.
 export type StoredFlag = { key: string; mode: string; listed: boolean };
 
 export type Flags = Record<FlagKey, boolean>;
 
-// Every declared flag for one viewer. A flag with no stored row, or a row with a mode the code does not know,
-// uses its default; stored keys that are not declared are ignored. `null` (the lookup failed) gives the defaults,
-// so a new feature stays off.
+// A flag with no stored row, or a row with a mode the code does not know, uses its default; stored keys that are not
+// declared are ignored. `null` (the lookup failed) gives the defaults, so a new feature stays off.
 export function resolveFlags(stored: readonly StoredFlag[] | null): Flags {
   const rows = new Map((stored ?? []).map((row) => [row.key, row]));
   return Object.fromEntries(

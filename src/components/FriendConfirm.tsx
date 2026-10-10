@@ -5,9 +5,9 @@ import { friendButtonClass, type FriendTone } from "./FriendActionButton";
 
 const noSubscription = () => () => {};
 
-// A button that asks first (spec 0024 AC-19): a `<details>`, so the question opens without JavaScript, whose
-// body holds the real form (children) with the confirming button. Nothing runs on the first press. With
-// JavaScript there is also a Cancel button and Escape closes it; without, the first button toggles it.
+// A `<details>`, so the question opens without JavaScript, whose body holds the real form (children) with the
+// confirming button. Nothing runs on the first press. With JavaScript there is also a Cancel button and Escape closes
+// it; without, the first button toggles it.
 export default function FriendConfirm({
   label,
   question,

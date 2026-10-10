@@ -1,5 +1,4 @@
-// Spec 0026 AC-9: the failure message to the developer, against a fake Telegram API. The request URL contains
-// the bot token, so what must never appear in any output is the token itself.
+// The request URL contains the bot token, so what must never appear in any output is the token itself.
 import { spawn } from "node:child_process";
 import http from "node:http";
 import type { AddressInfo } from "node:net";

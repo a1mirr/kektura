@@ -1,15 +1,15 @@
 import { expect, test, type Page } from "@playwright/test";
 import { accountButton, openAccountMenu, signInAsNewUser } from "./helpers";
 
-// Spec 0014 AC-20 to AC-26: the header strip's account menu. What it shows in each state of the `friends` flag is checked in
+// The header strip's account menu. What it shows in each state of the `friends` flag is checked in
 // e2e/feature-flags.spec.ts (flags are global), its words in every language in e2e/languages.spec.ts, and the phone's
 // 375 px in e2e/mobile.spec.ts. Texts are English; the menu is a `<details>`, so most of it works with the page's script off.
 const list = (page: Page) => page.locator("body > header details ul");
 const entries = (page: Page) => list(page).getByRole("link");
 
-// Every page a signed-in visitor sees (spec 0014 AC-20): the dashboard, the three pages of the menu and one that is not in it.
+// Every page a signed-in visitor sees: the dashboard, the three pages of the menu and one that is not in it.
 // The About, Changelog, Useful links and Feedback pages were static before the strip read the session: the button on them shows
-// that they render per request now (AC-27).
+// That they render per request now.
 const SIGNED_IN_PAGES = ["/dashboard", "/stats", "/friends", "/account", "/about", "/changelog", "/links", "/feedback"];
 
 test.describe("spec 0014: the account menu", () => {
@@ -44,7 +44,7 @@ test.describe("spec 0014: the account menu", () => {
     const button = (await accountButton(page).boundingBox())!;
     expect(logo!.x).toBeLessThan(switcher!.x);
     expect(switcher!.x + switcher!.width).toBeLessThanOrEqual(button.x);
-    expect(Math.abs(switcher!.y - button.y)).toBeLessThan(2); // one row
+    expect(Math.abs(switcher!.y - button.y)).toBeLessThan(2);
   });
 
   test("AC-20: a signed-out visitor gets the language switcher and no account menu, and the 404 page has neither", async ({ page }) => {
@@ -65,7 +65,6 @@ test.describe("spec 0014: the account menu", () => {
     await expect(entries(page)).toHaveText(["My stats", "Friends", "Settings"]);
     expect(await entries(page).evaluateAll((els) => els.map((e) => e.getAttribute("href")))).toEqual(["/en/stats", "/en/friends", "/en/account"]);
     await expect(menu.getByRole("button", { name: "Sign out" })).toBeVisible();
-    // the sign-out control is last
     expect(await menu.locator("li").last().getByRole("button", { name: "Sign out" }).count()).toBe(1);
   });
 

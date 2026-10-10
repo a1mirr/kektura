@@ -24,7 +24,7 @@ test.describe("spec 0014: the settings page", () => {
 
   test("AC-7, AC-15, AC-18: the account menu leads to the settings page, which has no chart; cancelling deletes nothing", async ({ page }) => {
     const email = await signInAsNewUser(page);
-    // The stamps-per-month chart is on the stats page (spec 0037), not on the dashboard (it renders in one piece, so once the
+    // The stamps-per-month chart is on the stats page, not on the dashboard (it renders in one piece, so once the
     // account button is there, a missing chart really is missing).
     await expect(accountButton(page)).toBeVisible();
     await expect(page.getByRole("heading", { name: "Stamps per month" })).toHaveCount(0);
@@ -32,7 +32,7 @@ test.describe("spec 0014: the settings page", () => {
     await expect(page).toHaveURL(/\/en\/account$/);
     await expect(page).toHaveTitle("Settings");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Settings");
-    await expect(page.getByRole("heading", { name: "Stamps per month" })).toHaveCount(0); // moved to /stats (spec 0037)
+    await expect(page.getByRole("heading", { name: "Stamps per month" })).toHaveCount(0);
 
     await openDeleteConfirmation(page);
     await page.getByRole("button", { name: "Cancel" }).click();
@@ -48,7 +48,6 @@ test.describe("spec 0014: the settings page", () => {
     const email = await signInAsNewUser(page);
     const userId = psql(`select id from auth.users where email = '${email}'`);
 
-    // Some data to lose: an official stamp, an extra stamp, and a feedback message.
     await expandAllStages(page);
     await page.locator("#place-OKTPH_02").getByRole("button", { name: "Add stamp" }).click();
     await expect(stat(page, "Stamps")).toHaveText("1 / 161");
@@ -61,7 +60,7 @@ test.describe("spec 0014: the settings page", () => {
     await page.getByRole("button", { name: "Yes, permanently delete my account" }).click();
     await expect(page).toHaveURL(/\/en$/);
     await expect(page.getByRole("button", { name: "Sign in with Google" })).toBeVisible();
-    await expect(accountButton(page)).toHaveCount(0); // the layout's strip follows the session: no account menu for a deleted account (spec 0014 AC-20)
+    await expect(accountButton(page)).toHaveCount(0); // The layout's strip follows the session: no account menu for a deleted account
 
     expect(count(`select count(*) from auth.users where id = '${userId}'`)).toBe(0);
     expect(count(`select count(*) from public.user_stamps where user_id = '${userId}'`)).toBe(0);
@@ -70,7 +69,6 @@ test.describe("spec 0014: the settings page", () => {
       `unlinked|to keep ${marker}`,
     );
 
-    // Signed out for real: the dashboard sends us back, and the same email starts a fresh account.
     await page.goto("/en/dashboard");
     await expect(page).toHaveURL(/\/en$/);
     await signInWithEmail(page, email);
@@ -80,7 +78,6 @@ test.describe("spec 0014: the settings page", () => {
   test("AC-11: when the server fails, the page says so and nothing is deleted", async ({ page }) => {
     const email = await signInAsNewUser(page);
     await page.goto("/en/account");
-    // Make the server action fail like a dropped connection or a server error.
     await page.route("**/en/account", (route) =>
       route.request().headers()["next-action"] ? route.fulfill({ status: 500, body: "boom" }) : route.continue(),
     );
@@ -99,7 +96,7 @@ test.describe("spec 0014: sign out and the settings address", () => {
   test("AC-15: the old /settings address redirects to /account in the same language", async ({ page }) => {
     await signInAsNewUser(page);
     await page.goto("/en/settings");
-    await expect(page).toHaveURL(/\/en\/account$/); // every language: e2e/languages.spec.ts
+    await expect(page).toHaveURL(/\/en\/account$/);
     await page.goto("/settings"); // no language prefix: the proxy adds one, then the redirect applies
     await expect(page).toHaveURL(new RegExp(`/(${routing.locales.join("|")})/account$`));
   });
@@ -108,7 +105,7 @@ test.describe("spec 0014: sign out and the settings address", () => {
     await signInAsNewUser(page);
     await (await openAccountMenu(page)).getByRole("link", { name: "Settings", exact: true }).click();
     await expect(page).toHaveURL(/\/en\/account$/);
-    const header = page.locator("main > header"); // the button sits next to the heading
+    const header = page.locator("main > header");
     await expect(header.getByRole("heading", { level: 1 })).toHaveText("Settings");
     await header.getByRole("button", { name: "Sign out" }).click();
     await expect(page).toHaveURL(/\/en$/);

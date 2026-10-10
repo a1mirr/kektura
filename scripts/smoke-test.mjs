@@ -1,5 +1,4 @@
-// Checks that the site answers after a deploy (spec 0026 AC-8): every language's page gives 200, an unknown route gives
-// 404, and the test server's dummy login is not there (404, spec 0006 AC-4). It is a sanity check of the running build, not a test suite. It retries, because the reload takes a moment.
+// It is a sanity check of the running build, not a test suite. It retries, because the reload takes a moment.
 //
 //   node scripts/smoke-test.mjs <base url> [timeout seconds]
 import fs from "node:fs";
@@ -8,8 +7,8 @@ import { pathToFileURL } from "node:url";
 /** A problem to tell the user about. Thrown, not process.exit(): see the Windows note in CLAUDE.md. */
 export class Problem extends Error {}
 
-// The languages of the site are its message files (spec 0005 AC-5), so a new `messages/<language>.json` is requested
-// here without an edit; `tests/smoke-test.test.ts` checks the list against `src/i18n/routing.ts`.
+// The languages of the site are its message files, so a new `messages/<language>.json` is requested here without an
+// edit; `tests/smoke-test.test.ts` checks the list against `src/i18n/routing.ts`.
 export const LANGUAGES = fs
   .readdirSync(new URL("../messages/", import.meta.url))
   .filter((name) => name.endsWith(".json"))

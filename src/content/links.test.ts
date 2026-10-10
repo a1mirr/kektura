@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { messageFiles } from "../../tests/message-files";
 import { LINK_GROUPS } from "./links";
 
-// Every message file (tests/messages.test.ts pins them to the routing's languages).
 const languages = Object.values(messageFiles) as (typeof import("../../messages/en.json"))[];
 const all = LINK_GROUPS.flatMap((g) => g.links);
 

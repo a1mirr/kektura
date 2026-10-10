@@ -1,5 +1,3 @@
-// Direct access to the local test Supabase for tests that check the database rules themselves
-// (spec 0017 AC-3, spec 0014): the REST API as an anonymous caller, and SQL through the container.
 import { execFileSync, execSync } from "node:child_process";
 import type { APIRequestContext } from "@playwright/test";
 
@@ -32,15 +30,13 @@ export async function anonRest(
   });
 }
 
-// Runs one SQL statement as the postgres user in the local database container and returns the rows
-// as unaligned text (one line per row, `|` between columns).
 export function psql(sql: string): string {
   return execFileSync("docker", ["exec", "supabase_db_kektura", "psql", "-U", "postgres", "-tA", "-c", sql], {
     encoding: "utf8",
   }).trim();
 }
 
-// ---- Skip or fail when the database is not there (spec 0007 AC-12) --------------------------------------------------
+// ---- Skip or fail when the database is not there --------------------------------------------------
 // Every test file that needs the local database calls `requireDatabase(ctx, relations)` at the top of each test, and no
 // file decides on its own: without a database the tests skip and say why, except where `REQUIRE_LOCAL_DB` is set (only
 // the end-to-end job's database step sets it), where a missing database or schema fails the test.
@@ -51,13 +47,11 @@ type Env = Record<string, string | undefined>;
 export type DatabaseState = { reachable: boolean; missing: string[] };
 export type DatabaseDecision = { action: "run" } | { action: "skip"; reason: string } | { action: "fail"; message: string };
 
-// Set, and not empty, "0" or "false", means the database is required.
 export function databaseRequired(env: Env): boolean {
   const value = (env.REQUIRE_LOCAL_DB ?? "").trim().toLowerCase();
   return value !== "" && value !== "0" && value !== "false";
 }
 
-// The decision itself, pure: what the state of the database and the environment mean for a test.
 export function decideDatabase(state: DatabaseState, env: Env): DatabaseDecision {
   const problem = !state.reachable
     ? NOT_RUNNING_MESSAGE
@@ -82,7 +76,6 @@ export function databaseReachable(): boolean {
   return reachable;
 }
 
-// Which of the given tables (`public.checkpoints`) the running database does not have: one query for the whole list.
 const missingCache = new Map<string, string[]>();
 function missingRelations(relations: string[]): string[] {
   const key = relations.join(",");
@@ -119,7 +112,6 @@ export function requireDatabase(ctx: SkippableTest, relations: string[] = [], en
 
 type SkippableTest = { skip: (note?: string) => never };
 
-// Applies a decision to a test: skips it, fails it by throwing the message, or lets it run.
 export function enforceDecision(ctx: SkippableTest, decision: DatabaseDecision): void {
   if (decision.action === "skip") ctx.skip(decision.reason);
   if (decision.action === "fail") throw new Error(decision.message);

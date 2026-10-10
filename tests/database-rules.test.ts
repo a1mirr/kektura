@@ -1,7 +1,5 @@
-// Spec 0002 (row level security under the stamp actions), spec 0016 AC-17 and AC-18 (set_stamp_dates) and spec 0006 AC-1 (what the seeds leave in the test
-// database), against the real local database (`npm run testdb:start`). The tests skip themselves when it isn't
-// running, and fail where CI requires it (`REQUIRE_LOCAL_DB`, spec 0007 AC-12); CI's end-to-end job runs them. They talk to PostgREST the way a browser could, as signed-in users and
-// as an anonymous visitor, so they prove what a malicious client can and cannot do.
+// They talk to PostgREST the way a browser could, as signed-in users and as an anonymous visitor, so they prove what
+// a malicious client can and cannot do.
 import { execFileSync, spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
@@ -26,7 +24,7 @@ async function signUp(): Promise<Person> {
 }
 
 beforeAll(async () => {
-  if (databaseDecision(RELATIONS).action !== "run") return; // the tests skip or fail, whichever the environment asks for
+  if (databaseDecision(RELATIONS).action !== "run") return;
   local = localSupabase();
   [ana, bob] = [await signUp(), await signUp()];
 }, 60_000);
@@ -52,13 +50,11 @@ describe("spec 0002: row level security of the stamp tables", () => {
     const extra = await ana.client.from("user_extra_stamps").insert({ user_id: ana.id, extra_id: 1 });
     expect([stamp.error, extra.error]).toEqual([null, null]);
 
-    // Bob sees nothing of Ana's, and cannot forge a stamp in her name.
     expect((await bob.client.from("user_stamps").select("*")).data).toEqual([]);
     expect((await bob.client.from("user_extra_stamps").select("*")).data).toEqual([]);
     expect((await bob.client.from("user_stamps").insert({ user_id: ana.id, checkpoint_id: 2 })).error).not.toBeNull();
     expect((await bob.client.from("user_extra_stamps").insert({ user_id: ana.id, extra_id: 2 })).error).not.toBeNull();
 
-    // Updates and deletes of her rows affect nothing (the rows are invisible to him).
     await bob.client.from("user_stamps").update({ stamped_on: "2000-01-01" }).eq("user_id", ana.id);
     await bob.client.from("user_extra_stamps").update({ stamped_on: "2000-01-01" }).eq("user_id", ana.id);
     await bob.client.from("user_stamps").delete().eq("user_id", ana.id);
@@ -66,7 +62,6 @@ describe("spec 0002: row level security of the stamp tables", () => {
     expect(rows(`select count(*) from user_stamps where user_id = '${ana.id}' and stamped_on <> '2000-01-01'`)).toBe("1");
     expect(rows(`select count(*) from user_extra_stamps where user_id = '${ana.id}' and stamped_on <> '2000-01-01'`)).toBe("1");
 
-    // She can still change and remove her own.
     expect((await ana.client.from("user_stamps").update({ stamped_on: "2026-01-02" }).eq("checkpoint_id", 1).select()).data).toHaveLength(1);
     expect((await ana.client.from("user_stamps").delete().eq("checkpoint_id", 1).select()).data).toHaveLength(1);
     expect((await ana.client.from("user_extra_stamps").delete().eq("extra_id", 1).select()).data).toHaveLength(1);
@@ -110,8 +105,8 @@ describe("spec 0016: set_stamp_dates (many dates in one transaction)", { timeout
     const { data, error } = await call(cleo, ["OKTPH_03", "OKTPH_07"], [1], "2026-03-04");
     expect([data, error]).toEqual([true, null]);
     const after = dates(cleo).split(",");
-    expect(after.filter((e) => e.endsWith("=2026-03-04")).map((e) => e.split("#")[0]).sort()).toEqual(["OKTPH_03", "OKTPH_03", "OKTPH_07", "OKTPH_07", "extra"]); // both variants of each place
-    expect(after.filter((e) => e.endsWith("=2025-01-01")).map((e) => e.split("#")[0]).sort()).toEqual(["OKTPH_09", "OKTPH_09", "extra"]); // the others keep their date
+    expect(after.filter((e) => e.endsWith("=2026-03-04")).map((e) => e.split("#")[0]).sort()).toEqual(["OKTPH_03", "OKTPH_03", "OKTPH_07", "OKTPH_07", "extra"]);
+    expect(after.filter((e) => e.endsWith("=2025-01-01")).map((e) => e.split("#")[0]).sort()).toEqual(["OKTPH_09", "OKTPH_09", "extra"]);
     expect(dates(dan)).toBe(danBefore);
   });
 
@@ -131,7 +126,7 @@ describe("spec 0016: set_stamp_dates (many dates in one transaction)", { timeout
       expect([data, error], JSON.stringify([places, extras])).toEqual([false, null]);
       expect(dates(cleo)).toBe(before);
     }
-    expect(dates(dan)).toBe(dates(dan).replaceAll("2026-03-04", "2025-01-01")); // nobody got a new date
+    expect(dates(dan)).toBe(dates(dan).replaceAll("2026-03-04", "2025-01-01"));
   });
 
   it("AC-17: a stamp that another transaction deletes while the function runs fails the whole request: it waits for the lock and counts again", async (ctx) => {
@@ -160,8 +155,8 @@ describe("spec 0016: set_stamp_dates (many dates in one transaction)", { timeout
     });
     expect(await finished).toBe(0);
     expect(answer).toContain("answer:f");
-    expect(dates(cleo).split(",").some((e) => e.endsWith("=2026-03-04"))).toBe(false); // nothing changed
-    expect(dates(cleo).split(",").length).toBe(before.split(",").length - 2); // OKTPH_07's two variants are gone, the rest is as it was
+    expect(dates(cleo).split(",").some((e) => e.endsWith("=2026-03-04"))).toBe(false);
+    expect(dates(cleo).split(",").length).toBe(before.split(",").length - 2);
   });
 
   it("AC-18: a retired stamp may only get a date before the day it retired; a request with one that is too late changes nothing", async (ctx) => {
@@ -175,7 +170,7 @@ describe("spec 0016: set_stamp_dates (many dates in one transaction)", { timeout
     }
     expect((await call(cleo, ["OKTPH_03", RETIRED], [1], "2014-11-20")).data).toBe(true);
     expect(dates(cleo).split(",").every((e) => e.endsWith("=2014-11-20"))).toBe(true);
-    expect((await call(cleo, ["OKTPH_03"], [], "2026-03-04")).data).toBe(true); // without the retired stamp any date goes
+    expect((await call(cleo, ["OKTPH_03"], [], "2026-03-04")).data).toBe(true);
   });
 
   it("AC-17: nothing, more than 500, or no date is refused, and so is a caller who is not signed in", async (ctx) => {

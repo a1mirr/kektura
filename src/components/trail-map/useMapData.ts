@@ -4,9 +4,7 @@ import { extrasData, placesData } from "@/lib/map-data";
 import { splitRoute } from "@/lib/route-geometry";
 import type { MapHandleRef, MapInputs } from "./types";
 
-// Keeps the map's lines and dots in step with the dashboard's data (spec 0003 AC-2, AC-16): new data
-// is pushed into the existing map, never a new one, so position and zoom stay. Returns `refreshRoute`,
-// which redraws the walked / not-walked lines (e.g. after the geometry or a toggle changed).
+// New data is pushed into the existing map, never a new one, so position and zoom stay.
 export function useMapData(
   mapRef: MapHandleRef,
   latest: RefObject<MapInputs>,
@@ -17,7 +15,6 @@ export function useMapData(
   const { points, extras, doneRanges } = inputs;
   const showDoneRef = useRef(showDone);
 
-  // With "Walked stretches" switched off the whole trail is grey.
   const refreshRoute = useCallback(() => {
     const { map, ready, route } = mapRef.current;
     if (!ready || !map || !route) return;

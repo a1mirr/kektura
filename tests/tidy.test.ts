@@ -1,4 +1,3 @@
-// Spec 0021 AC-8: what a merge leaves behind (worktrees, branches) is removed, and nothing that could hold work is.
 // `planTidy` decides (pure); the end-to-end block runs the real script against a bare origin and a clone.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
@@ -96,10 +95,10 @@ describe("spec 0021: tidy after a merge", () => {
       expect(link).toEqual({ target: expect.any(String) });
       expect(fs.existsSync(path.join(worktree, "node_modules"))).toBe(false);
       expect(fs.readFileSync(path.join(real, "keep.txt"), "utf8")).toBe("x");
-      expect(unlinkNodeModules(worktree)).toBe(false); // nothing left to unlink
-      restoreNodeModules(worktree, link); // a worktree that could not be removed gets its link back
+      expect(unlinkNodeModules(worktree)).toBe(false);
+      restoreNodeModules(worktree, link);
       expect(fs.readFileSync(path.join(worktree, "node_modules", "keep.txt"), "utf8")).toBe("x");
-      expect(unlinkNodeModules(worktree)).toEqual({ target: expect.any(String) }); // and it unlinks again
+      expect(unlinkNodeModules(worktree)).toEqual({ target: expect.any(String) });
       expect(fs.readFileSync(path.join(real, "keep.txt"), "utf8")).toBe("x");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });

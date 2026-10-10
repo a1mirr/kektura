@@ -6,7 +6,6 @@ import { useRouter } from "@/i18n/navigation";
 import type { ActionResult } from "@/lib/action-result";
 import { deleteAccountAction } from "./actions";
 
-// Two steps (AC-9): the button asks, the confirmation deletes. See spec 0014.
 export default function DeleteAccountButton() {
   const t = useTranslations("account");
   const router = useRouter();
@@ -21,14 +20,14 @@ export default function DeleteAccountButton() {
     try {
       result = await deleteAccountAction();
     } catch {
-      result = { ok: false, reason: "failed" }; // network error
+      result = { ok: false, reason: "failed" };
     }
     if (result.ok) {
       router.replace("/"); // stays disabled while the page changes
       return;
     }
     setDeleting(false);
-    if (result.reason === "unauthorized") router.refresh(); // session expired: the page redirects
+    if (result.reason === "unauthorized") router.refresh();
     else setFailed(true);
   }
 

@@ -9,8 +9,6 @@ import { setExtraStampDate, setExtraStamped, setPlacesStamped, setStampDate, set
 
 type Call = { table: string; op: string; args: unknown[] };
 
-// Minimal stand-in for the Supabase client: records every query-builder call and answers the
-// checkpoint lookup from `checkpoints`.
 function fakeSupabase({
   user = { id: "user-1" } as { id: string; email?: string } | null,
   checkpoints = [] as { id: number; place_key: string; retired_on?: string | null }[],
@@ -77,7 +75,7 @@ const withClient = useClient; // helpers outside `it` callbacks must not look li
 
 const writes = (calls: Call[]) => calls.filter((c) => c.op === "upsert" || c.op === "delete" || c.op === "update");
 
-// The actions log failures (spec 0008). Spying keeps the output quiet and lets the 0008 tests read it.
+// The actions log failures. Spying keeps the output quiet and lets the tests read it.
 const errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
 const warnLog = vi.spyOn(console, "warn").mockImplementation(() => {});
 

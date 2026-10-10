@@ -12,7 +12,7 @@ describe("spec 0001: a stamp that moved", () => {
   it("AC-29: the note is shown for 180 days from the day of the move: the day itself and the 179 after it", () => {
     expect(MOVED_NOTE_DAYS).toBe(180);
     expect(isRecentlyMoved("2026-04-01", "2026-04-01")).toBe(true);
-    expect(isRecentlyMoved("2026-04-01", "2026-09-26")).toBe(true); // 178 days
+    expect(isRecentlyMoved("2026-04-01", "2026-09-26")).toBe(true);
     expect(isRecentlyMoved("2026-04-01", "2026-09-27")).toBe(true); // 179 days: the last day
     expect(isRecentlyMoved("2026-04-01", "2026-09-28")).toBe(false); // 180 days
     expect(isRecentlyMoved("2026-04-01", "2027-04-01")).toBe(false);
@@ -55,7 +55,7 @@ describe("spec 0001: a stamp that moved", () => {
       { code: "A_1", moved_on: null },
       { code: "A_2", moved_on: "2026-08-01" },
       { code: "A_3", moved_on: "2026-09-01" },
-      { code: "A_4", moved_on: "2020-01-01" }, // long ago
+      { code: "A_4", moved_on: "2020-01-01" },
     ];
     expect(recentlyMovedVariant(variants, "2026-10-07")?.code).toBe("A_3");
     expect(recentlyMovedVariant(variants, "2027-05-01")).toBeUndefined();

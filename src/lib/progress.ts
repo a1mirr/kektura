@@ -1,5 +1,3 @@
-// Progress domain logic for the dashboard: places, stages, walked stretches, statistics.
-// Pure functions (no I/O) so the rules are unit-tested; see spec 0001.
 import type { Tables } from "@/lib/supabase/database.types";
 
 export type Checkpoint = Pick<
@@ -38,16 +36,15 @@ export type Stage = {
 export const placeKeyOf = (c: Pick<Checkpoint, "place_key" | "code" | "id">) =>
   c.place_key ?? c.code ?? String(c.id);
 
-// A stamp that no longer exists (spec 0001 AC-22): kept so the people who collected it keep it. It is outside the 161
-// places and the trail order; `afterKey` is the current place it followed, which gives it its position in the stage list.
+// A stamp that no longer exists: kept so the people who collected it keep it. It is outside the 161 places and the
+// trail order; `afterKey` is the current place it followed, which gives it its position in the stage list.
 export type RetiredStamp = Place & {
   retiredOn: string; // the first day it is no longer valid
-  replacedBy: string | null; // the place_key of the stamp that replaced it
+  replacedBy: string | null;
   afterKey: string | null;
   approximate: boolean; // its position is not from an official source
 };
 
-// Places in the order of their first variant (`checkpoints` sorted by seq). Retired rows are not places.
 export function buildPlaces(checkpoints: Checkpoint[]): Place[] {
   const places = new Map<string, Place>();
   for (const c of checkpoints) {
@@ -78,7 +75,7 @@ export function buildRetired(checkpoints: Checkpoint[]): RetiredStamp[] {
       key: placeKeyOf(c),
       seq: c.seq,
       stage: c.stage ?? 0,
-      label: "", // no number in the stage
+      label: "",
       name: c.name,
       km: Number(c.km_from_start),
       requiredFrom: null,
@@ -90,10 +87,10 @@ export function buildRetired(checkpoints: Checkpoint[]): RetiredStamp[] {
     }));
 }
 
-// The retired stamps to list for a user (spec 0001 AC-23): the ones they hold, and the ones they could have collected: they
-// walked past its position before it retired. That is read from the dates of the nearest stamped places on either side of the
-// position (the place it followed counts as before it), the EARLIER of the two: it was collectable if they passed any time before
-// the retirement. With no stamped neighbour and no stamp of its own it is not listed.
+// A retired stamp is listed when the user holds it or could have collected it: they walked past its position before
+// it retired. That is read from the dates of the nearest stamped places on either side of the position (the place it
+// followed counts as before it), the EARLIER of the two. With no stamped neighbour and no stamp of its own it is not
+// listed.
 export function retiredVisibleKeys(
   retired: RetiredStamp[],
   places: Place[],
@@ -118,7 +115,6 @@ export function retiredVisibleKeys(
   return visible;
 }
 
-// A place is stamped when any of its variants is.
 export function stampedPlaceKeys(places: Place[], stamps: StampRow[]): Map<string, string> {
   const stampDates = new Map<number, string>(stamps.map((s) => [s.checkpoint_id, s.stamped_on]));
   const result = new Map<string, string>();
@@ -134,10 +130,9 @@ export function stampedPlaceKeys(places: Place[], stamps: StampRow[]): Map<strin
 
 const byTrailOrder = (a: Place, b: Place) => a.km - b.km || a.seq - b.seq;
 
-// Places a user is not missing: the stamp was not required yet when they walked past (spec 0001 AC-17). The walk is
-// read from the stamp dates of the nearest stamped places on either side, in trail order; the later of the two
-// (the only one there is, with a single neighbour) is the day the place was walked. A place is waived when it has no
-// stamp, has a `requiredFrom` and that day is before it. Nothing is waived without a stamped neighbour.
+// The walk is read from the stamp dates of the nearest stamped places on either side, in trail order; the later of
+// the two (the only one there is, with a single neighbour) is the day the place was walked. Nothing is waived without
+// a stamped neighbour.
 export function waivedPlaceKeys(places: Place[], stampedOn: ReadonlyMap<string, string>): Set<string> {
   const ordered = [...places].sort(byTrailOrder);
   const before: (string | null)[] = [];
@@ -159,9 +154,8 @@ export function waivedPlaceKeys(places: Place[], stampedOn: ReadonlyMap<string, 
   return waived;
 }
 
-// Stamps can be collected in any order. A stretch counts as walked only when BOTH of its neighbouring
-// places (in trail order) are stamped; touching stretches merge into one range. A waived place (waivedPlaceKeys)
-// is not a neighbour: the stretch runs across it, from the stamped place before it to the one after.
+// A stretch counts as walked only when BOTH of its neighbouring places are stamped; a waived place is not a
+// neighbour: the stretch runs across it.
 export function walkedRanges(
   places: Place[],
   stamped: { has: (key: string) => boolean },
@@ -180,8 +174,7 @@ export function walkedRanges(
   return ranges;
 }
 
-// How many of `places` are done for a stage: stamped, or waived (the stage can be complete without a stamp the user was
-// not missing, spec 0001 AC-20).
+// A stage can be complete without a stamp the user was not missing.
 export const countDone = (places: Place[], stamped: { has: (key: string) => boolean }, waived: { has: (key: string) => boolean }) =>
   places.filter((p) => stamped.has(p.key) || waived.has(p.key)).length;
 
@@ -199,8 +192,8 @@ export function progressSummary(places: Place[], ranges: KmRange[]) {
   };
 }
 
-// Places grouped by official stage (1..27), in stage order. A stage's starting point is the previous
-// stage's last place (same stamp), except where they don't join (Visegrád -> Nagymaros, a ferry).
+// A stage's starting point is the previous stage's last place (same stamp), except where they don't join (Visegrád ->
+// Nagymaros, a ferry).
 export function buildStages(places: Place[], stagesMeta: StageMeta[]): Stage[] {
   const meta = new Map(stagesMeta.map((st) => [st.stage, st]));
   const byStage = new Map<number, Place[]>();
@@ -222,16 +215,15 @@ export function buildStages(places: Place[], stagesMeta: StageMeta[]): Stage[] {
   });
 }
 
-// Place keys for the per-stage button: marking adds the stage's own places plus its starting point
-// (so the first stretch counts as walked); unmarking removes only the stage's own places.
+// Marking adds the stage's own places plus its starting point (so the first stretch counts as walked); unmarking
+// removes only the stage's own places.
 export function stageStampKeys(stage: Stage): { stamp: string[]; unstamp: string[] } {
   const own = stage.places.map((p) => p.key);
   return { stamp: stage.startKey ? [stage.startKey, ...own] : own, unstamp: own };
 }
 
-// Maps a km_from_start value (e.g. from an extra stamp) to a stage number based on the stage's km bounds.
-// The bounds are [startKm, endKm) where startKm is the km of the stage's startKey (or first place),
-// and endKm is the km of its last place. For the final stage, endKm is inclusive.
+// The bounds are [startKm, endKm) where startKm is the km of the stage's startKey (or first place), and endKm is the
+// km of its last place. For the final stage, endKm is inclusive.
 export function findStageForKm(km: number, stages: Stage[], placeKm: Map<string, number>): number | null {
   for (let i = 0; i < stages.length; i++) {
     const stage = stages[i];

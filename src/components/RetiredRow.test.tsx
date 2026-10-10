@@ -38,7 +38,7 @@ describe("spec 0001: showing retired stamps", () => {
     expect(toggle.checked).toBe(true);
     expect(localStorage.getItem("kektura:showRetired")).toBe("1");
     cleanup();
-    expect(setup(false).row().hidden).toBe(false); // a later visit starts as the user left it
+    expect(setup(false).row().hidden).toBe(false);
     cleanup();
     localStorage.setItem("kektura:showRetired", "0");
     expect(setup(false).row().hidden).toBe(true);

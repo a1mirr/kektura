@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-// Spec 0038 AC-1, AC-2, AC-4: what the landing page's gallery renders, in every language.
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it } from "vitest";
@@ -12,7 +11,6 @@ import Screenshots from "./Screenshots";
 
 afterEach(cleanup);
 
-// The languages are the message files (tests/messages.test.ts pins them to the routing's).
 const messageFiles = { de, en, hu, ru };
 type Gallery = { heading: string; note: string; [key: string]: string };
 const galleryOf = (locale: keyof typeof messageFiles) => (messageFiles[locale].home.screenshots as Gallery);

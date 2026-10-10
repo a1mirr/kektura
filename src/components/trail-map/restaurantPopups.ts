@@ -3,8 +3,6 @@ import type { Map as MapLibreMap, Popup } from "maplibre-gl";
 import { buildRestaurantPopup } from "@/lib/map-popups";
 import type { MapContext, MapLibre } from "./types";
 
-// Restaurants (spec 0003 AC-14): hover shows name and distance, a click pins a popup with a link to
-// the restaurant's page.
 export function attachRestaurantPopups(m: MapLibreMap, maplibregl: MapLibre, ctx: RefObject<MapContext>) {
   const hover: Popup = new maplibregl.Popup({ closeButton: false, offset: 8 });
   const pinned: Popup = new maplibregl.Popup({

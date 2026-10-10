@@ -1,6 +1,6 @@
-// Stamps that moved (spec 0001 AC-29, spec 0003 AC-26): for 180 days after the MTSZ moved a stamp the page tells you so, because a
-// map or booklet printed before still shows the old place. Pure functions; the day itself comes from the database (`moved_on`,
-// filled by the seed from scripts/data/okt-stamp-dates.json).
+// For 180 days after the MTSZ moved a stamp the page tells you so, because a map or booklet printed before still
+// shows the old place. The day comes from the database (`moved_on`, filled by the seed from
+// scripts/data/okt-stamp-dates.json).
 
 // How long the note is shown: from the day of the move, 180 days (the last day shown is 179 days after it).
 export const MOVED_NOTE_DAYS = 180;
@@ -19,13 +19,12 @@ export function isRecentlyMoved(movedOn: string | null | undefined, today: strin
 }
 
 export type MovedText = {
-  on: (date: string) => string; // "Moved on 30 September 2026"
-  now: (description: string) => string; // "Where it is now: ..."
-  check: string; // "If you use an older map or booklet, check the new place."
+  on: (date: string) => string;
+  now: (description: string) => string;
+  check: string;
 };
 
-// The note of a stamp that moved recently, in the page's language: the day, the data's own description of where it is now
-// (nothing when there is none) and the advice. It says nothing about how far or in which direction (spec 0001 AC-29).
+// It says nothing about how far or in which direction.
 export function movedNote(
   movedOn: string,
   description: string | null,

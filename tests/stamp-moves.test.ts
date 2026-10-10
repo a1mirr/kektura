@@ -1,6 +1,5 @@
-// Spec 0004 AC-16 (a stamp that moved has an entry, and the build refuses one that has none) and AC-17 (the date of the MTSZ files).
-// The pure functions of scripts/lib are tested with fixtures; the generator itself is run, in a copy of the repository's script
-// folder in a temporary directory, on GPX files made from the committed seed, so a real run of build-data.mjs is what fails or passes.
+// The generator itself is run, in a copy of the repository's script folder in a temporary directory, on GPX files
+// made from the committed seed, so a real run of build-data.mjs is what fails or passes.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -24,7 +23,7 @@ describe("spec 0004: the moves of the dates file", () => {
     const codes = ["A", "B"];
     const fine = { code: "A", moved_on: "2026-09-30", source: SOURCE };
     expect(moveProblems([fine], codes, "2026-10-07")).toEqual([]);
-    expect(moveProblems([fine, { ...fine, code: "B", moved_on: "2026-10-07", source: "https://www.mtsz.org/x" }], codes, "2026-10-07")).toEqual([]); // today is fine
+    expect(moveProblems([fine, { ...fine, code: "B", moved_on: "2026-10-07", source: "https://www.mtsz.org/x" }], codes, "2026-10-07")).toEqual([]);
     const problems = (e: object, today = "2026-10-07") => moveProblems([{ ...fine, ...e }], codes, today).join(" | ");
     expect(problems({ code: "Z" })).toContain("Z: not a code of the stamps file");
     expect(moveProblems([fine, fine], codes, "2026-10-07").join()).toContain("A: listed twice");
@@ -85,7 +84,7 @@ insert into public.checkpoints (seq, code, place_key, stage, stage_seq, name, de
   it("AC-16: a new code and a code that is gone are not moves", () => {
     expect(unexplainedMoves(was, new Map([["NEW", at(48)]]), [])).toEqual([]);
     expect(unexplainedMoves(new Map([["GONE", at(48)]]), new Map(), [])).toEqual([]);
-    expect(unexplainedMoves(new Map(), new Map([["A", at(47)]]), [])).toEqual([]); // no previous seed at all
+    expect(unexplainedMoves(new Map(), new Map([["A", at(47)]]), [])).toEqual([]);
   });
 
   it("AC-16: the distance is measured as the app measures it (metres on the ground), east-west too", () => {
@@ -146,11 +145,9 @@ describe("spec 0004: the date of the MTSZ files", () => {
   });
 });
 
-// ---- the generator itself -----------------------------------------------------------------------------------------
 const escapeXml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const unquote = (s: string) => s.replace(/''/g, "'");
 
-// The rows of the committed seed as the MTSZ's stamping-points GPX would carry them.
 function stampsGpx(shift: Record<string, { dLat?: number; dLng?: number }> = {}) {
   const rows = [...read("supabase/seed.sql").matchAll(/^ {2}\(\d+, '([^']+)', '[^']+', \d+, \d+, '((?:[^']|'')*)', '((?:[^']|'')*)', (-?[\d.]+), (-?[\d.]+), (-?\d+), [\d.]+\),?$/gm)];
   expect(rows.length).toBeGreaterThan(200);
@@ -181,7 +178,6 @@ describe("spec 0004: build-data.mjs on moved stamps (the script, run for real)",
   afterAll(() => fs.rmSync(dir, { recursive: true, force: true }));
 
 
-  // Runs the generator in the temporary copy against the committed seed (the "previous" seed) with these stamps.
   function build(opts: { shift?: Record<string, { dLat?: number; dLng?: number }>; moves?: object[]; stampsName?: string } = {}) {
     fs.writeFileSync(path.join(dir, "supabase", "seed.sql"), read("supabase/seed.sql"));
     const datesFile = JSON.parse(read("scripts/data/okt-stamp-dates.json"));

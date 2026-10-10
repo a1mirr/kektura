@@ -1,7 +1,6 @@
-// Spec 0035 AC-23 against the real local database (`npm run testdb:start`): the functions the Telegram webhook calls.
-// The tests skip themselves when it isn't running and fail where CI requires it (`REQUIRE_LOCAL_DB`, spec 0007 AC-12); CI's end-to-end job runs them. They call the functions through
-// PostgREST as the service role (what the webhook does) and as an anonymous visitor and a signed-in user (what
-// nobody may do). Each test works on flags of its own (`dbtest-...`), never on the declared ones.
+// They call the functions through PostgREST as the service role (what the webhook does) and as an anonymous visitor
+// and a signed-in user (what nobody may do). Each test works on flags of its own (`dbtest-...`), never on the
+// declared ones.
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
@@ -41,7 +40,7 @@ const flag = (suffix: string) => `${prefix}-${suffix}`;
 const connect = (key: string): Client => createClient<Database>(local!.url, key, { auth: { persistSession: false } });
 
 beforeAll(async () => {
-  if (databaseDecision(RELATIONS).action !== "run") return; // the tests skip or fail, whichever the environment asks for
+  if (databaseDecision(RELATIONS).action !== "run") return;
   local = localSupabase();
   service = connect(local.serviceKey);
   anon = connect(local.anonKey);

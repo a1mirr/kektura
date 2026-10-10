@@ -3,16 +3,15 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { clickRow, selectedItems, type BulkItem } from "@/lib/bulk-dates";
 
-// The state of "Change dates" (spec 0016 AC-14 to AC-21) shared by the stage controls, the rows' checkboxes, the stage headers and
-// the bar: whether the mode is on, which stamps are chosen, and the answer to the last save. The page hands over the stamped rows
-// in the order it shows them (`items`); a chosen stamp that is no longer among them (removed meanwhile) is no longer chosen.
+// The page hands over the stamped rows in the order it shows them (`items`); a chosen stamp that is no longer among
+// them (removed meanwhile) is no longer chosen.
 export type BulkApi = {
   items: readonly BulkItem[];
   max: string; // the latest date the server accepts (tomorrow, UTC)
   active: boolean;
-  chosen: BulkItem[]; // the chosen stamps, in the page's order
+  chosen: BulkItem[];
   isSelected: (id: string) => boolean;
-  has: (id: string) => boolean; // the row can be chosen: it is stamped
+  has: (id: string) => boolean;
   enter: (ids?: string[]) => void;
   exit: () => void;
   toggle: (id: string, shift: boolean) => void;
@@ -21,8 +20,8 @@ export type BulkApi = {
   clear: () => void;
   busy: boolean;
   setBusy: (busy: boolean) => void;
-  saved: { count: number } | null; // the last save that went through
-  finish: (count: number) => void; // a save went through: leave the mode and say how many dates changed
+  saved: { count: number } | null;
+  finish: (count: number) => void;
 };
 
 const Context = createContext<BulkApi | null>(null);
@@ -59,7 +58,7 @@ export default function BulkDatesProvider({ items, max, children }: { items: rea
     setAnchor(null);
   }, []);
 
-  // Escape leaves the mode (spec 0016 AC-14), unless something else took it first: a row's note closes on Escape and says so with
+  // Escape leaves the mode, unless something else took it first: a row's note closes on Escape and says so with
   // preventDefault, and closing it must not cost the choice.
   useEffect(() => {
     if (!active) return;

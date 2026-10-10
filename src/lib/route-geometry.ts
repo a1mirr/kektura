@@ -1,5 +1,3 @@
-// Cutting the trail polyline by distance: walked / not-walked lines and the route-planner highlight.
-// See spec 0003.
 import type { FeatureCollection, LineString } from "geojson";
 import type { KmRange } from "@/lib/progress";
 
@@ -20,7 +18,7 @@ export function kmIndex(pts: Route["points"], km: number, strict = false) {
   return lo;
 }
 
-// The line from `from` to `to` km, with both ends interpolated between the neighbouring vertices.
+// With both ends interpolated between the neighbouring vertices.
 export function sliceRoute(route: Route, from: number, to: number): [number, number][] {
   const pts = route.points;
   const at = (km: number): [number, number] => {
@@ -46,7 +44,6 @@ const lines = (route: Route, ranges: KmRange[]): FeatureCollection<LineString> =
   })),
 });
 
-// Cut the route into walked (`ranges`) and not-walked (everything else) lines.
 export function splitRoute(route: Route, ranges: KmRange[]) {
   const sorted = [...ranges].sort((x, y) => x[0] - y[0]);
   const total = route.points[route.points.length - 1][2];
@@ -60,7 +57,6 @@ export function splitRoute(route: Route, ranges: KmRange[]) {
   return { done: sorted.length ? lines(route, sorted) : emptyLines, todo: lines(route, gaps) };
 }
 
-// The single highlighted stretch of the route planner (empty without a pair).
 export function segmentLines(route: Route, pair: KmRange | null): FeatureCollection<LineString> {
   return pair ? lines(route, [pair]) : emptyLines;
 }

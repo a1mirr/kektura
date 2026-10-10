@@ -1,6 +1,6 @@
-// The test server's environment (spec 0006 AC-7): tests must never reach the developer's real Telegram.
-// Next merges `.env.local` into a server's environment, so this runs Next's own env loader in a child
-// process against a `.env.local` that holds a bot, as `npm run dev:test` and `npm run e2e` would.
+// Tests must never reach the developer's real Telegram. Next merges `.env.local` into a server's environment, so this
+// runs Next's own env loader in a child process against a `.env.local` that holds a bot, as `npm run dev:test` and
+// `npm run e2e` would.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import { createRequire } from "node:module";
@@ -21,7 +21,6 @@ beforeAll(() => {
 });
 afterAll(() => fs.rmSync(projectDir, { recursive: true, force: true }));
 
-// What a Next server started with `base` as its environment ends up with after it loads `.env.local`.
 function loadedByNext(base: Record<string, string | undefined>): Record<string, string | undefined> {
   const script = `
     require(${JSON.stringify(nextEnvModule)}).loadEnvConfig(process.cwd(), false, { info() {}, error() {} });

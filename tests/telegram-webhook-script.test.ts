@@ -1,4 +1,3 @@
-// Spec 0035 AC-26: `npm run telegram:webhook` (scripts/telegram-webhook.mjs) against a fake Telegram API on localhost.
 import { spawn } from "node:child_process";
 import http from "node:http";
 import os from "node:os";

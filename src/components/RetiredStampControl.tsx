@@ -8,9 +8,8 @@ import { useStampAction } from "@/lib/use-stamp-action";
 import ActionButton from "./ActionButton";
 import StampDateInput from "./StampDateInput";
 
-// The control of a retired stamp (spec 0001 AC-25, spec 0002 AC-17, spec 0016 AC-13): there is no "today" to default to, so
-// collecting it asks for the day the user collected it, which must be before it retired (`latest`). Once collected it has the
-// usual date field, with the same limit.
+// There is no "today" to default to, so collecting it asks for the day the user collected it, which must be before it
+// retired (`latest`). Once collected it has the usual date field, with the same limit.
 export default function RetiredStampControl({
   placeKey,
   name,
@@ -24,7 +23,7 @@ export default function RetiredStampControl({
   stamped: boolean;
   date?: string;
   latest: string; // the day before it retired, YYYY-MM-DD
-  latestText: string; // the same day written for the page's language
+  latestText: string;
 }) {
   const t = useTranslations("dashboard");
   const { pending, failed, run } = useStampAction();

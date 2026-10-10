@@ -9,8 +9,6 @@ import { TRAIL_DATA_DATE } from "@/lib/trail-meta";
 import { TRAIL_FACTS } from "@/lib/trail-facts";
 import PageShell from "@/components/PageShell";
 
-// See spec 0015. Everything the page says has to be true of the app today.
-
 type Props = { params: Promise<{ locale: string }> };
 
 // Each source's name is a proper noun; only the description is translated.
@@ -18,7 +16,7 @@ const SOURCES = [
   { name: "kektura.hu (MTSZ)", href: "https://www.kektura.hu/okt-szakaszok", text: "sourceMtsz" },
   { name: "heyjoe.hu", href: "https://heyjoe.hu", text: "sourceHeyjoe" },
   { name: "OpenStreetMap", href: "https://www.openstreetmap.org/copyright", text: "sourceOsm" },
-  // Credited only while the restaurants layer is shown (flag `restaurants`, spec 0015 AC-4).
+  // Credited only while the restaurants layer is shown (flag `restaurants`).
   { name: "etteremhet.hu", href: "https://www.etteremhet.hu", text: "sourceEtteremhet", flag: "restaurants" },
 ] as const;
 

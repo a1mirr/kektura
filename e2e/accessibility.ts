@@ -1,10 +1,9 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
 
-// Accessibility checks with axe (spec 0006 AC-11, AC-12). Axe finds roughly a third of accessibility problems, not all:
+// Accessibility checks with axe. Axe finds roughly a third of accessibility problems, not all:
 // a page that passes is not "accessible", it only has none of the problems a machine can see.
 
-// A page is scanned at the desktop width and at the phone width (375 px, the narrowest width spec 0036 promises).
 export const WIDTHS = { desktop: { width: 1280, height: 800 }, phone: { width: 375, height: 812 } } as const;
 export type Width = keyof typeof WIDTHS;
 
@@ -16,13 +15,10 @@ export interface Finding {
   impact: string;
   width: Width;
   help: string;
-  /** The first few elements the rule fires on, as selectors, for the failure message. */
   elements: string[];
-  /** How many elements the rule fires on. */
   count: number;
 }
 
-// A violation that exists today and is not fixed yet (spec 0006 AC-12). Without `width` it covers both widths.
 export interface Allowed {
   rule: string;
   page: string;
@@ -32,14 +28,12 @@ export interface Allowed {
   task?: string;
 }
 
-// What a scan of one page says against the allow-list: the findings nobody listed, and the entries that no longer fire.
 export function judge(page: string, findings: Finding[], allowList: readonly Allowed[]) {
   const gated = findings.filter((f) => GATED.includes(f.impact));
   const covers = (a: Allowed, f: Finding) => a.page === page && a.rule === f.rule && (a.width === undefined || a.width === f.width);
   return {
     unlisted: gated.filter((f) => !allowList.some((a) => covers(a, f))),
     stale: allowList.filter((a) => a.page === page && !gated.some((f) => covers(a, f))),
-    // reported, not enforced
     ungated: findings.filter((f) => !GATED.includes(f.impact)),
   };
 }

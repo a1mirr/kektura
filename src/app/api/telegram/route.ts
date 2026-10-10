@@ -4,8 +4,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { answerTelegramCallback, editTelegramMessage, sendTelegramMessage, telegramConfig } from "@/lib/telegram";
 import { createSeenUpdates, isOwner, MAX_UPDATE_BYTES, parseCallback, parseUpdate, secretMatches } from "@/lib/telegram-webhook";
 
-// The Telegram webhook (spec 0035 AC-14 to AC-32): the owner switches feature flags by writing to the feedback bot and
-// by tapping the buttons of its panel. Under /api, so the proxy (and the language routing) leaves it alone.
+// Under /api, so the proxy (and the language routing) leaves it alone.
 
 const seen = createSeenUpdates();
 const limiter = createRateLimiter({ limit: 30, windowMs: 60_000 });
@@ -16,7 +15,7 @@ function database() {
   return supabase;
 }
 
-// What the commands run against: the service role client, through the functions of migrations 0062 and 0108 (AC-23, AC-33).
+// The service role client, through the functions of migrations 0062 and 0108.
 const store: FlagAdminStore = {
   async list() {
     const { data, error } = await database().rpc("admin_list_feature_flags");
@@ -54,7 +53,7 @@ const NOT_CONFIGURED = "Flag commands are not configured on the server (SUPABASE
 const empty = (status: number) => new Response(null, { status });
 
 // Any other method is as absent as the address: Next would answer 405 for a method the route does not export, which
-// shows that something lives here (AC-14).
+// shows that something lives here.
 export const GET = () => empty(404);
 export const HEAD = GET;
 export const PUT = GET;
@@ -65,10 +64,10 @@ export const OPTIONS = GET;
 export async function POST(request: Request): Promise<Response> {
   const config = telegramConfig();
   const secret = process.env.TELEGRAM_WEBHOOK_SECRET?.trim();
-  // Without the secret configured, or without the right header, the address does not exist (AC-14).
+  // Without the secret configured, or without the right header, the address does not exist.
   if (!config || !secret || !secretMatches(request.headers.get("x-telegram-bot-api-secret-token"), secret)) return empty(404);
 
-  // From here on Telegram always gets a 200, whatever the command did, so it does not retry (AC-16).
+  // From here on Telegram always gets a 200, whatever the command did, so it does not retry.
   try {
     if (Number(request.headers.get("content-length") ?? 0) > MAX_UPDATE_BYTES) return empty(200);
     const body = await request.text();
@@ -80,11 +79,12 @@ export async function POST(request: Request): Promise<Response> {
     const configured = createServiceClient() !== null;
     if (message) {
       const reply = configured ? await bot.handle(message.text) : { text: NOT_CONFIGURED };
-      // The answer goes out after the database has accepted the change (AC-22). Its failure is only a missing reply.
+      // The answer goes out after the database has accepted the change. Its failure is only a missing reply.
       await sendTelegramMessage(reply.text, config, { keyboard: reply.keyboard });
     } else if (tap) {
       const { reply, notice } = configured ? await bot.press(tap.data) : { reply: undefined, notice: "Not configured" };
-      // The panel is edited after the database accepted the change, and every tap is answered so the button stops spinning (AC-30).
+      // The panel is edited after the database accepted the change, and every tap is answered so the button stops
+      // spinning.
       try {
         if (reply) await editTelegramMessage(tap.messageId, reply.text, config, { keyboard: reply.keyboard });
       } finally {

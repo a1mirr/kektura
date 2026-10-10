@@ -17,7 +17,7 @@ describe("spec 0003: popup DOM builders (AC-12, AC-14, AC-15)", () => {
 
   it("AC-17: a menu without a subtitle has none", () => {
     const box = buildMenu("Name", null, []);
-    expect(box.children).toHaveLength(2); // title + the hidden error line
+    expect(box.children).toHaveLength(2);
   });
 
   it("AC-17: clicking a button runs its action with that button; the error line starts hidden and is shown on request", () => {
@@ -35,7 +35,7 @@ describe("spec 0003: popup DOM builders (AC-12, AC-14, AC-15)", () => {
     expect(error.hidden).toBe(false);
     expect(error.textContent).toBe("Couldn't save, try again.");
 
-    box.querySelector("button")!.click(); // the next attempt clears the old error
+    box.querySelector("button")!.click();
     expect(error.hidden).toBe(true);
   });
 
@@ -92,7 +92,7 @@ describe("spec 0003: the note and the report link of a stamp's popup", () => {
     const box = buildMenu("Lokó-pihenő", "679.5 km", [{ label: "Go", run: () => {} }], { note: `Moved on 30 September 2026. ${evil}` });
     const note = box.querySelector<HTMLElement>("[data-moved-note]")!;
     expect(note.textContent).toBe(`Moved on 30 September 2026. ${evil}`);
-    expect(note.querySelector("img")).toBeNull(); // text, never markup (AC-15)
+    expect(note.querySelector("img")).toBeNull(); // Text, never markup
     expect([...box.children].indexOf(note)).toBeLessThan([...box.children].indexOf(box.querySelector("button")!));
   });
 
@@ -110,7 +110,7 @@ describe("spec 0003: the note and the report link of a stamp's popup", () => {
     expect(a.rel).toBe("noopener noreferrer");
     expect(a.style.minHeight).toBe("44px");
     expect(a.style.minWidth).toBe("44px");
-    expect(a.style.display).toBe("flex"); // the whole row is the target, not the words
+    expect(a.style.display).toBe("flex");
   });
 
   it("AC-27: only a path of this site or an https: address becomes a link", () => {

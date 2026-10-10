@@ -111,7 +111,7 @@ describe("spec 0008: Telegram messages for failed actions", () => {
     expect(send).toHaveBeenCalledTimes(4);
     expect(send).toHaveBeenLastCalledWith(formatOutageAlert(3));
     report({ tag: "feedback", action: "submitFeedback", stage: "write" });
-    expect(send).toHaveBeenCalledTimes(4); // paused for the hour
+    expect(send).toHaveBeenCalledTimes(4);
   });
 
   it("AC-9: a `send` that throws never reaches the caller", () => {

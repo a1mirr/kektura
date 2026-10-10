@@ -1,5 +1,3 @@
-// What each month of a user's walk holds, for the "My stats" page (spec 0037). Pure functions of the stamps and the places:
-// nothing is read or computed in the component that draws them.
 import {
   findStageForKm,
   stampedPlaceKeys,
@@ -12,17 +10,16 @@ import {
 // `month` is "YYYY-MM": the calendar month of a stamp date as written (a day, not an instant: no time zone is involved).
 export type MonthStats = {
   month: string;
-  stamps: number; // places first stamped in the month (spec 0037 AC-4)
+  stamps: number; // places first stamped in the month
   extraStamps: number; // extra stamps dated in the month, counted apart from the places
   stages: number[]; // official stage numbers, ascending: the stages of the places first stamped and of the extra stamps
-  km: number; // kilometres that became walked in the month, unrounded (spec 0037 AC-6)
+  km: number; // kilometres that became walked in the month, unrounded
 };
 
 export type ExtraStampRow = { extra_id: number; stamped_on: string };
 
 const monthOf = (date: string) => date.slice(0, 7);
 
-// Every month from `first` to `last`, both "YYYY-MM", inclusive.
 export function monthsBetween(first: string, last: string): string[] {
   const months: string[] = [];
   let year = Number(first.slice(0, 4));
@@ -40,10 +37,8 @@ export function monthsBetween(first: string, last: string): string[] {
   return months;
 }
 
-// One entry per month between the first and the last stamp date (places and extra stamps), oldest first, the empty months
-// too. A stretch between two neighbouring places (spec 0001 AC-3, the waived places of AC-17 and AC-18 not counted as
-// neighbours) belongs to the month of the LATER of its two stamp dates, so the kilometres of all months add up to the
-// walked km of the dashboard.
+// A stretch between two neighbouring places belongs to the month of the LATER of its two stamp dates, so the
+// kilometres of all months add up to the walked km of the dashboard.
 export function monthlyProgress(input: {
   places: Place[];
   stamps: StampRow[];
@@ -52,7 +47,7 @@ export function monthlyProgress(input: {
   extraStamps: ExtraStampRow[];
 }): MonthStats[] {
   const { places, stamps, stages, extras, extraStamps } = input;
-  const stampedOn = stampedPlaceKeys(places, stamps); // each place's earliest stamp date
+  const stampedOn = stampedPlaceKeys(places, stamps);
   const placeKm = new Map(places.map((p) => [p.key, p.km]));
   const extraKm = new Map(extras.map((e) => [e.id, Number(e.km_from_start)]));
 
@@ -97,8 +92,6 @@ export function monthlyProgress(input: {
   return [...byMonth.values()].map((m) => ({ ...m, stages: [...stageSets.get(m.month)!].sort((x, y) => x - y) }));
 }
 
-// Stage numbers as a short list: "3, 4, 5" and "1, 2, 5-9": a run of four or more is written "first-last", a shorter one
-// is listed.
 export function stageList(stages: number[]): string {
   const sorted = [...new Set(stages)].sort((a, b) => a - b);
   const parts: string[] = [];
@@ -114,18 +107,16 @@ export function stageList(stages: number[]): string {
 
 const round1 = (km: number) => Math.round(km * 10) / 10;
 
-// The words of a month's tooltip, in the page's language (messages `stats.tip*`, with ICU plurals).
 export type MonthWords = {
   stamps: (count: number) => string;
   extraStamps: (count: number) => string;
   none: string;
   km: (km: number) => string;
-  stage: (list: string) => string; // "Stage 3"
-  stages: (list: string) => string; // "Stages 3, 4, 5"
+  stage: (list: string) => string;
+  stages: (list: string) => string;
 };
 
-// The lines of a month's tooltip (spec 0037 AC-9): the stamps, the km rounded to 0.1, the extra stamps and the stages. A month
-// with nothing says so; kilometres appear only with places (a stretch is walked when a place is stamped).
+// Kilometres appear only with places (a stretch is walked when a place is stamped).
 export function monthLines(m: MonthStats, words: MonthWords): string[] {
   const lines: string[] = [];
   if (m.stamps > 0) lines.push(words.stamps(m.stamps), words.km(round1(m.km)));

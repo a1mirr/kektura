@@ -1,16 +1,14 @@
-// Removes what a merge leaves behind (spec 0021 AC-8): linked worktrees under .claude/worktrees and local branches
-// whose work is already in origin/main, and brings a local `main` that is only behind up to origin/main (so a
-// stale `main` can never be the base of new work). A dry run unless --apply is given; --remote also deletes merged branches on
-// origin (GitHub's "automatically delete head branches" does that for you when it is on).
+// A dry run unless --apply is given; --remote also deletes merged branches on origin (GitHub's "automatically delete
+// head branches" does that for you when it is on).
 //
 //   node scripts/tidy.mjs [--apply] [--remote]
 //
 // "Merged" means a merge commit of origin/main brought the commit in (the repository merges pull requests with merge
-// commits). A new branch that has no commit of its own yet is an ancestor of origin/main too, and must not be taken for
-// finished work: another session may be about to start on it. Nothing is removed that could hold work: a worktree with a
-// modified or untracked file, a branch that no merge commit contains, the primary checkout, the worktree this runs in
-// (run it from another checkout to remove that one), a branch checked out anywhere else, `main`. Worktrees outside
-// .claude/worktrees (other tools') are only ever listed as kept.
+// commits). A new branch that has no commit of its own yet is an ancestor of origin/main too, and must not be taken
+// for finished work: another session may be about to start on it. Nothing is removed that could hold work: a worktree
+// with a modified or untracked file, a branch that no merge commit contains, the primary checkout, the worktree this
+// runs in (run it from another checkout to remove that one), a branch checked out anywhere else, `main`. Worktrees
+// outside .claude/worktrees (other tools') are only ever listed as kept.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -91,7 +89,6 @@ export function unlinkNodeModules(worktree) {
   return { target };
 }
 
-/** Puts back what unlinkNodeModules took out, for a worktree that then could not be removed. */
 export function restoreNodeModules(worktree, link) {
   if (link) fs.symlinkSync(link.target, path.join(worktree, "node_modules"), "junction"); // "junction" is ignored off Windows
 }

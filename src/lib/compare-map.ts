@@ -1,5 +1,3 @@
-// What the comparison map draws (spec 0003 AC-18 to AC-20): the trail cut into lines and the places turned into
-// points for the view the reader picked. Pure functions; the layers are in map-layers.ts.
 import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 import { complementRanges, type ComparisonRanges, type Who } from "./compare";
 import { DONE, TODO_LINE } from "./map-layers";
@@ -10,11 +8,9 @@ import { sliceRoute, type Route } from "./route-geometry";
 export type CompareView = "both" | "mine" | "theirs";
 export const COMPARE_VIEWS: readonly CompareView[] = ["both", "mine", "theirs"];
 
-// How a line is drawn. The four states differ in more than colour (spec 0003 AC-18): solid, dashed, dotted, faint.
+// The four states differ in more than colour: solid, dashed, dotted, faint.
 export type LineStyle = "solid" | "dashed" | "dotted" | "faint" | "todo";
 
-// Colours of the states. Me is the blue of the owner's own walked line; the others are told apart by line style
-// and point outline as well.
 export const WHO_COLOR: Record<Who, string> = { both: "#15803d", me: DONE, them: "#c2410c", neither: "#a8a29e" };
 export const WHO_LINE_STYLE: Record<Who, LineStyle> = { both: "solid", me: "dashed", them: "dotted", neither: "faint" };
 
@@ -33,7 +29,6 @@ const lineFeatures = (route: Route, parts: LinePart[]): FeatureCollection<LineSt
   ),
 });
 
-// The whole trail for a view: every stretch in one of the styles, nothing left out.
 export function compareLines(route: Route, ranges: ComparisonRanges, view: CompareView): FeatureCollection<LineString> {
   const total = route.points[route.points.length - 1][2];
   if (view === "both") {
@@ -53,11 +48,10 @@ export function compareLines(route: Route, ranges: ComparisonRanges, view: Compa
   ]);
 }
 
-// `label` is the place's number in the list ("17.1"), `placeKey` the key of its list row.
-// `moved`: the stamp moved within the last 180 days (spec 0003 AC-26): its point gets a ring.
+// `label` is the place's number in the list ("17.1"). `moved`: the stamp moved within the last 180 days, so its point
+// gets a ring.
 export type ComparePoint = { placeKey: string; label: string; name: string; lat: number; lng: number; who: Who; moved?: boolean };
 
-// A place stamped in the picked view is filled, a place that is not is hollow (the dashboard's dots).
 export function compareDots(points: ComparePoint[], view: CompareView): FeatureCollection<Point> {
   return {
     type: "FeatureCollection",
@@ -73,6 +67,5 @@ export function compareDots(points: ComparePoint[], view: CompareView): FeatureC
   };
 }
 
-// What hovering a place shows (spec 0003 AC-20): its number in the list, its name and its state.
 export const compareHoverText = (properties: { label?: unknown; name?: unknown }, state: string) =>
   `${properties.label} ${properties.name} · ${state}`;

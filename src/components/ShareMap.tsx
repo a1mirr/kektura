@@ -6,8 +6,8 @@ import { TRAIL_ROUTE } from "@/lib/share-route";
 const TODO = "#d6d3d1"; // stone-300: the part of the trail not walked yet
 const END = "#78716c"; // stone-500: the start (Írott-kő) and the finish (Hollóháza) of the trail
 
-// The trail with the walked stretches in blue (spec 0039 AC-5), drawn as plain SVG on the server: no map library, no
-// JavaScript, so a card opens at once and the page works before hydration. `label` is its accessible name.
+// Drawn as plain SVG on the server: no map library, no JavaScript, so a card opens at once and the page works before
+// hydration. `label` is its accessible name.
 export default function ShareMap({ ranges, label }: { ranges: KmRange[]; label: string }) {
   const map = shareMapPaths(TRAIL_ROUTE, ranges, 560);
   return (

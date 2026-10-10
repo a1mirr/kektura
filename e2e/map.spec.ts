@@ -2,11 +2,10 @@ import fs from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 import { canvas, expandAllStages, openStampPopup, pressLocate, signInAsNewUser, stat } from "./helpers";
 
-// Spec 0003: the map behaviours the DOM allows. The map is a WebGL canvas, so there
+// The map behaviours the DOM allows. The map is a WebGL canvas, so there
 // is no pixel clicking on stamps except through the app's own list -> map flow: the 📍 button flies
 // the map to a stamp and centres it, so a click on the canvas centre hits that stamp's dot.
 
-// The page may not scroll sideways (spec 0036 AC-5).
 const expectNoSideways = async (page: Page) =>
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 
@@ -28,7 +27,7 @@ test.describe("spec 0003: the trail map", () => {
     expect(box?.width).toBeGreaterThan(200);
     expect(box?.height).toBeGreaterThan(200);
     await expect(page.locator(".maplibregl-ctrl-attrib")).toContainText("OpenStreetMap");
-    // its links are told apart from the text around them by more than their colour (spec 0006 AC-11: axe's link-in-text-block)
+    // its links are told apart from the text around them by more than their colour (axe's link-in-text-block)
     const decorations = await page.locator(".maplibregl-ctrl-attrib a").evaluateAll((links) => links.map((a) => getComputedStyle(a).textDecorationLine));
     expect(decorations.length).toBeGreaterThan(0);
     expect(decorations.filter((line) => line !== "underline")).toEqual([]);
@@ -41,8 +40,8 @@ test.describe("spec 0003: the trail map", () => {
     const stamps = section.getByLabel("Stamps", { exact: true });
     const restaurants = section.getByLabel(/^Show restaurants \(\d+\)$/);
 
-    await expect(walked).toBeChecked(); // on by default
-    await expect(stamps).toBeChecked(); // on by default
+    await expect(walked).toBeChecked();
+    await expect(stamps).toBeChecked();
     await expect(restaurants).not.toBeChecked(); // off by default, shown once its data has loaded
 
     await walked.uncheck();
@@ -98,7 +97,7 @@ test.describe("spec 0003: the trail map", () => {
     await page.addInitScript(() => {
       Object.defineProperty(Element.prototype, "requestFullscreen", { value: undefined, configurable: true });
     });
-    await openDashboardWithMap(page); // the default window is 1280 x 720: two columns
+    await openDashboardWithMap(page);
     await expandAllStages(page);
     const row = page.locator("#place-OKTPH_01_DDKPH_01");
     await row.getByRole("button", { name: "Add stamp" }).click();
@@ -111,7 +110,7 @@ test.describe("spec 0003: the trail map", () => {
     const at = await calendar.boundingBox();
     const hits = await page.evaluate((box) => {
       const points = [
-        [box!.x + box!.width / 2, box!.y + box!.height / 2], // right where the calendar button is
+        [box!.x + box!.width / 2, box!.y + box!.height / 2],
         [2, 2],
         [innerWidth - 2, 2],
         [2, innerHeight - 2],
@@ -126,7 +125,7 @@ test.describe("spec 0003: the trail map", () => {
   });
 
   test("AC-24: with the route panel shown the map's block scrolls inside itself and the map stays visible", async ({ page }) => {
-    await openDashboardWithMap(page); // 1280 x 720
+    await openDashboardWithMap(page);
     await expandAllStages(page);
     await openStampPopup(page, "OKTPH_01_DDKPH_01", "Route from here");
     await page.getByRole("button", { name: "Route from here" }).click();
@@ -139,10 +138,9 @@ test.describe("spec 0003: the trail map", () => {
       overflowY: getComputedStyle(el).overflowY,
     }));
     expect(overflowY).toBe("auto");
-    expect(client).toBeLessThanOrEqual(720); // never taller than the window
+    expect(client).toBeLessThanOrEqual(720);
     await expect(canvas(page)).toBeInViewport();
     expect(scroll).toBeGreaterThanOrEqual(client);
-    // whatever does not fit can be scrolled to: the last control of the block, the layer toggles
     await aside.evaluate((el) => (el.scrollTop = el.scrollHeight));
     await expect(page.getByLabel("Walked stretches")).toBeInViewport({ ratio: 1 });
     await expect(page.getByRole("button", { name: "Clear", exact: true })).toBeVisible();
@@ -160,7 +158,7 @@ test.describe("spec 0003: the trail map", () => {
     await expect(page.getByText("Now pick the end stamp")).toBeVisible();
 
     const block = page.locator("[data-sticky-map]");
-    await page.evaluate(() => window.scrollTo(0, 1500)); // the block sticks
+    await page.evaluate(() => window.scrollTo(0, 1500));
     await block.evaluate((el) => (el.scrollTop = el.scrollHeight));
     const [blockBox, cutOff] = [(await block.boundingBox())!, (await canvas(page).boundingBox())!];
     expect(cutOff.y, "the map's top is hidden by the block").toBeLessThan(blockBox.y);
@@ -190,17 +188,17 @@ test.describe("spec 0003: the trail map", () => {
         await page.goto(`/${locale}/dashboard`);
         await expect(canvas(page)).toBeVisible();
         const aside = page.locator("[data-sticky-map]");
-        await page.evaluate(() => window.scrollTo(0, 1500)); // the block sticks once the page has scrolled
+        await page.evaluate(() => window.scrollTo(0, 1500));
         await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000);
         const m = await aside.evaluate((el) => {
           const box = el.getBoundingClientRect();
           el.scrollTop = el.scrollHeight;
           const last = el.lastElementChild!.getBoundingClientRect();
           return {
-            wide: el.scrollWidth - el.clientWidth, // nothing sticks out sideways
-            tall: el.scrollHeight - el.clientHeight, // above 0: it scrolls
+            wide: el.scrollWidth - el.clientWidth,
+            tall: el.scrollHeight - el.clientHeight,
             overflowY: getComputedStyle(el).overflowY,
-            lastBottomInside: last.bottom <= box.bottom + 1, // after scrolling to the end the last block is in view
+            lastBottomInside: last.bottom <= box.bottom + 1,
             asideInWindow: box.bottom <= innerHeight + 0.5,
           };
         });
@@ -215,7 +213,7 @@ test.describe("spec 0003: the trail map", () => {
   test("AC-13: in one column the 📍 button in a list row scrolls the map into view and labels the stamp", async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 768, height: 720 }); // below 1024 px the map is not sticky (spec 0001 AC-28)
+    await page.setViewportSize({ width: 768, height: 720 }); // Below 1024 px the map is not sticky
     await openDashboardWithMap(page);
     await expandAllStages(page);
 
@@ -231,7 +229,7 @@ test.describe("spec 0003: the trail map", () => {
   test("AC-13: in two columns the map is in view already, so the 📍 button only flies it to the stamp and labels it", async ({
     page,
   }) => {
-    await openDashboardWithMap(page); // the default window is 1280 x 720: two columns, the map sticky
+    await openDashboardWithMap(page);
     await expandAllStages(page);
 
     const row = page.locator("#place-OKTPH_149");
@@ -255,12 +253,12 @@ test.describe("spec 0003: the trail map", () => {
       await page.setViewportSize({ width, height: 720 });
       await openDashboardWithMap(page);
       await expandAllStages(page);
-      const row = page.locator("#place-OKTPH_149"); // the last stage: far down the list
-      await row.getByRole("button", { name: "Add stamp" }).click(); // a stamped row, with its date controls
+      const row = page.locator("#place-OKTPH_149");
+      await row.getByRole("button", { name: "Add stamp" }).click();
       await expect(row.getByRole("button", { name: "Remove" })).toBeVisible();
       await openStampPopup(page, "OKTPH_149", "Show in list");
       if (width >= 1024) {
-        await page.evaluate(() => window.scrollTo(0, 1500)); // the row is far out of view, the sticky map is not
+        await page.evaluate(() => window.scrollTo(0, 1500));
         await expect(row).not.toBeInViewport();
         await expect(page.getByRole("button", { name: "Show in list" })).toBeInViewport();
       }
@@ -283,14 +281,13 @@ test.describe("spec 0003: the trail map", () => {
     await openDashboardWithMap(page);
     await expandAllStages(page);
 
-    await openStampPopup(page, "OKTPH_01_DDKPH_01", "Route from here"); // Írott-kő
+    await openStampPopup(page, "OKTPH_01_DDKPH_01", "Route from here");
     await page.getByRole("button", { name: "Route from here" }).click();
     await expect(page.getByText("Now pick the end stamp")).toBeVisible();
 
-    await openStampPopup(page, "OKTPH_02", "Route to here"); // Hét-forrás
+    await openStampPopup(page, "OKTPH_02", "Route to here");
     await page.getByRole("button", { name: "Route to here" }).click();
 
-    // First hop of the MTSZ table: 8.2 km, +125 m / -570 m, 130 minutes west -> east.
     const panel = page.locator("div.bg-amber-50");
     await expect(panel).toContainText("Írott-kő → Hét-forrás");
     await expect(panel).toContainText("Distance: 8.2 km");
@@ -318,10 +315,9 @@ test.describe("spec 0003: the trail map", () => {
 
     await page.unroute("**/en/dashboard");
     await page.getByRole("button", { name: "Mark as walked" }).dispatchEvent("click"); // the popup's buttons overlap in the small test window
-    await expect(page.getByRole("button", { name: "Mark as walked" })).toHaveCount(0); // the popup closed
+    await expect(page.getByRole("button", { name: "Mark as walked" })).toHaveCount(0);
     await expect(stat(page, "Stamps")).toHaveText("1 / 161");
 
-    // The popup of a marked stamp unmarks it.
     await openStampPopup(page, "OKTPH_01_DDKPH_01", "Remove mark");
     await page.getByRole("button", { name: "Remove mark" }).dispatchEvent("click");
     await expect(page.getByRole("button", { name: "Remove mark" })).toHaveCount(0);
@@ -340,17 +336,17 @@ test.describe("spec 0003: the trail map", () => {
     });
     await openDashboardWithMap(page);
     await expandAllStages(page);
-    expect(requests).toBe(0); // the overview is enough at the start
+    expect(requests).toBe(0);
 
     const locate = page.locator("#place-OKTPH_02").getByRole("button", { name: "Show on map" });
     await expect(async () => {
-      await locate.click(); // flies to zoom 12 or more; repeated until the map has loaded and listens
+      await locate.click();
       expect(requests).toBeGreaterThanOrEqual(1);
     }).toPass({ timeout: 45_000 });
     await expect.poll(() => requests).toBe(1); // refused: the map stays on the overview
 
     refuse = false;
-    await page.locator(".maplibregl-ctrl-zoom-in").click(); // the next zoom change retries
+    await page.locator(".maplibregl-ctrl-zoom-in").click();
     await expect.poll(() => requests).toBe(2);
 
     await page.locator(".maplibregl-ctrl-zoom-in").click();
@@ -365,7 +361,7 @@ test.describe("spec 0003: the trail map", () => {
     await expect(extras).not.toBeChecked();
     const locate = page.locator("#extra-stamps li").first().getByRole("button", { name: "Show on map" });
     await expect(async () => {
-      await locate.click(); // repeated until the map has loaded and listens
+      await locate.click();
       await expect(extras).toBeChecked({ timeout: 2_000 });
     }).toPass({ timeout: 45_000 });
     await expect(canvas(page)).toBeInViewport();
@@ -392,25 +388,24 @@ test.describe("spec 0003: the trail map", () => {
     await expect(stat(page, "Stamps")).toHaveText("1 / 161");
     await page.waitForTimeout(500); // the refreshed page has had time to reach the map
     await expect(label).toBeVisible(); // a new map would have lost the stamp's label
-    expect(await onCanvas()).toEqual(before); // same position and zoom
+    expect(await onCanvas()).toEqual(before);
   });
 
   test("AC-12: with an expired session the popup's action sends the visitor to the landing page", async ({ page }) => {
     await openDashboardWithMap(page);
     await expandAllStages(page);
     await openStampPopup(page, "OKTPH_01_DDKPH_01", "Mark as walked");
-    await page.context().clearCookies(); // the session is gone, as after signing out in another tab
+    await page.context().clearCookies();
     await page.getByRole("button", { name: "Mark as walked" }).dispatchEvent("click");
     await expect(page).toHaveURL(/\/en$/);
   });
 });
 
-// Spec 0003 AC-27: every stamp's popup offers the report of a wrong location, for that stamp's code only.
 test.describe("spec 0003: the report link of a stamp's popup", () => {
   test("AC-27: the popup of a stamp has the link, in a new tab, at least 44 x 44 px, with only the stamp's code in the address", async ({ page }) => {
     await openDashboardWithMap(page);
     await expandAllStages(page);
-    await openStampPopup(page, "OKTPH_84_B", "Mark as walked"); // Lokó-pihenő, one stamp at its place
+    await openStampPopup(page, "OKTPH_84_B", "Mark as walked");
     const link = page.locator(".maplibregl-popup").getByRole("link", { name: "Report a wrong location" });
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute("href", "/en/feedback?stamp=OKTPH_84_B");
@@ -419,7 +414,7 @@ test.describe("spec 0003: the report link of a stamp's popup", () => {
     const box = (await link.boundingBox())!;
     expect(box.width).toBeGreaterThanOrEqual(44);
     expect(box.height).toBeGreaterThanOrEqual(44);
-    await expect(page.locator(".maplibregl-popup [data-moved-note]")).toHaveCount(0); // it has not moved
+    await expect(page.locator(".maplibregl-popup [data-moved-note]")).toHaveCount(0);
   });
 });
 

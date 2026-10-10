@@ -4,8 +4,7 @@ import type { ActionResult } from "@/lib/action-result";
 import { logAccountDeletionError } from "@/lib/log";
 import { createClient } from "@/lib/supabase/server";
 
-// See spec 0014 (AC-9 to AC-13). Like the stamp actions it never throws: a
-// thrown error reaches the client as an opaque message.
+// Like the stamp actions it never throws: a thrown error reaches the client as an opaque message.
 export async function deleteAccountAction(): Promise<ActionResult> {
   let userId: string | undefined;
   try {

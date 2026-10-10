@@ -5,7 +5,6 @@ vi.mock("@/app/[locale]/dashboard/actions", () => ({ setExtraStamped: vi.fn(), s
 
 import { attachStampPopups } from "./stampPopups";
 
-// A map that remembers its click handler and a popup that remembers the content it was given.
 function setup(point: { note?: string; movedNote?: string; code?: string | null }) {
   let click: (e: unknown) => void = () => {};
   let content: HTMLElement | null = null;

@@ -28,8 +28,8 @@ export default async function InvitePage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Signed out (spec 0024 AC-3): through sign-in and back here. The link's owner and its validity are not
-  // revealed to someone who has not signed in.
+  // Signed out: through sign-in and back here. The link's owner and its validity are not revealed to someone who has
+  // not signed in.
   if (!user) {
     const next = `/friends/invite/${token}`;
     return (

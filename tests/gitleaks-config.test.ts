@@ -1,5 +1,5 @@
-// Spec 0007 AC-16: the configuration of CI's gitleaks scan. It extends the default rules and allows exactly the local
-// Supabase demo keys, by value; nothing else may be allowed, so a new allow-list entry shows up here.
+// It extends the default rules and allows exactly the local Supabase demo keys, by value; nothing else may be
+// allowed, so a new allow-list entry shows up here.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 
@@ -9,13 +9,12 @@ const code = config
   .split("\n")
   .filter((line) => !line.trim().startsWith("#"))
   .join("\n");
-// The literal strings ('''...''') of the `regexes` array of the one allow-list.
 const regexes = [...(code.match(/regexes = \[([\s\S]*?)\n\]/)?.[1] ?? "").matchAll(/'''(.*?)'''/g)].map((m) => m[1]);
 
 describe("spec 0007: the gitleaks configuration", () => {
   it("AC-16: extends the default rules and switches none of them off", () => {
     expect(code).toMatch(/\[extend\]\s*\nuseDefault = true\b/);
-    expect(code).not.toMatch(/\[\[rules\]\]|disabledRules|\[extend\][^[]*(path|url) =/); // no other configuration is extended
+    expect(code).not.toMatch(/\[\[rules\]\]|disabledRules|\[extend\][^[]*(path|url) =/);
   });
 
   it("AC-16: has one allow-list, and it allows by value: no path, commit, stopword or other rule of its own", () => {

@@ -13,11 +13,11 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
     await signInAsNewUser(page);
     await expandAllStages(page);
 
-    await place(page, "OKTPH_01_DDKPH_01").getByRole("button", { name: "Add stamp" }).click(); // Írott-kő
+    await place(page, "OKTPH_01_DDKPH_01").getByRole("button", { name: "Add stamp" }).click();
     await expect(stat(page, "Stamps")).toHaveText("1 / 161");
     await expect(stat(page, "Kilometres")).toHaveText("0"); // one place alone walks nothing
 
-    await place(page, "OKTPH_02").getByRole("button", { name: "Add stamp" }).click(); // Hét-forrás, km 8.1
+    await place(page, "OKTPH_02").getByRole("button", { name: "Add stamp" }).click();
     await expect(stat(page, "Stamps")).toHaveText("2 / 161");
     await expect(stat(page, "Kilometres")).toHaveText("8.1");
 
@@ -42,7 +42,7 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
 
     await stage2.getByRole("button", { name: "Clear stage" }).click();
     await expect(stat(page, "Stamps")).toHaveText("1 / 161");
-    await expect(place(page, "OKTPH_09").getByRole("button", { name: "Remove" })).toBeVisible(); // Sárvár stays
+    await expect(place(page, "OKTPH_09").getByRole("button", { name: "Remove" })).toBeVisible();
   });
 
   test("0001 AC-10: stamp descriptions wrap in full: nothing is clipped or sticks out of its row at 375 px", async ({
@@ -66,7 +66,6 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
       de: ["Piliscsaba - An der Kreuzung der Wesselényi-, Árpád-vezér- und Kálmán-király-Straße, an einem Strommast. (OKTPH_66)", "An der Kapelle Szent Vid."],
       hu: ["Piliscsaba - A Wesselényi-, Árpád vezér- és Kálmán király utca találkozásánál, egy villanyoszlopon. (OKTPH_66)", "A Szent Vid-kápolnánál."],
     };
-    // The one test that runs over every language: adding a language fails to compile until it has its texts here.
     for (const locale of routing.locales) {
       const [placeText, extraText] = expected[locale];
       await page.goto(`/${locale}/dashboard`);
@@ -80,7 +79,7 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
   }) => {
     await page.setViewportSize({ width: 375, height: 800 });
     await signInAsNewUser(page);
-    const locales = [routing.defaultLocale, "de"]; // the default and German
+    const locales = [routing.defaultLocale, "de"];
     const widths = () =>
       page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, viewport: window.innerWidth }));
     const expectFits = async (label: string, stagesOpen: boolean) => {
@@ -104,7 +103,7 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
     await expect(place(page, "OKTPH_01_DDKPH_01").getByRole("button", { name: "Open calendar" })).toBeVisible();
     await expect(page.locator("#extra-stamps li").first().getByRole("button", { name: "Open calendar" })).toBeVisible();
 
-    await expectFits("stamped rows, every stage expanded", true); // the open stages are remembered across languages
+    await expectFits("stamped rows, every stage expanded", true);
   });
 
   test("0002 AC-9, AC-13, AC-14: the button flips and is disabled at once, the stats and the date field wait for the server's answer", async ({
@@ -114,7 +113,6 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
     await expandAllStages(page);
     let release!: () => void;
     const gate = new Promise<void>((resolve) => (release = resolve));
-    // Server actions are POSTs to the page: hold the answer back.
     await page.route("**/en/dashboard", async (route) => {
       if (route.request().method() === "POST") await gate;
       await route.continue();

@@ -1,4 +1,4 @@
-// Dummy sign-in for the local test server (spec 0006). Production never has it: it needs
+// Dummy sign-in for the local test server. Production never has it: it needs
 // TEST_LOGIN=1 *and* a Supabase running on this machine, so a stray flag can't open it remotely.
 
 export const TEST_EMAIL = "tester@kektura.test";

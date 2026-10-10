@@ -1,6 +1,5 @@
-// Spec 0012 AC-1 to AC-3, AC-5 and AC-6: the properties of the backup workflow and of the dump action it shares with the
-// deploy, so a later edit can't remove them unnoticed. The workflow only runs on GitHub (and needs the production
-// secret); the restore drill is AC-4.
+// The workflow only runs on GitHub (and needs the production secret), so these tests pin the properties a later edit
+// could remove unnoticed.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -13,7 +12,6 @@ const deploy = read(".github/workflows/deploy.yml");
 const action = read(".github/actions/dump-user-data/action.yml");
 const lines = workflow.split("\n");
 
-// The text of one step, from its `- name:` line to the next step of the same indent.
 function stepOf(text: string, name: string) {
   const all = text.split("\n");
   const start = all.findIndex((line) => line.includes(`- name: ${name}`));
@@ -84,7 +82,6 @@ describe("spec 0012: the backup workflow", () => {
     expect(step("Notice when the secret is missing")).toMatch(/if: env\.CONFIGURED != 'true'\s*\n\s+run: echo "::notice[^"]*SUPABASE_DB_URL[^"]*BACKUP_PUBLIC_KEY/);
     const real = lines.filter((line) => /^ {6}(- name:|- uses:|- run:)/.test(line));
     expect(real.length).toBeGreaterThan(3);
-    // every step after the notice carries the condition
     const afterNotice = workflow.slice(workflow.indexOf("- uses: actions/checkout"));
     const steps = afterNotice.split(/\n(?= {6}- )/);
     for (const text of steps) expect(text, text.split("\n")[0]).toContain("if: env.CONFIGURED == 'true'");
@@ -102,7 +99,7 @@ describe("spec 0012: the backup workflow", () => {
     const code = lines.filter((line) => !line.trim().startsWith("#"));
     const secretUses = code.filter((line) => line.includes("secrets.SUPABASE_DB_URL"));
     expect(secretUses.length).toBe(2); // the CONFIGURED flag and the dump step's env
-    expect(code.filter((line) => line.includes("secrets.BACKUP_PUBLIC_KEY")).length).toBe(2); // the same
+    expect(code.filter((line) => line.includes("secrets.BACKUP_PUBLIC_KEY")).length).toBe(2);
     expect(workflow).toMatch(/env:\s*\n\s+SUPABASE_DB_URL: \$\{\{ secrets\.SUPABASE_DB_URL \}\}\n\s+BACKUP_PUBLIC_KEY: \$\{\{ secrets\.BACKUP_PUBLIC_KEY \}\}/);
     expect(workflow).not.toMatch(/permissions:[\s\S]*write/);
   });
@@ -157,7 +154,6 @@ describe("spec 0012 AC-5: one dump action for every workflow that takes a dump",
   });
 });
 
-// The script of one step of the action, as bash runs it.
 function runScriptOf(text: string, name: string) {
   const block = stepOf(text, name).split("\n");
   const start = block.findIndex((line) => line.trim() === "run: |");
