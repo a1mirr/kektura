@@ -198,11 +198,11 @@ test.describe("spec 0016: set many dates at once", () => {
     const extraId = await stampStageOneAndAnExtra(page);
     const actions = countServerActions(page);
 
-    // outside the mode: no checkbox anywhere, no stage button, but the floating button
+    // outside the mode: no checkbox anywhere, no stage button, but the toolbar's button
     await expect(page.getByRole("checkbox", { name: /^Select / })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /stage:/i })).toHaveCount(0);
     await enterSetDates(page);
-    await expect(setDates(page)).toHaveCount(0); // the bar has Cancel
+    await expect(setDates(page)).toHaveAttribute("aria-pressed", "true"); // still in the toolbar: pressing it leaves the mode
     // in the mode: every place and every extra stamp has a checkbox, stamped or not
     await expect(page.getByRole("checkbox", { name: /^Select / })).toHaveCount(161 + 72);
     await expect(checkbox(page, "OKTPH_10")).toHaveCount(1);
@@ -243,7 +243,7 @@ test.describe("spec 0016: set many dates at once", () => {
     // one request; the mode is closed, the message names the count, the fields show the new dates, the button is back
     await expect(page.getByText("8 dates set")).toBeVisible();
     await expect(bar(page)).toHaveCount(0);
-    await expect(setDates(page)).toBeVisible();
+    await expect(setDates(page)).toHaveAttribute("aria-pressed", "false");
     await expect(page.getByRole("checkbox", { name: /^Select / })).toHaveCount(0);
     expect(actions.count).toBe(1);
     await expect(dateField(place(page, "OKTPH_02"))).toHaveValue("2024-03-05");
@@ -369,6 +369,23 @@ test.describe("spec 0016: set many dates at once", () => {
     await expect(checkbox(page, "OKTPH_102")).toHaveCount(1); // the places around it have one
   });
 
+  test("AC-14: the toolbar with the button stays at the top of the window while the list scrolls, down to the extra stamps, and holds the bar in the mode", async ({ page }) => {
+    await signInAsNewUser(page);
+    await expandAllStages(page);
+    for (const target of ["#stage-12", "#extra-stamps"]) {
+      await page.locator(target).scrollIntoViewIfNeeded();
+      await page.evaluate((selector) => document.querySelector(selector)!.scrollIntoView({ block: "center" }), target);
+      const box = (await setDates(page).boundingBox())!;
+      expect(box.y, `the button is at the top of the window next to ${target}`).toBeGreaterThanOrEqual(0);
+      expect(box.y, `the button is at the top of the window next to ${target}`).toBeLessThan(80);
+    }
+    await setDates(page).click();
+    const toolbarBottom = (await setDates(page).boundingBox())!.y;
+    const barBox = (await bar(page).boundingBox())!;
+    expect(barBox.y).toBeGreaterThan(toolbarBottom); // the bar is docked under the toolbar, in view
+    expect(barBox.y).toBeLessThan(200);
+  });
+
   test("AC-14: without JavaScript the mode is not offered, and the single date fields stay", async ({ page, browser, baseURL }) => {
     await signInAsNewUser(page);
     await stampStageOneAndAnExtra(page);
@@ -387,10 +404,10 @@ test.describe("spec 0016: set many dates at once", () => {
   });
 });
 
-// In two columns the map's block is a sticky stacking context (z-10) holding the fullscreen overlay, and the floating button and the bar of
-// the mode sit below it (the bar is a sticky box of the other column): neither may paint over a fullscreen map (spec 0016 AC-21, spec 0003 AC-11).
+// In two columns the map's block is a sticky stacking context (z-10) holding the fullscreen overlay, and the toolbar and the bar of
+// the mode sit below it (they are one sticky box of the other column): neither may paint over a fullscreen map (spec 0016 AC-21, spec 0003 AC-11).
 test.describe("spec 0016: the button, the bar and the fullscreen map", () => {
-  test("AC-21: at 1280 px the fullscreen map is topmost over the floating button and over the bar of the mode", async ({ page }) => {
+  test("AC-21: at 1280 px the fullscreen map is topmost over the toolbar and over the bar of the mode", async ({ page }) => {
     // Without the native Fullscreen API the CSS overlay is all there is, and it is the overlay that has to win the stacking.
     await page.addInitScript(() => {
       Object.defineProperty(Element.prototype, "requestFullscreen", { value: undefined, configurable: true });

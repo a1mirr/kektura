@@ -18,7 +18,7 @@ vi.mock("@/app/[locale]/dashboard/actions", () => ({
 }));
 
 import BulkCheckbox from "./BulkCheckbox";
-import BulkDateBar from "./BulkDateBar";
+import { BulkMessage, BulkToolbar } from "./BulkDateBar";
 import BulkDatesProvider from "./BulkDatesProvider";
 import BulkStageButton from "./BulkStageButton";
 import RequiredFrom from "./RequiredFrom";
@@ -48,8 +48,10 @@ function Page({ items = ITEMS, rows = items }: { items?: BulkItem[]; rows?: Bulk
   return (
     <NextIntlClientProvider locale="en" messages={messages}>
       <BulkDatesProvider items={items} max="2999-01-01">
-        <StageControls />
-        <BulkDateBar />
+        <BulkMessage />
+        <BulkToolbar>
+          <StageControls />
+        </BulkToolbar>
         <BulkStageButton stage={1} />
         <BulkStageButton stage={2} />
         <BulkStageButton stage={3} />
@@ -86,21 +88,58 @@ const choose = (...names: string[]) => names.forEach((n) => click(box(n)));
 const submit = () => act(async () => void fireEvent.submit(field().closest("form")!));
 
 describe("spec 0016: the mode", () => {
-  it("AC-14: outside the mode no row has a checkbox and there is no bar, only the button that opens the mode", () => {
+  it("AC-14: outside the mode no row has a checkbox and there is no bar, only the toolbar's button that opens the mode", () => {
     render(<Page />);
     expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
     expect(noBar()).toBeNull();
-    expect(modeButton()).toBeTruthy();
+    expect(modeButton().getAttribute("aria-pressed")).toBe("false");
     enter();
     expect(bar()).toBeTruthy();
-    expect(noModeButton()).toBeNull(); // the bar has Cancel
+    expect(modeButton().getAttribute("aria-pressed")).toBe("true"); // still there: pressing it leaves the mode
   });
 
-  it("AC-14: the button floats: fixed to the screen's corner on a phone, under the map's block from 1024 px, and 44 px tall at least", () => {
+  it("AC-14: the toolbar sticks to the top, under the map's block from 1024 px, and holds the bar in the mode", () => {
     render(<Page />);
-    const classes = modeButton().className.split(" ");
-    expect(classes).toEqual(expect.arrayContaining(["fixed", "right-4", "z-30", "lg:z-5", "h-12", "min-w-11"]));
-    expect(classes.some((c) => c.startsWith("bottom-"))).toBe(true);
+    const toolbar = modeButton().closest("[class*='sticky']") as HTMLElement;
+    expect(toolbar.className.split(" ")).toEqual(expect.arrayContaining(["sticky", "top-0", "z-20", "lg:z-5"]));
+    enter();
+    expect(toolbar.contains(bar())).toBe(true);
+    expect(toolbar.contains(modeButton())).toBe(true);
+  });
+
+  it("AC-14: the button is a filled button of at least 36 px on a phone, not a text link", () => {
+    render(<Page />);
+    expect(modeButton().className.split(" ")).toEqual(expect.arrayContaining(["bg-blue-600", "min-h-9", "text-white"]));
+  });
+
+  describe("on a phone the toolbar hides while the page scrolls down and comes back on the way up", () => {
+    const scrollTo = (y: number) => act(() => void (Object.defineProperty(window, "scrollY", { value: y, configurable: true }), window.dispatchEvent(new Event("scroll"))));
+    const hidden = () => modeButton().closest("[class*='sticky']")!.hasAttribute("data-hidden");
+    afterEach(() => void Object.defineProperty(window, "scrollY", { value: 0, configurable: true }));
+
+    it("AC-14: hides after scrolling down past the top, shows when scrolling up, ignores a nudge and the very top", () => {
+      render(<Page />);
+      scrollTo(60);
+      expect(hidden()).toBe(false); // too near the top
+      scrollTo(400);
+      expect(hidden()).toBe(true);
+      scrollTo(404);
+      expect(hidden()).toBe(true); // a nudge changes nothing
+      scrollTo(300);
+      expect(hidden()).toBe(false);
+    });
+
+    it("AC-14: the toolbar is not hidden while the mode is open, and a focus inside it brings it back", () => {
+      render(<Page />);
+      scrollTo(500);
+      expect(hidden()).toBe(true);
+      act(() => void fireEvent.focus(modeButton()));
+      expect(hidden()).toBe(false);
+      scrollTo(900);
+      expect(hidden()).toBe(true);
+      enter();
+      expect(hidden()).toBe(false);
+    });
   });
 
   it("AC-14: in the mode every place and extra stamp has a checkbox named after it, stamped or not", () => {
@@ -161,12 +200,15 @@ describe("spec 0016: the mode", () => {
   it("AC-14: a page without the provider (a friend's page) has no button", () => {
     render(
       <NextIntlClientProvider locale="en" messages={messages}>
-        <StageControls />
-        <BulkDateBar />
+        <BulkMessage />
+        <BulkToolbar>
+          <StageControls />
+        </BulkToolbar>
       </NextIntlClientProvider>,
     );
     expect(noModeButton()).toBeNull();
     expect(screen.getByRole("button", { name: "Expand all" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Expand all" }).closest("[class*='sticky']")).toBeNull(); // nothing sticks there
   });
 });
 
@@ -229,8 +271,9 @@ describe("spec 0016: Escape", () => {
     render(
       <NextIntlClientProvider locale="en" messages={messages}>
         <BulkDatesProvider items={ITEMS} max="2999-01-01">
-          <StageControls />
-          <BulkDateBar />
+          <BulkToolbar>
+            <StageControls />
+          </BulkToolbar>
           <RequiredFrom requiredFrom="2022-05-01" waived={false} tolerance={false} />
           <BulkCheckbox id={placeItemId("A")} name="Place A" />
         </BulkDatesProvider>
@@ -303,7 +346,7 @@ describe("spec 0016: choosing rows", () => {
     expect((box("Extra 7") as HTMLInputElement).checked).toBe(false); // the extras are not a stage's
   });
 
-  it("AC-15: outside the mode a stage has no button: the way in is the floating one (AC-14)", () => {
+  it("AC-15: outside the mode a stage has no button: the way in is the toolbar's button (AC-14)", () => {
     render(<Page />);
     expect(screen.queryByRole("button", { name: /stage/i })).toBeNull();
     expect(screen.queryByRole("button", { name: /Set date:/ })).toBeNull();

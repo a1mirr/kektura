@@ -80,7 +80,7 @@ walked before it retired collected it, and it belongs in their record.
   past its position before it retired. That is read from the stamp dates of the nearest stamped places on either side of the position
   (the place it followed counts as before it, nothing is read from places that were not stamped): the **earlier** of the two (the one
   there is, with a single neighbour) is before `retired_on`. With no stamped neighbour and no stamp of its own it is not listed.
-- **AC-24**: A checkbox on the stage controls, "Show retired stamps", is off by default, is remembered in localStorage like the open state
+- **AC-24**: A checkbox with the stage controls ("Expand all", "Collapse all"; on the dashboard just above them, because they stick to the top of the page, spec 0016 AC-14), "Show retired stamps", is off by default, is remembered in localStorage like the open state
   of the stages (also when storage refuses a write: the page then follows the choice without remembering it) and lists every retired
   stamp, for a user who walked the old route without stamping its neighbours first. It exists only while there is a retired stamp.
 - **AC-25**: A retired stamp has no "today": collecting it opens a date field and the stamp is created with the day the user enters, which

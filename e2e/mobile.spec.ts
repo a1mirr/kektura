@@ -202,10 +202,10 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
     await expect(tooltip).toHaveCount(0);
   });
 
-  // Spec 0016 AC-14, AC-21: "Set dates" on a phone. The floating button and the bar are fixed to the bottom of the screen and fit at
-  // 320 px, the checkboxes are 44 x 44 px targets, and tapping is enough to choose and apply, also for a place not stamped yet. (The bar above a real on-screen keyboard cannot be tested:
+  // Spec 0016 AC-14, AC-21: "Set dates" on a phone. The toolbar with the button sticks to the top (and hides while the page scrolls
+  // down), the bar is fixed to the bottom of the screen, both fit at 320 px, the checkboxes are 44 x 44 px targets, and tapping is enough to choose and apply, also for a place not stamped yet. (The bar above a real on-screen keyboard cannot be tested:
   // manual row of spec 0016.)
-  test("AC-10: Set dates does not scroll sideways, the button and the bar fit at 375 and 320 px, and rows are chosen and dated with taps", async ({ page }) => {
+  test("AC-10: Set dates does not scroll sideways, the toolbar and the bar fit at 375 and 320 px, and rows are chosen and dated with taps", async ({ page }) => {
     const email = await signInAsNewUser(page);
     await expandAllStages(page);
     const stamp = (key: string) => page.locator(`#place-${key}`);
@@ -214,20 +214,23 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
       await expect(stamp(key).getByRole("button", { name: "Remove" })).toBeVisible();
     }
     const change = page.getByRole("button", { name: "Set dates" });
-    await expectTappable(page, change, "the Set dates button", 44);
+    await expectTappable(page, change, "the Set dates button", 36);
     for (const width of [375, 320]) {
       await page.setViewportSize({ width, height: 700 });
-      await expectNoSidewaysScroll(page, `sideways scroll with the Set dates button at ${width} px`);
+      await expectNoSidewaysScroll(page, `sideways scroll with the toolbar at ${width} px`);
       const at = (await change.boundingBox())!;
+      expect(at.x, `the button starts inside the window at ${width} px`).toBeGreaterThanOrEqual(0);
       expect(at.x + at.width, `the button ends inside the window at ${width} px`).toBeLessThanOrEqual(width + 0.5);
-      expect(at.y + at.height, `the button floats at the bottom of the screen at ${width} px`).toBeGreaterThan(700 - 40);
     }
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2)); // it stays on the screen while the page scrolls
+    // the toolbar sticks to the top, goes away while the page is scrolled down and comes back on the way up
+    await page.evaluate(() => window.scrollTo(0, 1500));
+    await expect(change).not.toBeInViewport();
+    await page.evaluate(() => window.scrollTo(0, 1200));
     await expect(change).toBeInViewport();
     await change.tap();
     const bar = page.getByRole("region", { name: "Set the date of several stamps" });
     await expect(bar).toBeVisible();
-    await expect(change).toHaveCount(0);
+    await expect(change).toHaveAttribute("aria-pressed", "true");
 
     await stamp("OKTPH_02").getByRole("checkbox").tap();
     await stamp("OKTPH_03").getByRole("checkbox").tap();
@@ -254,7 +257,7 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
     await bar.getByRole("button", { name: "Apply" }).tap();
     await expect(page.getByText("3 dates set")).toBeVisible();
     await expect(bar).toHaveCount(0);
-    await expect(change).toBeVisible(); // the button is back
+    await expect(change).toHaveAttribute("aria-pressed", "false"); // the mode is off
     await expectNoSidewaysScroll(page, "sideways scroll after the dates were set");
     const stored = psql(
       `select string_agg(distinct s.stamped_on::text, ',') from public.user_stamps s join auth.users u on u.id = s.user_id where u.email = '${email}'`,

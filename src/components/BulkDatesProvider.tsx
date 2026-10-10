@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { clickRow, selectedItems, type BulkItem } from "@/lib/bulk-dates";
 
-// The state of "Set dates" (spec 0016 AC-14 to AC-21) shared by the floating button, the rows' checkboxes, the stage headers and
+// The state of "Set dates" (spec 0016 AC-14 to AC-21) shared by the toolbar button, the rows' checkboxes, the stage headers and
 // the bar: whether the mode is on, which rows are chosen, and the answer to the last save. The page hands over the rows that can be
 // chosen, stamped or not, in the order it shows them (`items`); a chosen row that is no longer among them is no longer chosen.
 export type BulkApi = {
@@ -96,11 +96,10 @@ export default function BulkDatesProvider({ items, max, children }: { items: rea
     },
   };
 
-  // The wrapper of the list's blocks. On a phone the bar, or the button when the mode is off, is fixed to the bottom of the screen:
-  // the last rows need room above it.
+  // The wrapper of the list's blocks. On a phone the bar is fixed to the bottom of the screen: the last rows need room above it.
   return (
     <Context.Provider value={api}>
-      <div className={`space-y-8 ${active ? "max-lg:pb-44" : "max-lg:pb-20"}`}>{children}</div>
+      <div className={`space-y-8${active ? " max-lg:pb-44" : ""}`}>{children}</div>
     </Context.Provider>
   );
 }

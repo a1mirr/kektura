@@ -1,61 +1,66 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition, type CSSProperties } from "react";
+import { useEffect, useRef, useState, useTransition, type CSSProperties, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { setStampDates } from "@/app/[locale]/dashboard/actions";
 import { useRouter } from "@/i18n/navigation";
 import type { ActionResult } from "@/lib/action-result";
 import { canApply, notStampedCount, requestOf, retiredConflicts } from "@/lib/bulk-dates";
 import { isValidStampDate } from "@/lib/stamp-date";
-import { useHydrated } from "@/lib/use-hydrated";
 import { useBulk, type BulkApi } from "./BulkDatesProvider";
 import CalendarButton from "./CalendarButton";
 
-// The floating button, the bar of "Set dates" (spec 0016 AC-14 to AC-19, AC-21) and the answer to a save. The answer ("12 dates set")
-// is a status live region that is always in the page, so a screen reader announces its text when it appears; empty, it takes no room.
-// It has no role of its own: the page already has one status (the test server's banner) and the others look for it.
-export default function BulkDateBar() {
+// The answer to a save (spec 0016 AC-19): "12 dates set". A status live region that is always in the page, so a screen reader
+// announces its text when it appears; empty, it takes no room. It has no role of its own: the page already has one status (the test
+// server's banner) and the others look for it.
+export function BulkMessage() {
   const bulk = useBulk();
   const t = useTranslations("dashboard");
-  const opened = useRef(false); // the mode was open: the button gets the focus back when it closes
-  const active = bulk?.active ?? false;
-  useEffect(() => {
-    if (active) opened.current = true;
-  }, [active]);
   if (!bulk) return null;
   return (
-    <>
-      <div aria-live="polite" className={bulk.saved ? "rounded-lg bg-green-50 p-4 text-green-800" : "sr-only"}>
-        {bulk.saved && t("bulkSaved", { count: bulk.saved.count })}
-      </div>
-      {bulk.active ? <Bar bulk={bulk} /> : <Launcher bulk={bulk} openedRef={opened} />}
-    </>
+    <div aria-live="polite" className={bulk.saved ? "rounded-lg bg-green-50 p-4 text-green-800" : "sr-only"}>
+      {bulk.saved && t("bulkSaved", { count: bulk.saved.count })}
+    </div>
   );
 }
 
-// The way into the mode (spec 0016 AC-14): a button that stays on the screen while the page scrolls, bottom right. It needs JavaScript,
-// so the server's HTML has none. mb-0: the list wrapper's space-y would lift a fixed box. From 1024 px it sits at z-5, under the map's
-// block (z-10), so a fullscreen map covers it (spec 0003 AC-11).
-function Launcher({ bulk, openedRef }: { bulk: BulkApi; openedRef: { current: boolean } }) {
-  const t = useTranslations("dashboard");
-  const hydrated = useHydrated();
-  const button = useRef<HTMLButtonElement>(null);
+// Hides the toolbar on a phone while the page is scrolled down and brings it back on the way up (or when something in it takes the
+// focus), so it does not cost the small screen a strip all the time. The scroll direction is read from window.scrollY.
+function useHideOnScrollDown() {
+  const [hidden, setHidden] = useState(false);
   useEffect(() => {
-    if (hydrated && openedRef.current) {
-      openedRef.current = false;
-      button.current?.focus({ preventScroll: true });
-    }
-  }, [hydrated, openedRef]);
-  if (!hydrated) return null;
+    let last = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (Math.abs(y - last) < 8) return; // a nudge is not a direction
+      setHidden(y > last && y > 120);
+      last = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return [hidden, () => setHidden(false)] as const;
+}
+
+// The toolbar of the stage list (spec 0016 AC-14): the list's controls, with the button into "Set dates", stuck to the top of the page
+// while the list scrolls, extra stamps included. In the mode the bar sits under it on a wide screen (on a phone it is fixed to the
+// bottom, spec 0016 AC-21). A friend's page has no provider and so no bar: the controls just stand there. From 1024 px it is at z-5:
+// above the rows' positioned controls (the date fields) and below the map's block of the other column (z-10), which holds the
+// fullscreen map, so the map covers it (spec 0003 AC-11).
+export function BulkToolbar({ children }: { children: ReactNode }) {
+  const bulk = useBulk();
+  const [hidden, show] = useHideOnScrollDown();
+  if (!bulk) return <div className="py-2">{children}</div>;
+  const away = hidden && !bulk.active;
   return (
-    <button
-      ref={button}
-      type="button"
-      onClick={() => bulk.enter()}
-      className="fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 mb-0 inline-flex h-12 min-w-11 items-center justify-center rounded-full bg-blue-600 px-5 text-sm font-medium text-white shadow-lg ring-1 ring-blue-700 hover:bg-blue-700 lg:z-5"
+    <div
+      data-hidden={away || undefined}
+      onFocusCapture={show}
+      className="sticky top-0 z-20 -mx-2 bg-stone-50 px-2 py-2 transition-[top] motion-reduce:transition-none max-lg:data-hidden:-top-40 lg:z-5"
     >
-      {t("bulkMode")}
-    </button>
+      {children}
+      {bulk.active && <Bar bulk={bulk} />}
+    </div>
   );
 }
 
@@ -78,8 +83,7 @@ function useKeyboardInset() {
   return inset;
 }
 
-// From 1024 px the bar is sticky at z-5: above the rows' positioned controls (the date fields) and below the map's block of the other
-// column (z-10), which holds the fullscreen map, so the map covers the bar (spec 0016 AC-21, spec 0003 AC-11).
+// On a phone the bar is fixed to the bottom of the screen; from 1024 px it stands under the toolbar, inside its sticky box.
 // Mounted only while the mode is on, so its date and its failure start empty every time the mode opens.
 function Bar({ bulk }: { bulk: BulkApi }) {
   const t = useTranslations("dashboard");
@@ -128,7 +132,7 @@ function Bar({ bulk }: { bulk: BulkApi }) {
       aria-label={t("bulkBar")}
       aria-busy={pending}
       style={{ "--kb": `${inset}px` } as CSSProperties}
-      className="rounded-lg bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-lg outline-none ring-1 ring-stone-300 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-(--kb) max-lg:mb-0 max-lg:z-30 max-lg:rounded-b-none lg:sticky lg:top-4 lg:z-5"
+      className="rounded-lg bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-lg outline-none ring-1 ring-stone-300 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-(--kb) max-lg:mb-0 max-lg:z-30 max-lg:rounded-b-none lg:mt-2"
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <p role="status" className="text-sm font-semibold tabular-nums">

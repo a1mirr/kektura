@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useBulk } from "./BulkDatesProvider";
 
 // On a stage's header, in the mode only (spec 0016 AC-15): "Select stage" adds every row of the stage to the choice, stamped or not.
-// Outside the mode the stage has no such button; the way in is the floating button (AC-14). The mode needs JavaScript, so this is
+// Outside the mode the stage has no such button; the way in is the toolbar's button (AC-14). The mode needs JavaScript, so this is
 // never in the server's HTML.
 export default function BulkStageButton({ stage }: { stage: number }) {
   const t = useTranslations("dashboard");
