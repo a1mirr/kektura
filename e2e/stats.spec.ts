@@ -103,7 +103,6 @@ test.describe("spec 0037: the stats page", () => {
     await page.mouse.move(0, 0);
     await expect(tooltip(page)).toHaveCount(0);
 
-    // a bar's height is its month's stamps: January (2) is twice December (1); an empty month has a faint mark instead of a bar
     const barHeight = async (name: string) =>
       (await bar(page, new RegExp(`^${name}:`)).locator("rect[fill='#2563eb']").boundingBox())!.height;
     expect((await barHeight("January 2026")) / (await barHeight("December 2025"))).toBeCloseTo(2, 1);

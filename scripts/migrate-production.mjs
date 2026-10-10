@@ -1,10 +1,3 @@
-//
-//   node scripts/migrate-production.mjs [--dry-run] [--baseline <file>]
-//
-// Needs psql and SUPABASE_DB_URL (the session pooler connection string). A file is recorded in
-// public.applied_migrations in the same transaction as the file, so it is never applied twice and a failing one
-// leaves nothing behind. When $GITHUB_OUTPUT is set it also writes `missing=true|false`: whether a file was missing
-// when the run started.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -14,7 +7,6 @@ import { baselineFiles, dropDetails, migrationFiles, pendingMigrations, redact }
 export class Problem extends Error {}
 
 /**
- * A function that runs psql with `args` against `url` and returns { status, stdout, stderr }.
  * @param {string} url
  * @param {(command: string, args: string[], options: object) => any} [spawn]
  */
@@ -39,7 +31,6 @@ revoke all on public.applied_migrations from anon, authenticated;
 `;
 
 /**
- * The whole run. `psql` is injected so the tests need no database. Returns { applied, pending, baselined } and logs what it did through `log`.
  * @typedef {{ status: number, stdout: string, stderr: string }} PsqlResult
  * @param {{ psql: (args: string[]) => PsqlResult, dir: string, names: string[], baseline?: string, dryRun?: boolean, url?: string, log?: (line: string) => void }} options
  */
@@ -95,7 +86,6 @@ export function migrate({ psql, dir, names, baseline, dryRun = false, url = "", 
   const done = [];
   for (const name of pending) {
     const file = path.join(dir, name);
-    // One transaction per file: the file and its record commit together, or neither does.
     const result = psql(["-1", "-f", file, "-c", `insert into public.applied_migrations (file_name) values (${quote(name)})`]);
     if (result.status !== 0) {
       throw new Problem(`Migration ${name} failed and was rolled back; nothing was recorded.\n${redact(dropDetails(result.stderr.trim()), url)}`);
@@ -118,7 +108,6 @@ function parseArgs(argv) {
 }
 
 /**
- * What the command line does. `env` and `psql` are injected for the tests.
  * @param {{ argv: string[], env: Record<string, string | undefined>, psql?: (args: string[]) => PsqlResult, print?: (line: string) => void }} options
  */
 export function cli({ argv, env, psql, print = console.log }) {

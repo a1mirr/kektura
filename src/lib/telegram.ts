@@ -1,6 +1,3 @@
-// The request URL contains the bot token, so nothing here ever returns or logs the URL, a fetch error object or a
-// response body: failures are reduced to a short reason.
-
 export const TELEGRAM_MAX_TEXT = 4096; // characters per message
 const DEFAULT_API = "https://api.telegram.org";
 

@@ -1,7 +1,3 @@
-// Usage (in CI, on a full clone): node scripts/check-review-recorded.mjs
-// Reads the pull request from the event file ($GITHUB_EVENT_PATH); the description is fetched fresh with `gh`
-// ($GH_TOKEN) so that re-running the job after editing the description sees the edit, not the description of the
-// original event.
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
@@ -37,8 +33,6 @@ export function checkReviewRecorded({ description, head, reviewed }) {
   return { ok: true, message: `Review recorded at ${reviewed.sha.slice(0, 7)}; only Markdown changed after it (head ${head.slice(0, 7)}).` };
 }
 
-// Files that arrive by merging the base into the branch were reviewed with the pull request that put them there; a
-// conflict resolution in a merge commit is the author's own work and counts.
 /**
  * @param {(...args: string[]) => string} git
  * @param {string} sha

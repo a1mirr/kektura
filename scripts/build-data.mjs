@@ -1,5 +1,3 @@
-// Usage: node scripts/build-data.mjs <stamps.gpx> <full-route.gpx> [heyjoe.hu okt_pecsetek.gpx (extra, non-official
-// stamps)]
 import fs from "node:fs";
 import { attr, flatMeters, nearestVertex, readTrack } from "./lib/geo.mjs";
 import { readRetiredStamps, retiredStampsSql } from "./lib/retired-stamps.mjs";
@@ -77,8 +75,8 @@ function writeRoute(file, tolDeg) {
   fs.writeFileSync(file, JSON.stringify({ points: pts }));
   console.log(`${file}: ${pts.length} points, ${(fs.statSync(file).size / 1024).toFixed(0)} KB`);
 }
-writeRoute("public/data/okt-route.json", 0.0003); // ~30 m, whole-trail overview
-writeRoute("public/data/okt-route-detail.json", 0.00003); // ~3 m, zoomed-in view
+writeRoute("public/data/okt-route.json", 0.0003);
+writeRoute("public/data/okt-route-detail.json", 0.00003);
 
 const stampsXml = fs.readFileSync(stampsPath, "utf8");
 const waypoints = [...stampsXml.matchAll(/<wpt\b([^>]*)>([\s\S]*?)<\/wpt>/g)].map((m) => {

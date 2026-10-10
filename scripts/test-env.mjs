@@ -1,9 +1,5 @@
 // Process env beats .env.local in Next, which is also how the Telegram secrets from .env.local are kept out of the
-// test server (scripts/lib/test-server-env.mjs).
-//
-// Usage: node scripts/test-env.mjs [--e2e] <command...>
-//   e.g. node scripts/test-env.mjs next dev --port 3001       (manual test server, .next-test)
-//        node scripts/test-env.mjs --e2e next build            (E2E production build, .next-e2e)
+// test server.
 import { spawn, spawnSync } from "node:child_process";
 import { testServerEnv } from "./lib/test-server-env.mjs";
 

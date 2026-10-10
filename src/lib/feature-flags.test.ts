@@ -14,7 +14,7 @@ describe("spec 0035: the registry", () => {
   it("AC-1: a key is a declared flag only if it is in the registry", () => {
     expect(isFlagKey("friends")).toBe(true);
     expect(isFlagKey("not-a-flag")).toBe(false);
-    expect(isFlagKey("toString")).toBe(false); // an inherited property is not a flag
+    expect(isFlagKey("toString")).toBe(false);
     // @ts-expect-error asking for a flag that is not declared fails typecheck
     const undeclared: keyof typeof FLAGS = "not-a-flag";
     expect(undeclared).toBe("not-a-flag");

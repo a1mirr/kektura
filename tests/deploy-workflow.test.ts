@@ -28,7 +28,7 @@ describe("spec 0026: the deploy workflow", () => {
       const ci = read(".github/workflows/ci.yml");
       expect(ci).toContain("name: Typecheck, lint, unit tests");
       expect(ci).toContain("name: End-to-end tests");
-      expect(ci).toContain("name: Security checks"); // a failure of it fails the workflow's conclusion, so it stops a deploy too
+      expect(ci).toContain("name: Security checks");
     });
 
     it("the job runs only for a successful push to main of this very repository (or by hand)", () => {
@@ -221,7 +221,7 @@ describe("spec 0026: the deploy workflow", () => {
       const push = step("Push the code to production");
       expect(push).toContain('2>&1 | tee "$RUNNER_TEMP/push.log"');
       expect(push).toMatch(/if ! grep -Eq "remote: Deployed \$\{TARGET_SHA:0:7\}\[0-9a-f\]\*\\\." "\$RUNNER_TEMP\/push\.log"; then/);
-      expect(push).toMatch(/exit 1\n\s+fi\n\s+echo "### Deployed"/); // the summary says "Deployed" only after the check
+      expect(push).toMatch(/exit 1\n\s+fi\n\s+echo "### Deployed"/);
       expect(read("deploy/post-receive")).toContain('echo "Deployed $(git --git-dir="$GIT_DIR" rev-parse --short main)."');
     });
 
@@ -267,7 +267,7 @@ describe("spec 0026: the deploy workflow", () => {
       expect(failure).toMatch(/revert the pull request on main and merge the revert/);
       for (const id of ["pick", "ci", "plan", "missing", "backup", "migrate", "push", "smoke"]) expect(failure).toContain(`steps.${id}.outcome`);
       expect(failure).toContain("DEPLOY_SHA: ${{ env.TARGET_SHA ||");
-      expect(failure).toMatch(/rebuild on the server by hand/); // a push whose build failed can't be re-run
+      expect(failure).toMatch(/rebuild on the server by hand/);
     });
 
     it("names the steps the failure message refers to", () => {
@@ -320,7 +320,7 @@ describe("spec 0026: the deploy workflow", () => {
       const missing = step("Find out whether a migration is missing");
       expect(missing).toContain("id: missing");
       expect(missing).toContain("args=(--dry-run)");
-      expect(missing).toContain('if [ -n "$BASELINE" ]; then args+=(--baseline "$BASELINE"); fi'); // a first run with a baseline would be refused without it
+      expect(missing).toContain('if [ -n "$BASELINE" ]; then args+=(--baseline "$BASELINE"); fi');
       expect(missing).toContain('node scripts/migrate-production.mjs "${args[@]}"');
       expect(missing).toContain("env -u GITHUB_STEP_SUMMARY");
       expect(missing).toContain("SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}");
@@ -344,7 +344,7 @@ describe("spec 0026: the deploy workflow", () => {
       expect(backup).toContain("uses: ./.github/actions/dump-user-data");
       expect(backup).toContain("artifact-name: pre-migration-${{ env.TARGET_SHA7 }}");
       expect(backup).toContain("retention-days: 30");
-      expect(backup).toMatch(/timeout-minutes: \d+/); // a hang fails the step, which still reaches the failure message
+      expect(backup).toMatch(/timeout-minutes: \d+/);
       expect(step("Pick the commit to deploy")).toContain('echo "TARGET_SHA7=${sha:0:7}" >> "$GITHUB_ENV"');
     });
 
@@ -366,7 +366,6 @@ describe("spec 0026: the deploy workflow", () => {
 
     it("AC-14: a dump that fails stops the chain: nothing makes the backup step optional, and no later step runs after a failure except the message", () => {
       expect(code).not.toContain("continue-on-error");
-      // the migration step keeps the default `success()`: it has no status function of its own
       const migrateIf = step("Apply the missing migrations")
         .split("\n")
         .filter((line) => /^ {8}if: /.test(line));

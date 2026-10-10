@@ -3,9 +3,6 @@ import { expectNoSidewaysScroll, openAccountMenu, setFeatureFlag, signInAsNewUse
 import { describeFindings, judge, scan, WIDTHS } from "./accessibility";
 import { psql } from "./local-db";
 
-// The `friends` and `restaurants` flags in each state, for a signed-in user, a user on the
-// allowlist and a signed-out visitor. Flags are global, so the tests run one after the other (this file is its own
-// Playwright project, after the others) and leave the flags on, as the other tests expect.
 test.describe.configure({ mode: "serial" });
 test.afterAll(() => {
   setFeatureFlag("friends", "on");

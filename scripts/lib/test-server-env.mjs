@@ -12,7 +12,6 @@ export function testServerEnv(base, local, e2e) {
     NEXT_PUBLIC_SUPABASE_URL: local.API_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: local.ANON_KEY ?? local.PUBLISHABLE_KEY,
     TEST_LOGIN: "1",
-    // Separate folders: an E2E build must not clobber a running manual test server.
     NEXT_DIST_DIR: e2e ? ".next-e2e" : ".next-test",
   };
 }

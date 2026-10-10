@@ -1,10 +1,3 @@
-// Run it on a developer machine when the interface changed, then look at the pictures and commit them; it is not part
-// of CI (the map needs OpenStreetMap's tiles).
-//
-//   npm run testdb:start                        (local Supabase, needs Docker)
-// npm run build:e2e && npm run start:e2e      (the test server's production build on :3002: no dev overlay in the
-// pictures)
-//   npm run screenshots                         (SCREENSHOTS_URL=http://localhost:3002 is the default)
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
@@ -90,8 +83,7 @@ async function zoomOut(page, steps, delta = 240) {
   }
 }
 
-// Checks the page as it is about to be photographed, then removes the test server's banner from it (see the top of the file). A page
-// that was just loaded must still have the banner: without it this is not the test server.
+// A page that was just loaded must still have the banner: without it this is not the test server.
 async function inspect(page, what, { freshPage }) {
   const banner = messages.app.testBanner;
   const text = () => page.evaluate(() => document.body.innerText);

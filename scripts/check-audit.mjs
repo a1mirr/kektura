@@ -1,4 +1,3 @@
-// Usage: node scripts/check-audit.mjs [audit-report.json] [allowlist.json]
 import { readFileSync } from "node:fs";
 
 export const SEVERITIES_THAT_FAIL = ["high", "critical"];
@@ -18,10 +17,6 @@ function isRealDate(text) {
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text;
 }
 
-/**
- * The allow-list: `{ entries: [{ advisory, reason, expires }] }`. Returns the entries that still count and a list of
- * what is wrong with the file (an unreadable shape, a malformed entry, an expired one).
- */
 export function readAllowlist(allowlist, now) {
   const today = dayOf(now);
   const latest = dayOf(new Date(now.getTime() + MAX_DAYS_AHEAD * 86_400_000));

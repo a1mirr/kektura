@@ -1,11 +1,3 @@
-//
-//   npm run telegram:webhook -- set      tell Telegram to send the bot's messages to SITE_URL/api/telegram
-//   npm run telegram:webhook -- info     show where Telegram sends them and whether it had trouble
-//   npm run telegram:webhook -- delete   stop sending them (the bot works again for getUpdates)
-//
-// Reads TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET and SITE_URL from .env.local (or the environment). The request
-// URL holds the token and the secret goes to Telegram in the body, so neither is ever printed: only what Telegram
-// answers.
 try {
   process.loadEnvFile(".env.local");
 } catch {
@@ -29,7 +21,6 @@ async function call(method, body = {}) {
       signal: AbortSignal.timeout(10_000),
     });
   } catch (error) {
-    // The error's message can contain the request URL, so only its name is shown.
     throw new Problem(`Could not reach Telegram (${error instanceof Error ? error.name : "error"}). Check the network.`);
   }
   const answer = await response.json().catch(() => ({}));

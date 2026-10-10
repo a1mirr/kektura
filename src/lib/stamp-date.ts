@@ -21,8 +21,6 @@ export function localToday(now: Date = new Date()): string {
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }
 
-// The server also ignores a real date outside its range: a client can't know how far its clock is off, and stamping
-// must not stop working because of it.
 export function newStampDate(now: Date = new Date()): string | undefined {
   const today = localToday(now);
   return isValidStampDate(today, now) ? today : undefined;

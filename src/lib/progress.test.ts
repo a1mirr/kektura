@@ -161,9 +161,6 @@ describe("spec 0001: stages", () => {
     const placeKm = new Map(places.map(p => [p.key, p.km]));
     const stages = [s1, s2, s3];
 
-    // s1: [0, 10)
-    // s2: [10, 20) (starts at B's km=10)
-    // s3: [21, 30] (final stage, inclusive of end)
     expect(findStageForKm(0, stages, placeKm)).toBe(1);
     expect(findStageForKm(5, stages, placeKm)).toBe(1);
     expect(findStageForKm(10, stages, placeKm)).toBe(2);

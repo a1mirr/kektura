@@ -29,7 +29,7 @@ export default function RequiredFrom({
   return (
     <div className="mt-1 text-xs text-stone-600 [overflow-wrap:anywhere]" onKeyDown={(e) => {
         if (e.key !== "Escape" || !open) return;
-        e.preventDefault(); // this Escape closed the note: others (the "Change dates" mode) leave it alone
+        e.preventDefault(); // this Escape closed the note: others (the "Set dates" mode) leave it alone
         setOpen(false);
       }}>
       <p>

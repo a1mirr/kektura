@@ -5,9 +5,6 @@ export function needsDeploy(paths) {
 }
 
 /**
- * What to do for `target` (a commit of main), given what production runs.
- * `changed` are the paths that differ between production's commit and the target;
- * `targetIsBehind` is true when the target is an ancestor of production's commit.
  * @param {{ production: string, target: string, changed?: string[], targetIsBehind?: boolean }} input
  * @returns {{ deploy: boolean, reason: string }}
  */
@@ -61,7 +58,6 @@ export function redact(text, connectionString) {
       if (secret) secrets.add(secret);
     }
   } catch {
-    // not a URL: only the whole string is redacted
   }
   let out = text;
   for (const secret of [...secrets].filter(Boolean).sort((a, b) => b.length - a.length)) out = out.split(secret).join("***");
@@ -71,7 +67,6 @@ export function redact(text, connectionString) {
 const STEPS = { pick: "choosing the commit to deploy", ci: "checking that CI passed", plan: "reaching production", missing: "checking which migrations are missing", backup: "backing up the user data before the migrations (no migration was applied)", migrate: "applying migrations", push: "pushing the code to production", smoke: "the smoke test" };
 
 /**
- * The Telegram message for a failed run: the commit, the failed step, a link. `outcomes` maps step id to its outcome.
  * @param {{ sha: string, runUrl: string, outcomes: Record<string, string | undefined> }} input
  */
 export function failureMessage({ sha, runUrl, outcomes }) {

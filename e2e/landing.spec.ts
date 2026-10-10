@@ -13,7 +13,6 @@ const messages = (locale: string): Messages =>
 const figures = (page: Page) => page.getByRole("region", { name: /./ }).getByRole("figure");
 const box = async (locator: ReturnType<Page["locator"]>) => (await locator.boundingBox())!;
 
-// Scrolls the whole page once, so the lazy pictures are asked for, then waits until each one has been drawn.
 async function loadAllPictures(page: Page) {
   for (const figure of await figures(page).all()) {
     await figure.scrollIntoViewIfNeeded();

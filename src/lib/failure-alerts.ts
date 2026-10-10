@@ -1,7 +1,3 @@
-// What may go into a message: the tag, the action, the stage and the error's own short `code`. Never the error
-// message (it can quote row values), emails, user ids, request input or Supabase `details` / `hint`: the server log
-// has the rest, the message only says where to look.
-
 // Only these stages are sent: the expected outcomes (no session, rejected input) are not failures, and a failed read
 // is left to the log.
 export const ALERT_STAGES = ["write", "exception"] as const;

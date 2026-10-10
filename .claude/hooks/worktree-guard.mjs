@@ -51,7 +51,6 @@ function nearestExisting(file) {
   return dir;
 }
 
-/** Splits a shell line into simple commands (on ; && || | and newlines), good enough for `cd x && git commit`. */
 function simpleCommands(line) {
   return line.split(/&&|\|\||;|\||\r?\n/).map((s) => s.trim()).filter(Boolean);
 }
@@ -90,7 +89,7 @@ export function newBranchBase(invocation) {
     if (word === "-b" || word === "-B") {
       creates = true;
       i++;
-    } else if (/^-[bB]./.test(word)) creates = true; // -bNAME
+    } else if (/^-[bB]./.test(word)) creates = true;
     else if (word === "--reason") i++;
     else if (!word.startsWith("-")) positional.push(unquote(word));
   }

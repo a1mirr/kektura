@@ -409,7 +409,7 @@ test.describe("spec 0016: the button, the bar and the fullscreen map", () => {
       }, box);
     const button = (await setDates(page).boundingBox())!;
     expect(button.y).toBeGreaterThan(0);
-    expect(button.y).toBeLessThan(720); // the button is in the window, so it could paint over the map
+    expect(button.y).toBeLessThan(720);
 
     await page.getByRole("button", { name: "Fullscreen", exact: true }).click();
     await expect(page.getByRole("button", { name: "Exit fullscreen" })).toBeVisible();
@@ -419,7 +419,7 @@ test.describe("spec 0016: the button, the bar and the fullscreen map", () => {
     await enterSetDates(page);
     const at = (await bar(page).boundingBox())!;
     expect(at.y).toBeGreaterThan(0);
-    expect(at.y).toBeLessThan(720); // the bar is in the window, so it could paint over the map
+    expect(at.y).toBeLessThan(720);
     await page.getByRole("button", { name: "Fullscreen", exact: true }).click();
     await expect(page.getByRole("button", { name: "Exit fullscreen" })).toBeVisible();
     expect(await covered(at)).toEqual([true, true, true]);

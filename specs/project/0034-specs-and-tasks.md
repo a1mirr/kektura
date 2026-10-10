@@ -116,7 +116,7 @@ that is in the repository.
   task.
 - Spec 0022 (the fresh-context review) owns the reviewer; its ACs name what the reviewer is told, which AC-8
   restates.
-- Numbers are stable ids: tests and code comments cite spec numbers; migrations and branches cite the task's issue number.
+- Numbers are stable ids: tests cite spec numbers; migrations and branches cite the task's issue number.
 - Task issues live outside the repository on purpose: opening, editing and closing one needs no branch, CI run or
   review. The cost is that an issue can be edited after the fact with no review, so what a change did to the specs is
   recorded in the pull request description (AC-3), which the reviewer reads (AC-8).

@@ -13,9 +13,8 @@ export default defineConfig({
     locale: "en-US",
     trace: "retain-on-failure",
   },
-  // The flags project switches declared flags for everybody, which the other tests must not see, so it starts only
-  // when the rest has finished. Run it alone with `npx playwright test --project flags --no-deps`, the phone tests
-  // with `npx playwright test --project mobile`.
+  // Run the flags project alone with `npx playwright test --project flags --no-deps`, the phone tests with `npx
+  // playwright test --project mobile`.
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] }, testIgnore: "feature-flags.spec.ts", grepInvert: /@mobile/ },
     {

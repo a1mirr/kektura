@@ -5,7 +5,6 @@ const isRealDate = (iso) => {
   return !Number.isNaN(t) && new Date(t).toISOString().slice(0, 10) === iso;
 };
 
-// Throws when there is none: a regeneration must say which MTSZ file it is from.
 export function fileDate(file) {
   const m = path.basename(file).match(/(\d{4})[-_.]?(\d{2})[-_.]?(\d{2})/);
   const iso = m ? `${m[1]}-${m[2]}-${m[3]}` : "";

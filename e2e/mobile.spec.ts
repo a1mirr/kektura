@@ -4,7 +4,7 @@ import { accountButton, expandAllStages, expectNoSidewaysScroll, openAccountMenu
 import { psql } from "./local-db";
 
 // The control is on the screen: visible, inside the window sideways, and big enough to hit with a thumb: at least 24 px
-// each way (WCAG 2.2's target size), or `minSize` where a spec promises more (44 px: specs 0014 AC-16, 0024 AC-20).
+// each way (WCAG 2.2's target size), or `minSize` where a spec promises more (44 px).
 async function expectTappable(page: Page, control: Locator, what: string, minSize = 24) {
   await expect(control, `${what} is visible`).toBeVisible();
   await control.scrollIntoViewIfNeeded();

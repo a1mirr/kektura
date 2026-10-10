@@ -84,10 +84,6 @@ export function buildRetired(checkpoints: Checkpoint[]): RetiredStamp[] {
     }));
 }
 
-// A retired stamp is listed when the user holds it or could have collected it: they walked past its position before
-// it retired. That is read from the dates of the nearest stamped places on either side of the position (the place it
-// followed counts as before it), the EARLIER of the two. With no stamped neighbour and no stamp of its own it is not
-// listed.
 export function retiredVisibleKeys(
   retired: RetiredStamp[],
   places: Place[],
@@ -127,9 +123,6 @@ export function stampedPlaceKeys(places: Place[], stamps: StampRow[]): Map<strin
 
 const byTrailOrder = (a: Place, b: Place) => a.km - b.km || a.seq - b.seq;
 
-// The walk is read from the stamp dates of the nearest stamped places on either side, in trail order; the later of
-// the two (the only one there is, with a single neighbour) is the day the place was walked. Nothing is waived without
-// a stamped neighbour.
 export function waivedPlaceKeys(places: Place[], stampedOn: ReadonlyMap<string, string>): Set<string> {
   const ordered = [...places].sort(byTrailOrder);
   const before: (string | null)[] = [];

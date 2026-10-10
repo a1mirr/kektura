@@ -119,9 +119,9 @@ test.describe("spec 0001 + 0002: stamping on the dashboard", () => {
     const row = place(page, "OKTPH_02");
     await row.getByRole("button", { name: "Add stamp" }).click();
     const undo = row.getByRole("button", { name: "Remove" });
-    await expect(undo).toBeVisible(); // flipped at once (optimistic) ...
-    await expect(undo).toBeDisabled(); // ... and disabled while the action runs
-    await expect(row.getByLabel("Date of the stamp")).toHaveCount(0); // the date is the server's
+    await expect(undo).toBeVisible();
+    await expect(undo).toBeDisabled();
+    await expect(row.getByLabel("Date of the stamp")).toHaveCount(0);
     await expect(stat(page, "Stamps")).toHaveText("0 / 161");
 
     release();

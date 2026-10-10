@@ -145,18 +145,16 @@ describe("spec 0016: set_stamp_dates (one date for many rows, in one transaction
     const cleo = await signUp();
     stamp(cleo, ["OKTPH_03", "OKTPH_07"], [1], "2025-01-01");
     const psqlArgs = ["exec", "-i", "supabase_db_kektura", "psql", "-U", "postgres", "-tA", "-v", "ON_ERROR_STOP=1", "-q"];
-    // Another session removes OKTPH_07 and keeps its transaction open for a while...
     const other = spawn("docker", psqlArgs);
     const finished = new Promise<number | null>((resolve) => other.on("close", resolve));
     other.stdin.end(
       `begin; delete from user_stamps s using checkpoints c where c.id = s.checkpoint_id and s.user_id = '${cleo.id}' and c.place_key = 'OKTPH_07'; select pg_sleep(4); commit;`,
     );
-    // Wait until that session is asleep inside its transaction, with the delete done (not a fixed pause: a slow runner would be too late).
+    // Wait until that session is asleep inside its transaction (not a fixed pause: a slow runner would be too late).
     for (let waited = 0; rows("select count(*) from pg_stat_activity where state = 'active' and query like 'select pg_sleep(4)%' and pid <> pg_backend_pid()") !== "1"; waited += 100) {
       if (waited > 15_000) throw new Error("the first session never got to its sleep");
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
-    // ...and the function is called meanwhile, as the user: it waits for that transaction, then writes every row it was asked to.
     const answer = execFileSync("docker", psqlArgs, {
       encoding: "utf8",
       input: `begin; set local role authenticated; select set_config('request.jwt.claims', '{"sub":"${cleo.id}","role":"authenticated"}', true);

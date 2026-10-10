@@ -1,9 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
 
-// Accessibility checks with axe. Axe finds roughly a third of accessibility problems, not all:
-// a page that passes is not "accessible", it only has none of the problems a machine can see.
-
 export const WIDTHS = { desktop: { width: 1280, height: 800 }, phone: { width: 375, height: 812 } } as const;
 export type Width = keyof typeof WIDTHS;
 

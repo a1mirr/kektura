@@ -1,6 +1,5 @@
 export const DEMO_EMAIL = "demo@kektura.test";
 
-// Fixed, so the pictures can be made again and look the same.
 export const DEMO_WALK = {
   stages: [
     { upToStage: 1, day: "2026-09-12" },
@@ -23,7 +22,6 @@ export function pngSize(png) {
 
 const quote = (text) => `'${String(text).replaceAll("'", "''")}'`;
 
-// Every variant of a place gets a row, as the stamp button would.
 /** @param {string} [email] @param {typeof DEMO_WALK} [walk] */
 export function demoSql(email = DEMO_EMAIL, walk = DEMO_WALK) {
   const user = `(select id from auth.users where email = ${quote(email)})`;

@@ -186,7 +186,6 @@ describe("spec 0007: CI is the authority for the end-to-end tests", () => {
     expect(read("specs/README.md")).toMatch(/CI's "End-to-end tests" job is the authority and must be green on the pull request/);
     expect(read("specs/README.md")).toMatch(/run `npm run e2e` locally only to reproduce a failure/);
     expect(read(".github/pull_request_template.md")).toMatch(/^- \[ \] .*CI's end-to-end job is green \(`npm run e2e` locally only to reproduce a failure\)/m);
-    expect(read(".claude/hooks/stop-check.mjs")).toMatch(/left to CI, which is the authority; `npm run e2e` only to reproduce a failure/);
   });
 
   it("AC-8: nothing still tells the author to run the end-to-end tests before committing", () => {

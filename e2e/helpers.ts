@@ -2,9 +2,9 @@ import { randomUUID } from "node:crypto";
 import { expect, type Locator, type Page } from "@playwright/test";
 import { psql } from "./local-db";
 
-// Signs in through the dummy login with this email; the account is created on first use.
 // Posts to the route the form submits to instead of loading the landing page and filling in the form: the session
-// cookies land in the page's browser context, and the 303 is not followed so the dashboard is rendered once, by the goto.
+// cookies land in the page's browser context, and the 303 is not followed so the dashboard is rendered once, by the
+// goto.
 export async function signInWithEmail(page: Page, email: string) {
   const response = await page.request.post("/auth/test-login", { form: { email, locale: "en" }, maxRedirects: 0 });
   const location = response.headers()["location"] ?? "";
@@ -30,8 +30,8 @@ export async function signInAsNewUser(page: Page) {
 
 export const accountButton = (page: Page) => page.locator("body > header summary");
 
-// Opens the account menu and returns its list. Waits until the page has hydrated first (the button then carries
-// `aria-expanded`), so the click is the one the script listens to.
+// Waits until the page has hydrated first (the button then carries `aria-expanded`), so the click is the one the
+// script listens to.
 export async function openAccountMenu(page: Page) {
   const button = accountButton(page);
   await expect(button).toHaveAttribute("aria-expanded", "false");
@@ -43,7 +43,7 @@ export async function openAccountMenu(page: Page) {
 export const stat = (page: Page, label: string) =>
   page.locator("dl > div", { has: page.locator("dt", { hasText: new RegExp(`^${label}$`) }) }).locator("dd");
 
-// Opens every stage of the stamps list. Retried until it sticks, which also waits for hydration.
+// Retried until it sticks, which also waits for hydration.
 export async function expandAllStages(page: Page) {
   await expect(async () => {
     await page.getByRole("button", { name: "Expand all" }).click();
@@ -67,8 +67,6 @@ export async function expectNoSidewaysScroll(page: Page, message: string) {
     .toBe("");
 }
 
-// The ids of the place and extra-stamp rows whose description is cut off, nowrap or sticks
-// out of its row, plus how many descriptions were measured (so a changed selector can't pass vacuously).
 export function measureDescriptions(page: Page) {
   return page.locator("li[id^=place-], #extra-stamps li").evaluateAll((lis) => {
     const rows = lis.flatMap((li) =>
@@ -86,9 +84,6 @@ export function measureDescriptions(page: Page) {
   });
 }
 
-// Switches a feature flag in the local database: its mode, and for `allowlist` the users it is on
-// for. The change shows on the next request. The flags are global, so a test that changes a declared flag belongs
-// in e2e/feature-flags.spec.ts (a project that runs alone, after the others) and puts it back when it is done.
 export function setFeatureFlag(key: string, mode: "off" | "allowlist" | "on", allowedEmails: string[] = []) {
   const quote = (text: string) => `'${text.replaceAll("'", "''")}'`;
   psql(

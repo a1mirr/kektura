@@ -1,7 +1,3 @@
-// Only a pull request can skip: on a push (to `main`) everything runs, because the deploy workflow relies on both
-// jobs having run.
-// Usage (in CI, after a checkout with `fetch-depth: 2`): node scripts/ci-changes.mjs
-// When in doubt (an unexpected checkout, an empty list) the answer is `true`: running too much is the safe mistake.
 import { execFileSync } from "node:child_process";
 import { appendFileSync } from "node:fs";
 import { isMarkdown } from "./check-review-recorded.mjs";
@@ -12,7 +8,6 @@ export function codeChanged({ eventName, files }) {
   return files.some((file) => !isMarkdown(file));
 }
 
-// Null when HEAD is not a merge commit or git cannot say, so the caller runs everything.
 export function changedFiles(git) {
   try {
     const parents = git("rev-list", "--parents", "-n", "1", "HEAD").trim().split(/\s+/).length - 1;

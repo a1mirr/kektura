@@ -1,5 +1,3 @@
-// Kept apart from stop-check.mjs so that a test can call the decision (the hook itself runs on import).
-
 const isTest = (f) => /\.test\.[cm]?[jt]sx?$/.test(f) || f.startsWith("tests/") || f.startsWith("e2e/");
 const isCode = (f) => /\.(ts|tsx)$/.test(f) && !isTest(f) && !f.endsWith(".types.ts");
 

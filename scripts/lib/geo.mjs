@@ -19,7 +19,6 @@ export function flatMeters(lng, lat, p) {
   return Math.sqrt(dx * dx + dy * dy) * 111320;
 }
 
-// `points` are [lon, lat], `km[i]` is the distance along the track up to point i.
 export function readTrack(path) {
   const xml = fs.readFileSync(path, "utf8");
   const points = [...xml.matchAll(/<trkpt\b([^>]*)>/g)].map((m) => [attr(m[1], "lon"), attr(m[1], "lat")]);

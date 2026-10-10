@@ -1,4 +1,3 @@
-// The request URL contains the bot token, so what must never appear in any output is the token itself.
 import { spawn } from "node:child_process";
 import http from "node:http";
 import type { AddressInfo } from "node:net";

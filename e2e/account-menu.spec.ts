@@ -4,9 +4,6 @@ import { accountButton, openAccountMenu, signInAsNewUser } from "./helpers";
 const list = (page: Page) => page.locator("body > header details ul");
 const entries = (page: Page) => list(page).getByRole("link");
 
-// Every page a signed-in visitor sees: the dashboard, the three pages of the menu and one that is not in it.
-// The About, Changelog, Useful links and Feedback pages were static before the strip read the session: the button on them shows
-// that they render per request now.
 const SIGNED_IN_PAGES = ["/dashboard", "/stats", "/friends", "/account", "/about", "/changelog", "/links", "/feedback"];
 
 test.describe("spec 0014: the account menu", () => {

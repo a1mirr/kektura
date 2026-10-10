@@ -1,4 +1,3 @@
-// Usage: node scripts/slowest-tests.mjs [report.json] [count]
 import { readFileSync } from "node:fs";
 
 export function slowestTests(report, count = 10) {

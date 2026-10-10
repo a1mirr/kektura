@@ -2,8 +2,6 @@ import { FLAG_KEYS, FLAG_MODES, FLAGS, isFlagKey, isFlagMode, type FlagKey, type
 import { logFeatureFlagsError, logFlagChange } from "./log";
 import type { InlineKeyboard } from "./telegram";
 
-// The texts are English: this is the owner's own tool, not part of the three-language rule.
-
 export const CONFIRM_WINDOW_MS = 60_000;
 export const MAX_LISTED_USERS = 20;
 // Telegram refuses callback data over 64 bytes.

@@ -1,6 +1,3 @@
-// node scripts/deploy-plan.mjs <target sha> [remote]      (remote defaults to `production`)
-// Needs the deploy key and GIT_SSH_COMMAND for `git ls-remote`; writes `deploy=true|false` to $GITHUB_OUTPUT and the
-// reason to the job summary.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
@@ -11,7 +8,6 @@ export class Problem extends Error {}
 const git = (...args) => spawnSync("git", args, { encoding: "utf8" });
 
 /**
- * The commit production's main points to, or "" when it has none yet.
  * @param {string} remote
  * @param {(...args: string[]) => { status: number | null, stdout: string, stderr: string }} [run]
  */
@@ -25,7 +21,6 @@ export function productionMain(remote, run = git) {
 }
 
 /**
- * Everything the decision needs from the local repository.
  * @param {string} production
  * @param {string} target
  * @param {(...args: string[]) => { status: number | null, stdout: string, stderr: string }} [run]

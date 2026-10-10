@@ -1,6 +1,3 @@
-// A database that was not reachable, or a test file that forgot the helper of `e2e/local-db.ts`, must never turn the
-// step green without the rules being checked.
-// Usage: node scripts/check-database-tests.mjs [report.json]
 import { readFileSync } from "node:fs";
 
 function testsOf(report) {

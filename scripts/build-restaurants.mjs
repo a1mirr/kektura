@@ -1,8 +1,3 @@
-// Restaurants layer data: scraped marker list from an etteremhet.hu search results page
-// (the page embeds `var markerData = [...]` for its own map) + distance to the OKT track.
-//
-// Usage: node scripts/build-restaurants.mjs <results.html> <full-route.gpx>
-// Writes: public/data/restaurants.json
 import fs from "node:fs";
 import { haversine, nearestVertex, readTrack } from "./lib/geo.mjs";
 

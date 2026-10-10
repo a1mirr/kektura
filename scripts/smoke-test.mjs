@@ -1,6 +1,3 @@
-// It is a sanity check of the running build, not a test suite. It retries, because the reload takes a moment.
-//
-//   node scripts/smoke-test.mjs <base url> [timeout seconds]
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
 
@@ -24,7 +21,6 @@ export const CHECKS = [
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * Runs every check once; returns the list of what is wrong (empty when all is well).
  * @param {string} base
  * @param {(url: URL, init: object) => Promise<any>} [fetchFn]
  * @returns {Promise<string[]>}
@@ -44,7 +40,6 @@ export async function checkOnce(base, fetchFn = fetch) {
 }
 
 /**
- * Retries until every check passes or `timeoutMs` has passed.
  * @param {{ base: string, timeoutMs?: number, intervalMs?: number, fetchFn?: (url: URL, init: object) => Promise<any>, sleep?: (ms: number) => Promise<void>, now?: () => number, log?: (line: string) => void }} options
  */
 export async function smoke({ base, timeoutMs = 120_000, intervalMs = 5_000, fetchFn = fetch, sleep = wait, now = Date.now, log = () => {} }) {

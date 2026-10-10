@@ -326,7 +326,7 @@ test.describe("spec 0024: the Friends page buttons respond", () => {
     await page.goto("/en/friends");
     await page.getByRole("button", { name: "Approve" }).click();
     await expect(status(page)).toHaveText("Friend request approved.");
-    await expect(page.getByRole("button", { name: "Cancel" })).toHaveCount(0); // no JavaScript, no Cancel button
+    await expect(page.getByRole("button", { name: "Cancel" })).toHaveCount(0);
 
     await page.locator("summary", { hasText: "Remove" }).click();
     await page.getByRole("button", { name: "Yes, remove" }).click();

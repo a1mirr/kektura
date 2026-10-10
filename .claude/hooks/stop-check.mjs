@@ -1,4 +1,3 @@
-// E2E needs Docker and is left to CI, which is the authority; `npm run e2e` only to reproduce a failure.
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";

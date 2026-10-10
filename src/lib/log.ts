@@ -19,8 +19,6 @@ function describeError(error: unknown): { code?: string; message: string } {
   return { message: "unknown error" };
 }
 
-// Only a reason such as http_401, timeout or network is ever logged for a failed Telegram request: the request URL
-// holds the bot token and the message text can hold what the sender wrote.
 const safeReason = (reason: string) => (/^[\w-]{1,32}$/.test(reason) ? reason : "unknown");
 
 // Does not wait for Telegram: an action never waits for it, or fails because of it.
@@ -77,8 +75,6 @@ export function logFeedbackError(stage: "write" | "exception", error: unknown, u
   alertFailure({ tag: "feedback", action: "submitFeedback", stage, code });
 }
 
-// Only a short reason such as http_401, timeout or network: the request URL holds the bot token and
-// the message text is the sender's, so neither is ever logged.
 export function logFeedbackNotifyFailure(reason: string): void {
   console.warn(`[feedback] telegram notification failed reason=${safeReason(reason)}`);
 }

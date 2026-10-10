@@ -1,9 +1,3 @@
-//
-//   npm run telegram:check                   verify the token, send a test message to TELEGRAM_CHAT_ID
-//   npm run telegram:check -- --find-chat-id list the chats that recently wrote to the bot
-//
-// Reads TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID from .env.local (or the environment). The request URL contains the
-// token, so it is never printed: only what Telegram answers.
 try {
   process.loadEnvFile(".env.local");
 } catch {
@@ -26,7 +20,6 @@ async function call(method, body = {}) {
       signal: AbortSignal.timeout(10_000),
     });
   } catch (error) {
-    // The error's message can contain the request URL, so only its name is shown.
     throw new Problem(`Could not reach Telegram (${error instanceof Error ? error.name : "error"}). Check the network.`);
   }
   const answer = await response.json().catch(() => ({}));

@@ -1,5 +1,3 @@
-// Git runs the `pre-push` hook with the remote's name and URL as arguments and one line per ref on stdin: <local ref>
-// <local sha> <remote ref> <remote sha>
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
 

@@ -49,9 +49,6 @@ const validPlaceKeys = (keys: unknown): keys is string[] =>
   keys.length <= MAX_PLACES &&
   keys.every((k) => typeof k === "string" && k.length <= 64);
 
-// The `stamped_on` for rows that are created now. Optional: without one the database default (the server's day)
-// applies. A real date outside the valid range is ignored rather than refused: a client can't know how far its clock
-// is off, and stamping must not stop working because of it.
 const dateForNewRows = (date: string | undefined) => (date !== undefined && isValidStampDate(date) ? date : undefined);
 
 const retiredDateRefused = (rows: { retired_on: string | null }[], date: string | undefined): boolean => {
@@ -118,9 +115,6 @@ export async function setStampDate(placeKeys: string[], date: string): Promise<A
   });
 }
 
-// A stamped row is re-dated, one that is not stamped yet is stamped with the date. One database function does it in
-// one transaction (migrations 0080 and 0137); it answers false, and changes nothing, when a place or extra stamp does
-// not exist or a retired stamp would get a date from its retirement day on.
 export async function setStampDates(placeKeys: string[], extraIds: number[], date: string): Promise<ActionResult> {
   if (
     !Array.isArray(placeKeys) ||
@@ -164,7 +158,7 @@ export async function setExtraStamped(extraId: number, stamped: boolean, date?: 
   });
 }
 
-// Update only; needs the UPDATE policy of migration 0007.
+// Update only; needs the UPDATE policy on user_extra_stamps.
 export async function setExtraStampDate(extraId: number, date: string): Promise<ActionResult> {
   if (!Number.isInteger(extraId) || !isValidStampDate(date)) {
     logStampActionInvalidInput("setExtraStampDate");

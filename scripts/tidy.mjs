@@ -1,10 +1,6 @@
-// A dry run unless --apply is given; --remote also deletes merged branches on origin.
-//
-//   node scripts/tidy.mjs [--apply] [--remote]
-//
-// "Merged" means a merge commit of origin/main brought the commit in (the repository merges pull requests with merge
-// commits). A new branch that has no commit of its own yet is an ancestor of origin/main too, and must not be taken
-// for finished work: another session may be about to start on it.
+// "Merged" means a merge commit of origin/main brought the commit in. A new branch that has no commit of its own yet
+// is an ancestor of origin/main too, and must not be taken for finished work: another session may be about to start
+// on it.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -14,7 +10,6 @@ const NOT_MERGED = "no merge commit of origin/main contains it (unmerged work, o
 const norm = (p) => path.resolve(p).replace(/\\/g, "/").toLowerCase();
 
 /**
- * Decides what to remove. Pure: all state comes in.
  * @param {{ primary: string, current: string, worktrees: { path: string, branch: string | null, merged: boolean, clean: boolean }[],
  *   branches: { name: string, merged: boolean }[], remotes: { name: string, merged: boolean }[], localMain?: { behind: boolean } | null, protectedBranches?: string[] }} state
  */
@@ -85,7 +80,7 @@ export function unlinkNodeModules(worktree) {
 }
 
 export function restoreNodeModules(worktree, link) {
-  if (link) fs.symlinkSync(link.target, path.join(worktree, "node_modules"), "junction"); // "junction" is ignored off Windows
+  if (link) fs.symlinkSync(link.target, path.join(worktree, "node_modules"), "junction");
 }
 
 const git = (cwd, args) => {
