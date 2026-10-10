@@ -1,6 +1,3 @@
-// Tests must never reach the developer's real Telegram. Next merges `.env.local` into a server's environment, so this
-// runs Next's own env loader in a child process against a `.env.local` that holds a bot, as `npm run dev:test` and
-// `npm run e2e` would.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import { createRequire } from "node:module";

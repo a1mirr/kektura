@@ -27,7 +27,7 @@ const ROUTE_ZOOM_OUT = 2;
 const canvas = (page) => page.locator(".maplibregl-canvas");
 
 async function mapSettled(page) {
-  await page.waitForLoadState("networkidle").catch(() => {});
+  await page.waitForLoadState("networkidle").catch(() => {}); // tiles may keep arriving: the canvas check decides
   let before = "";
   for (let i = 0; i < 20; i++) {
     await wait(700);
@@ -70,7 +70,7 @@ async function showPlace(page, placeKey) {
 const popupAction = (page, name) => page.getByRole("button", { name }).dispatchEvent("click");
 
 async function closePopups(page) {
-  for (const close of await page.locator(".maplibregl-popup-close-button").all()) await close.click().catch(() => {});
+  for (const close of await page.locator(".maplibregl-popup-close-button").all()) await close.click().catch(() => {}); // the popups are removed below anyway
   await page.evaluate(() => document.querySelectorAll(".maplibregl-popup").forEach((el) => el.remove()));
 }
 

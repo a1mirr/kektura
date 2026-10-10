@@ -28,6 +28,7 @@ export function useRestaurants(mapRef: MapHandleRef, enabled: boolean) {
         }
       })
       .catch(() => {
+        // the layer simply stays unavailable
       });
     return () => {
       cancelled = true;

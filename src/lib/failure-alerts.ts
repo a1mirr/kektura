@@ -1,5 +1,3 @@
-// Only these stages are sent: the expected outcomes (no session, rejected input) are not failures, and a failed read
-// is left to the log.
 export const ALERT_STAGES = ["write", "exception"] as const;
 export type AlertStage = (typeof ALERT_STAGES)[number];
 
@@ -11,8 +9,6 @@ export type Failure = {
 };
 
 export const ALERT_WINDOW_MS = 60 * 60_000;
-// When this many different kinds fail within `BURST_WINDOW_MS`, the cause is shared (the database is down): one
-// summary is sent and single messages are paused for `ALERT_WINDOW_MS`.
 export const BURST_KINDS = 3;
 export const BURST_WINDOW_MS = 60_000;
 

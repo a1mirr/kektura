@@ -2,8 +2,6 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { pageWidth } from "./PageShell";
 
-// The settings page is reached from the account menu of the header strip instead: a footer link would lead signed-out
-// visitors nowhere.
 const LINKS = [
   { href: "/about", label: "about" },
   { href: "/changelog", label: "changelog" },

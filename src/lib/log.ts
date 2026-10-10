@@ -37,13 +37,12 @@ function sendAlert(text: string): void {
 // limit has to be shared by all of them.
 const alerts = globalThis as typeof globalThis & { __kekturaFailureAlerter?: ReturnType<typeof createFailureAlerter> };
 
-// Only a production build sends: on a developer's machine, which may hold the real bot's token, a failure stays in
-// the terminal, and the tests send nothing unless they ask for it.
 function alertFailure(failure: Failure): void {
   try {
     if (process.env.NODE_ENV !== "production" || !telegramConfig()) return;
     (alerts.__kekturaFailureAlerter ??= createFailureAlerter({ send: sendAlert })).report(failure);
   } catch {
+    // Never let the alert change what the action returns.
   }
 }
 
@@ -62,7 +61,6 @@ export function logStampActionInvalidInput(action: StampAction): void {
   console.warn(`${TAG} invalid input action=${action}`);
 }
 
-// A refused request is an expected outcome, so it is never sent to Telegram.
 export function logStampActionRefused(action: StampAction): void {
   console.warn(`${TAG} request refused action=${action}`);
 }

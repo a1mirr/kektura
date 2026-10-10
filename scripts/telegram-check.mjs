@@ -1,6 +1,7 @@
 try {
   process.loadEnvFile(".env.local");
 } catch {
+  // no .env.local: the variables may come from the environment
 }
 
 const token = process.env.TELEGRAM_BOT_TOKEN?.trim();

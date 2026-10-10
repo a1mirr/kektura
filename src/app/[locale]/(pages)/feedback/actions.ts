@@ -22,8 +22,6 @@ const overall = createRateLimiter({ limit: 100, windowMs: 60 * 60_000 });
 // Caddy puts the client address first in x-forwarded-for; without a proxy everyone shares a bucket.
 const clientIp = (h: Headers) => h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "unknown";
 
-// `website` is the honeypot: hidden from people, so a filled one is a bot, which gets a success answer and nothing
-// else.
 export async function submitFeedback(input: unknown): Promise<FeedbackResult> {
   try {
     if (typeof input !== "object" || input === null) return { ok: false, reason: "invalid" };

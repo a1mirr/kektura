@@ -1,5 +1,3 @@
-// It extends the default rules and allows exactly the local Supabase demo keys, by value; nothing else may be
-// allowed, so a new allow-list entry shows up here.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 

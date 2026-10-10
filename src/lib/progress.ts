@@ -7,7 +7,6 @@ export type Checkpoint = Pick<
 
 export type StampRow = Pick<Tables<"user_stamps">, "checkpoint_id" | "stamped_on">;
 
-// A "place" groups alternative stamps at the same spot (161 places on the official trail).
 export type Place = {
   key: string;
   seq: number;
@@ -37,7 +36,7 @@ export const placeKeyOf = (c: Pick<Checkpoint, "place_key" | "code" | "id">) =>
 
 // `afterKey` is the current place it followed, which gives it its position in the stage list.
 export type RetiredStamp = Place & {
-  retiredOn: string; // the first day it is no longer valid
+  retiredOn: string;
   replacedBy: string | null;
   afterKey: string | null;
   approximate: boolean;
@@ -179,8 +178,6 @@ export function progressSummary(places: Place[], ranges: KmRange[]) {
   };
 }
 
-// A stage's starting point is the previous stage's last place (same stamp), except where they don't join (Visegrád ->
-// Nagymaros, a ferry).
 export function buildStages(places: Place[], stagesMeta: StageMeta[]): Stage[] {
   const meta = new Map(stagesMeta.map((st) => [st.stage, st]));
   const byStage = new Map<number, Place[]>();

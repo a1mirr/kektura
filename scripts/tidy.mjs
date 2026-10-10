@@ -1,6 +1,3 @@
-// "Merged" means a merge commit of origin/main brought the commit in. A new branch that has no commit of its own yet
-// is an ancestor of origin/main too, and must not be taken for finished work: another session may be about to start
-// on it.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";

@@ -102,7 +102,7 @@ test.describe("spec 0014: the account menu", () => {
   }) => {
     await signInAsNewUser(page);
     const button = accountButton(page);
-    await expect(button).toHaveAttribute("aria-expanded", "false"); // hydrated
+    await expect(button).toHaveAttribute("aria-expanded", "false");
     await button.focus();
     await page.keyboard.press("Enter");
     await expect(button).toHaveAttribute("aria-expanded", "true");

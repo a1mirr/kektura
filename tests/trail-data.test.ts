@@ -206,9 +206,9 @@ describe("spec 0004: retired stamps (okt-retired-stamps.json)", () => {
   });
 });
 
-const STAMP_LIMIT_M = 1000; // the farthest an alternative stamp (a village's pub or office) may be from the line; 801 m today
-const PLACE_LIMIT_M = 400; // the nearest stamp of a place: 325 m today (Ostffyasszonyfa)
-const KM_AGREEMENT = 0.5; // the km written in the seed against where the line is nearest to the stamp; 0.2 km at most today
+const STAMP_LIMIT_M = 1000; // the farthest an alternative stamp (a village's pub or office) may be from the line
+const PLACE_LIMIT_M = 400; // the nearest stamp of a place
+const KM_AGREEMENT = 0.5; // the km written in the seed against where the line is nearest to the stamp
 
 const seedCoordinates = [
   ...read("supabase/seed.sql").matchAll(/^ {2}\(\d+, '([^']+)', '([^']+)', \d+, \d+, '(?:[^']|'')*', '(?:[^']|'')*', (-?[\d.]+), (-?[\d.]+), -?\d+, ([\d.]+)\)/gm),

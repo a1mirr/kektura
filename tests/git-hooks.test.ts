@@ -123,7 +123,7 @@ describe("spec 0021: pull requests only", () => {
     expect(claude).toContain(String.raw`C:\Program Files\GitHub CLI`);
     expect(claude).not.toContain(String.raw`%LOCALAPPDATA%\Programs\gh`);
     expect(claude).not.toContain("There is no `gh` here");
-    // No control characters other than line breaks and tabs (an earlier edit turned `\b` into a backspace).
+    // No control characters other than line breaks and tabs.
     const control = [...claude].filter((ch) => ch.charCodeAt(0) < 32 && !["\n", "\r", "\t"].includes(ch));
     expect(control).toEqual([]);
     expect(claude).not.toMatch(/\r(?!\n)/); // a lone carriage return: this is what `\r` in a path turned into

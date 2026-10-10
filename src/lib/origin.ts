@@ -17,6 +17,7 @@ export function originFromHeaders(headers: Headers, own: string, env: Env = proc
       const url = new URL(configured);
       if (url.protocol === "https:" || url.protocol === "http:") return url.origin;
     } catch {
+      // not a URL: fall through to the request's own headers
     }
   }
 

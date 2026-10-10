@@ -1,5 +1,3 @@
-// Check a new link before adding it: `curl -sIL <url>` ends in 200 and the page says what the description says.
-
 export type LinkId =
   | "kekturaHu"
   | "kekturaStages"

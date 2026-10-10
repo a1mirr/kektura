@@ -387,9 +387,6 @@ test.describe("spec 0016: set many dates at once", () => {
   });
 });
 
-// In two columns the map's block is a sticky stacking context (z-10) holding the fullscreen overlay, and the toolbar
-// and the bar of the mode sit below it (they are one sticky box of the other column): neither may paint over a
-// fullscreen map.
 test.describe("spec 0016: the button, the bar and the fullscreen map", () => {
   test("AC-21: at 1280 px the fullscreen map is topmost over the toolbar and over the bar of the mode", async ({ page }) => {
     await page.addInitScript(() => {

@@ -1,5 +1,3 @@
-// A guard against the usual mistake, not a sandbox: a shell redirect, `sed -i` or a script that writes files is not
-// recognised (the pre-push guard, CI and the review still stand behind it).
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -156,7 +154,6 @@ export function decide(input, { project = input.cwd ?? process.cwd(), git = real
       }
       if (!MUTATING.has(invocation.subcommand)) continue;
       if (invocation.subcommand === "stash" && /^(list|show)$/.test(invocation.rest[0] ?? "")) continue;
-      // Bringing a checkout that is on main up to date, forward only, is upkeep and not a change of work.
       if ((invocation.subcommand === "pull" || invocation.subcommand === "merge") && invocation.rest.includes("--ff-only") && where.branch === "main") continue;
       const reason = refusal(where);
       if (reason) return refuse(`\`git ${invocation.subcommand}\``, reason);

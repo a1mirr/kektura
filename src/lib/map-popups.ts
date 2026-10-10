@@ -1,4 +1,3 @@
-// Built with DOM nodes and never innerHTML, so names in the data can't inject markup.
 import { RESTAURANT } from "./map-layers";
 
 export type MenuAction = {

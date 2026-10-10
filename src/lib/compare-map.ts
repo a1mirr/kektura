@@ -8,7 +8,6 @@ import { sliceRoute, type Route } from "./route-geometry";
 export type CompareView = "both" | "mine" | "theirs";
 export const COMPARE_VIEWS: readonly CompareView[] = ["both", "mine", "theirs"];
 
-// The four states differ in more than colour: solid, dashed, dotted, faint.
 export type LineStyle = "solid" | "dashed" | "dotted" | "faint" | "todo";
 
 export const WHO_COLOR: Record<Who, string> = { both: "#15803d", me: DONE, them: "#c2410c", neither: "#a8a29e" };
@@ -48,7 +47,6 @@ export function compareLines(route: Route, ranges: ComparisonRanges, view: Compa
   ]);
 }
 
-// `label` is the place's number in the list ("17.1").
 export type ComparePoint = { placeKey: string; label: string; name: string; lat: number; lng: number; who: Who; moved?: boolean };
 
 export function compareDots(points: ComparePoint[], view: CompareView): FeatureCollection<Point> {

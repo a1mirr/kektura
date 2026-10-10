@@ -5,8 +5,6 @@ import { isShareToken, toShareCard, type ShareCard } from "./share-card";
 import { createClient } from "./supabase/server";
 import type { Database } from "./supabase/database.types";
 
-// A token that is no token, an unknown one and a failed lookup all give `null`: the caller answers 404 and no one
-// learns which it was.
 export const loadShareCard = cache(async (token: string): Promise<ShareCard | null> => {
   if (!isShareToken(token)) return null;
   try {

@@ -10,6 +10,7 @@ export function useFullscreen(wrapper: RefObject<HTMLDivElement | null>, mapRef:
     document.body.style.overflow = fullscreen ? "hidden" : "";
     if (fullscreen) {
       wrapper.current?.requestFullscreen?.().catch(() => {
+        // not allowed or unsupported: the CSS overlay is enough
       });
     } else if (document.fullscreenElement) {
       document.exitFullscreen().catch(() => {});

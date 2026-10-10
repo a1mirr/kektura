@@ -32,7 +32,7 @@ describe("spec 0038: the pictures", () => {
   it("AC-9: all the pictures together stay under the budget", () => {
     const total = SCREENSHOTS.reduce((sum, name) => sum + read(name).length, 0);
     expect(total, `${total} bytes, the budget is ${SCREENSHOTS_BUDGET_BYTES}`).toBeLessThanOrEqual(SCREENSHOTS_BUDGET_BYTES);
-    expect(SCREENSHOTS_BUDGET_BYTES).toBeLessThanOrEqual(3_000_000); // a heavier gallery is a decision for the spec, not for a test
+    expect(SCREENSHOTS_BUDGET_BYTES).toBeLessThanOrEqual(3_000_000);
   });
 
   it("AC-9: a file that is not a PNG is refused by the size check", () => {

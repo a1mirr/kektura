@@ -1,5 +1,3 @@
-// Like trail-data.test.ts it reads the generated seeds, so regenerating the trail data with a new stamp fails here
-// until it is translated.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import translations from "../src/content/stamp-descriptions.json";

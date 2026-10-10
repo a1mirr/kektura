@@ -17,6 +17,7 @@ export function watchDetailRoute(
         const r = await fetch("/data/okt-route-detail.json");
         if (r.ok) route.detail = (await r.json()) as Route;
       } catch {
+        // stay on the overview geometry; the next zoom change tries again
       } finally {
         loading = false;
       }

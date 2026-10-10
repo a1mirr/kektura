@@ -1,5 +1,3 @@
-// They talk to PostgREST the way a browser could, as signed-in users and as an anonymous visitor, so they prove what
-// a malicious client can and cannot do.
 import { execFileSync, spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";

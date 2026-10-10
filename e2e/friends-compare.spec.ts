@@ -129,7 +129,7 @@ test.describe("spec 0003: the comparison map", () => {
     await bobPage.goto(`/en/friends/${anaId}`);
     const group = bobPage.getByRole("group", { name: "Map view" });
     await expect(group.getByRole("button", { name: "Both" })).toHaveAttribute("aria-pressed", "true");
-    await expect(bobPage.locator("canvas.maplibregl-canvas")).toBeVisible(); // the map came up (WebGL pixels: manual row)
+    await expect(bobPage.locator("canvas.maplibregl-canvas")).toBeVisible(); // the map came up (WebGL pixels cannot be asserted)
     const legend = bobPage.getByRole("list", { name: "Legend" });
     await expect(legend.getByRole("listitem")).toHaveText(["Both", "Only me", "Only them", "Neither"]);
 

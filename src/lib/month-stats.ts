@@ -37,8 +37,6 @@ export function monthsBetween(first: string, last: string): string[] {
   return months;
 }
 
-// A stretch between two neighbouring places belongs to the month of the LATER of its two stamp dates, so the
-// kilometres of all months add up to the walked km of the dashboard.
 export function monthlyProgress(input: {
   places: Place[];
   stamps: StampRow[];

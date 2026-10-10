@@ -34,8 +34,6 @@ const FAILED = "Failed: nothing was changed. The reason is in the server log.";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,255}$/;
 
-// The data of the buttons: `f:<key>` opens one flag; `m:<key>:<mode>:<shown>` sets a mode, knowing the mode the
-// view showed; `u:<key>` opens an allowlist; `d:<key>:<user id>` removes one user from it; `p` shows the list again.
 export const callbackData = {
   flag: (key: FlagKey) => `f:${key}`,
   mode: (key: FlagKey, mode: FlagMode, shown: FlagMode) => `m:${key}:${mode}:${shown}`,

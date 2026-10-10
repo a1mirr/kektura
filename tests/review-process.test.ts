@@ -78,7 +78,7 @@ describe("spec 0022: fresh-context review", () => {
     });
 
     it("checks that comments earn their place, and its brief carries the Comments rule of CLAUDE.md verbatim", () => {
-      const rule = /^## Comments\n([\s\S]+?)\n\n## Gotchas/m.exec(read("CLAUDE.md"))?.[1];
+      const rule = /^## Comments\r?\n([\s\S]+?)\r?\n\r?\n## Gotchas/m.exec(read("CLAUDE.md"))?.[1];
       expect(rule, "the Comments section of CLAUDE.md").toMatch(/strictly FORBIDDEN/);
       expect(body).toContain(rule!);
       expect(body).toMatch(/A comment that has not earned its place/);

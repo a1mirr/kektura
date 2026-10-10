@@ -1,5 +1,3 @@
-// The generator itself is run, in a copy of the repository's script folder in a temporary directory, on GPX files
-// made from the committed seed, so a real run of build-data.mjs is what fails or passes.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";

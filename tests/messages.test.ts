@@ -42,8 +42,6 @@ describe("spec 0005: translations", () => {
 });
 
 describe("spec 0015: about page text", () => {
-  // The app has no manifest or service worker, so the progressive web app claim is not true, and the page makes no
-  // open source claim. Whoever adds either edits the About page's spec and this test.
   const claims = /open[- ]source|progressive|\bPWA\b|открыт[а-яё]* исходн|nyílt forrás|quelloffen/i; // (\w doesn't match Cyrillic)
 
   it.each(Object.entries({ en: reference, ...locales }))("AC-6: %s makes no open-source or PWA claim", (_, messages) => {

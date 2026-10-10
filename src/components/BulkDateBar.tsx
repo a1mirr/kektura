@@ -42,9 +42,8 @@ function useHideOnScrollDown() {
   return [hidden, () => setHidden(false)] as const;
 }
 
-// From 1024 px the toolbar is at z-5: above the rows' positioned controls (the date fields) and below the map's block
-// of the other column (z-10), which holds the fullscreen map, so the map covers it. A friend's page has no provider
-// and so no bar: the controls just stand there.
+// From 1024 px the toolbar is at z-5, below the map's block of the other column (z-10), so the fullscreen map covers
+// it. A friend's page has no provider and so no bar: the controls just stand there.
 export function BulkToolbar({ children }: { children: ReactNode }) {
   const bulk = useBulk();
   const [hidden, show] = useHideOnScrollDown();

@@ -19,6 +19,7 @@ export function useRoutePlanner(mapRef: MapHandleRef, latest: RefObject<MapInput
         if (!cancelled) setHops(items);
       })
       .catch(() => {
+        // route stats just stay unavailable (the highlight still works)
       });
     return () => {
       cancelled = true;

@@ -13,8 +13,6 @@ export default defineConfig({
     locale: "en-US",
     trace: "retain-on-failure",
   },
-  // Run the flags project alone with `npx playwright test --project flags --no-deps`, the phone tests with `npx
-  // playwright test --project mobile`.
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] }, testIgnore: "feature-flags.spec.ts", grepInvert: /@mobile/ },
     {

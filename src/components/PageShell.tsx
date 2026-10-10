@@ -4,9 +4,6 @@ export const pageWidth = "mx-auto w-full max-w-(--page-width) px-4 sm:px-6";
 
 export type PageVariant = "wide" | "reading" | "hero" | "card";
 
-// `hero` fills the space above the footer with flex-1, not min-h-screen. A sticky box is a stacking context of its
-// own, so the `aside` of a `stretch` page takes a z-index (`lg:z-10`) that lifts it, and the fullscreen map (`fixed
-// z-50`) inside it, over the positioned controls of the children (the date fields).
 export default function PageShell({
   variant = "wide",
   spaced = false,

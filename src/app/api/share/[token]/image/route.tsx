@@ -20,7 +20,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
   if (!(await flagOn("share"))) return NOT_FOUND();
   const card = await loadShareCard(token);
   if (!card) return NOT_FOUND();
-  // Only a drawn image is charged: an unknown token costs a lookup, not a drawing, so it cannot use up the budget.
   if (!limiter.allow("images")) return new Response("Too many requests", { status: 429, headers: { "retry-after": "60" } });
 
   const map = shareMapPaths(TRAIL_ROUTE, card.ranges, 560);
@@ -44,7 +43,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
         </div>
       </div>
     ),
-    // A card never changes, but it can be deleted: an hour is long enough for the messenger and short enough for that.
     { width: 1200, height: 630, headers: { "Cache-Control": "public, max-age=3600" } },
   );
 }

@@ -35,6 +35,7 @@ export default function StageSection({
       try {
         localStorage.setItem(storageKey(stage), next ? "1" : "0");
       } catch {
+        // storage unavailable: the choice is just not remembered
       }
     },
     [stage],
@@ -46,6 +47,7 @@ export default function StageSection({
       try {
         if (localStorage.getItem(storageKey(stage)) === "1") setOpen(true);
       } catch {
+        // storage unavailable: stages just start collapsed
       }
     });
     return () => cancelAnimationFrame(id);

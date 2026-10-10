@@ -190,7 +190,7 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
     await expect(tooltip).toHaveCount(0);
   });
 
-  // The bar above a real on-screen keyboard cannot be tested here: it is a manual row of the spec.
+  // The bar above a real on-screen keyboard cannot be tested here.
   test("AC-10: Set dates does not scroll sideways, the toolbar and the bar fit at 375 and 320 px, and rows are chosen and dated with taps", async ({ page }) => {
     const email = await signInAsNewUser(page);
     await expandAllStages(page);

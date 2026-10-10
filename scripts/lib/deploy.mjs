@@ -58,6 +58,7 @@ export function redact(text, connectionString) {
       if (secret) secrets.add(secret);
     }
   } catch {
+    // not a URL: only the whole string is redacted
   }
   let out = text;
   for (const secret of [...secrets].filter(Boolean).sort((a, b) => b.length - a.length)) out = out.split(secret).join("***");
