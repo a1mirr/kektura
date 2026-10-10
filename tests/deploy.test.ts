@@ -1,5 +1,3 @@
-// The deployment files (spec 0020): the properties that make a deploy safe, so they can't be edited away
-// unnoticed. The scripts themselves only run on the server.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
@@ -30,7 +28,6 @@ describe("spec 0020: deployment files", () => {
     // nvm isn't written for `set -u`, so it must be loaded before the flags are set.
     expect(hook.indexOf("nvm.sh")).toBeGreaterThan(-1);
     expect(hook.indexOf("nvm.sh")).toBeLessThan(hook.indexOf("set -euo pipefail"));
-    // The build runs before the reload, and nothing swallows a build failure.
     expect(hook.indexOf("npm run build")).toBeLessThan(hook.indexOf("pm2 reload"));
     expect(hook).not.toMatch(/npm run build\s*\|\|/);
   });
@@ -62,7 +59,7 @@ describe("spec 0020: deployment files", () => {
     const setup = read("deploy/server-setup.sh");
     expect(setup).toMatch(/^set -euo pipefail$/m);
     expect(setup).toContain('id -u');
-    expect(setup).toContain('grep -q "swapfile" /etc/fstab'); // only creates it once
+    expect(setup).toContain('grep -q "swapfile" /etc/fstab');
   });
 
   it("the README documents the environment variables and the migrations-before-deploy rule", () => {

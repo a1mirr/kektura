@@ -1,5 +1,3 @@
-// Spec 0007 AC-15: the check after `npm audit --omit=dev --audit-level=high --json`, which reads the report and the
-// allow-list (`.github/audit-allowlist.json`: an advisory id, a reason and an expiry date per entry).
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -62,7 +60,7 @@ describe("spec 0007: the check of npm audit's report", () => {
       const r = report(
         {
           "left-pad": { name: "left-pad", severity: "high", via: [advisory(A)] },
-          app: { name: "app", severity: "high", via: ["left-pad"] }, // the package that carries it: no advisory of its own
+          app: { name: "app", severity: "high", via: ["left-pad"] },
           other: { name: "other", severity: "high", via: [advisory(A, { name: "other" })] },
         },
         { high: 3 },
@@ -122,7 +120,7 @@ describe("spec 0007: the check of npm audit's report", () => {
       expect(auditProblems(failing, list(entry({ expires: day(MAX_DAYS_AHEAD) })), NOW)).toEqual([]);
       const problems = auditProblems(failing, list(entry({ expires: day(MAX_DAYS_AHEAD + 1) })), NOW);
       expect(problems[0]).toContain(`more than ${MAX_DAYS_AHEAD} days from now`);
-      expect(problems).toHaveLength(2); // and it covers nothing
+      expect(problems).toHaveLength(2);
     });
 
     it("a malformed entry is a problem of its own and covers nothing", () => {
@@ -140,7 +138,7 @@ describe("spec 0007: the check of npm audit's report", () => {
       for (const [what, value, message] of bad) {
         const problems = readAllowlist(list(value), NOW).problems;
         expect(problems.join("\n"), what).toContain(message);
-        expect(auditProblems(failing, list(value), NOW).length, what).toBeGreaterThanOrEqual(2); // the entry, and the advisory it does not cover
+        expect(auditProblems(failing, list(value), NOW).length, what).toBeGreaterThanOrEqual(2);
       }
     });
 

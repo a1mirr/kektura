@@ -22,8 +22,6 @@ export default async function Home({
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
 
-  // Signed-in users go straight to their dashboard. Same check as the dashboard's own guard
-  // (getUser, not getClaims): a revoked but unexpired token must not bounce between the two pages.
   const supabase = await createClient();
   const {
     data: { user },

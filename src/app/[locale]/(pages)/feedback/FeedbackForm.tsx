@@ -5,9 +5,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { characterCount, messageLimit } from "@/lib/feedback";
 import { submitFeedback, type FeedbackResult } from "./actions";
 
-// See spec 0017.
-
-// Which message to show for the server's answer (AC-8).
 function messageKey(result: FeedbackResult) {
   if (result.ok) return "success";
   if (result.reason === "too_long") return "tooLong";
@@ -20,11 +17,11 @@ export default function FeedbackForm({ stamp = null }: { stamp?: { code: string;
   const locale = useLocale();
   const id = useId();
   const [message, setMessage] = useState("");
-  const [website, setWebsite] = useState(""); // honeypot: people never see or fill it
+  const [website, setWebsite] = useState("");
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<FeedbackResult | null>(null);
 
-  const max = messageLimit(stamp); // the stamp's line takes its share of the 2000 (spec 0017 AC-11)
+  const max = messageLimit(stamp);
   const count = characterCount(message);
   const canSend = !sending && count > 0 && count <= max;
 
@@ -37,7 +34,7 @@ export default function FeedbackForm({ stamp = null }: { stamp?: { code: string;
     try {
       answer = await submitFeedback({ message, website, locale, stamp: stamp?.code });
     } catch {
-      answer = { ok: false, reason: "failed" }; // network error
+      answer = { ok: false, reason: "failed" };
     }
     setSending(false);
     setResult(answer);

@@ -11,7 +11,6 @@ import {
 import { buildPlaces, buildStages, walkedRanges, type Checkpoint, type StageMeta } from "./progress";
 
 let nextId = 1;
-// One checkpoint row; variants of a place share `key`.
 function cp(key: string, km: number, stage: number): Checkpoint {
   const id = nextId++;
   return {
@@ -40,7 +39,6 @@ const meta: StageMeta[] = [
   { stage: 2, start: "C", end: "E", km: 20.3 },
 ];
 
-// Five places A..E in two stages (A, B, C | D, E): 10, 10, 10.2 and 10.1 km apart.
 function trail() {
   const places = buildPlaces([cp("A", 0, 1), cp("B", 10, 1), cp("C", 20, 1), cp("D", 30.2, 2), cp("E", 40.3, 2)]);
   return { places, stages: buildStages(places, meta) };
@@ -165,9 +163,8 @@ describe("spec 0024: comparing with places someone was not missing", () => {
     const c = compareProgress(places, new Set(["A", "C"]), new Set(["A", "B", "C"]), stages, { mine: new Set(["B"]) });
     expect(c.ranges.mine).toEqual([[0, 20]]);
     expect(c.ranges.both).toEqual([[0, 20]]);
-    expect(c.places).toEqual({ both: 2, me: 0, them: 1, neither: 2 }); // B is only theirs: waived is not a stamp
+    expect(c.places).toEqual({ both: 2, me: 0, them: 1, neither: 2 });
     expect(c.stages[0]).toMatchObject({ stage: 1, me: 3, them: 3, state: "both" });
-    // Without the waiver the same stamps do not complete the stage.
     expect(compareProgress(places, new Set(["A", "C"]), new Set(["A", "B", "C"]), stages).stages[0].state).toBe("them");
   });
 });
@@ -205,7 +202,7 @@ describe("spec 0024: how a stage stands", () => {
 describe("spec 0024: operations on walked stretches", () => {
   it("AC-23: intersect, subtract and complement", () => {
     expect(intersectRanges([[0, 10], [20, 30]], [[5, 25]])).toEqual([[5, 10], [20, 25]]);
-    expect(intersectRanges([[0, 10]], [[10, 20]])).toEqual([]); // touching is not sharing
+    expect(intersectRanges([[0, 10]], [[10, 20]])).toEqual([]);
     expect(subtractRanges([[0, 30]], [[5, 10], [20, 25]])).toEqual([[0, 5], [10, 20], [25, 30]]);
     expect(subtractRanges([[0, 10]], [[0, 10]])).toEqual([]);
     expect(subtractRanges([[0, 10]], [])).toEqual([[0, 10]]);

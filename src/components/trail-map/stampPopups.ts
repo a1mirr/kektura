@@ -6,8 +6,6 @@ import { buildMenu, type MenuAction, type MenuExtras } from "@/lib/map-popups";
 import { newStampDate } from "@/lib/stamp-date";
 import type { MapContext, MapInputs, MapLibre } from "./types";
 
-// Official and extra stamps on the map (spec 0003 AC-12): hover shows the name, a click opens a popup
-// with route from/to, mark / unmark walked and show in list.
 export function attachStampPopups(
   m: MapLibreMap,
   maplibregl: MapLibre,
@@ -45,12 +43,10 @@ export function attachStampPopups(
     const key = String(f.properties?.key);
     const name = String(f.properties?.name);
 
-    // Runs a stamp action behind a menu button: success closes the menu, an expired session sends the
-    // page to sign-in, anything else re-enables the button and says so.
     const done = (button: HTMLButtonElement, showError: (message: string) => void, task: Promise<ActionResult>) => {
       button.disabled = true;
       task
-        .catch((): ActionResult => ({ ok: false, reason: "failed" })) // network error
+        .catch((): ActionResult => ({ ok: false, reason: "failed" }))
         .then((result) => {
           if (result.ok) menu.remove();
           else if (result.reason === "unauthorized") {
@@ -72,7 +68,6 @@ export function attachStampPopups(
       if (point) {
         subtitle = [t("kmFromStart", { km: point.km.toFixed(1) }), point.note].filter(Boolean).join(" · ");
         extras.note = point.movedNote;
-        // Spec 0003 AC-27: any stamp's popup offers the report; only its code travels in the address.
         if (point.code) extras.link = { label: t("reportLocation"), href: c.reportHref(point.code) };
       }
       actions.push(

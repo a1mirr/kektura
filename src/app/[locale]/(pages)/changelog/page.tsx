@@ -6,8 +6,6 @@ import { routing } from "@/i18n/routing";
 import { CHANGELOG, type ChangeKind } from "@/content/changelog";
 import PageShell from "@/components/PageShell";
 
-// See spec 0018. The entries are data in src/content/changelog.ts.
-
 type Props = { params: Promise<{ locale: string }> };
 
 const BADGE: Record<ChangeKind, string> = {

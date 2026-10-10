@@ -12,11 +12,11 @@ describe("spec 0035: taps on the bot's buttons", () => {
 
   it("AC-30: anything else is not a tap: wrong types, no data, no message, a text message, bad JSON, too long", () => {
     expect(parseCallback(tap({ id: 5 }))).toBeNull();
-    expect(parseCallback(tap({ data: undefined }))).toBeNull(); // a button without data
-    expect(parseCallback(tap({ message: undefined }))).toBeNull(); // nothing to edit
+    expect(parseCallback(tap({ data: undefined }))).toBeNull();
+    expect(parseCallback(tap({ message: undefined }))).toBeNull();
     expect(parseCallback(tap({ from: { id: "42" } }))).toBeNull();
     expect(parseCallback(text)).toBeNull();
-    expect(parseUpdate(tap())).toBeNull(); // and a tap is not a text message
+    expect(parseUpdate(tap())).toBeNull();
     expect(parseCallback("not json")).toBeNull();
     expect(parseCallback("null")).toBeNull();
     expect(parseCallback(tap({ data: "x".repeat(MAX_UPDATE_BYTES) }))).toBeNull();

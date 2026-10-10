@@ -1,6 +1,5 @@
-// Integrity of the generated trail data (scripts/build-data.mjs output). These catch a broken
-// regeneration before it reaches the database or the map; they assert relationships between the
-// files rather than today's numbers, so a legitimate MTSZ update keeps them green.
+// They assert relationships between the files rather than today's numbers, so a legitimate MTSZ update keeps them
+// green.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import hopsJson from "../public/data/okt-hops.json";
@@ -15,7 +14,6 @@ const hops = hopsJson as Hop[];
 const read = (path: string) => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const round1 = (x: number) => Math.round(x * 10) / 10;
 
-// (seq, code, place_key, stage, stage_seq, name, ...) rows of supabase/seed.sql
 const seedRows = [...read("supabase/seed.sql").matchAll(/^ {2}\((\d+), '([^']+)', '([^']+)', (\d+), (\d+), '((?:[^']|'')*)'/gm)].map(
   (m) => ({ seq: Number(m[1]), code: m[2], placeKey: m[3], stage: Number(m[4]), stageSeq: Number(m[5]), name: m[6].replace(/''/g, "'") }),
 );
@@ -113,7 +111,6 @@ describe("spec 0004: extra stamps (seed_extra.sql)", () => {
   });
 });
 
-// scripts/data/okt-stamp-dates.json: the MTSZ's dates for new stamps
 const datesFile = JSON.parse(read("scripts/data/okt-stamp-dates.json")) as {
   stamps: { code: string; place?: string; required_from?: string; source: string; tolerance_note?: unknown }[];
 };
@@ -143,14 +140,12 @@ describe("spec 0004: the dates of new stamps (okt-stamp-dates.json)", () => {
       stampDatesSql: (entries: unknown[]) => string;
     };
     const block = stampDatesSql(readStampDates());
-    expect(read("supabase/seed.sql")).toContain(`\n${block}\n${stampMovesSql(readStampMoves())}\ncommit;`); // the dates, then the moves (AC-16), then the end of the transaction
-    // ... and a date reaches the right row only: the block names every code of the file and no other
+    expect(read("supabase/seed.sql")).toContain(`\n${block}\n${stampMovesSql(readStampMoves())}\ncommit;`);
     const named = [...block.matchAll(/\('(OKTPH_[0-9A-Za-z_]+)', '\d{4}-\d{2}-\d{2}'\)/g)].map((m) => m[1]).sort();
     expect(named).toEqual(datesFile.stamps.map((e) => e.code).sort());
   });
 });
 
-// scripts/data/okt-retired-stamps.json: stamps that no longer exist, kept as rows
 const retiredFile = JSON.parse(read("scripts/data/okt-retired-stamps.json")) as {
   stamps: {
     code: string;
@@ -171,7 +166,7 @@ describe("spec 0004: retired stamps (okt-retired-stamps.json)", () => {
     const codes = retiredFile.stamps.map((e) => e.code);
     expect(new Set(codes).size).toBe(codes.length);
     for (const e of retiredFile.stamps) {
-      expect(seedRows.map((r) => r.code), e.code).not.toContain(e.code); // a retired stamp is no current stamp's code
+      expect(seedRows.map((r) => r.code), e.code).not.toContain(e.code);
       expect(e.name, e.code).toBeTruthy();
       expect(/^\d{4}-\d{2}-\d{2}$/.test(e.retired_on) && new Date(`${e.retired_on}T00:00:00Z`).toISOString().slice(0, 10) === e.retired_on, e.code).toBe(true);
       expect(e.source, e.code).toMatch(/^https:\/\/www\.(kektura\.hu|mtsz\.org)\//);
@@ -211,17 +206,14 @@ describe("spec 0004: retired stamps (okt-retired-stamps.json)", () => {
   });
 });
 
-// A stamp is never shown at a place the drawn line does not pass (spec 0004 AC-18). The seed's coordinates, the route and the km
-// all come from one run of the generator, so a moved stamp whose new coordinates are wrong, or a route that no longer passes a stamp, fails here.
-const STAMP_LIMIT_M = 1000; // the farthest an alternative stamp (a village's pub or office) may be from the line; 801 m today
-const PLACE_LIMIT_M = 400; // the nearest stamp of a place: 325 m today (Ostffyasszonyfa)
-const KM_AGREEMENT = 0.5; // the km written in the seed against where the line is nearest to the stamp; 0.2 km at most today
+const STAMP_LIMIT_M = 1000; // the farthest an alternative stamp (a village's pub or office) may be from the line
+const PLACE_LIMIT_M = 400; // the nearest stamp of a place
+const KM_AGREEMENT = 0.5; // the km written in the seed against where the line is nearest to the stamp
 
 const seedCoordinates = [
   ...read("supabase/seed.sql").matchAll(/^ {2}\(\d+, '([^']+)', '([^']+)', \d+, \d+, '(?:[^']|'')*', '(?:[^']|'')*', (-?[\d.]+), (-?[\d.]+), -?\d+, ([\d.]+)\)/gm),
 ].map((m) => ({ code: m[1], placeKey: m[2], lat: Number(m[3]), lng: Number(m[4]), km: Number(m[5]) }));
 
-// Metres from a stamp to the segment a-b ([lng, lat, km] points), on a local flat plane.
 function metersToSegment(p: { lat: number; lng: number }, a: number[], b: number[]) {
   const M = 111320;
   const cos = Math.cos((p.lat * Math.PI) / 180);
@@ -263,11 +255,10 @@ describe("spec 0004: the stamps and the drawn line", () => {
   it("AC-18: a stamp put a kilometre off its place is caught (the limits are not too loose to notice a wrong move)", () => {
     const s = seedCoordinates.find((c) => c.code === "OKTPH_84_B")!;
     expect(nearestOnRoute({ lat: s.lat, lng: s.lng }).m).toBeLessThan(PLACE_LIMIT_M);
-    expect(nearestOnRoute({ lat: s.lat + 0.01, lng: s.lng }).m).toBeGreaterThan(PLACE_LIMIT_M); // 1.1 km north
+    expect(nearestOnRoute({ lat: s.lat + 0.01, lng: s.lng }).m).toBeGreaterThan(PLACE_LIMIT_M);
   });
 });
 
-// The km of the vertex of the detailed route nearest to a stamp.
 function nearestKm(p: { lat: number; lng: number }) {
   const pts = detail.points as number[][];
   let best = { m: Infinity, km: 0 };

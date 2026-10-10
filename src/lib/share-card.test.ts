@@ -23,7 +23,6 @@ const place = (key: string, km: number, stage: number): Place => ({
   variants: [],
 });
 
-// Four places in two stages: 0, 10, 20 and 40 km.
 const places = [place("a", 0, 1), place("b", 10, 1), place("c", 20, 2), place("d", 40, 2)];
 const stages: Stage[] = [
   { stage: 1, meta: undefined, places: places.slice(0, 2), startKey: null },
@@ -126,7 +125,6 @@ describe("spec 0039: share cards", () => {
   });
 
   describe("AC-5: the map", () => {
-    // A trail that runs east and then north: 3 vertices, 0 / 10 / 20 km.
     const route: Route = {
       points: [
         [16, 47, 0],
@@ -141,9 +139,8 @@ describe("spec 0039: share cards", () => {
       // One degree of longitude is cos(47.5 degrees) = 0.675 of a degree of latitude here, so the 1 x 1 degree trail is
       // 0.675 wide and 1 tall: (400 - 24) / 0.675 + 24 = 581 px.
       expect(map.height).toBe(581);
-      // Coordinates are rounded to a tenth of a pixel.
-      expect(map.start).toEqual([12, 568.6]); // the south-west end: left and at the bottom
-      expect(map.end[0]).toBeCloseTo(388, 0); // the north-east end: right and at the top
+      expect(map.start).toEqual([12, 568.6]);
+      expect(map.end[0]).toBeCloseTo(388, 0);
       expect(map.end[1]).toBe(12);
       expect(map.trail.startsWith("M12 568.6L")).toBe(true);
     });

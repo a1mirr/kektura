@@ -108,7 +108,7 @@ describe("spec 0003: the ring of a stamp that moved", () => {
     const layer = ring(all);
     expect(layer).toMatchObject({ type: "circle", source: "dots", filter: ["==", ["get", "moved"], true] });
     const paint = layer.paint as Record<string, unknown>;
-    expect(paint["circle-opacity"]).toBe(0); // a ring, not a disc
+    expect(paint["circle-opacity"]).toBe(0);
     expect(paint["circle-stroke-width"]).toBeGreaterThanOrEqual(2);
     expect(layers.findIndex((l) => l.id === MOVED_RING_LAYER)).toBe(layers.findIndex((l) => l.id === STAMPS_LAYER) - 1);
   });

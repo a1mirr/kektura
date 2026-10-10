@@ -15,8 +15,6 @@ import type { MapHandle } from "./trail-map/types";
 import { useLatest } from "./trail-map/useLatest";
 import { watchDetailRoute } from "./trail-map/watchDetailRoute";
 
-// The shared map of a friend's page (spec 0003 AC-18 to AC-20): the trail coloured by who walked each stretch, or one
-// person's own map, with a legend. Read-only: hovering a place names it, nothing can be stamped from here.
 export default function CompareMap({ points, ranges }: { points: ComparePoint[]; ranges: ComparisonRanges }) {
   const t = useTranslations("compare");
   const tDash = useTranslations("dashboard");
@@ -26,7 +24,6 @@ export default function CompareMap({ points, ranges }: { points: ComparePoint[];
   const [view, setView] = useState<CompareView>("both");
   const latest = useLatest({ points, ranges, view });
 
-  // Pushes the lines and points of the current view into the map (once it exists).
   const draw = useCallback(() => {
     const { map, ready, route } = handle.current;
     if (!ready || !map || !route) return;
@@ -70,7 +67,6 @@ export default function CompareMap({ points, ranges }: { points: ComparePoint[];
               .addTo(m);
           }
         });
-        // A click goes to the place's row in the list below, like "Show in list" on the dashboard's map (spec 0003 AC-12).
         m.on("click", COMPARE_DOTS_LAYER, (e) => {
           const key = e.features?.[0]?.properties?.key;
           if (key !== undefined) revealInList("place", String(key));

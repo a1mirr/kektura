@@ -17,7 +17,6 @@ import {
 } from "./progress";
 
 let nextId = 1;
-// One checkpoint row; variants of a place share `key`.
 function cp(key: string, km: number, over: Partial<Checkpoint> = {}): Checkpoint {
   const id = nextId++;
   return {
@@ -42,7 +41,6 @@ function cp(key: string, km: number, over: Partial<Checkpoint> = {}): Checkpoint
   };
 }
 
-// The stamps of a walk: `{ A: "2026-06-03" }` is a stamp on the (first) row of place A.
 function stampsOf(rows: Checkpoint[], dates: Record<string, string>) {
   return Object.entries(dates).map(([key, stamped_on]) => ({
     checkpoint_id: rows.find((r) => r.place_key === key)!.id,
@@ -50,7 +48,6 @@ function stampsOf(rows: Checkpoint[], dates: Record<string, string>) {
   }));
 }
 
-// A, B, C, D, 10 km apart, in stages 1 and 2 (A-B-C stage 1; D stage 2).
 const stageMeta: StageMeta[] = [
   { stage: 1, start: "A", end: "C", km: 20 },
   { stage: 2, start: "C", end: "D", km: 10 },
@@ -110,7 +107,7 @@ describe("spec 0037: the months of a walk", () => {
         { checkpoint_id: k1.id, stamped_on: "2026-08-20" },
         { checkpoint_id: rows[0].id, stamped_on: "2026-09-01" },
         { checkpoint_id: rows[3].id, stamped_on: "2025-12-31" },
-        { checkpoint_id: 999_999, stamped_on: "2026-01-01" }, // unknown checkpoint: ignored
+        { checkpoint_id: 999_999, stamped_on: "2026-01-01" },
       ],
       stages: buildStages(places, []),
       extras: [],
@@ -121,7 +118,7 @@ describe("spec 0037: the months of a walk", () => {
       ["2026-08", 1],
       ["2026-09", 1],
     ]);
-    expect(monthsOf(months)).toHaveLength(10); // Dec 2025 to Sep 2026, the empty months among them
+    expect(monthsOf(months)).toHaveLength(10);
   });
 
   it("AC-5: a stamp on a retired row is no month's stamp and does not stretch the span", () => {
@@ -154,14 +151,14 @@ describe("spec 0037: the months of a walk", () => {
       { A: "2026-02-03" },
       [
         { id: 1, km: 25 }, // between C (20) and D (30): the end of stage 2 is D, so it lies in stage 2
-        { id: 2, km: 5 }, // stage 1
-        { id: 3, km: 500 }, // beyond the trail: no stage
+        { id: 2, km: 5 },
+        { id: 3, km: 500 },
       ],
       [
         { extra_id: 1, stamped_on: "2026-02-20" },
         { extra_id: 2, stamped_on: "2026-03-02" },
         { extra_id: 3, stamped_on: "2026-03-03" },
-        { extra_id: 404, stamped_on: "2026-03-04" }, // an extra stamp that is not in the list: counted, no stage
+        { extra_id: 404, stamped_on: "2026-03-04" },
       ],
     );
     expect(months.map((m) => [m.month, m.stamps, m.extraStamps, m.stages])).toEqual([
@@ -185,7 +182,6 @@ describe("spec 0037: the kilometres of a month", () => {
       "2026-08": 0,
       "2026-09": 20,
     });
-    // Had B been stamped in July, A-B would count in July and B-C in August.
     expect(kmOf(walk({ A: "2026-06-10", C: "2026-08-20", B: "2026-07-02" }).months)).toEqual({ "2026-06": 0, "2026-07": 10, "2026-08": 10 });
   });
 
@@ -217,7 +213,7 @@ describe("spec 0037: the kilometres of a month", () => {
     const stamped = stampedPlaceKeys(places, stamps);
     expect([...waivedPlaceKeys(places, stamped)]).toEqual(["N"]);
     const months = monthlyProgress({ places, stamps, stages: buildStages(places, []), extras: [], extraStamps: [] });
-    expect(kmOf(months)).toEqual({ "2025-03": 0, "2025-04": 20 }); // B-C is one stretch of 10 km, dated April; A-B too
+    expect(kmOf(months)).toEqual({ "2025-03": 0, "2025-04": 20 });
     const done = progressSummary(places, walkedRanges(places, stamped, waivedPlaceKeys(places, stamped))).doneKm;
     expect(done).toBe(20);
   });
@@ -225,7 +221,7 @@ describe("spec 0037: the kilometres of a month", () => {
   it("AC-7: a required stamp that is missing blocks its stretches, as on the dashboard", () => {
     const rows = [cp("A", 0), cp("B", 10), cp("N", 15, { required_from: "2025-05-08" }), cp("C", 20)];
     const places = buildPlaces(rows);
-    const stamps = stampsOf(rows, { A: "2025-06-01", B: "2025-06-02", C: "2025-06-03" }); // walked after N was required
+    const stamps = stampsOf(rows, { A: "2025-06-01", B: "2025-06-02", C: "2025-06-03" });
     expect(kmOf(monthlyProgress({ places, stamps, stages: buildStages(places, []), extras: [], extraStamps: [] }))).toEqual({ "2025-06": 10 });
   });
 });
@@ -243,7 +239,7 @@ describe("spec 0037: changing a date, removing a stamp", () => {
   });
 
   it("AC-8: a removed stamp takes the stretches it made walked out of the month they were in", () => {
-    const { months } = walk({ A: "2026-06-10", C: "2026-07-10" }); // B was stamped in July and is removed again
+    const { months } = walk({ A: "2026-06-10", C: "2026-07-10" });
     expect(months.reduce((sum, m) => sum + m.km, 0)).toBe(0);
     expect(walk({ A: "2026-06-10", B: "2026-06-11", C: "2026-07-10" }).months.map((m) => m.km)).toEqual([10, 10]);
   });
@@ -280,7 +276,6 @@ describe("spec 0037: the words of a month", () => {
     expect(monthLines(month({ stamps: 2, km: 3, extraStamps: 1, stages: [1, 2] }), words)).toEqual(["2 stamps", "3 km", "1 extra", "Stages 1, 2"]);
   });
 
-  // The real messages with the real plural rules of each language (spec 0037 AC-14).
   const real = (locale: string): MonthWords => {
     const t = createTranslator({ locale: locale as Locale, messages: messageFiles[locale] as unknown as typeof import("../../messages/en.json"), namespace: "stats" });
     const n = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });

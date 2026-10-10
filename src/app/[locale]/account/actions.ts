@@ -4,8 +4,6 @@ import type { ActionResult } from "@/lib/action-result";
 import { logAccountDeletionError } from "@/lib/log";
 import { createClient } from "@/lib/supabase/server";
 
-// See spec 0014 (AC-9 to AC-13). Like the stamp actions it never throws: a
-// thrown error reaches the client as an opaque message.
 export async function deleteAccountAction(): Promise<ActionResult> {
   let userId: string | undefined;
   try {
@@ -16,7 +14,6 @@ export async function deleteAccountAction(): Promise<ActionResult> {
     if (!user) return { ok: false, reason: "unauthorized" };
     userId = user.id;
 
-    // The database function deletes auth.users where id = auth.uid(); the stamps follow by cascade.
     const { error } = await supabase.rpc("delete_user_account");
     if (error) {
       logAccountDeletionError("rpc", error, user.id);

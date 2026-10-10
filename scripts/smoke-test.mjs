@@ -1,15 +1,10 @@
-// Checks that the site answers after a deploy (spec 0026 AC-8): every language's page gives 200, an unknown route gives
-// 404, and the test server's dummy login is not there (404, spec 0006 AC-4). It is a sanity check of the running build, not a test suite. It retries, because the reload takes a moment.
-//
-//   node scripts/smoke-test.mjs <base url> [timeout seconds]
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
 
-/** A problem to tell the user about. Thrown, not process.exit(): see the Windows note in CLAUDE.md. */
 export class Problem extends Error {}
 
-// The languages of the site are its message files (spec 0005 AC-5), so a new `messages/<language>.json` is requested
-// here without an edit; `tests/smoke-test.test.ts` checks the list against `src/i18n/routing.ts`.
+// The languages of the site are its message files, so a new `messages/<language>.json` is requested here without an
+// edit; `tests/smoke-test.test.ts` checks the list against `src/i18n/routing.ts`.
 export const LANGUAGES = fs
   .readdirSync(new URL("../messages/", import.meta.url))
   .filter((name) => name.endsWith(".json"))
@@ -26,7 +21,6 @@ export const CHECKS = [
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * Runs every check once; returns the list of what is wrong (empty when all is well).
  * @param {string} base
  * @param {(url: URL, init: object) => Promise<any>} [fetchFn]
  * @returns {Promise<string[]>}
@@ -46,7 +40,6 @@ export async function checkOnce(base, fetchFn = fetch) {
 }
 
 /**
- * Retries until every check passes or `timeoutMs` has passed.
  * @param {{ base: string, timeoutMs?: number, intervalMs?: number, fetchFn?: (url: URL, init: object) => Promise<any>, sleep?: (ms: number) => Promise<void>, now?: () => number, log?: (line: string) => void }} options
  */
 export async function smoke({ base, timeoutMs = 120_000, intervalMs = 5_000, fetchFn = fetch, sleep = wait, now = Date.now, log = () => {} }) {

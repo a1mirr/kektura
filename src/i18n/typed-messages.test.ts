@@ -22,7 +22,6 @@ function useTypedHooks() {
   // @ts-expect-error unknown nested key
   root("dashboard.stampp");
 
-  // `useLocale` returns the routing locales, not a plain string.
   const locale: "hu" | "en" | "de" | "ru" = useLocale();
   return locale;
 }
@@ -53,7 +52,6 @@ function typedLocale() {
 
 describe("spec 0005: typed translations", () => {
   it("AC-7: unknown keys and namespaces fail the typecheck", () => {
-    // The assertions are the @ts-expect-error comments above: tsc fails if one becomes unnecessary.
     expect(typeof useTypedHooks).toBe("function");
     expect(typeof typedServerApi).toBe("function");
   });

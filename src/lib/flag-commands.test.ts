@@ -5,7 +5,6 @@ import { FLAG_KEYS } from "./feature-flags";
 const ANA = "3f0c1b6e-9d41-4c55-8a39-2b7a5c1e9d02";
 const BOB = "7a1d2c3e-1111-4222-8333-444455556666";
 
-// A store that remembers what it was asked to do, in order.
 function fakeStore(rows: { key: string; mode: string; users: number }[] = [], users: Record<string, ListedUser[]> = {}) {
   const calls: string[] = [];
   const store: FlagAdminStore = {
@@ -137,10 +136,10 @@ describe("spec 0035: flag commands of the Telegram bot", () => {
     clock += CONFIRM_WINDOW_MS + 1;
     expect(await text(bot, "/confirm")).toBe("Nothing to confirm.");
     await bot.handle("/flag friends on");
-    await bot.handle("/flags"); // anything else cancels
+    await bot.handle("/flags");
     expect(await text(bot, "/confirm")).toBe("Nothing to confirm.");
     await bot.handle("/flag friends on");
-    await bot.handle("/flag friends off"); // and is carried out as its own command
+    await bot.handle("/flag friends off");
     expect(await text(bot, "/confirm")).toBe("Nothing to confirm.");
     expect(calls).toEqual(["mode friends off"]);
   });
@@ -217,7 +216,6 @@ describe("spec 0035: flag commands of the Telegram bot", () => {
   });
 });
 
-// The buttons of the panel the owner gets from /flags (spec 0035 AC-27 to AC-32).
 describe("spec 0035: the flag panel and its buttons", () => {
   const buttons = (reply: { keyboard?: { text: string; callback_data: string }[][] }) => (reply.keyboard ?? []).flat();
 
@@ -243,7 +241,7 @@ describe("spec 0035: the flag panel and its buttons", () => {
       ],
       [{ text: "‹ Back", callback_data: "p" }],
     ]);
-    expect(buttons(reply!).filter((b) => b.callback_data.includes(":restaurants:"))).toHaveLength(0); // only this flag's buttons
+    expect(buttons(reply!).filter((b) => b.callback_data.includes(":restaurants:"))).toHaveLength(0);
   });
 
   it("AC-27: a flag on an allowlist, or with users, gets a button that opens the list", async () => {
@@ -280,7 +278,7 @@ describe("spec 0035: the flag panel and its buttons", () => {
 
   it("AC-28: a tap on a view that is out of date changes nothing and shows the flag's view as it is", async () => {
     const { store, calls } = fakeStore([{ key: "friends", mode: "allowlist", users: 0 }]);
-    const { reply, notice } = await createFlagBot({ store, now }).press("m:friends:off:on"); // shown while it was on
+    const { reply, notice } = await createFlagBot({ store, now }).press("m:friends:off:on");
     expect(calls).toEqual([]);
     expect(notice).toBe("Changed since: nothing applied");
     expect(reply?.text).toMatch(/^friends is allowlist now, not on: nothing was changed\./);

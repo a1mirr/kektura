@@ -3,36 +3,32 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, type BarShapeProps } from "recharts";
 
-// The stamps-per-month chart of the stats page (spec 0037 AC-10 to AC-15). One bar for every month, however empty: the axis names
-// every month (a short month name, the year under January and under the first bar) and, when they do not fit, the chart scrolls
-// inside its own frame instead of dropping labels. Every text is already localized by the page.
-//
-// Recharts draws the axes and sizes the bars; the bars themselves are drawn here (`shape`) because the tooltip has to work on a
-// touch screen (a tap toggles it), with the keyboard (focus shows it) and for a month of height 0, none of which its own tooltip
-// does. A month's whole column is the target, not only the bar.
+// Recharts draws the axes and sizes the bars; the bars themselves are drawn here (`shape`) because the tooltip has to
+// work on a touch screen (a tap toggles it), with the keyboard (focus shows it) and for a month of height 0, none of
+// which its own tooltip does.
 export type ChartMonth = {
-  key: string; // "YYYY-MM"
-  short: string; // the axis label of the month
-  year: string | null; // the year, written under the axis label (January and the first month), else null
-  stamps: number; // the bar's height
-  title: string; // "June 2026"
-  lines: string[]; // the tooltip's lines under the title
-  label: string; // the same, as one sentence: the bar's accessible name
+  key: string;
+  short: string;
+  year: string | null;
+  stamps: number;
+  title: string;
+  lines: string[];
+  label: string;
 };
 
 const HEIGHT = 240;
-const TOP = 8; // the plot's top margin
-const AXIS_HEIGHT = 46; // a month name and a year under it
+const TOP = 8;
+const AXIS_HEIGHT = 46;
 const Y_AXIS_WIDTH = 28;
 const MIN_SLOT = 46; // the narrowest column of a month: room for "sept." and a tap target of 44 px
-const MAX_BAR = 64; // a walk of one month is not one huge bar
-const BAR = "#2563eb"; // blue-600
-const BAR_ACTIVE = "#1e40af"; // blue-800
-const ZERO = "#a8a29e"; // stone-400: the faint mark of a month with nothing
-const TEXT = "#57534e"; // stone-600
-const AXIS = "#a8a29e"; // stone-400: the axis lines
+const MAX_BAR = 64;
+const BAR = "#2563eb";
+const BAR_ACTIVE = "#1e40af";
+const ZERO = "#a8a29e";
+const TEXT = "#57534e";
+const AXIS = "#a8a29e";
 
-type Active = { index: number; x: number }; // the month shown and the centre of its column, in chart pixels
+type Active = { index: number; x: number };
 
 // What a month's column needs from the chart. It travels by context, not by closure: Recharts takes a `shape` for a component type, so
 // a new function on every render would remount every bar, and a bar that is remounted loses its focus.
@@ -46,12 +42,11 @@ type ChartState = {
 };
 const ChartContext = createContext<ChartState | null>(null);
 
-// One month's column: the target, the bar, the mark of an empty month and the focus ring.
 function MonthBar(props: Partial<BarShapeProps>) {
   const { months, active, tabStop, setActive, setTabStop, onKeyDown } = useContext(ChartContext)!;
   const { index, x, y, width, height } = props as BarShapeProps;
   const month = months[index];
-  const base = y + height; // the baseline
+  const base = y + height;
   const slot = width / 0.8; // the column of the month (the gap is 10 % of it on each side; with a capped bar it is narrower than the space the month has)
   const left = x - (slot - width) / 2;
   const centre = x + width / 2;
@@ -71,14 +66,12 @@ function MonthBar(props: Partial<BarShapeProps>) {
       onPointerLeave={(e) => {
         if (e.pointerType === "mouse") setActive((a) => (a?.index === index ? null : a));
       }}
-      // A tap (touch or pen) toggles; a mouse click leaves what hovering opened; Enter and Space are in onKeyDown.
       onClick={(e: MouseEvent<SVGGElement>) => {
         const type = (e.nativeEvent as PointerEvent).pointerType;
         if (type === "touch" || type === "pen") setActive((a) => (a?.index === index ? null : { index, x: centre }));
       }}
       onFocus={(e) => {
         setTabStop(index);
-        // Focus shows the tooltip for the keyboard; a tap or a click focuses too, and has its own handling.
         if (e.currentTarget.matches(":focus-visible")) setActive({ index, x: centre });
       }}
       onBlur={() => setActive((a) => (a?.index === index ? null : a))}
@@ -104,8 +97,6 @@ function MonthBar(props: Partial<BarShapeProps>) {
   );
 }
 
-// The axis label of a month: its short name and, where there is one, the year under it. Hidden from assistive technology: the bars carry
-// the names.
 function MonthTick({ x, y, index }: { x?: number | string; y?: number | string; index?: number }) {
   const month = useContext(ChartContext)!.months[index ?? 0];
   if (!month) return <g />;
@@ -133,17 +124,15 @@ const TICK = <MonthTick />;
 
 export default function MonthChart({ months, labelledBy }: { months: ChartMonth[]; labelledBy: string }) {
   const [active, setActive] = useState<Active | null>(null);
-  const [tabStop, setTabStop] = useState(months.length - 1); // the one month that Tab reaches: the newest, until another is focused
+  const [tabStop, setTabStop] = useState(months.length - 1);
   const frame = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
   const tip = useRef<HTMLDivElement>(null);
 
-  // The newest months are the ones to look at: start scrolled to them.
   useEffect(() => {
     if (frame.current) frame.current.scrollLeft = frame.current.scrollWidth;
   }, []);
 
-  // A tap anywhere but on a month closes the tooltip (a mouse closes it by leaving).
   useEffect(() => {
     if (!active) return;
     const close = (e: PointerEvent) => {
@@ -153,7 +142,6 @@ export default function MonthChart({ months, labelledBy }: { months: ChartMonth[
     return () => document.removeEventListener("pointerdown", close);
   }, [active]);
 
-  // Centred over the column, pushed back inside the chart where it would stick out.
   useLayoutEffect(() => {
     if (!active || !tip.current || !inner.current) return;
     const width = tip.current.offsetWidth;

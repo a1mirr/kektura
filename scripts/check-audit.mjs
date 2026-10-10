@@ -1,12 +1,6 @@
-// Spec 0007 AC-14, AC-15: reads the JSON report of `npm audit --omit=dev --audit-level=high --json` and fails when it names
-// a high or critical advisory in a production dependency that the allow-list (`.github/audit-allowlist.json`) does not
-// cover. An allow-list entry has an advisory id, a reason and an expiry date; an expired entry (and one that is
-// malformed, or expires too far ahead) is a failure of its own, so an advisory without a fix can wait only for a while.
-// Usage: node scripts/check-audit.mjs [audit-report.json] [allowlist.json]
 import { readFileSync } from "node:fs";
 
 export const SEVERITIES_THAT_FAIL = ["high", "critical"];
-/** The longest an entry may be allowed to run from today: an advisory is looked at again at least this often. */
 export const MAX_DAYS_AHEAD = 90;
 
 const GHSA = /GHSA(?:-[2-9cfghjmpqrvwx]{4}){3}/i;
@@ -23,10 +17,6 @@ function isRealDate(text) {
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text;
 }
 
-/**
- * The allow-list: `{ entries: [{ advisory, reason, expires }] }`. Returns the entries that still count and a list of
- * what is wrong with the file (an unreadable shape, a malformed entry, an expired one).
- */
 export function readAllowlist(allowlist, now) {
   const today = dayOf(now);
   const latest = dayOf(new Date(now.getTime() + MAX_DAYS_AHEAD * 86_400_000));
@@ -56,7 +46,6 @@ export function readAllowlist(allowlist, now) {
   return { active, problems };
 }
 
-/** The advisories of high or critical severity in a report: one per advisory id, whichever package they reach. */
 export function advisoriesOf(report) {
   const found = new Map();
   for (const [name, vulnerability] of Object.entries(report.vulnerabilities ?? {})) {
@@ -72,7 +61,6 @@ export function advisoriesOf(report) {
   return [...found.entries()].map(([key, advisory]) => ({ key, ...advisory }));
 }
 
-/** What is wrong, as a list of sentences; empty when the report has no advisory the allow-list does not cover. */
 export function auditProblems(report, allowlist, now = new Date()) {
   if (!report || typeof report !== "object" || report.error || typeof report.vulnerabilities !== "object" || !report.metadata?.vulnerabilities) {
     const why = report?.error ? ` (${[report.error.code, report.error.summary].filter(Boolean).join(": ")})` : "";

@@ -1,5 +1,3 @@
-// Spec 0007: the properties of the CI workflow and of Dependabot's configuration, so a later edit can't remove
-// them unnoticed. The workflow itself only runs on GitHub; this pins what it is made of.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 
@@ -7,14 +5,12 @@ const read = (file: string) => fs.readFileSync(new URL(`../${file}`, import.meta
 const ci = read(".github/workflows/ci.yml");
 const lines = ci.split("\n");
 
-// The text of one job (from `  name:` at two spaces of indentation to the next job).
 function job(id: string) {
   const start = lines.findIndex((line) => line === `  ${id}:`);
   expect(start, `a job "${id}"`).toBeGreaterThan(-1);
   const end = lines.findIndex((line, i) => i > start && /^ {2}\S/.test(line));
   return lines.slice(start, end === -1 ? undefined : end).join("\n");
 }
-// The text of one step of a job, from its `- name:` line to the next step.
 function step(jobText: string, name: string) {
   const jobLines = jobText.split("\n");
   const start = jobLines.findIndex((line) => line.includes(`- name: ${name}`));
@@ -183,7 +179,6 @@ describe("spec 0007: the security job", () => {
     it("runs for pull requests, for pushes to main and once a week (a cron expression for one day of the week)", () => {
       const cron = ci.match(/^ {4}- cron: "([^"]+)"$/m)?.[1] ?? "";
       expect(cron).toMatch(/^\d{1,2} \d{1,2} \* \* [0-6]$/);
-      // no condition and nothing to wait for: it runs for every trigger of the workflow, the weekly one included
       expect(header).not.toMatch(/^ {4}if:/m);
       expect(header).not.toContain("needs:");
       expect(header).toContain("name: Security checks");

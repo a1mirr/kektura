@@ -11,7 +11,6 @@ import { submitFeedback } from "./actions";
 
 type User = { id: string; email?: string } | null;
 
-// Stand-in for the Supabase client: records inserts and answers getUser.
 function useSupabase({ user = null as User, insertError = null as unknown } = {}) {
   const insert = vi.fn(async () => ({ error: insertError }));
   const from = vi.fn(() => ({ insert }));
@@ -171,7 +170,7 @@ describe("spec 0017: abuse limits", () => {
 
   it("AC-7: another address isn't affected, and refused attempts (invalid messages) aren't counted", async () => {
     useSupabase();
-    for (let i = 0; i < 10; i++) await submitFeedback({ message: "" }); // refused as empty, not counted
+    for (let i = 0; i < 10; i++) await submitFeedback({ message: "" });
     expect(await submitFeedback({ message: "still fine" })).toEqual({ ok: true });
   });
 });

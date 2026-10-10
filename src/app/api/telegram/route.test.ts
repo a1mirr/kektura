@@ -235,7 +235,7 @@ describe("spec 0035: taps on the panel's buttons", () => {
     expect((await POST(tap("p"))).status).toBe(200);
     edit.mockResolvedValue({ ok: false, reason: "http_400" });
     expect((await POST(tap("p"))).status).toBe(200);
-    expect(answer).toHaveBeenCalledTimes(2); // both taps are answered, whatever happened to the edit
+    expect(answer).toHaveBeenCalledTimes(2);
   });
 
   it("AC-30: without the service role key a tap is answered that it is not configured", async () => {

@@ -1,5 +1,3 @@
-// Spec 0021 AC-8: what a merge leaves behind (worktrees, branches) is removed, and nothing that could hold work is.
-// `planTidy` decides (pure); the end-to-end block runs the real script against a bare origin and a clone.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -78,7 +76,7 @@ describe("spec 0021: tidy after a merge", () => {
     expect(planTidy(state({ localMain: { behind: true }, worktrees: [wt("me")] })).advanceMain).toBe(true);
     expect(planTidy(state({ localMain: { behind: false } })).advanceMain).toBe(false);
     expect(planTidy(state({ localMain: null })).advanceMain).toBe(false);
-    const held = planTidy(state({ localMain: { behind: true } })); // the primary checkout has main
+    const held = planTidy(state({ localMain: { behind: true } }));
     expect(held.advanceMain).toBe(false);
     expect(held.keep.find((k) => k.what.startsWith("branch main"))?.why).toMatch(/checked out in/);
   });
@@ -96,10 +94,10 @@ describe("spec 0021: tidy after a merge", () => {
       expect(link).toEqual({ target: expect.any(String) });
       expect(fs.existsSync(path.join(worktree, "node_modules"))).toBe(false);
       expect(fs.readFileSync(path.join(real, "keep.txt"), "utf8")).toBe("x");
-      expect(unlinkNodeModules(worktree)).toBe(false); // nothing left to unlink
-      restoreNodeModules(worktree, link); // a worktree that could not be removed gets its link back
+      expect(unlinkNodeModules(worktree)).toBe(false);
+      restoreNodeModules(worktree, link);
       expect(fs.readFileSync(path.join(worktree, "node_modules", "keep.txt"), "utf8")).toBe("x");
-      expect(unlinkNodeModules(worktree)).toEqual({ target: expect.any(String) }); // and it unlinks again
+      expect(unlinkNodeModules(worktree)).toEqual({ target: expect.any(String) });
       expect(fs.readFileSync(path.join(real, "keep.txt"), "utf8")).toBe("x");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -132,16 +130,13 @@ describe("spec 0021: tidy after a merge", () => {
       git(primary, "push", "-q", "-u", "origin", "main");
 
       for (const name of ["done", "dirty", "open", "me"]) git(primary, "worktree", "add", "-q", "-b", name, wtDir(name), "origin/main");
-      // `done` is merged through a merge commit, as a pull request is; `me` and `dirty` have no commits of their own.
       fs.writeFileSync(path.join(wtDir("done"), "d.txt"), "d\n");
       git(wtDir("done"), "add", ".");
       git(wtDir("done"), "commit", "-q", "-m", "done work");
       git(wtDir("done"), "push", "-q", "origin", "done");
       git(primary, "merge", "-q", "--no-ff", "-m", "Merge done", "done");
       git(primary, "push", "-q", "origin", "main");
-      // What CLAUDE.md step 7 leaves behind: a worktree detached at origin/main (its branch was deleted).
       git(primary, "worktree", "add", "-q", "--detach", wtDir("det"), "origin/main");
-      // Started after that merge, and another merge has moved origin/main on since: its tip is an ancestor of origin/main.
       git(primary, "worktree", "add", "-q", "-b", "fresh", wtDir("fresh"), "origin/main");
       fs.writeFileSync(path.join(primary, "next.txt"), "n\n");
       git(primary, "add", ".");
@@ -170,13 +165,12 @@ describe("spec 0021: tidy after a merge", () => {
       const run = tidy(wtDir("me"), "--apply");
       expect(run.status, run.stderr).toBe(0);
       expect(fs.existsSync(wtDir("done"))).toBe(false);
-      expect(fs.existsSync(wtDir("det"))).toBe(false); // detached at origin/main: nothing to protect
+      expect(fs.existsSync(wtDir("det"))).toBe(false);
       expect(git(primary, "branch", "--list", "done")).toBe("");
       for (const kept of ["dirty", "open", "me"]) expect(fs.existsSync(wtDir(kept)), kept).toBe(true);
       expect(git(primary, "branch", "--list", "open")).not.toBe("");
       expect(run.stdout).toMatch(/Keeping worktree dirty .*modified or untracked/);
       expect(run.stdout).toMatch(/Keeping worktree open .*no merge commit of origin\/main contains it/);
-      // A new branch with no commit of its own is an ancestor of origin/main, but it is not finished work.
       expect(fs.existsSync(wtDir("fresh"))).toBe(true);
       expect(git(primary, "branch", "--list", "fresh")).not.toBe("");
       expect(run.stdout).toMatch(/Keeping worktree fresh .*no commit yet/);
@@ -186,7 +180,7 @@ describe("spec 0021: tidy after a merge", () => {
     it("AC-8: --remote deletes the merged branch on origin, and only with --remote", () => {
       const origin = path.join(root, "origin.git");
       const remoteHas = (name: string) => git(root, "ls-remote", "--heads", origin, name) !== "";
-      expect(remoteHas("done")).toBe(true); // the --apply run above left it
+      expect(remoteHas("done")).toBe(true);
       expect(tidy(wtDir("me"), "--apply").stdout).toMatch(/Would delete origin\/done \(needs --remote\)/);
       expect(remoteHas("done")).toBe(true);
       const run = tidy(wtDir("me"), "--apply", "--remote");
@@ -213,7 +207,6 @@ describe("spec 0021: tidy after a merge", () => {
     });
 
     it("AC-9: a stale local main is fast-forwarded when no worktree has it", () => {
-      // A second clone that sits on another branch while origin/main moves on, as the shared checkout does.
       const clone = path.join(root, "second");
       git(root, "clone", "-q", path.join(root, "origin.git"), clone);
       git(clone, "checkout", "-q", "-b", "work");

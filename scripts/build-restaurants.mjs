@@ -1,8 +1,3 @@
-// Restaurants layer data: scraped marker list from an etteremhet.hu search results page
-// (the page embeds `var markerData = [...]` for its own map) + distance to the OKT track.
-//
-// Usage: node scripts/build-restaurants.mjs <results.html> <full-route.gpx>
-// Writes: public/data/restaurants.json
 import fs from "node:fs";
 import { haversine, nearestVertex, readTrack } from "./lib/geo.mjs";
 
@@ -36,10 +31,9 @@ const { points: route, km } = readTrack(routePath);
 
 for (const r of items) {
   const { index, distance } = nearestVertex(route, (p) => haversine([r.lng, r.lat], p));
-  r.distKm = Math.round(distance * 10) / 10; // straight line to the nearest track point
+  r.distKm = Math.round(distance * 10) / 10;
   r.km = Math.round(km[index] * 10) / 10;
 }
-// Only restaurants within reach of the trail (straight line).
 const MAX_DIST_KM = 5;
 const nearby = items.filter((r) => r.distKm <= MAX_DIST_KM).sort((a, b) => a.km - b.km);
 fs.mkdirSync("public/data", { recursive: true });

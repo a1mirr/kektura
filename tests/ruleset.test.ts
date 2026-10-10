@@ -1,6 +1,5 @@
-// Spec 0021 AC-11: the definition of the ruleset on `main` stays what the spec says, and its required checks are the
-// jobs the CI workflow really has (a job that is renamed would otherwise leave every pull request waiting for a check
-// that never comes). That the ruleset is applied on GitHub is a manual row of the spec.
+// Its required checks are the jobs the CI workflow really has (a job that is renamed would otherwise leave every pull
+// request waiting for a check that never comes).
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 
@@ -22,7 +21,7 @@ describe("spec 0021: the ruleset on main", () => {
     expect(rule("deletion")).toBeDefined();
     expect(rule("non_fast_forward")).toBeDefined();
     expect(rule("pull_request").parameters.allowed_merge_methods).toEqual(["merge"]);
-    expect(rule("pull_request").parameters.required_approving_review_count).toBe(0); // one owner
+    expect(rule("pull_request").parameters.required_approving_review_count).toBe(0);
   });
 
   it("AC-11: requires branches to be up to date with main", () => {

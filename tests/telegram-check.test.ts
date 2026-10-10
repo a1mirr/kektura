@@ -1,4 +1,3 @@
-// Spec 0017 AC-9: `npm run telegram:check` (scripts/telegram-check.mjs) against a fake Telegram API on localhost.
 import { spawn } from "node:child_process";
 import http from "node:http";
 import os from "node:os";

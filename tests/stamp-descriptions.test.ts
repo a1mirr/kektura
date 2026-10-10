@@ -1,6 +1,3 @@
-// Spec 0033: every stamp in the seeds has an English, a Russian and a German description, and a translation keeps
-// the technical marker codes of the Hungarian original. Like trail-data.test.ts it reads the generated seeds,
-// so regenerating the trail data (spec 0004) with a new stamp fails here until it is translated.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import translations from "../src/content/stamp-descriptions.json";
@@ -9,7 +6,6 @@ const read = (path: string) => fs.readFileSync(new URL(`../${path}`, import.meta
 const sql = (s: string) => s.replace(/''/g, "'");
 const STR = String.raw`'((?:[^']|'')*)'`;
 
-// code and Hungarian description of every row of supabase/seed.sql and supabase/seed_extra.sql
 const places = [
   ...read("supabase/seed.sql").matchAll(new RegExp(String.raw`^ {2}\(\d+, ${STR}, ${STR}, \d+, \d+, ${STR}, (?:null|${STR}),`, "gm")),
 ].map((m) => ({ code: sql(m[1]), original: m[4] === undefined ? null : sql(m[4]) }));
@@ -31,7 +27,7 @@ describe("spec 0033: translated stamp descriptions", () => {
     expect(extras.length).toBe((read("supabase/seed_extra.sql").match(/^ {2}\(/gm) ?? []).length);
     expect(places.length).toBeGreaterThan(200);
     expect(extras.length).toBeGreaterThan(50);
-    expect(stamps.filter((s) => s.original).length).toBeGreaterThan(280); // descriptions were read, not just codes
+    expect(stamps.filter((s) => s.original).length).toBeGreaterThan(280);
   });
 
   it("AC-3: every stamp code of the seeds has an en, a ru and a de translation", () => {

@@ -3,13 +3,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 import { accountButton, expandAllStages, expectNoSidewaysScroll, openAccountMenu, openStampPopup, seedStatsWalk, signInAsNewUser, stampPlacesOn, stat } from "./helpers";
 import { psql } from "./local-db";
 
-// Spec 0006 AC-10: the pages at a phone's width, in the `mobile` project (Chromium, 375 x 812, touch, mobile emulation,
-// see playwright.config.ts). The tag on the describe is what puts these tests there and keeps them out of the desktop
-// project. Each test checks that its page does not scroll sideways and that the page's main action is on the screen
-// and works when tapped (a tap needs a touch screen: `locator.tap()` fails in the desktop project).
-
-// The control is on the screen: visible, inside the window sideways, and big enough to hit with a thumb: at least 24 px
-// each way (WCAG 2.2's target size), or `minSize` where a spec promises more (44 px: specs 0014 AC-16, 0024 AC-20).
+// 24 px is WCAG 2.2's target size.
 async function expectTappable(page: Page, control: Locator, what: string, minSize = 24) {
   await expect(control, `${what} is visible`).toBeVisible();
   await control.scrollIntoViewIfNeeded();
@@ -48,7 +42,7 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
   test("AC-10: the dashboard does not scroll sideways, and a place is stamped and unstamped with a tap", async ({ page }) => {
     await signInAsNewUser(page);
     await expandAllStages(page);
-    const row = page.locator("#place-OKTPH_02"); // Hét-forrás
+    const row = page.locator("#place-OKTPH_02");
     const add = row.getByRole("button", { name: "Add stamp" });
     await expectTappable(page, add, "the stamp button");
     await add.tap();
@@ -77,7 +71,6 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
   });
 
-  // The trail map is a section of the dashboard (there is no page of its own), and its main action is going fullscreen.
   test("AC-10: the map does not scroll the page sideways, and fullscreen is entered and left with a tap", async ({ page }) => {
     await signInAsNewUser(page);
     await expect(page.locator(".maplibregl-canvas")).toBeVisible();
@@ -92,7 +85,6 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
     await expect(enter).toBeVisible();
   });
 
-  // Spec 0003 AC-27: the report link of a stamp's popup is a 44 px target at the narrowest width the layout promises.
   test("AC-10: a stamp's popup fits at 375 px and its report link is a target of at least 44 px", async ({ page }) => {
     await signInAsNewUser(page);
     await expect(page.locator(".maplibregl-canvas")).toBeVisible();
@@ -135,8 +127,6 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
     await expect(page).toHaveURL(/\/en$/);
   });
 
-  // Spec 0014 AC-20 to AC-26: the header strip's account menu opens with a tap in every language, its list stays inside the window
-  // and every target is at least 44 px (the strip itself must not push the page sideways, even in the longest language).
   test("AC-10: the account menu opens with a tap, its list stays inside the window and its targets are 44 px, in every language", async ({ page }) => {
     await signInAsNewUser(page);
     for (const locale of ["en", "hu", "de", "ru"]) {
@@ -145,7 +135,7 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
       await expectTappable(page, button, `the account button (${locale})`, 44);
       await expectTappable(page, page.getByLabel(/^(Language|Nyelv|Sprache|Язык)$/), `the language switcher (${locale})`, 44);
       await expectNoSidewaysScroll(page, `sideways scroll with the strip's controls in ${locale}`);
-      await expect(button).toHaveAttribute("aria-expanded", "false"); // hydrated
+      await expect(button).toHaveAttribute("aria-expanded", "false");
       await button.tap();
       await expect(button).toHaveAttribute("aria-expanded", "true");
       const list = page.locator("body > header details ul");
@@ -168,19 +158,17 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
     await expect(page).toHaveURL(/\/en$/);
   });
 
-  // Spec 0037: the stats page. A long walk scrolls inside the chart's own frame, and a tap on a month opens its tooltip, a second tap
-  // closes it (no hover on a phone).
   test("AC-10: the stats page does not scroll sideways, and a month's tooltip is opened and closed with taps", async ({ page }) => {
     const email = await signInAsNewUser(page);
     seedStatsWalk(email);
-    stampPlacesOn(email, { OKTPH_06: "2025-01-05" }); // 17 months in all: the chart is wider than the phone
+    stampPlacesOn(email, { OKTPH_06: "2025-01-05" });
     await page.goto("/en/stats");
     await expect(page.locator("[data-month]").first()).toBeAttached();
     await expectNoSidewaysScroll(page, "sideways scroll on the stats page");
     expect(await page.locator("[data-month-chart]").evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
 
     const may = page.getByRole("button", { name: /^May 2026:/ });
-    await expectTappable(page, may, "the newest month", 44); // the whole column is the target (spec 0037 AC-10)
+    await expectTappable(page, may, "the newest month", 44);
     const tooltip = page.locator("[data-chart-tooltip]");
     // Retried until it sticks: a tap before hydration does nothing.
     await expect(async () => {
@@ -192,9 +180,8 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
     const box = (await tooltip.boundingBox())!;
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width).toBeLessThanOrEqual(375.5);
-    await may.tap(); // a second tap closes it
+    await may.tap();
     await expect(tooltip).toHaveCount(0);
-    // another month, and a tap on the page closes it again
     const april = page.getByRole("button", { name: /^April 2026:/ });
     await april.tap();
     await expect(tooltip).toContainText("April 2026");
@@ -202,9 +189,7 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
     await expect(tooltip).toHaveCount(0);
   });
 
-  // Spec 0016 AC-14, AC-21: "Set dates" on a phone. The toolbar with the button sticks to the top (and hides while the page scrolls
-  // down), the bar is fixed to the bottom of the screen, both fit at 320 px, the checkboxes are 44 x 44 px targets, and tapping is enough to choose and apply, also for a place not stamped yet. (The bar above a real on-screen keyboard cannot be tested:
-  // manual row of spec 0016.)
+  // The bar above a real on-screen keyboard cannot be tested here.
   test("AC-10: Set dates does not scroll sideways, the toolbar and the bar fit at 375 and 320 px, and rows are chosen and dated with taps", async ({ page }) => {
     const email = await signInAsNewUser(page);
     await expandAllStages(page);
@@ -222,7 +207,6 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
       expect(at.x, `the button starts inside the window at ${width} px`).toBeGreaterThanOrEqual(0);
       expect(at.x + at.width, `the button ends inside the window at ${width} px`).toBeLessThanOrEqual(width + 0.5);
     }
-    // the toolbar sticks to the top, goes away while the page is scrolled down and comes back on the way up
     await page.evaluate(() => window.scrollTo(0, 1500));
     await expect(change).not.toBeInViewport();
     await page.evaluate(() => window.scrollTo(0, 1200));
@@ -234,13 +218,12 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
 
     await stamp("OKTPH_02").getByRole("checkbox").tap();
     await stamp("OKTPH_03").getByRole("checkbox").tap();
-    await stamp("OKTPH_04").getByRole("checkbox").tap(); // not stamped yet: a new stamp
+    await stamp("OKTPH_04").getByRole("checkbox").tap();
     await expect(bar.getByRole("status")).toHaveText("3 selected · 1 not stamped yet");
     await bar.getByLabel("New date of the selected stamps").fill("2024-03-05");
 
     const label = (key: string) => stamp(key).locator("label", { has: page.getByRole("checkbox") });
     await expectTappable(page, label("OKTPH_02"), "the checkbox's label", 44);
-    // with something chosen and a date typed, every control of the bar is enabled
     for (const width of [375, 320]) {
       await page.setViewportSize({ width, height: 700 });
       await expectNoSidewaysScroll(page, `sideways scroll with the bar at ${width} px`);
@@ -257,7 +240,7 @@ test.describe("spec 0006: the pages at a phone's width", { tag: "@mobile" }, () 
     await bar.getByRole("button", { name: "Apply" }).tap();
     await expect(page.getByText("3 dates set")).toBeVisible();
     await expect(bar).toHaveCount(0);
-    await expect(change).toHaveAttribute("aria-pressed", "false"); // the mode is off
+    await expect(change).toHaveAttribute("aria-pressed", "false");
     await expectNoSidewaysScroll(page, "sideways scroll after the dates were set");
     const stored = psql(
       `select string_agg(distinct s.stamped_on::text, ',') from public.user_stamps s join auth.users u on u.id = s.user_id where u.email = '${email}'`,

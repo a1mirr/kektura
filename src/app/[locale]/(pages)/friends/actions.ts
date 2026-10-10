@@ -9,13 +9,9 @@ import { createRateLimiter } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 
-// Spec 0024 AC-14: like the stamp actions these never throw, a thrown error reaches the client as an opaque
-// message. Every one checks the flag first (AC-15), then the session.
-
 type Failure = Extract<ActionResult, { ok: false }>;
 export type SendRequestResult = ActionResult | { ok: false; reason: RequestRefusal };
 
-// Spec 0024 AC-13: one hourly budget per user for invites, requests and approvals.
 const limiter = createRateLimiter({ limit: 30, windowMs: 60 * 60_000 });
 
 async function run<T>(name: string, limited: boolean, work: (supabase: SupabaseClient<Database>) => Promise<T>): Promise<T | Failure> {
@@ -32,8 +28,8 @@ async function run<T>(name: string, limited: boolean, work: (supabase: SupabaseC
   }
 }
 
-// Turns the outcome of a database call into an ActionResult, logging a failure. The page that called the action
-// reloads itself with a redirect (see `done` in page.tsx), so nothing is revalidated here.
+// The page that called the action reloads itself with a redirect (see `done` in page.tsx), so nothing is revalidated
+// here.
 function finish(name: string, error: unknown): ActionResult {
   if (!error) return { ok: true };
   logFriendsError(name, error);
@@ -78,7 +74,6 @@ export async function setSharing(friendId: string, isSharing: boolean): Promise<
   });
 }
 
-// The database generates the new token (at least 128 random bits), the old one stops working at once.
 export async function regenerateInvite(): Promise<ActionResult> {
   return run("regenerateInvite", true, async (supabase) => finish("regenerateInvite", (await supabase.rpc("regenerate_invite")).error));
 }

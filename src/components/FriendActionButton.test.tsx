@@ -8,8 +8,6 @@ import FriendConfirm from "./FriendConfirm";
 
 afterEach(cleanup);
 
-// A form like the page's: its action is a server action that takes a while and then redirects (here: a promise
-// the test settles).
 function pendingForm(label: string, tone?: "approve" | "danger") {
   let finish!: () => void;
   const action = vi.fn(() => new Promise<void>((resolve) => (finish = resolve)));
@@ -35,7 +33,6 @@ describe("spec 0024: the Friends page buttons respond", () => {
     expect(button).toHaveProperty("disabled", true);
     expect(button.getAttribute("aria-busy")).toBe("true");
     expect(button.querySelector(".animate-spin")).not.toBeNull();
-    // The label is still there, transparent: the button keeps its size and its name.
     expect(screen.getByText("Approve").className).toContain("opacity-0");
     await finish();
     expect(button).toHaveProperty("disabled", false);
@@ -68,7 +65,7 @@ describe("spec 0024: the Friends page buttons respond", () => {
     await press("Approve");
     expect(screen.getByRole("button", { name: "Ignore" })).toHaveProperty("disabled", true);
     expect(screen.getByRole("button", { name: "Other row" })).toHaveProperty("disabled", false);
-    await press("Ignore"); // disabled: nothing happens
+    await press("Ignore");
     expect(ignore.action).not.toHaveBeenCalled();
     await approve.finish();
     expect(screen.getByRole("button", { name: "Ignore" })).toHaveProperty("disabled", false);

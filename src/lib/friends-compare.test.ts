@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Checkpoint } from "./progress";
 
-// Three places 10 km apart, one checkpoint (id = km + 1) per place, with coordinates.
 const checkpoints: Checkpoint[] = [0, 10, 20].map((km, i) => ({
   id: km + 1,
   seq: i + 1,
@@ -26,7 +25,6 @@ vi.mock("./dashboard-data", () => ({ getReferenceData: async () => ({ checkpoint
 
 import { compareWithFriend, type Friend } from "./friends";
 
-// Records everything the code asks the database for.
 function recordingSupabase(ownStamps: { checkpoint_id: number; stamped_on: string }[]) {
   const calls: string[] = [];
   const supabase = {
@@ -67,13 +65,13 @@ describe("spec 0024: comparing with a friend", () => {
     const { supabase } = recordingSupabase([{ checkpoint_id: 1, stamped_on: "2026-05-01" }]);
     const { points } = await compareWithFriend(supabase, friend);
     expect(points.map((p) => [p.placeKey, p.who])).toEqual([["P0", "me"], ["P1", "them"], ["P2", "them"]]);
-    expect(points.map((p) => p.label)).toEqual(["1.1", "1.2", "1.3"]); // the numbers of the list
+    expect(points.map((p) => p.label)).toEqual(["1.1", "1.2", "1.3"]);
     for (const p of points) expect(Object.keys(p).sort()).toEqual(["label", "lat", "lng", "moved", "name", "placeKey", "who"]);
   });
 
   it("AC-29: a place that moved in the last 180 days is a point with a ring, and no other is", async () => {
     const { supabase } = recordingSupabase([]);
-    const moved = checkpoints[1]; // P1
+    const moved = checkpoints[1];
     try {
       moved.moved_on = "2026-10-01";
       const { points } = await compareWithFriend(supabase, friend, "2026-10-07");

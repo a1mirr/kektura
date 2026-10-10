@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-// Spec 0035 AC-14, AC-26: the test server has neither the webhook secret nor the bot (spec 0006 AC-7), so the webhook
+// The test server has neither the webhook secret nor the bot, so the webhook
 // does not exist there, whatever is sent to it. (What it does for the owner is unit-tested with a mocked database.)
 test.describe("spec 0035: the Telegram webhook on the test server", () => {
   test("AC-14, AC-26: /api/telegram is an empty 404 with or without a secret header, and for any other method", async ({ request }) => {

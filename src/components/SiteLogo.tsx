@@ -5,10 +5,6 @@ import type { Locale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { pageWidth } from "./PageShell";
 
-// The header strip of every page: the logo and name at the left edge of the content width (spec 0036 AC-1), linking to the
-// main page of the visitor's language (spec 0014 AC-19), and `children` at the right edge: the language switcher and the
-// account menu (AC-20). Rendered once by the locale layout and by the 404 page, which has no locale layout and gives no
-// children: a page never draws its own copy.
 export default async function SiteLogo({ locale, children }: { locale: Locale; children?: ReactNode }) {
   const t = await getTranslations({ locale, namespace: "app" });
 

@@ -3,16 +3,12 @@ import { expectNoSidewaysScroll, openAccountMenu, setFeatureFlag, signInAsNewUse
 import { describeFindings, judge, scan, WIDTHS } from "./accessibility";
 import { psql } from "./local-db";
 
-// Spec 0035 AC-5, AC-6, AC-11: the `friends` and `restaurants` flags in each state, for a signed-in user, a user on the
-// allowlist and a signed-out visitor. Flags are global, so the tests run one after the other (this file is its own
-// Playwright project, after the others) and leave the flags on, as the other tests expect.
 test.describe.configure({ mode: "serial" });
 test.afterAll(() => {
   setFeatureFlag("friends", "on");
   setFeatureFlag("restaurants", "on");
 });
 
-// The Friends entry of the account menu (spec 0014 AC-21); a visible one needs the menu open.
 const friendsLink = (page: Page) => page.locator("body > header details").getByRole("link", { name: "Friends" });
 
 async function friendsAnswer(page: Page) {
@@ -31,7 +27,7 @@ test.describe("spec 0035: a flag that is off is off", () => {
     await page.goto("/en/about");
     await expect(page.getByText("If you connect with friends")).toHaveCount(0);
 
-    setFeatureFlag("friends", "on"); // no deploy, no restart, no cache to clear (AC-6)
+    setFeatureFlag("friends", "on");
     expect(await friendsAnswer(page)).toBe(200);
     await page.goto("/en/dashboard");
     await openAccountMenu(page);
@@ -56,7 +52,6 @@ test.describe("spec 0035: a flag that is off is off", () => {
 
     setFeatureFlag("friends", "on");
     expect(await friendsAnswer(other)).toBe(200);
-    // On means everybody: a signed-out visitor is sent to sign in instead of getting a 404.
     expect((await visitor.goto("/en/friends"))?.url()).not.toContain("/en/friends");
     await expect(visitor).toHaveURL(/\/en\/?$/);
   });
@@ -82,7 +77,6 @@ test.describe("spec 0035: the restaurants flag", () => {
   const canvas = (page: Page) => page.locator(".maplibregl-canvas");
   const checkbox = (page: Page) => page.getByLabel(/^Show restaurants \(\d+\)$/);
 
-  // Opens the dashboard and waits for the map (created after hydration); returns the requests for the data file.
   async function openMap(page: Page) {
     const fetched: string[] = [];
     page.on("request", (request) => {
@@ -107,9 +101,9 @@ test.describe("spec 0035: the restaurants flag", () => {
     expect(fetchedOff).toEqual([]);
     await page.goto("/en/about");
     await expect(page.getByRole("link", { name: "etteremhet.hu" })).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "heyjoe.hu" })).toBeVisible(); // the other credits stay
+    await expect(page.getByRole("link", { name: "heyjoe.hu" })).toBeVisible();
 
-    setFeatureFlag("restaurants", "on"); // no deploy, no restart, no cache to clear
+    setFeatureFlag("restaurants", "on");
     const fetchedOn = await openMap(page);
     await expect(checkbox(page)).toBeVisible();
     expect(fetchedOn).toHaveLength(1);
@@ -121,7 +115,7 @@ test.describe("spec 0035: the restaurants flag", () => {
     const email = await signInAsNewUser(page);
     const other = await (await browser.newContext()).newPage();
     await signInAsNewUser(other);
-    await expect(checkbox(page)).toBeVisible(); // the first dashboards have loaded their data (the flag is on)
+    await expect(checkbox(page)).toBeVisible();
     await expect(checkbox(other)).toBeVisible();
 
     setFeatureFlag("restaurants", "allowlist", [email]);
@@ -137,7 +131,7 @@ test.describe("spec 0035: the restaurants flag", () => {
 test.describe("spec 0039: the share flag and share cards", () => {
   test.afterAll(() => setFeatureFlag("share", "off")); // off is what production starts with; no other test needs it on
 
-  // Built at run time, from a repeated pair: a 32-character hex literal, or one with many different characters, assigned to a constant is what the secret scanner (spec 0007 AC-16) takes for an API key.
+  // Built at run time, from a repeated pair: a 32-character hex literal, or one with many different characters, assigned to a constant is what the secret scanner takes for an API key.
   const UNKNOWN_TOKEN = "ab".repeat(16);
   const panel = (page: Page) => page.getByRole("region", { name: "Share your progress" });
 
@@ -150,7 +144,6 @@ test.describe("spec 0039: the share flag and share cards", () => {
     await page.goto("/en/about");
     await expect(page.getByText("If you create a share card")).toHaveCount(0);
 
-    // A card that exists answers 404 as well while the flag is off: the flag, not the data, decides.
     setFeatureFlag("share", "on");
     await page.goto("/en/about");
     await expect(page.getByText("If you create a share card")).toBeVisible();
@@ -177,9 +170,8 @@ test.describe("spec 0039: the share flag and share cards", () => {
     setFeatureFlag("share", "on");
     await page.goto("/en/stats");
 
-    // Anonymous by default.
     await panel(page).getByRole("button", { name: "Create a card" }).click();
-    const item = panel(page).getByRole("listitem").filter({ hasText: "anonymous" }); // stays this card when a newer one is created
+    const item = panel(page).getByRole("listitem").filter({ hasText: "anonymous" });
     await expect(item).toHaveCount(1);
     const link = await item.getByLabel("Link to the card").inputValue();
     expect(link).toMatch(/\/en\/share\/[0-9a-f]{32}$/);
@@ -188,7 +180,6 @@ test.describe("spec 0039: the share flag and share cards", () => {
     expect(numbers).not.toBeNull();
     const [, percent, stamps] = numbers!;
 
-    // A signed-out visitor sees the frozen numbers, the map and the preview tags, and nothing about whose it is.
     const visitorContext = await browser.newContext();
     const visitor = await visitorContext.newPage();
     const path = new URL(link).pathname;
@@ -209,14 +200,12 @@ test.describe("spec 0039: the share flag and share cards", () => {
     expect(image.headers()["content-type"]).toBe("image/png");
     expect((await image.body()).subarray(1, 4).toString()).toBe("PNG");
 
-    // The numbers are frozen: stamping more does not change the card.
     psql(
       `insert into public.user_stamps (user_id, checkpoint_id, stamped_on) select u.id, c.id, '2026-06-02' from auth.users u, public.checkpoints c where u.email = '${email}' and c.stage = 3 and c.retired_on is null`,
     );
     await visitor.reload();
     await expect(visitor.getByText(`${stamps} / 161`)).toBeVisible();
 
-    // A card with the name: the owner's display name is the title.
     await page.reload();
     await panel(page).getByLabel("Show my name on the card").check();
     await panel(page).getByRole("button", { name: "Create a card" }).click();
@@ -227,7 +216,6 @@ test.describe("spec 0039: the share flag and share cards", () => {
     await visitor.goto(new URL(await named.getByLabel("Link to the card").inputValue()).pathname);
     await expect(visitor.getByRole("heading", { level: 1 })).toHaveText(`${name}'s Kéktúra progress`);
 
-    // Deleting asks first and then the link stops working at once.
     await item.getByRole("button", { name: "Delete" }).click();
     await item.getByRole("button", { name: "Cancel" }).click();
     expect((await visitor.goto(path))?.status()).toBe(200);
@@ -246,7 +234,7 @@ test.describe("spec 0039: the share flag and share cards", () => {
     await page.goto("/en/stats");
     await panel(page).getByRole("button", { name: "Create a card" }).click();
     await expect(panel(page).getByRole("listitem")).toHaveCount(1);
-    await panel(page).getByRole("button", { name: "Delete" }).click(); // the open question is part of the panel too
+    await panel(page).getByRole("button", { name: "Delete" }).click();
     await expect(panel(page).getByRole("button", { name: "Yes, delete" })).toBeVisible();
     const path = new URL(await panel(page).getByLabel("Link to the card").inputValue()).pathname;
     const visitor = await (await browser.newContext()).newPage();
@@ -262,7 +250,6 @@ test.describe("spec 0039: the share flag and share cards", () => {
       }
     }
 
-    // The panel is a list of wrapping buttons and a full-width field: at 375 px it must not widen the stats page (spec 0036 AC-5).
     await page.setViewportSize(WIDTHS.phone);
     for (const locale of ["de", "hu", "ru"]) {
       await page.goto(`/${locale}/stats`);
@@ -287,7 +274,6 @@ test.describe("spec 0039: the share flag and share cards", () => {
     expect((await visitor.goto("/en/share/not-a-token"))?.status()).toBe(404);
     expect((await visitor.request.get(`/api/share/${UNKNOWN_TOKEN}/image`)).status()).toBe(404);
 
-    // A phone: the page does not scroll sideways, in the language with the longest words as well.
     for (const width of [375, 320]) {
       await visitor.setViewportSize({ width, height: 800 });
       for (const locale of ["de", "hu", "ru"]) {

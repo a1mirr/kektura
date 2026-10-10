@@ -1,6 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server";
 
-// A plain form (no client JS): see src/app/auth/sign-out/route.ts.
 export default async function SignOutButton() {
   const t = await getTranslations("account");
   const locale = await getLocale();

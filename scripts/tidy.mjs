@@ -1,16 +1,3 @@
-// Removes what a merge leaves behind (spec 0021 AC-8): linked worktrees under .claude/worktrees and local branches
-// whose work is already in origin/main, and brings a local `main` that is only behind up to origin/main (so a
-// stale `main` can never be the base of new work). A dry run unless --apply is given; --remote also deletes merged branches on
-// origin (GitHub's "automatically delete head branches" does that for you when it is on).
-//
-//   node scripts/tidy.mjs [--apply] [--remote]
-//
-// "Merged" means a merge commit of origin/main brought the commit in (the repository merges pull requests with merge
-// commits). A new branch that has no commit of its own yet is an ancestor of origin/main too, and must not be taken for
-// finished work: another session may be about to start on it. Nothing is removed that could hold work: a worktree with a
-// modified or untracked file, a branch that no merge commit contains, the primary checkout, the worktree this runs in
-// (run it from another checkout to remove that one), a branch checked out anywhere else, `main`. Worktrees outside
-// .claude/worktrees (other tools') are only ever listed as kept.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -20,7 +7,6 @@ const NOT_MERGED = "no merge commit of origin/main contains it (unmerged work, o
 const norm = (p) => path.resolve(p).replace(/\\/g, "/").toLowerCase();
 
 /**
- * Decides what to remove. Pure: all state comes in.
  * @param {{ primary: string, current: string, worktrees: { path: string, branch: string | null, merged: boolean, clean: boolean }[],
  *   branches: { name: string, merged: boolean }[], remotes: { name: string, merged: boolean }[], localMain?: { behind: boolean } | null, protectedBranches?: string[] }} state
  */
@@ -62,7 +48,6 @@ export function planTidy({ primary, current, worktrees, branches, remotes, local
     if (remote.merged) deleteRemote.push(remote.name);
     else keep.push({ what: `origin/${remote.name}`, why: NOT_MERGED });
   }
-  // A local main that is only behind is moved up, unless a worktree has it checked out (it is theirs to update).
   let advanceMain = false;
   if (localMain?.behind) {
     const holder = worktrees.find((wt) => wt.branch === "main");
@@ -91,9 +76,8 @@ export function unlinkNodeModules(worktree) {
   return { target };
 }
 
-/** Puts back what unlinkNodeModules took out, for a worktree that then could not be removed. */
 export function restoreNodeModules(worktree, link) {
-  if (link) fs.symlinkSync(link.target, path.join(worktree, "node_modules"), "junction"); // "junction" is ignored off Windows
+  if (link) fs.symlinkSync(link.target, path.join(worktree, "node_modules"), "junction");
 }
 
 const git = (cwd, args) => {
@@ -103,7 +87,7 @@ const git = (cwd, args) => {
 
 export function gatherState(cwd) {
   const top = git(cwd, ["rev-parse", "--path-format=absolute", "--show-toplevel", "--git-common-dir"]).stdout.split(/\r?\n/);
-  const primary = path.dirname(top[1]); // <primary>/.git
+  const primary = path.dirname(top[1]);
   // Commits that came in through a merge commit: in origin/main, but not on its first-parent line.
   const lines = (args) => git(cwd, args).stdout.split(/\r?\n/).filter(Boolean);
   const firstParent = new Set(lines(["rev-list", "--first-parent", "origin/main"]));
@@ -118,8 +102,6 @@ export function gatherState(cwd) {
     if (!wt || !head) continue;
     const branch = lines.find((l) => l.startsWith("branch "))?.slice(7).replace("refs/heads/", "") ?? null;
     const dirty = git(wt, ["status", "--porcelain"]);
-    // A detached worktree has no branch to protect: what it points at only has to be in origin/main (the clean-up
-    // recipe of CLAUDE.md step 7 leaves a worktree detached at origin/main).
     const contained = git(cwd, ["merge-base", "--is-ancestor", head, "origin/main"]).status === 0;
     worktrees.push({ path: wt, branch, merged: branch ? merged(head) : contained, clean: dirty.status === 0 && dirty.stdout === "" });
   }
@@ -170,13 +152,12 @@ function main() {
     const result = git(cwd, ["worktree", "remove", wt.path]);
     run(`removing ${wt.path}`, result);
     if (result.status !== 0) {
-      restoreNodeModules(wt.path, link); // a worktree that stays keeps its dependencies
+      restoreNodeModules(wt.path, link);
       if (wt.branch) stuck.add(wt.branch);
     }
   }
   git(cwd, ["worktree", "prune"]);
   if (plan.advanceMain) {
-    // Only ever forward: planTidy saw main contained in origin/main, and update-ref is given the sha that was checked.
     const old = git(cwd, ["rev-parse", "--verify", "refs/heads/main"]).stdout;
     if (git(cwd, ["merge-base", "--is-ancestor", old, "origin/main"]).status === 0) run("moving main", git(cwd, ["update-ref", "refs/heads/main", "origin/main", old]));
   }
@@ -209,7 +190,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   try {
     main();
   } catch (error) {
-    console.error(error.message); // no process.exit(): see the Windows note in CLAUDE.md
+    console.error(error.message);
     process.exitCode = 1;
   }
 }

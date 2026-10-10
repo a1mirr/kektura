@@ -1,6 +1,5 @@
 import type { LineStyle } from "@/lib/compare-map";
 
-// A short sample of a map line, drawn the way the map draws it, so a legend does not rely on colour alone.
 const border: Record<LineStyle, string> = {
   solid: "4px solid",
   dashed: "4px dashed",

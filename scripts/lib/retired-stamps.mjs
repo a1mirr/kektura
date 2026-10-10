@@ -1,5 +1,3 @@
-// Stamps that no longer exist (scripts/data/okt-retired-stamps.json, spec 0004): kept as rows of `checkpoints` with a
-// `retired_on` date, so users' stamps on them survive every regeneration of the seed.
 import fs from "node:fs";
 
 const q = (s) => `'${String(s).replace(/'/g, "''")}'`;
@@ -10,8 +8,6 @@ export function readRetiredStamps(file = "scripts/data/okt-retired-stamps.json")
   return JSON.parse(fs.readFileSync(file, "utf8")).stamps;
 }
 
-// A retired row sits outside the trail order: its seq is above every current row's, it has no number in its stage
-// (stage_seq null) and the km and stage of the place it followed (`after_place_key`); its place_key is its own code.
 export function retiredStampsSql(entries) {
   if (!entries.length) return "";
   const values = entries

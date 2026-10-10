@@ -4,8 +4,6 @@ import { expect, test, type Page } from "@playwright/test";
 import { routing } from "../src/i18n/routing";
 import { signInAsNewUser } from "./helpers";
 
-// The name and the link's accessible name come from the language's own messages file, so every language is
-// covered without a fixture here.
 type Locale = (typeof routing.locales)[number];
 const names = (locale: Locale) => {
   const { app } = JSON.parse(fs.readFileSync(path.join(process.cwd(), "messages", `${locale}.json`), "utf8"));
@@ -19,14 +17,13 @@ async function expectLogo(page: Page, locale: Locale) {
   await expect(link).toHaveCount(1);
   await expect(link).toHaveAttribute("href", `/${locale}`);
   await expect(link).toContainText(names(locale).text);
-  await expect(link.getByRole("img")).toHaveCount(0); // the mark is decorative: empty alt
+  await expect(link.getByRole("img")).toHaveCount(0);
   const box = await link.boundingBox();
   expect(box!.width).toBeGreaterThanOrEqual(44);
   expect(box!.height).toBeGreaterThanOrEqual(44);
-  // top-left corner of the content width (spec 0036 AC-1): the page's left edge on a phone, 64 rem centred on a wide window
   const viewport = await page.evaluate(() => document.documentElement.clientWidth);
   expect(box!.x).toBeLessThan(Math.max(0, (viewport - 1024) / 2) + 40);
-  expect(box!.y).toBeLessThan(80); // below the test banner, above any page content
+  expect(box!.y).toBeLessThan(80);
 }
 
 // Polled: after the viewport shrinks, a chart that measures its container (the stats page's) takes a frame to follow,

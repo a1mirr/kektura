@@ -4,7 +4,6 @@ import { compareDots, compareHoverText, compareLines, WHO_COLOR, WHO_LINE_STYLE,
 import { DONE } from "./map-layers";
 import type { Route } from "./route-geometry";
 
-// A straight trail of 40 km: a vertex every 10 km.
 const route: Route = { points: [0, 10, 20, 30, 40].map((km) => [16 + km / 100, 47, km] as [number, number, number]) };
 const ranges: ComparisonRanges = {
   both: [[10, 20]],

@@ -1,12 +1,8 @@
-// Comparing two people's progress on the trail (spec 0024 AC-22, AC-23): which places and which stretches each has,
-// and the gaps. Pure functions (no I/O, no dates): only the places each stamped, which is all a friend shares.
 import { progressSummary, walkedRanges, type KmRange, type Place, type Stage } from "./progress";
 
-// Who has a place or a stretch: both of us, only me, only them, neither.
 export type Who = "both" | "me" | "them" | "neither";
 export const WHO: readonly Who[] = ["both", "me", "them", "neither"];
 
-// How a stage stands, from my count `a`, their count `b` and the stage's total `n` (the first that applies).
 export type StageState = "both" | "me" | "them" | "neither" | "partly";
 
 export type StageComparison = { stage: number; me: number; them: number; total: number; state: StageState };
@@ -16,7 +12,6 @@ export type ComparisonRanges = Record<Who, KmRange[]> & { mine: KmRange[]; their
 export type Comparison = {
   places: Record<Who, number>;
   placeWho: Map<string, Who>;
-  // The four figures add up to `total`: three are rounded to 0.1 (spec 0001 AC-4) and the fourth is what is left.
   km: Record<Who, number> & { total: number };
   ranges: ComparisonRanges;
   stages: StageComparison[];
@@ -27,7 +22,6 @@ type Stamped = { has: (key: string) => boolean };
 const round1 = (km: number) => Math.round(km * 10) / 10;
 const lengthOf = (ranges: KmRange[]) => ranges.reduce((sum, [from, to]) => sum + (to - from), 0);
 
-// Sorted, touching and overlapping ranges merged.
 function merge(ranges: KmRange[]): KmRange[] {
   const merged: KmRange[] = [];
   for (const [from, to] of [...ranges].sort((a, b) => a[0] - b[0] || a[1] - b[1])) {
@@ -38,7 +32,6 @@ function merge(ranges: KmRange[]): KmRange[] {
   return merged;
 }
 
-// The kilometres in both lists.
 export function intersectRanges(a: KmRange[], b: KmRange[]): KmRange[] {
   const x = merge(a);
   const y = merge(b);
@@ -55,7 +48,6 @@ export function intersectRanges(a: KmRange[], b: KmRange[]): KmRange[] {
   return result;
 }
 
-// The kilometres of `a` that are not in `b`.
 export function subtractRanges(a: KmRange[], b: KmRange[]): KmRange[] {
   const cut = merge(b);
   const result: KmRange[] = [];
@@ -71,7 +63,6 @@ export function subtractRanges(a: KmRange[], b: KmRange[]): KmRange[] {
   return result;
 }
 
-// What is left of [from, to] when `ranges` are taken out.
 export const complementRanges = (ranges: KmRange[], from: number, to: number) => subtractRanges([[from, to]], ranges);
 
 // Three figures rounded, the fourth the total minus them. Rounding three figures up can leave a "neither" of
@@ -87,8 +78,7 @@ function kmFigures(parts: Pick<Record<Who, number>, "both" | "me" | "them">, tot
   return km;
 }
 
-// A stage is "both" when both have all its places, "me" or "them" when only one has, "neither" when neither has any,
-// and "partly" otherwise. The order matters: a stage with one place that only I stamped is "me", not "partly".
+// The order matters: a stage with one place that only I stamped is "me", not "partly".
 export function stageState(me: number, them: number, total: number): StageState {
   if (me === total && them === total) return "both";
   if (me === total) return "me";
@@ -97,10 +87,6 @@ export function stageState(me: number, them: number, total: number): StageState 
   return "partly";
 }
 
-// `mine` and `theirs` are the place keys each stamped (a place with several variants counts once, spec 0001 AC-1);
-// the walked stretches come from the rule of spec 0001 AC-3, so the comparison never disagrees with a dashboard.
-// `waived` are the places each was not missing (spec 0001 AC-17): they are not counted as stamped, but a stage with
-// only stamped and waived places is complete and the stretch runs across them.
 export function compareProgress(
   places: Place[],
   mine: Stamped,

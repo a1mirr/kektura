@@ -2,8 +2,6 @@ import { expect, test } from "@playwright/test";
 import { expandAllStages, signInAsNewUser, stat } from "./helpers";
 import { psql } from "./local-db";
 
-// Vércverés (OKTPH_103, stage 20) is required from 2014-11-21; its neighbours on the trail are Galyatető (OKTPH_102)
-// and Vörösmarty fogadó (OKTPH_104).
 const stampNeighbours = (email: string, day: string) =>
   psql(
     `insert into public.user_stamps (user_id, checkpoint_id, stamped_on) select u.id, c.id, '${day}' from auth.users u, public.checkpoints c where u.email = '${email}' and c.place_key in ('OKTPH_102', 'OKTPH_104')`,
@@ -23,21 +21,19 @@ test.describe("spec 0001: stamps required from a date", () => {
     const row = page.locator("#place-OKTPH_103");
     await expect(row).toContainText("Stamp required from November 21, 2014");
     await expect(row).toContainText("Not required for your walk");
-    await expect(row.getByRole("button", { name: "Add stamp" })).toBeVisible(); // still unstamped, only not missing
-    await expect(stat(page, "Stamps")).toHaveText("2 / 161"); // the waived place is not a stamp
-    await expect(stat(page, "Kilometres")).toHaveText(kmBetweenNeighbours()); // the stretch across it is walked
-    const stage = page.locator("#stage-20"); // Mátraverebély -> Mátraháza: 6 places, 2 stamped, Vércverés waived
-    await expect(stage.locator("[aria-expanded]").first()).toContainText("3/6"); // the waived place is done for the stage's progress
-    await expect(stage.getByRole("button", { name: "Stamp stage" })).toBeVisible(); // but the button follows the stamps
+    await expect(row.getByRole("button", { name: "Add stamp" })).toBeVisible();
+    await expect(stat(page, "Stamps")).toHaveText("2 / 161");
+    await expect(stat(page, "Kilometres")).toHaveText(kmBetweenNeighbours());
+    const stage = page.locator("#stage-20");
+    await expect(stage.locator("[aria-expanded]").first()).toContainText("3/6");
+    await expect(stage.getByRole("button", { name: "Stamp stage" })).toBeVisible();
 
-    // The date explains itself, by click (and so by keyboard and touch).
     const why = row.getByText(/became required on that day/);
     await expect(why).toBeHidden();
     await row.getByRole("button", { name: /November 21, 2014/ }).click();
     await expect(why).toBeVisible();
     await expect(why).not.toContainText("tolerance"); // an announcement of 2014 says nothing of one
 
-    // A later stamp takes nothing away.
     await row.getByRole("button", { name: "Add stamp" }).click();
     await expect(stat(page, "Stamps")).toHaveText("3 / 161");
     await expect(stat(page, "Kilometres")).toHaveText(kmBetweenNeighbours());
@@ -59,7 +55,6 @@ test.describe("spec 0001: stamps required from a date", () => {
   });
 
   test("AC-19, AC-20: a friend's page shows the date and the waiver as theirs, with their figures", async ({ page, browser }) => {
-    // The viewer and a friend who shares with them: an accepted friendship made in the database (the invite flow is spec 0024's).
     const viewer = await signInAsNewUser(page);
     const friendPage = await (await browser.newContext()).newPage();
     const friend = await signInAsNewUser(friendPage);
@@ -70,8 +65,8 @@ test.describe("spec 0001: stamps required from a date", () => {
     );
 
     await page.goto(`/en/friends/${id(friend)}`);
-    await expect(stat(page, "Stamps")).toHaveText("2 / 161"); // the waived place is no stamp
-    await expect(stat(page, "Kilometres")).toHaveText(kmBetweenNeighbours()); // the stretch across it is walked
+    await expect(stat(page, "Stamps")).toHaveText("2 / 161");
+    await expect(stat(page, "Kilometres")).toHaveText(kmBetweenNeighbours());
     const row = page.locator("#place-OKTPH_103");
     await expect(row).toContainText("Stamp required from November 21, 2014");
     await expect(row).toContainText("Not required for their walk");
@@ -83,7 +78,7 @@ test.describe("spec 0001: stamps required from a date", () => {
     await signInAsNewUser(page);
     await page.goto("/en/dashboard");
     await expandAllStages(page);
-    const row = page.locator("#place-OKTPH_30_B"); // Badacsony, required from 2025-05-08
+    const row = page.locator("#place-OKTPH_30_B");
     await row.getByRole("button", { name: /May 8, 2025/ }).click();
     await expect(row.getByText(/one-month tolerance/)).toBeVisible();
   });
@@ -94,7 +89,7 @@ test.describe("spec 0001: stamps required from a date", () => {
       const email = await signInAsNewUser(page);
       stampNeighbours(email, "2014-06-01");
       await page.goto("/en/dashboard");
-      await expandAllStages(page); // the open stages are remembered across languages
+      await expandAllStages(page);
       for (const locale of ["en", "de"]) {
         await page.goto(`/${locale}/dashboard`);
         await expect(page.locator("#stage-1 [aria-expanded]")).toHaveAttribute("aria-expanded", "true");

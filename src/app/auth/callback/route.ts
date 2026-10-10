@@ -6,7 +6,6 @@ import { requestOrigin } from "@/lib/origin";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
-  // Behind the proxy request.url says localhost: redirect to the address the user is on (spec 0020).
   const origin = requestOrigin(request);
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");

@@ -1,4 +1,3 @@
-// Spec 0026 AC-8 and spec 0006 AC-4: the smoke test, against a local server whose answers the test controls.
 import http from "node:http";
 import type { AddressInfo } from "node:net";
 import { afterEach, describe, expect, it } from "vitest";
@@ -10,10 +9,8 @@ type Answers = Record<string, number>;
 let server: http.Server | undefined;
 const requests: string[] = [];
 const methods: string[] = [];
-// every language's page, the unknown route and the dummy login
 const CHECKS_PER_ROUND = LANGUAGES.length + 2;
 
-// Starts a server that answers each path with the status in `answers` (404 for any other path).
 async function serve(answers: Answers, beforeReady = 0) {
   let served = 0;
   server = http.createServer((request, response) => {
@@ -81,7 +78,7 @@ describe("spec 0026 AC-8: the smoke test", () => {
   });
 
   it("retries while the reload is still going, then passes", async () => {
-    const base = await serve(HEALTHY, 2); // the first two rounds fail with 502
+    const base = await serve(HEALTHY, 2);
     const log: string[] = [];
     const attempts = await smoke({ base, timeoutMs: 5_000, log: (line) => log.push(line), ...fast });
     expect(attempts).toBe(3);

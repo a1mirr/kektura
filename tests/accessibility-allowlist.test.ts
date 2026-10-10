@@ -1,5 +1,3 @@
-// Spec 0006 AC-12: how the accessibility allow-list judges what axe found. The browser part is e2e/accessibility.spec.ts;
-// this is the rule that makes the list shrink only.
 import { describe, expect, it } from "vitest";
 import { judge, type Allowed, type Finding } from "../e2e/accessibility";
 import { ALLOWED } from "../e2e/accessibility-allowlist";
@@ -30,7 +28,6 @@ describe("spec 0006: the accessibility allow-list", () => {
 
   it("AC-12: an entry covers the page it names and nothing else", () => {
     expect(judge("account", [finding("label")], [allowed("label")]).unlisted).toHaveLength(1);
-    // another page's entry is neither used up nor stale here
     expect(judge("account", [], [allowed("label")]).stale).toEqual([]);
   });
 

@@ -5,9 +5,6 @@ import { friendButtonClass, type FriendTone } from "./FriendActionButton";
 
 const noSubscription = () => () => {};
 
-// A button that asks first (spec 0024 AC-19): a `<details>`, so the question opens without JavaScript, whose
-// body holds the real form (children) with the confirming button. Nothing runs on the first press. With
-// JavaScript there is also a Cancel button and Escape closes it; without, the first button toggles it.
 export default function FriendConfirm({
   label,
   question,
@@ -22,7 +19,6 @@ export default function FriendConfirm({
   children: ReactNode;
 }) {
   const details = useRef<HTMLDetailsElement>(null);
-  // Cancel does nothing before hydration, so it is only rendered once there is JavaScript.
   const hydrated = useSyncExternalStore(noSubscription, () => true, () => false);
 
   function close() {

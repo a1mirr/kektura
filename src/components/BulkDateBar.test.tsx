@@ -41,7 +41,6 @@ const place = (key: string, stage: number, retiredOn?: string, stamped = true): 
 });
 const extra = (id: number, stamped = true): BulkItem => ({ id: extraItemId(id), kind: "extra", extraId: id, name: `Extra ${id}`, stamped });
 
-// Four stamped places in two stages, a place U that is not stamped yet, an extra stamp and an extra stamp that is not stamped yet.
 const ITEMS: BulkItem[] = [place("A", 1), place("B", 1), place("U", 1, undefined, false), place("C", 1), place("D", 2), extra(7), extra(8, false)];
 
 function Page({ items = ITEMS, rows = items }: { items?: BulkItem[]; rows?: BulkItem[] }) {
@@ -95,7 +94,7 @@ describe("spec 0016: the mode", () => {
     expect(modeButton().getAttribute("aria-pressed")).toBe("false");
     enter();
     expect(bar()).toBeTruthy();
-    expect(modeButton().getAttribute("aria-pressed")).toBe("true"); // still there: pressing it leaves the mode
+    expect(modeButton().getAttribute("aria-pressed")).toBe("true");
   });
 
   it("AC-14: the toolbar sticks to the top, under the map's block from 1024 px, and holds the bar in the mode", () => {
@@ -120,11 +119,11 @@ describe("spec 0016: the mode", () => {
     it("AC-14: hides after scrolling down past the top, shows when scrolling up, ignores a nudge and the very top", () => {
       render(<Page />);
       scrollTo(60);
-      expect(hidden()).toBe(false); // too near the top
+      expect(hidden()).toBe(false);
       scrollTo(400);
       expect(hidden()).toBe(true);
       scrollTo(404);
-      expect(hidden()).toBe(true); // a nudge changes nothing
+      expect(hidden()).toBe(true);
       scrollTo(300);
       expect(hidden()).toBe(false);
     });
@@ -178,7 +177,7 @@ describe("spec 0016: the mode", () => {
       expect(noBar()).toBeNull();
       expect(document.activeElement).toBe(modeButton());
       enter();
-      expect(chosen()).toEqual([]); // not remembered
+      expect(chosen()).toEqual([]);
       click(screen.getByRole("button", { name: "Cancel" }));
     }
   });
@@ -194,7 +193,7 @@ describe("spec 0016: the mode", () => {
     expect(html).not.toContain("Set dates");
     expect(html).not.toContain("Select stage");
     expect(html).not.toContain("checkbox");
-    expect(html).toContain("Expand all"); // the rest of the controls are there
+    expect(html).toContain("Expand all");
   });
 
   it("AC-14: a page without the provider (a friend's page) has no button", () => {
@@ -208,7 +207,7 @@ describe("spec 0016: the mode", () => {
     );
     expect(noModeButton()).toBeNull();
     expect(screen.getByRole("button", { name: "Expand all" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Expand all" }).closest("[class*='sticky']")).toBeNull(); // nothing sticks there
+    expect(screen.getByRole("button", { name: "Expand all" }).closest("[class*='sticky']")).toBeNull();
   });
 });
 
@@ -225,25 +224,25 @@ describe("spec 0016: the bar above the on-screen keyboard", () => {
   afterEach(() => Reflect.deleteProperty(window, "visualViewport"));
 
   it("AC-21: the bar's bottom follows the part of the screen the keyboard covers, and its listeners go with the bar", () => {
-    const { viewport, add, remove } = stubViewport({ height: window.innerHeight }); // no keyboard
+    const { viewport, add, remove } = stubViewport({ height: window.innerHeight });
     render(<Page />);
     enter();
     expect(gap()).toBe("0px");
-    viewport.height = window.innerHeight - 300; // the keyboard opens
+    viewport.height = window.innerHeight - 300;
     act(() => void viewport.dispatchEvent(new Event("resize")));
     expect(gap()).toBe("300px");
-    viewport.offsetTop = 40; // the visual viewport scrolled inside the layout one
+    viewport.offsetTop = 40;
     act(() => void viewport.dispatchEvent(new Event("scroll")));
     expect(gap()).toBe("260px");
     viewport.height = window.innerHeight;
     viewport.offsetTop = 0;
-    act(() => void viewport.dispatchEvent(new Event("resize"))); // the keyboard closes
+    act(() => void viewport.dispatchEvent(new Event("resize")));
     expect(gap()).toBe("0px");
     const listeners = add.mock.calls.map((c) => c[0]).sort();
     expect(listeners).toEqual(["resize", "scroll"]);
-    click(screen.getByRole("button", { name: "Cancel" })); // the bar goes: so do its listeners
+    click(screen.getByRole("button", { name: "Cancel" }));
     expect(remove.mock.calls.map((c) => c[0]).sort()).toEqual(["resize", "scroll"]);
-    expect(new Set(remove.mock.calls.map((c) => c[1]))).toEqual(new Set(add.mock.calls.map((c) => c[1]))); // the very functions that were added
+    expect(new Set(remove.mock.calls.map((c) => c[1]))).toEqual(new Set(add.mock.calls.map((c) => c[1])));
   });
 
   it("AC-21: a pinch-zoomed page (scale above 1.01) gets no gap: the zoomed viewport is not a keyboard", () => {
@@ -285,10 +284,10 @@ describe("spec 0016: Escape", () => {
     click(note);
     expect(note.getAttribute("aria-expanded")).toBe("true");
     act(() => void fireEvent.keyDown(note, { key: "Escape" }));
-    expect(note.getAttribute("aria-expanded")).toBe("false"); // the note is closed...
-    expect(bar()).toBeTruthy(); // ...and the mode and the choice are as they were
+    expect(note.getAttribute("aria-expanded")).toBe("false");
+    expect(bar()).toBeTruthy();
     expect(chosen()).toEqual(["Place A"]);
-    act(() => void fireEvent.keyDown(note, { key: "Escape" })); // nothing open any more: Escape leaves the mode
+    act(() => void fireEvent.keyDown(note, { key: "Escape" }));
     expect(noBar()).toBeNull();
   });
 });
@@ -321,8 +320,8 @@ describe("spec 0016: choosing rows", () => {
     enter();
     choose("Place B");
     click(box("Extra 7"), { shiftKey: true });
-    expect(chosen()).toEqual(["Place B", "Place U", "Place C", "Place D", "Extra 7"]); // also the place that is not stamped
-    click(box("Place C"), { shiftKey: true }); // C is chosen: the range from the anchor (the extra) down to C is cleared
+    expect(chosen()).toEqual(["Place B", "Place U", "Place C", "Place D", "Extra 7"]);
+    click(box("Place C"), { shiftKey: true });
     expect(chosen()).toEqual(["Place B", "Place U"]);
   });
 
@@ -342,8 +341,8 @@ describe("spec 0016: choosing rows", () => {
     choose("Place D");
     click(screen.getByRole("button", { name: "Select stage: Stage 1" }));
     expect(chosen()).toEqual(["Place A", "Place B", "Place U", "Place C", "Place D"]);
-    expect(screen.queryByRole("button", { name: /Stage 3/ })).toBeNull(); // nothing in stage 3: no button
-    expect((box("Extra 7") as HTMLInputElement).checked).toBe(false); // the extras are not a stage's
+    expect(screen.queryByRole("button", { name: /Stage 3/ })).toBeNull();
+    expect((box("Extra 7") as HTMLInputElement).checked).toBe(false);
   });
 
   it("AC-15: outside the mode a stage has no button: the way in is the toolbar's button (AC-14)", () => {
@@ -374,14 +373,14 @@ describe("spec 0016: the bar", () => {
     expect(within(bar()).getByRole("button", { name: "Open calendar" })).toBeTruthy();
     const picker = bar().querySelector("input[type=date]") as HTMLInputElement;
     expect(picker.min).toBe("1938-01-01");
-    expect(picker.max).toBe("2999-01-01"); // what the page gives: tomorrow in UTC
+    expect(picker.max).toBe("2999-01-01");
   });
 
   it("AC-16: Apply is disabled for nothing chosen, and for an empty, incomplete, other-format, impossible or out-of-range date", () => {
     render(<Page />);
     enter();
     type("2026-09-15");
-    expect(apply().disabled).toBe(true); // nothing chosen
+    expect(apply().disabled).toBe(true);
     choose("Place A");
     type("");
     expect(apply().disabled).toBe(true);
@@ -391,7 +390,7 @@ describe("spec 0016: the bar", () => {
     }
     type("2026-09-15");
     expect(apply().disabled).toBe(false);
-    choose("Place A"); // unchosen again
+    choose("Place A");
     expect(apply().disabled).toBe(true);
   });
 
@@ -402,7 +401,7 @@ describe("spec 0016: the bar", () => {
     for (const part of ["2", "20", "2026-0", "2026-09-1", "2026-09-15"]) type(part);
     act(() => void fireEvent.blur(field()));
     act(() => void fireEvent.change(bar().querySelector("input[type=date]")!, { target: { value: "2026-09-16" } }));
-    expect(field().value).toBe("2026-09-16"); // a pick fills the field
+    expect(field().value).toBe("2026-09-16");
     expect(setStampDates).not.toHaveBeenCalled();
     await act(async () => void fireEvent.click(apply()));
     expect(setStampDates).toHaveBeenCalledOnce();
@@ -443,7 +442,7 @@ describe("spec 0016: the bar", () => {
     act(() => void fireEvent.submit(field().closest("form")!));
     expect(setStampDates).toHaveBeenCalledOnce();
     expect(bar().getAttribute("aria-busy")).toBe("true");
-    act(() => void fireEvent.keyDown(window, { key: "Escape" })); // leaving now would hide the answer
+    act(() => void fireEvent.keyDown(window, { key: "Escape" }));
     expect(bar()).toBeTruthy();
     await act(async () => finish({ ok: true }));
     await waitFor(() => expect(noBar()).toBeNull());
@@ -458,7 +457,7 @@ describe("spec 0016: the bar", () => {
     await waitFor(() => expect(noBar()).toBeNull());
     expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
     expect(screen.getByText("3 dates set").getAttribute("aria-live")).toBe("polite");
-    enter(); // a new visit starts clean, without the old message
+    enter();
     expect(chosen()).toEqual([]);
     expect(screen.queryByText("3 dates set")).toBeNull();
   });
@@ -516,12 +515,12 @@ describe("spec 0016: a retired stamp in the choice", () => {
     expect(screen.getByText(/cannot get a date on or after the day it retired: Old house\./)).toBeTruthy();
     expect(apply().disabled).toBe(true);
     expect(field().getAttribute("aria-describedby")).toBe("bulk-conflict");
-    type("2014-11-20"); // the day before it retired
+    type("2014-11-20");
     expect(screen.queryByText(/cannot get a date/)).toBeNull();
     expect(apply().disabled).toBe(false);
     type("2014-11-21");
     expect(apply().disabled).toBe(true);
-    choose("Old house"); // taken out of the choice
+    choose("Old house");
     expect(screen.queryByText(/cannot get a date/)).toBeNull();
     expect(apply().disabled).toBe(false);
     await act(async () => void fireEvent.click(apply()));

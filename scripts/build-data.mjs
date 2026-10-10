@@ -1,11 +1,3 @@
-// Builds DB seed + map geometry from the official MTSZ GPX files (kektura.hu):
-//   okt_bh_<date>.gpx        - stamping points (waypoints)
-//   okt_teljes_bh_<date>.gpx - full route (single track)
-//
-// Usage: node scripts/build-data.mjs <stamps.gpx> <full-route.gpx>
-// Optional 3rd arg: heyjoe.hu okt_pecsetek.gpx (extra, non-official stamps).
-// Writes: supabase/seed.sql, public/data/okt-route.json, public/data/okt-route-detail.json,
-//         public/data/okt-hops.json, public/data/okt-meta.json and, with the 3rd arg, supabase/seed_extra.sql
 import fs from "node:fs";
 import { attr, flatMeters, nearestVertex, readTrack } from "./lib/geo.mjs";
 import { readRetiredStamps, retiredStampsSql } from "./lib/retired-stamps.mjs";
@@ -21,7 +13,6 @@ if (!stampsPath || !routePath) {
 
 // The seed of the last run, read before this one overwrites it: the coordinates a stamp had (a move is checked against them).
 const previousSeed = fs.existsSync("supabase/seed.sql") ? fs.readFileSync("supabase/seed.sql", "utf8") : "";
-// Which MTSZ files this is from: the date in their names (spec 0004 AC-17).
 const mtszFileDate = trailDataDate(stampsPath, routePath);
 
 const decode = (s) =>
@@ -36,11 +27,9 @@ const tag = (src, t) => {
   const m = src.match(new RegExp(`<${t}>([\\s\\S]*?)</${t}>`));
   return m ? decode(m[1].trim()) : null;
 };
-// --- route -----------------------------------------------------------------
 const { points: raw, km } = readTrack(routePath);
 const totalKm = km[km.length - 1];
 
-// Distance along the track and distance from it for a point (stamp / extra stamp).
 const snap = (item) => {
   const { index, distance } = nearestVertex(raw, (p) => flatMeters(item.lng, item.lat, p));
   return { km: km[index], offTrackM: distance };
@@ -81,16 +70,14 @@ function simplify(points, tol) {
 
 function writeRoute(file, tolDeg) {
   const idx = simplify(raw, tolDeg);
-  // [lng, lat, km] with km rounded to 0.01 so the map can cut the line by progress.
   const pts = idx.map((i) => [+raw[i][0].toFixed(5), +raw[i][1].toFixed(5), +km[i].toFixed(2)]);
   fs.mkdirSync("public/data", { recursive: true });
   fs.writeFileSync(file, JSON.stringify({ points: pts }));
   console.log(`${file}: ${pts.length} points, ${(fs.statSync(file).size / 1024).toFixed(0)} KB`);
 }
-writeRoute("public/data/okt-route.json", 0.0003); // ~30 m, whole-trail overview
-writeRoute("public/data/okt-route-detail.json", 0.00003); // ~3 m, zoomed-in view
+writeRoute("public/data/okt-route.json", 0.0003);
+writeRoute("public/data/okt-route-detail.json", 0.00003);
 
-// --- stamping points -------------------------------------------------------
 const stampsXml = fs.readFileSync(stampsPath, "utf8");
 const waypoints = [...stampsXml.matchAll(/<wpt\b([^>]*)>([\s\S]*?)<\/wpt>/g)].map((m) => {
   const desc = tag(m[2], "desc") ?? "";
@@ -105,7 +92,6 @@ const waypoints = [...stampsXml.matchAll(/<wpt\b([^>]*)>([\s\S]*?)<\/wpt>/g)].ma
   };
 });
 
-// Snap each point to the nearest track vertex to get its distance from Írott-kő.
 for (const w of waypoints) Object.assign(w, snap(w));
 waypoints.sort((a, b) => a.km - b.km || a.code?.localeCompare(b.code ?? "") || 0);
 
@@ -120,17 +106,16 @@ const placeKey = (code) =>
   code.replace(/^(OKTPH_\d+(?:_[BC])?(?:_DDKPH_\d+)?)(?:_\d+)?$/, "$1");
 console.log(`places: ${new Set(waypoints.map((w) => placeKey(w.code))).size}`);
 
-// Stage numbers (official 27 sections, MTSZ table): "<stage>.<n>" labels. A stamp belongs to the
-// stage it ends (plus Írott-kő and Nagymaros, the stage starts that follow no hop).
+// A stamp belongs to the stage it ends (plus Írott-kő and Nagymaros, the stage starts that follow no hop).
 const stagesFile = JSON.parse(fs.readFileSync("scripts/data/okt-stages.json", "utf8"));
-const placeNames = new Map(); // place_key -> name
+const placeNames = new Map();
 for (const w of waypoints) if (!placeNames.has(placeKey(w.code))) placeNames.set(placeKey(w.code), w.name);
 const keyByName = new Map();
 for (const [key, name] of placeNames) {
   if (keyByName.has(name)) throw new Error("two places share the name " + name);
   keyByName.set(name, key);
 }
-const stageOf = new Map(); // place_key -> { stage, n }
+const stageOf = new Map();
 for (const st of stagesFile.stages) {
   st.places.forEach((name, i) => {
     const key = keyByName.get(name);
@@ -143,12 +128,12 @@ const unassigned = [...placeNames.keys()].filter((k) => !stageOf.has(k));
 if (unassigned.length) throw new Error("places without a stage: " + unassigned.join(", "));
 console.log(`stages: ${stagesFile.stages.length}, places with a stage: ${stageOf.size}`);
 
-// Hops between neighbouring stamping places (MTSZ table): length, ascent/descent walking
-// west->east, time forward/back in minutes. Used by the map's "route between two stamps" mode.
+// Hops between neighbouring stamping places (MTSZ table): length, ascent/descent walking west->east, time
+// forward/back in minutes.
 // The Visegrád -> Nagymaros ferry crossing has no table row: distance from the track, no times.
-// A place sits at its furthest-along variant: the MTSZ table lengths measure to it (e.g. OKTPH_05 ->
-// OKTPH_06 is 12.4 km = to the second variant of 06, not the first).
-const placeKm = new Map(); // place_key -> km along the track
+// A place sits at its furthest-along variant: the MTSZ table lengths measure to it (e.g. OKTPH_05 -> OKTPH_06 is 12.4
+// km = to the second variant of 06, not the first).
+const placeKm = new Map();
 for (const w of waypoints) placeKm.set(placeKey(w.code), Math.max(placeKm.get(placeKey(w.code)) ?? 0, w.km));
 const hopList = [];
 const keyOf = (name) => {
@@ -179,8 +164,6 @@ const stampDates = readStampDates();
 const unknownDates = stampDates.filter((e) => !waypoints.some((w) => w.code === e.code));
 if (unknownDates.length) throw new Error("okt-stamp-dates.json has codes the stamps file lacks: " + unknownDates.map((e) => e.code).join(", "));
 
-// Moved stamps (spec 0004 AC-16): a coordinate that changed by more than 100 m since the last seed needs an entry with the day and the
-// publication, and an entry has to be a real one.
 const stampMoves = readStampMoves();
 const moveErrors = moveProblems(stampMoves, waypoints.map((w) => w.code), new Date().toISOString().slice(0, 10));
 if (moveErrors.length) throw new Error("okt-stamp-dates.json `moves`:\n  " + moveErrors.join("\n  "));
@@ -196,7 +179,6 @@ if (unexplained.length) {
   );
 }
 
-// Retired stamps (spec 0004 AC-14): kept as rows, so what they point at must exist and their code must not be a current stamp's.
 const retired = readRetiredStamps();
 const currentKeys = new Set(waypoints.map((w) => placeKey(w.code)));
 for (const r of retired) {
@@ -207,7 +189,6 @@ for (const r of retired) {
 }
 
 const q = (s) => `'${String(s).replace(/'/g, "''")}'`;
-// Temp table of the codes a seed file contains, so it can drop rows the source no longer has.
 const codesTable = (codes) =>
   `create temporary table seed_codes on commit drop as\n  select unnest(array[${codes.map(q).join(", ")}]) as code;`;
 const rows = waypoints.map(
@@ -251,10 +232,6 @@ console.log(`supabase/seed.sql: ${waypoints.length} rows`);
 fs.writeFileSync("public/data/okt-meta.json", trailMetaJson(mtszFileDate));
 console.log(`public/data/okt-meta.json: MTSZ file of ${mtszFileDate}`);
 
-// --- extra (non-official) stamps -------------------------------------------
-// Optional 3rd arg: heyjoe.hu "okt_pecsetek.gpx" (community list: castles, museums, other
-// hiking movements' stamps near the trail). Everything that is not within 60 m of an
-// official point becomes an extra stamp.
 const extraPath = process.argv[4];
 if (extraPath) {
   const extras = [...fs.readFileSync(extraPath, "utf8").matchAll(/<wpt\b([^>]*)>([\s\S]*?)<\/wpt>/g)]

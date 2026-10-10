@@ -1,6 +1,4 @@
-// Spec 0004 AC-15 (a stamp that becomes retired keeps every user's stamp), spec 0024 AC-26 (a friend's page counts no retired
-// stamp) and the rules of the retired columns, against the real local database (`npm run testdb:start`). Skips itself when it
-// isn't running (it fails where CI requires one, `REQUIRE_LOCAL_DB`, spec 0007 AC-12); CI's end-to-end job runs it. Every drill is one transaction that is rolled back.
+// Every drill is one transaction that is rolled back.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import { beforeAll, describe, expect, it } from "vitest";
@@ -8,7 +6,6 @@ import { databaseDecision, requireDatabase } from "../e2e/local-db";
 
 const seed = fs.readFileSync(new URL("../supabase/seed.sql", import.meta.url), "utf8");
 
-// Runs a script in one psql session; throws on the first error.
 function run(sql: string): string[] {
   return execFileSync("docker", ["exec", "-i", "supabase_db_kektura", "psql", "-U", "postgres", "-At", "-v", "ON_ERROR_STOP=1", "-q"], {
     input: sql,
@@ -33,7 +30,6 @@ describe("spec 0004: a stamp that becomes retired", () => {
   it("AC-15: keeps every user's stamp on it, with its date and id, and does not move them to another variant of the place", async (ctx) => {
     requireDatabase(ctx, RELATIONS);
     const { retiredStampsSql } = (await import("../scripts/lib/retired-stamps.mjs")) as { retiredStampsSql: (entries: unknown[]) => string };
-    // The new source no longer lists OKTPH_03_1 (a variant of Kőszeg, which keeps OKTPH_03_2) and the retired file now does.
     const block = retiredStampsSql([
       { code: "OKTPH_03_1", name: "Kőszeg (old)", after_place_key: "OKTPH_02", retired_on: "2020-01-01", replaced_by: "OKTPH_03", assumed: [] },
     ]);
@@ -59,7 +55,7 @@ describe("spec 0004: a stamp that becomes retired", () => {
       ].join("\n"),
     );
     const get = (name: string) => lines.find((l) => l.startsWith(`${name}:`))!.slice(name.length + 1);
-    expect(get("id_after")).toBe(`${get("id_before")},2020-01-01,OKTPH_03_1`); // the same row, now retired, its own key
+    expect(get("id_after")).toBe(`${get("id_before")},2020-01-01,OKTPH_03_1`);
     expect(get("stamps")).toBe("OKTPH_03_1@2019-05-01"); // the stamp stayed, and was not moved to OKTPH_03_2
     expect(get("places")).toBe("219"); // 220 current rows minus the one that retired
   });
@@ -113,7 +109,6 @@ describe("spec 0024: what a friend sees of retired stamps", () => {
         createUser(1),
         createUser(2),
         `insert into public.friendships (user_id, friend_id, status, user_is_sharing, friend_is_sharing) values ('${user(1)}', '${user(2)}', 'accepted', true, true);`,
-        // the friend collected the retired stamp (before it retired) and one current stamp
         `insert into public.user_stamps (user_id, checkpoint_id, stamped_on) select '${user(2)}', id, '2014-06-01' from public.checkpoints where code in ('OKT_RETIRED_NYIRJESI', 'OKTPH_102_1');`,
         `select set_config('request.jwt.claims', '{"sub":"${user(1)}","role":"authenticated"}', true);`,
         "select 'stamps:' || coalesce(string_agg(c.code, ',' order by c.code), '') from public.get_friend_stamps() f join public.checkpoints c on c.id = f.checkpoint_id;",
@@ -122,7 +117,7 @@ describe("spec 0024: what a friend sees of retired stamps", () => {
       ].join("\n"),
     );
     const get = (name: string) => lines.find((l) => l.startsWith(`${name}:`))!.slice(name.length + 1);
-    expect(get("stamps")).toBe("OKTPH_102_1"); // never the retired one
+    expect(get("stamps")).toBe("OKTPH_102_1");
     expect(get("waived")).not.toContain("RETIRED");
   });
 });

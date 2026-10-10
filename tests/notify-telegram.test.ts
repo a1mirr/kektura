@@ -1,5 +1,3 @@
-// Spec 0026 AC-9: the failure message to the developer, against a fake Telegram API. The request URL contains
-// the bot token, so what must never appear in any output is the token itself.
 import { spawn } from "node:child_process";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
@@ -39,7 +37,7 @@ describe("spec 0026 AC-9: the failure message", () => {
   it("names the commit, the failed step and the run", () => {
     const text = failureMessage({ sha: SHA, runUrl: RUN, outcomes: { plan: "success", migrate: "failure", push: "skipped", smoke: "skipped" } });
     expect(text).toContain("0123456");
-    expect(text).not.toContain(SHA); // short sha only
+    expect(text).not.toContain(SHA);
     expect(text).toContain("applying migrations");
     expect(text).toContain(RUN);
     expect(text).toMatch(/Nothing was rolled back by itself/);

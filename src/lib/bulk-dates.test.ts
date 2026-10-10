@@ -95,8 +95,8 @@ describe("spec 0016: set dates (logic)", () => {
     });
 
     it("AC-15: a shift-click selects the range from the anchor to the row, keeping the rest, and the row becomes the anchor", () => {
-      const start = clickRow(ITEMS, new Set(["p:A"]), "p:A", "p:C", false); // A and C chosen
-      const ranged = clickRow(ITEMS, start.selected, start.anchor, "e:1", true); // from C to the extra
+      const start = clickRow(ITEMS, new Set(["p:A"]), "p:A", "p:C", false);
+      const ranged = clickRow(ITEMS, start.selected, start.anchor, "e:1", true);
       expect([...ranged.selected].sort()).toEqual(["e:1", "p:A", "p:C", "p:D"]);
       expect(ranged.anchor).toBe("e:1");
     });
@@ -135,7 +135,7 @@ describe("spec 0016: set dates (logic)", () => {
       expect(retiredConflicts(chosen, "2014-06-01").map((i) => i.name)).toEqual(["R1"]);
       expect(retiredConflicts(chosen, "2014-05-31")).toEqual([]);
       expect(retiredConflicts(chosen, "2021-01-01").map((i) => i.name)).toEqual(["R1", "R2"]);
-      expect(retiredConflicts(chosen, "2014-6-1")).toEqual([]); // not a date: no conflict to name
+      expect(retiredConflicts(chosen, "2014-6-1")).toEqual([]);
     });
 
     describe("canApply", () => {

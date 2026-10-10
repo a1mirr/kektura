@@ -1,11 +1,3 @@
-// Checks the Telegram setup of the feedback form (spec 0017 AC-9) and whether the webhook of the flag commands is
-// registered (spec 0035 AC-26).
-//
-//   npm run telegram:check                   verify the token, send a test message to TELEGRAM_CHAT_ID
-//   npm run telegram:check -- --find-chat-id list the chats that recently wrote to the bot
-//
-// Reads TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID from .env.local (or the environment). The request URL
-// contains the token, so it is never printed: only what Telegram answers.
 try {
   process.loadEnvFile(".env.local");
 } catch {
@@ -17,8 +9,6 @@ const chatId = process.env.TELEGRAM_CHAT_ID?.trim();
 const base = process.env.TELEGRAM_API_BASE?.trim() || "https://api.telegram.org";
 const findChatId = process.argv.includes("--find-chat-id");
 
-// A problem to tell the user about. Thrown, not process.exit(): on Windows, exiting while a fetch
-// connection is still closing crashes Node with a libuv assertion.
 class Problem extends Error {}
 
 async function call(method, body = {}) {
@@ -31,7 +21,6 @@ async function call(method, body = {}) {
       signal: AbortSignal.timeout(10_000),
     });
   } catch (error) {
-    // The error's message can contain the request URL, so only its name is shown.
     throw new Problem(`Could not reach Telegram (${error instanceof Error ? error.name : "error"}). Check the network.`);
   }
   const answer = await response.json().catch(() => ({}));

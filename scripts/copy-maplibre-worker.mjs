@@ -1,6 +1,5 @@
-// MapLibre's inline worker breaks under Turbopack ("Worker failed to load"), so the
-// worker files are served as static assets and wired up with setWorkerUrl().
-// Runs before dev/build so public/maplibre always matches the installed version.
+// MapLibre's inline worker breaks under Turbopack ("Worker failed to load"), so the worker files are served as static
+// assets and wired up with setWorkerUrl().
 import fs from "node:fs";
 
 const src = "node_modules/maplibre-gl/dist";

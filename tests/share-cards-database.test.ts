@@ -1,6 +1,3 @@
-// Spec 0039 AC-1, AC-2, AC-3, AC-4, AC-7, AC-8, AC-12 against the real local database (`npm run testdb:start`).
-// The tests skip themselves when it isn't running, and fail where CI requires it (`REQUIRE_LOCAL_DB`, spec 0007 AC-12). They talk to PostgREST the way a browser could, as
-// signed-in users and as an anonymous visitor, so they prove what a malicious client can and cannot do.
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { beforeAll, describe, expect, it } from "vitest";
@@ -26,7 +23,6 @@ async function signUp(fullName?: string): Promise<Person> {
   return { client, id: data.user.id };
 }
 
-// A valid card's arguments; `over` changes some.
 const args = (over: Record<string, unknown> = {}) => ({
   p_show_name: false,
   p_stamps_done: 87,
@@ -50,7 +46,7 @@ let ana: Person;
 let bob: Person;
 
 beforeAll(async () => {
-  if (databaseDecision(RELATIONS).action !== "run") return; // the tests skip or fail, whichever the environment asks for
+  if (databaseDecision(RELATIONS).action !== "run") return;
   local = localSupabase();
   [ana, bob] = [await signUp("Ana Maria Kovacs"), await signUp()];
 }, 60_000);
@@ -76,7 +72,6 @@ describe("spec 0039: share cards database rules", { timeout: 30_000 }, () => {
     expect(psql(`select coalesce(display_name, 'NULL') from public.share_cards where user_id = '${cleo.id}'`)).toBe("NULL");
     await create(cleo, { p_show_name: true });
     expect(psql(`select display_name from public.share_cards where user_id = '${cleo.id}' and display_name is not null`)).toBe("Cleo");
-    // A later rename changes nothing on the card.
     await cleo.client.rpc("set_display_name", { name: "Renamed" });
     expect(psql(`select display_name from public.share_cards where user_id = '${cleo.id}' and display_name is not null`)).toBe("Cleo");
   });
@@ -160,7 +155,7 @@ describe("spec 0039: share cards database rules", { timeout: 30_000 }, () => {
     const bad: Record<string, unknown>[] = [
       { p_percent: 101 },
       { p_percent: -1 },
-      { p_stamps_done: 200 }, // more than the total
+      { p_stamps_done: 200 },
       { p_stamps_total: 0 },
       { p_km_done: -5 },
       { p_stages_done: 28 },
@@ -189,7 +184,6 @@ describe("spec 0039: share cards database rules", { timeout: 30_000 }, () => {
     expect(answers.filter((a) => a === "ok")).toHaveLength(20);
     expect(answers.filter((a) => a === "limit")).toHaveLength(10);
     expect(cardsOf(hal)).toBe(20);
-    // Another user is not held back by it.
     expect(await create(bob)).toBe("ok");
   });
 

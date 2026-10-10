@@ -1,6 +1,3 @@
-// Spec 0038: the landing page's gallery. The pictures themselves (present, the right size, light enough), and what
-// `npm run screenshots` does around them, without a browser: the demo dataset, the checks that stop a bad run, and that a stopped
-// run writes nothing.
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -35,7 +32,7 @@ describe("spec 0038: the pictures", () => {
   it("AC-9: all the pictures together stay under the budget", () => {
     const total = SCREENSHOTS.reduce((sum, name) => sum + read(name).length, 0);
     expect(total, `${total} bytes, the budget is ${SCREENSHOTS_BUDGET_BYTES}`).toBeLessThanOrEqual(SCREENSHOTS_BUDGET_BYTES);
-    expect(SCREENSHOTS_BUDGET_BYTES).toBeLessThanOrEqual(3_000_000); // a heavier gallery is a decision for the spec, not for a test
+    expect(SCREENSHOTS_BUDGET_BYTES).toBeLessThanOrEqual(3_000_000);
   });
 
   it("AC-9: a file that is not a PNG is refused by the size check", () => {
@@ -77,8 +74,8 @@ describe("spec 0038: the demo dataset", () => {
       expect(statement, statement).toContain(`(select id from auth.users where email = '${DEMO_EMAIL}')`);
       expect(statement, statement).toMatch(/^(delete from public\.user_(extra_)?stamps where user_id = |insert into public\.user_(extra_)?stamps )/);
     }
-    expect(statements.slice(0, 2).every((s) => s.startsWith("delete from"))).toBe(true); // it starts from nothing
-    expect(sql).toContain("retired_on is null"); // a current stamp, never a retired one
+    expect(statements.slice(0, 2).every((s) => s.startsWith("delete from"))).toBe(true);
+    expect(sql).toContain("retired_on is null");
   });
 
   it("AC-10: the walk is the first three stages, the start of the fourth and two extra stamps, each on a past day", () => {

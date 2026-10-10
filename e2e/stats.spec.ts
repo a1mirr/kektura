@@ -5,11 +5,9 @@ import type en from "../messages/en.json";
 import { routing } from "../src/i18n/routing";
 import { expectNoSidewaysScroll, openAccountMenu, seedStatsWalk, signInAsNewUser, stampPlacesOn, stampStagesOn, stat } from "./helpers";
 
-// The expected texts are read from the language's own messages file, so a new language needs no edit here.
 const messages = (locale: string): typeof en => JSON.parse(fs.readFileSync(path.join(process.cwd(), "messages", `${locale}.json`), "utf8"));
 
-// Spec 0037: the stats page and its monthly chart. Recharts has no layout in jsdom, so the chart is checked here, in a browser.
-// The walk of `seedStatsWalk` has six months (Dec 2025 to May 2026); see helpers.ts for what each holds.
+// Recharts has no layout in jsdom, so the chart is checked here, in a browser.
 
 const bars = (page: Page) => page.locator("[data-month]");
 const bar = (page: Page, name: RegExp | string) => page.getByRole("button", { name });
@@ -70,7 +68,6 @@ test.describe("spec 0037: the stats page", () => {
     await expect(stat(page, "Kilometres")).toHaveText(dashboard.km);
     await expect(stat(page, "Remaining, km")).toHaveText(dashboard.remaining);
 
-    // the km of the six tooltips
     let sum = 0;
     for (const { name } of walkedMonths) {
       await bar(page, new RegExp(`^${name}:`)).hover();
@@ -86,7 +83,7 @@ test.describe("spec 0037: the stats page", () => {
     await openStats(page);
     await expect(stat(page, "Completed stages")).toHaveText("6 / 27");
     await bars(page).first().hover();
-    await expect(tooltip(page)).toContainText("Stages 1-6"); // a run of six is abbreviated
+    await expect(tooltip(page)).toContainText("Stages 1-6");
   });
 
   test("AC-4, AC-5, AC-6, AC-7, AC-11, AC-13: every month has a bar, and a hover tells its stamps, km and stages", async ({ page }) => {
@@ -94,20 +91,18 @@ test.describe("spec 0037: the stats page", () => {
     seedStatsWalk(email);
     await openStats(page);
 
-    await expect(bars(page)).toHaveCount(6); // the empty months are there too
+    await expect(bars(page)).toHaveCount(6);
     await expect(page.getByRole("group", { name: "Stamps per month" }).getByRole("button")).toHaveCount(6);
     await expect(tooltip(page)).toHaveCount(0);
     for (const { name, text } of walkedMonths) {
       await bar(page, new RegExp(`^${name}:`)).hover();
       await expect.poll(() => tooltip(page).innerText(), { message: name }).toBe(text);
     }
-    // a click on the month leaves what hovering opened; the mouse leaving closes it
     await bar(page, /^May 2026:/).click();
     await expect(tooltip(page)).toContainText("May 2026");
     await page.mouse.move(0, 0);
     await expect(tooltip(page)).toHaveCount(0);
 
-    // a bar's height is its month's stamps: January (2) is twice December (1); an empty month has a faint mark instead of a bar
     const barHeight = async (name: string) =>
       (await bar(page, new RegExp(`^${name}:`)).locator("rect[fill='#2563eb']").boundingBox())!.height;
     expect((await barHeight("January 2026")) / (await barHeight("December 2025"))).toBeCloseTo(2, 1);
@@ -123,7 +118,6 @@ test.describe("spec 0037: the stats page", () => {
     await openStats(page);
     expect(await page.locator("[data-tick=month]").allTextContents()).toEqual(["Dec", "Jan", "Feb", "Mar", "Apr", "May"]);
     expect(await page.locator("[data-tick=year]").allTextContents()).toEqual(["2025", "2026"]);
-    // the year sits under its month
     const dec = await page.locator("[data-tick=month]").first().boundingBox();
     const year = await page.locator("[data-tick=year]").first().boundingBox();
     expect(year!.y).toBeGreaterThan(dec!.y);
@@ -138,7 +132,6 @@ test.describe("spec 0037: the stats page", () => {
       await page.keyboard.press("Tab");
       expect(await page.evaluate(() => document.activeElement?.hasAttribute("data-month"))).toBe(true);
     }).toPass();
-    // the first stop is the newest month, and focus alone shows its tooltip
     await expect(page.locator("[data-month='2026-05']")).toBeFocused();
     await expect(tooltip(page)).toContainText("May 2026");
     await page.keyboard.press("ArrowLeft");
@@ -146,7 +139,7 @@ test.describe("spec 0037: the stats page", () => {
     await expect(tooltip(page)).toContainText("April 2026");
     await page.keyboard.press("Home");
     await expect(tooltip(page)).toContainText("December 2025");
-    await page.keyboard.press("ArrowLeft"); // already the first
+    await page.keyboard.press("ArrowLeft");
     await expect(page.locator("[data-month='2025-12']")).toBeFocused();
     await page.keyboard.press("End");
     await expect(page.locator("[data-month='2026-05']")).toBeFocused();
@@ -157,7 +150,6 @@ test.describe("spec 0037: the stats page", () => {
     await expect(tooltip(page)).toContainText("May 2026");
     await page.keyboard.press("Space");
     await expect(tooltip(page)).toHaveCount(0);
-    // Tab leaves the chart: one stop for all the months
     await page.keyboard.press("Tab");
     expect(await page.evaluate(() => document.activeElement?.hasAttribute("data-month"))).toBe(false);
   });
@@ -174,25 +166,23 @@ test.describe("spec 0037: the stats page", () => {
 
   test("AC-10: a long walk scrolls inside the chart's own frame, not the page, at 320 and 375 px, and names every month", async ({ page }) => {
     const email = await signInAsNewUser(page);
-    stampPlacesOn(email, { OKTPH_01_DDKPH_01: "2025-01-05", OKTPH_02: "2026-02-10" }); // 14 months
+    stampPlacesOn(email, { OKTPH_01_DDKPH_01: "2025-01-05", OKTPH_02: "2026-02-10" });
     await page.setViewportSize({ width: 1280, height: 900 });
     await openStats(page);
     await expect(page.locator("[data-tick=month]")).toHaveCount(14);
-    // wide enough: no scrolling at all
     expect(await frame(page).evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
 
     for (const width of [375, 320]) {
       await page.setViewportSize({ width, height: 800 });
-      await openStats(page); // loaded at this width: the chart opens on its newest months
+      await openStats(page);
       await expectNoSidewaysScroll(page, `sideways scroll at ${width} px on /en/stats`);
       const f = await frame(page).evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth, left: el.scrollLeft }));
       expect(f.scroll, `the frame scrolls at ${width} px`).toBeGreaterThan(f.client);
-      // opened on the newest months, which is where the eye goes; the oldest are a scroll away
       expect(f.left).toBeGreaterThan(0);
       const newest = (await bars(page).last().boundingBox())!;
       const box = (await frame(page).boundingBox())!;
       expect(newest.x + newest.width).toBeLessThanOrEqual(box.x + box.width + 1);
-      expect(await page.locator("[data-tick=month]").allTextContents()).toHaveLength(14); // no label dropped
+      expect(await page.locator("[data-tick=month]").allTextContents()).toHaveLength(14);
       for (const label of await page.locator("[data-tick=month]").allTextContents()) expect(label.trim()).not.toBe("");
       await frame(page).evaluate((el) => (el.scrollLeft = 0));
       await expect(bar(page, /^January 2025:/)).toBeInViewport();

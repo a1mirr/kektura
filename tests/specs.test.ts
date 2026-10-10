@@ -1,13 +1,10 @@
-// specs/README.md rules (spec 0034): the index lists every spec with its real status, spec numbers are unique, specs
-// are written in English, tasks are GitHub issues (the repository has no tasks/ folder), and the rules are written
-// down where authors, the reviewer and the hook look.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const specsDir = new URL("../specs/", import.meta.url);
-const SPEC_FOLDERS = ["product", "project"]; // spec 0034 AC-1: the only places a spec lives
+const SPEC_FOLDERS = ["product", "project"];
 const baseName = (path: string) => path.slice(path.lastIndexOf("/") + 1);
 const read = (dir: URL, name: string) => fs.readFileSync(new URL(name, dir), "utf8");
 const readRoot = (path: string) => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -17,7 +14,7 @@ const specFiles = SPEC_FOLDERS.flatMap((folder) =>
     .readdirSync(new URL(`${folder}/`, specsDir))
     .filter((name) => /^\d{4}-.+\.md$/.test(name))
     .map((name) => `${folder}/${name}`),
-); // "product/0001-progress.md": relative to specs/
+);
 
 const indexOf = (readme: string) =>
   new Map(
@@ -214,8 +211,6 @@ describe("spec 0034: the rules are written where authors and the reviewer look",
   });
 });
 
-// Spec 0034 AC-9: what can be checked mechanically about "a spec mirrors the code". Whether an AC is really
-// satisfied only a person or the reviewer can tell; these catch the drift that leaves a trace.
 describe("spec 0034: specs and the repository agree", () => {
   const skipDirs = new Set(["node_modules", ".git", ".next", ".next-test", ".next-e2e", ".claude", "playwright-report", "test-results"]);
   const walk = (dir: string): string[] =>
@@ -298,9 +293,6 @@ describe("spec 0034: manual checks", () => {
   });
 });
 
-// Spec 0034 AC-9: a spec is cited by number or by its real path. Every path that names a spec in a tracked text file,
-// and every relative Markdown link, points at a file that exists; the old flat path (before the specs moved into
-// product/ and project/) is not used anywhere. Fixtures with made-up names are not allowed either.
 describe("spec 0034: spec paths and links resolve", () => {
   const root = new URL("..", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1").replace(/\/$/, "");
   const tracked = execFileSync("git", ["ls-files", "-z"], { cwd: root, encoding: "utf8" })

@@ -8,7 +8,6 @@ import { deleteAccountAction } from "./actions";
 const errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
 afterEach(() => vi.clearAllMocks());
 
-// Stand-in for the Supabase client; `calls` records the order of rpc and signOut.
 function useSupabase({
   user = { id: "user-1", email: "hiker@example.com" } as { id: string; email: string } | null,
   rpcError = null as unknown,

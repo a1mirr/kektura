@@ -54,7 +54,7 @@ test.describe("spec 0017: feedback form", () => {
     const left = 2000 - [...prefix].length;
     await page.goto("/en/feedback?stamp=OKTPH_84_B");
     await expect(page.locator("[data-feedback-stamp]")).toHaveText("About the stamp Lokó-pihenő (OKTPH_84_B)");
-    await expect(page.getByText(`0 / ${left}`)).toBeVisible(); // the line takes its share of the 2000 characters
+    await expect(page.getByText(`0 / ${left}`)).toBeVisible();
     const box = page.getByLabel("Your message");
     await expect(async () => {
       await box.fill(words);
@@ -82,7 +82,6 @@ test.describe("spec 0017: feedback form", () => {
   });
 });
 
-// The rules live in the database (migration 0008), so they are checked there, as an anonymous caller.
 test.describe("spec 0017 AC-2, AC-3 and spec 0014: database rules", () => {
   test("anonymous feedback is accepted", async ({ request }) => {
     const marker = randomUUID();

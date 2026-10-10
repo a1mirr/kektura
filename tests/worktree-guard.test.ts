@@ -1,13 +1,11 @@
-// Spec 0021 AC-7: Claude changes files in a linked worktree on a topic branch, never in the primary checkout or on
-// main. The decision is `decide()` in .claude/hooks/worktree-guard.mjs; these tests run it against real temporary
-// repositories (a primary checkout and linked worktrees), because "primary or linked" is what git says, not a path.
+// Run against real temporary repositories (a primary checkout and linked worktrees), because "primary or linked" is
+// what git says, not a path.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
-// Real git repositories: slow when the whole suite runs in parallel.
 vi.setConfig({ testTimeout: 60_000, hookTimeout: 60_000 });
 import { decide, gitInvocation, toNative } from "../.claude/hooks/worktree-guard.mjs";
 
@@ -18,10 +16,10 @@ const git = (cwd: string, ...args: string[]) => {
 };
 
 let root: string;
-let primary: string; // on branch `base`
-let topic: string; // a linked worktree on `topic`
-let onMain: string; // a linked worktree on `main`
-let other: string; // an unrelated repository
+let primary: string;
+let topic: string;
+let onMain: string;
+let other: string;
 
 beforeAll(() => {
   root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "worktree-guard-")));
@@ -179,7 +177,7 @@ describe("spec 0021: work happens in a linked worktree", () => {
       }
       expect(decide(bash("git merge origin/main", onMain), { project: topic })).toMatch(/is on main/);
       expect(decide(bash("git pull", onMain), { project: topic })).toMatch(/is on main/);
-      expect(decide(bash("git merge --ff-only origin/main", primary), { project: topic })).toMatch(/primary checkout/); // primary is on a topic here
+      expect(decide(bash("git merge --ff-only origin/main", primary), { project: topic })).toMatch(/primary checkout/);
     });
   });
 
@@ -205,7 +203,6 @@ describe("spec 0021: work happens in a linked worktree", () => {
       const settings = JSON.parse(read(".claude/settings.json"));
       const entry = settings.hooks.PreToolUse.find((h: { hooks: { command: string }[] }) => h.hooks.some((x) => x.command.includes("worktree-guard.mjs")));
       expect(entry.matcher).toBe("Edit|Write|NotebookEdit|Bash|PowerShell");
-      // AC-9: Claude Code's own worktree tool starts from the remote's default branch, not from the checkout's HEAD.
       expect(settings.worktree.baseRef).toBe("fresh");
       const script = path.resolve(new URL("../.claude/hooks/worktree-guard.mjs", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1"));
       const run = spawnSync("node", [script], { input: "not json", encoding: "utf8" });
@@ -227,7 +224,7 @@ describe("spec 0021: work happens in a linked worktree", () => {
 
 describe("spec 0021: AC-9 a new branch starts from a fresh origin/main", () => {
   let base: string;
-  let clone: string; // the session's checkout, with origin
+  let clone: string;
   let elsewhere: string; // someone else's clone, to move origin/main behind this one's back
   const create = (command: string) => decide(bash(command, clone), { project: clone });
 

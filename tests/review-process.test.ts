@@ -1,5 +1,3 @@
-// Spec 0022: every change is reviewed by an agent with no context before it is merged. The process lives in
-// prose and in an agent definition, so these tests pin that it is written down where people and agents look.
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 
@@ -79,6 +77,15 @@ describe("spec 0022: fresh-context review", () => {
       expect(read("CLAUDE.md")).toMatch(/a migration in the diff that the code running in production could not live with while it is applied/);
     });
 
+    it("checks that comments earn their place, and its brief carries the Comments rule of CLAUDE.md verbatim", () => {
+      const rule = /^## Comments\r?\n([\s\S]+?)\r?\n\r?\n## Gotchas/m.exec(read("CLAUDE.md"))?.[1];
+      expect(rule, "the Comments section of CLAUDE.md").toMatch(/strictly FORBIDDEN/);
+      expect(body).toContain(rule!);
+      expect(body).toMatch(/A comment that has not earned its place/);
+      expect(read("CLAUDE.md")).toMatch(/a comment that has not earned its place \(the Comments section below\)/);
+      expect(read("specs/project/0022-fresh-context-review.md")).toMatch(/comments that have not earned their place/);
+    });
+
     it("checks spec hygiene and reads (does not run) the E2E specs", () => {
       expect(body).toMatch(/Spec hygiene/);
       expect(body).toMatch(/marked `Removed`|instead of marked `Removed`/);
@@ -143,8 +150,6 @@ describe("spec 0022: fresh-context review", () => {
   });
 });
 
-// Spec 0018 AC-7: what users can see always reaches the changelog page. Whether an entry exists for a given
-// change can't be computed, so the rule is written where authors and reviewers look; the review checks it.
 describe("spec 0018: the changelog rule", () => {
   it("AC-7: CLAUDE.md asks for an entry, in every language, in the same pull request", () => {
     const claude = read("CLAUDE.md");
@@ -181,7 +186,6 @@ describe("spec 0007: CI is the authority for the end-to-end tests", () => {
     expect(read("specs/README.md")).toMatch(/CI's "End-to-end tests" job is the authority and must be green on the pull request/);
     expect(read("specs/README.md")).toMatch(/run `npm run e2e` locally only to reproduce a failure/);
     expect(read(".github/pull_request_template.md")).toMatch(/^- \[ \] .*CI's end-to-end job is green \(`npm run e2e` locally only to reproduce a failure\)/m);
-    expect(read(".claude/hooks/stop-check.mjs")).toMatch(/left to CI, which is the authority; `npm run e2e` only to reproduce a failure/);
   });
 
   it("AC-8: nothing still tells the author to run the end-to-end tests before committing", () => {

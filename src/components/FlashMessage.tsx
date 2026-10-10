@@ -2,9 +2,8 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 
-// The one-line answer at the top of the Friends page: "done" (role=status, announced politely) or a failure
-// (role=alert). It scrolls into view, since on a phone the top may be above what is on screen after an action
-// at the bottom of a long list (spec 0024 AC-18).
+// It scrolls into view, since on a phone the top may be above what is on screen after an action at the bottom of a
+// long list.
 export default function FlashMessage({ kind, children }: { kind: "ok" | "error"; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   // Without a dependency list on purpose: the page re-renders this with every answer, also with the same text twice.

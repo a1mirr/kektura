@@ -1,4 +1,3 @@
-// What the dashboard hands the map, and the GeoJSON built from it (spec 0003).
 import type { Feature, FeatureCollection, Point } from "geojson";
 import { placeKeyOf, type Checkpoint } from "./progress";
 
@@ -9,16 +8,13 @@ export type MapPoint = {
   lng: number;
   km: number;
   stamped: boolean;
-  // Spec 0003 AC-22: what the popup adds under the km for a new stamp (the date it is required from, whether it is waived).
   note?: string;
-  // Spec 0003 AC-26: the stamp moved within the last 180 days (spec 0001 AC-29): the note its popup shows, and the ring its marker gets.
   movedNote?: string;
-  // The stamp's own code, for the "Report a wrong location" link (spec 0003 AC-27); null for a row without one.
   code: string | null;
 };
 
-// The map's points: one per current stamp that has coordinates. A retired stamp is never one, even when its row has coordinates
-// (spec 0003 AC-23): a stamp that no longer exists is not somewhere to go, to route to or to stamp from the map.
+// A retired stamp is never one, even when its row has coordinates: a stamp that no longer exists is not somewhere to
+// go, to route to or to stamp from the map.
 export function buildMapPoints(
   checkpoints: Checkpoint[],
   placeKm: ReadonlyMap<string, number>,

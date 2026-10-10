@@ -2,9 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 
-// The buttons of one row of the Friends page (approve and ignore of one request, sharing and remove of one friend)
-// share one busy state: `useFormStatus` only knows its own form, so while one of them runs the others of the row
-// are disabled too (spec 0024 AC-17).
+// `useFormStatus` only knows its own form, so while one button of the row runs the others are disabled too.
 type Group = { busy: boolean; begin: () => void; end: () => void };
 
 const GroupContext = createContext<Group | null>(null);

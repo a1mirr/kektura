@@ -38,7 +38,7 @@ describe("spec 0003: GeoJSON built for the map", () => {
       stamped: false,
       kind: "extra",
       key: "7",
-      moved: false, // only a place can have moved (spec 0003 AC-26)
+      moved: false,
     });
     expect(f.geometry.coordinates).toEqual([2, 1]);
   });

@@ -3,13 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 import { createPublicClient } from "@/lib/supabase/public";
 
-// Spec 0002: what the dashboard reads from the database, split by who may share it.
-//  - Reference data (checkpoints, extra stamps) is the same for everybody and only changes when the
-//    seeds are regenerated: read through a cookie-less client and cached on the server (AC-15).
-//  - A user's own stamps are read per request through the cookie-based client, under RLS, and are
-//    never cached (AC-16).
-
-export const REFERENCE_DATA_TAG = "reference-data"; // `revalidateTag(REFERENCE_DATA_TAG, "max")` expires it on demand
+export const REFERENCE_DATA_TAG = "reference-data";
 export const REFERENCE_DATA_REVALIDATE_SECONDS = 60 * 60 * 24;
 
 async function fetchReferenceData() {
@@ -23,9 +17,9 @@ async function fetchReferenceData() {
   return { checkpoints: checkpoints.data, extras: extras.data };
 }
 
-export const getReferenceData = // The key's second part changes when the shape of the rows changes (a new column), so the rows cached before a deploy are never
-// served to code that expects the column (v2: checkpoints.required_from, spec 0001 AC-16; v3: the retired columns, AC-22; v4: checkpoints.moved_on, AC-29).
-unstable_cache(fetchReferenceData, ["dashboard-reference-data", "v4"], {
+// The key's second part changes when the shape of the rows changes (a new column), so rows cached before a deploy are
+// never served to code that expects it.
+export const getReferenceData = unstable_cache(fetchReferenceData, ["dashboard-reference-data", "v4"], {
   tags: [REFERENCE_DATA_TAG],
   revalidate: REFERENCE_DATA_REVALIDATE_SECONDS,
 });

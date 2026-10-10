@@ -26,10 +26,9 @@ export type Friend = {
   status: "pending" | "accepted";
   isRequester: boolean;
   stampIds: number[]; // what the friend shares with me: empty while pending or switched off
-  waivedKeys: string[]; // the places the friend was not missing when they walked past (spec 0001 AC-17), never their dates
+  waivedKeys: string[]; // the places the friend was not missing when they walked past, never their dates
 };
 
-// Everything the signed-in user `uid` has with other people: one row per friendship or pending request.
 export async function getFriends(supabase: SupabaseClient<Database>, uid: string): Promise<Friend[]> {
   const [{ data: profiles }, { data: friendships }, { data: stamps }, { data: waived }] = await Promise.all([
     supabase.from("profiles").select("id, display_name"),
@@ -60,10 +59,6 @@ export async function getFriends(supabase: SupabaseClient<Database>, uid: string
   });
 }
 
-// Spec 0024 AC-8: a friend's numbers come from the same functions as the owner's dashboard (progress.ts),
-// computed from the stamped checkpoint ids. The friend's dates are not shared, so the places they were not missing
-// (`waivedKeys`, spec 0001 AC-17) are decided by the database and come with the stamps. A stage is completed when all
-// of its places are stamped or waived.
 export function summarizeFriend(checkpoints: Checkpoint[], checkpointIds: number[], stagesMeta: StageMeta[], waivedKeys: string[] = []) {
   const places = buildPlaces(checkpoints);
   const stampedKeys = stampedPlaceKeys(places, checkpointIds.map((id) => ({ checkpoint_id: id, stamped_on: "" })));
@@ -79,8 +74,8 @@ export async function getFriendProgress(friend: Friend) {
   return summarizeFriend(checkpoints, friend.stampIds, stagesData.stages, friend.waivedKeys);
 }
 
-// Spec 0024 AC-22: the friend's progress next to the signed-in user's own. The only database read besides the friend's
-// shared stamps (already in `friend`) is the user's own `user_stamps`, under RLS: nothing else of the friend is asked for.
+// The only database read besides the friend's shared stamps is the user's own `user_stamps`, under RLS: nothing else
+// of the friend is asked for.
 export async function compareWithFriend(supabase: SupabaseClient<Database>, friend: Friend, today: string = todayIso()) {
   const [progress, { data: stamps }] = await Promise.all([
     getFriendProgress(friend),
@@ -91,7 +86,6 @@ export async function compareWithFriend(supabase: SupabaseClient<Database>, frie
     mine: waivedPlaceKeys(progress.places, mine),
     theirs: progress.waived,
   });
-  // One point per variant of a place with coordinates, like the dashboard's map.
   const points: ComparePoint[] = progress.places.flatMap((p) =>
     p.variants
       .filter((v) => v.lat != null && v.lng != null)

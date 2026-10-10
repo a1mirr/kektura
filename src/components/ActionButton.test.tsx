@@ -37,7 +37,7 @@ describe("spec 0002: stamp buttons", () => {
     expect(button.textContent).toBe("Add stamp");
     const classesBefore = button.className;
     await click(button);
-    expect(button.textContent).toBe("Remove"); // flipped before the server answered
+    expect(button.textContent).toBe("Remove");
     expect(button.className).not.toBe(classesBefore);
     expect(button).toHaveProperty("disabled", true);
     await act(async () => finish({ ok: true }));

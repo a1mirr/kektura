@@ -1,5 +1,3 @@
-// Spec 0021: main only changes through pull requests. The guard decides; the hook script and the npm script
-// wire it in; CLAUDE.md tells everybody about it.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
@@ -117,19 +115,19 @@ describe("spec 0021: pull requests only", () => {
     expect(claude).toContain("gh pr merge <n> --merge --match-head-commit <full-sha>");
     expect(claude).toMatch(/on the owner's standing permission \(given in chat on 2026-10-03, revocable\) for pull requests you wrote, once CI is green and the fresh-context review is done/);
     expect(claude).toContain("never `--admin`");
-    expect(claude).toContain("merge `origin/main` into the branch"); // GitHub refuses the merge of a branch that is behind (spec 0021 AC-11)
+    expect(claude).toContain("merge `origin/main` into the branch");
     expect(claude).toContain("Delete the pull request's branch after the merge, remote and local");
     expect(claude).toContain("git merge-base --is-ancestor origin/<topic> origin/main");
     expect(claude).toContain("Delete only branches of pull requests you merged");
     expect(claude).toContain("only for a rollback or when the workflow is broken");
     expect(claude).toContain(String.raw`C:\Program Files\GitHub CLI`);
-    expect(claude).not.toContain(String.raw`%LOCALAPPDATA%\Programs\gh`); // the per-user copy was replaced by the machine-wide one
+    expect(claude).not.toContain(String.raw`%LOCALAPPDATA%\Programs\gh`);
     expect(claude).not.toContain("There is no `gh` here");
-    // No control characters other than line breaks and tabs (an earlier edit turned `\b` into a backspace).
+    // No control characters other than line breaks and tabs.
     const control = [...claude].filter((ch) => ch.charCodeAt(0) < 32 && !["\n", "\r", "\t"].includes(ch));
     expect(control).toEqual([]);
     expect(claude).not.toMatch(/\r(?!\n)/); // a lone carriage return: this is what `\r` in a path turned into
-    expect(claude).toContain(String.raw`%LOCALAPPDATA%\Docker\run`); // the same damage once hit this gotcha
+    expect(claude).toContain(String.raw`%LOCALAPPDATA%\Docker\run`);
     expect(claude).toContain("Spec 0021 owns these pull request rules");
     expect(claude).toContain("`git fetch origin`, check it is in `main`");
     expect(claude).toContain("never `-D`");

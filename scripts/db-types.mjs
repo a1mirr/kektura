@@ -1,9 +1,3 @@
-// Generates and checks src/lib/supabase/database.types.ts from the LOCAL test database (spec 0007),
-// which is built from supabase/migrations, the source of truth. Needs the test stack
-// (`npm run testdb:start`, Docker).
-//
-// Usage: node scripts/db-types.mjs gen     rewrite the committed file (npm run types:gen)
-//        node scripts/db-types.mjs check   fail when the committed file is stale (npm run types:check)
 import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 
@@ -48,7 +42,6 @@ if (committed === generated) {
   process.exit(0);
 }
 
-// Short diff hint: the first line where the two versions part ways.
 const have = committed.split("\n");
 const want = generated.split("\n");
 let i = 0;

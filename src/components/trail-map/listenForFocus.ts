@@ -3,9 +3,9 @@ import type { Map as MapLibreMap, Popup } from "maplibre-gl";
 import { centeredScrollTop, FOCUS_EVENT, fullyInView, type FocusDetail } from "@/lib/map-focus";
 import type { MapContext, MapLibre } from "./types";
 
-// The map into view, if it is not in view already. The dashboard's sticky block scrolls inside itself (spec 0001 AC-28), so a
-// map half hidden by it is not in view either; when the block is in the window and sticking, scrolling the block alone brings
-// the map back (scrolling the page to a sticky element moves nothing it sits in, and the page would only jump).
+// The dashboard's sticky block scrolls inside itself, so a map half hidden by it is not in view either; when the
+// block is in the window and sticking, scrolling the block alone brings the map back (scrolling the page to a sticky
+// element moves nothing it sits in, and the page would only jump).
 function bringIntoView(map: HTMLElement) {
   const block = map.closest<HTMLElement>("[data-sticky-map]");
   const rect = map.getBoundingClientRect();
@@ -18,10 +18,6 @@ function bringIntoView(map: HTMLElement) {
   map.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-// List -> map (spec 0003 AC-13): the 📍 button in a list row flies the map to that stamp (zoom >= 12),
-// labels it and brings the map into view if it is not in view already (the sticky map of the two columns is: scrolling
-// then would move the list from under the pointer); for an extra stamp the extra-stamps layer is switched on.
-// Returns the function that stops listening.
 export function listenForFocus(
   m: MapLibreMap,
   maplibregl: MapLibre,

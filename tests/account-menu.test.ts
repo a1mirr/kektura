@@ -1,5 +1,3 @@
-// Spec 0014 AC-20, AC-27: the header strip with the language switcher and the account menu is drawn once, by the locale
-// layout, and no page has links of its own to the menu's pages in its header.
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -49,7 +47,6 @@ describe("spec 0014: the header strip", () => {
     const links = [...title.matchAll(/<(?:Link|a)\b[^>]*>/g)].map((match) => match[0]);
     expect(links).toHaveLength(1);
     expect(links[0]).toContain('href="/friends"');
-    // and the page links to none of the other pages of the menu
     expect(source).not.toMatch(/href="\/(stats|account)"/);
   });
 

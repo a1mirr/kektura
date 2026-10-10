@@ -11,15 +11,10 @@ import { buildShareSnapshot } from "@/lib/share-card";
 import { createClient } from "@/lib/supabase/server";
 import stagesData from "../../../../scripts/data/okt-stages.json";
 
-// Spec 0039 AC-12, AC-13: like the stamp and friends actions these never throw, a thrown error reaches the client as an
-// opaque message. Each checks the flag first (AC-1), then the session.
 export type CreateShareResult = ActionResult | { ok: false; reason: "limit" };
 
-// Spec 0039 AC-12: one hourly budget per user for creating cards (the database caps how many a user keeps).
 const limiter = createRateLimiter({ limit: 20, windowMs: 60 * 60_000 });
 
-// Takes the numbers from the user's own stamps on the server, never from the client: the browser only says whether
-// the name is shown.
 export async function createShareCard(showName: boolean): Promise<CreateShareResult> {
   if (!(await flagOn("share"))) return { ok: false, reason: "disabled" };
   try {
@@ -28,8 +23,8 @@ export async function createShareCard(showName: boolean): Promise<CreateShareRes
     if (!data.user) return { ok: false, reason: "unauthorized" };
     if (!limiter.allow(data.user.id)) return { ok: false, reason: "failed" };
 
-    // The stamps are read here and not through `loadDashboardData`, which turns a failed read into "no stamps": a card made from
-    // that would freeze 0 % for good (AC-10). A failed read is a failed action instead.
+    // The stamps are read here and not through `loadDashboardData`, which turns a failed read into "no stamps": a
+    // card made from that would freeze 0 % for good. A failed read is a failed action instead.
     const [reference, { data: stamps, error: stampsError }] = await Promise.all([
       getReferenceData(),
       supabase.from("user_stamps").select("checkpoint_id, stamped_on"),

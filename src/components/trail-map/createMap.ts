@@ -2,7 +2,6 @@ import type { Map as MapLibreMap } from "maplibre-gl";
 import type { Route } from "@/lib/route-geometry";
 import type { MapLibre } from "./types";
 
-// A MapLibre map with OpenStreetMap tiles (spec 0003 AC-9), fitted to the trail overview, with zoom buttons.
 export function createTrailMap(maplibregl: MapLibre, element: HTMLElement, overview: Route, attribution: string): MapLibreMap {
   maplibregl.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
   const bounds = new maplibregl.LngLatBounds();

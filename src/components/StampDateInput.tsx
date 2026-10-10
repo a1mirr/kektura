@@ -7,14 +7,6 @@ import type { ActionResult } from "@/lib/action-result";
 import { isValidStampDate } from "@/lib/stamp-date";
 import CalendarButton from "./CalendarButton";
 
-// The date field of a stamp (spec 0016 AC-5 to AC-12): a yyyy-mm-dd text field, so the date reads
-// the same in every browser, plus a button that opens the browser's calendar.
-//
-// It must not save on every change: typing one date over another passes through other complete dates
-// (2026-09-02 on the way to 2026-09-26), and a disabled field would lose focus mid-typing. So a valid,
-// changed value is saved after a pause or when the field is left; anything else is never sent and is
-// restored on leaving. (A day picked in the calendar is one complete date and is saved at once.)
-
 const SAVE_DELAY_MS = 700;
 
 export default function StampDateInput({
@@ -23,16 +15,16 @@ export default function StampDateInput({
   latest,
   onSave,
 }: {
-  value: string; // the saved date, as the server has it
-  max: string; // the latest date the server accepts (tomorrow, UTC)
-  latest?: string; // a stricter last day, for a retired stamp (spec 0016 AC-13): a later date is never sent
+  value: string;
+  max: string;
+  latest?: string;
   onSave: (date: string) => Promise<ActionResult>;
 }) {
   const t = useTranslations("dashboard");
   const router = useRouter();
   const [draft, setDraft] = useState(value);
-  const [saved, setSaved] = useState(value); // the last date known to be saved: from the server or our own save
-  const [seen, setSeen] = useState(value); // the last `value` prop we looked at
+  const [saved, setSaved] = useState(value);
+  const [seen, setSeen] = useState(value);
   const valid = useCallback((date: string) => isValidStampDate(date) && (latest === undefined || date <= latest), [latest]);
   const [status, setStatus] = useState<"idle" | "saving" | "failed">("idle");
 
@@ -59,14 +51,14 @@ export default function StampDateInput({
       try {
         result = await onSaveRef.current(date);
       } catch {
-        result = { ok: false, reason: "failed" }; // network error
+        result = { ok: false, reason: "failed" };
       }
       if (result.ok) {
         setSaved(date);
         setStatus("idle");
       } else if (result.reason === "unauthorized") {
         setStatus("idle");
-        router.refresh(); // the session expired: the page sends the user to the landing page
+        router.refresh();
       } else {
         setDraft(saved);
         setStatus("failed");
@@ -75,14 +67,12 @@ export default function StampDateInput({
     [router, saved],
   );
 
-  // Save after a pause. One save at a time: when it ends this runs again for anything typed meanwhile.
   useEffect(() => {
     if (status === "saving" || draft === saved || !valid(draft)) return;
     const timer = setTimeout(() => void save(draft), SAVE_DELAY_MS);
     return () => clearTimeout(timer);
   }, [draft, saved, status, save, valid]);
 
-  // A day picked in the calendar (spec 0016 AC-9) is one complete date, so it is saved at once instead of after the pause.
   function handlePick(date: string) {
     if (!valid(date)) return;
     setDraft(date);
@@ -92,8 +82,8 @@ export default function StampDateInput({
 
   function handleBlur() {
     if (draft === saved) return;
-    if (!valid(draft)) setDraft(saved); // empty, incomplete or out of range: back to the saved date
-    else if (status !== "saving") void save(draft); // leaving the field saves at once (and stops the pause)
+    if (!valid(draft)) setDraft(saved);
+    else if (status !== "saving") void save(draft);
   }
 
   return (

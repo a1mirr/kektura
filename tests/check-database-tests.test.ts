@@ -1,5 +1,3 @@
-// Spec 0007 AC-13: the check after CI's database rule tests, which reads the JSON report of vitest and fails when no test
-// ran or when one was skipped.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";

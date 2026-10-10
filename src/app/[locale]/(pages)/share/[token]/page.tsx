@@ -12,9 +12,6 @@ import { originFromHeaders } from "@/lib/origin";
 import { shareUrl } from "@/lib/share-card";
 import { loadShareCard } from "@/lib/share-card-server";
 
-// See spec 0039. A public page: no sign-in is asked for, and nothing on it says whose card it is unless the owner
-// chose to show their name.
-
 type Props = { params: Promise<{ locale: string; token: string }> };
 
 const imageUrl = (origin: string, token: string) => `${origin}/api/share/${token}/image`;
@@ -33,7 +30,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
-    // A card is for the people it was sent to, not for a search engine (AC-4).
     robots: { index: false, follow: false },
     openGraph: { title, description, type: "website", url: shareUrl(origin, locale, token), images },
     twitter: { card: "summary_large_image", title, description, images },

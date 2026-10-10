@@ -14,7 +14,6 @@ vi.mock("@/lib/dashboard-data", () => ({ getReferenceData: () => mockReference()
 const mockStamps = vi.fn();
 const mockFrom = vi.fn(() => ({ select: () => mockStamps() }));
 
-// Two places of stage 1, both stamped: 100 %, one stage done.
 const checkpoint = (id: number, key: string, km: number) => ({
   id,
   seq: id,
@@ -75,7 +74,7 @@ describe("spec 0039: share card actions", () => {
         p_km_left: 0,
         p_ranges: [[0, 10]],
       });
-      expect(JSON.stringify(args)).not.toContain("2026"); // no stamp date
+      expect(JSON.stringify(args)).not.toContain("2026");
     });
 
     it("anything but `true` is anonymous", async () => {

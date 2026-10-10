@@ -6,7 +6,6 @@ import { newStampDate } from "@/lib/stamp-date";
 import ActionButton from "./ActionButton";
 import StampDateInput from "./StampDateInput";
 
-// Same as StampButton, for the extra (non-official) stamps.
 export default function ExtraStampButton({
   extraId,
   stamped,
@@ -15,8 +14,8 @@ export default function ExtraStampButton({
 }: {
   extraId: number;
   stamped: boolean;
-  date?: string; // the stamp's date, when stamped
-  maxDate: string; // the latest date the server accepts
+  date?: string;
+  maxDate: string;
 }) {
   const t = useTranslations("dashboard");
 

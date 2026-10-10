@@ -1,6 +1,3 @@
-// Spec 0021: refuse a push to `main` on GitHub, so that `main` only changes through pull requests.
-// Git runs the `pre-push` hook with the remote's name and URL as arguments and one line per ref on stdin:
-//   <local ref> <local sha> <remote ref> <remote sha>
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
 
@@ -35,7 +32,6 @@ export function checkPush(remoteUrl, stdinText) {
   };
 }
 
-// Run as the hook: `node guard.mjs <remote name> <remote url>`, stdin from git.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const remoteUrl = process.argv[3] ?? "";
   const result = checkPush(remoteUrl, fs.readFileSync(0, "utf8"));

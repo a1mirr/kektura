@@ -2,20 +2,15 @@ import { FLAG_KEYS, FLAG_MODES, FLAGS, isFlagKey, isFlagMode, type FlagKey, type
 import { logFeatureFlagsError, logFlagChange } from "./log";
 import type { InlineKeyboard } from "./telegram";
 
-// What the owner sends the Telegram bot to look at and switch feature flags, as typed commands and as taps on the
-// panel's buttons (spec 0035 AC-17 to AC-22 and AC-27 to AC-32). Pure apart from the store it is given and the clock, so
-// every reply is unit-tested. The texts are English: this is the owner's own tool, not part of the three-language rule.
-
 export const CONFIRM_WINDOW_MS = 60_000;
-// How many users of an allowlist the panel names; the rest is "and N more".
 export const MAX_LISTED_USERS = 20;
-// Telegram refuses callback data over 64 bytes (AC-31).
+// Telegram refuses callback data over 64 bytes.
 export const MAX_CALLBACK_BYTES = 64;
 
 export type StoredFlagSummary = { key: string; mode: string; users: number };
 export type ListedUser = { id: string; name: string };
 
-// What the bot needs from the database (spec 0035 AC-23). Every method throws when the database refuses.
+// Every method throws when the database refuses.
 export type FlagAdminStore = {
   list(): Promise<StoredFlagSummary[]>;
   setMode(key: FlagKey, mode: FlagMode): Promise<void>;
@@ -24,9 +19,7 @@ export type FlagAdminStore = {
   removeUser(key: FlagKey, userId: string): Promise<"ok" | "not_listed">;
 };
 
-// What the bot says: a text and, under it, buttons.
 export type BotReply = { text: string; keyboard?: InlineKeyboard };
-// The answer to a tap: the message is replaced by `reply` (or left alone), `notice` is the short toast Telegram shows.
 export type PressResult = { reply?: BotReply; notice?: string };
 
 const HELP = [
@@ -41,8 +34,6 @@ const FAILED = "Failed: nothing was changed. The reason is in the server log.";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,255}$/;
 
-// The data of the buttons (AC-31): `f:<key>` opens one flag; `m:<key>:<mode>:<shown>` sets a mode, knowing the mode the
-// view showed; `u:<key>` opens an allowlist; `d:<key>:<user id>` removes one user from it; `p` shows the list again.
 export const callbackData = {
   flag: (key: FlagKey) => `f:${key}`,
   mode: (key: FlagKey, mode: FlagMode, shown: FlagMode) => `m:${key}:${mode}:${shown}`,
@@ -68,22 +59,18 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
     return row && isFlagMode(row.mode) ? row.mode : FLAGS[key].default;
   };
 
-  // A flag's mode as the panels write it: "friends: allowlist, 2 users", "friends: off (default)" (AC-17).
   const summary = (rows: StoredFlagSummary[], key: FlagKey): string => {
     const row = rows.find((r) => r.key === key);
     const mode = modeOf(rows, key);
     return `${key}: ${mode}${mode === "allowlist" ? `, ${plural(row?.users ?? 0)}` : ""}${row ? "" : " (default)"}`;
   };
 
-  // Every declared flag with its mode, one line and one button each; a button opens the flag (AC-17, AC-27).
   async function panel(note?: string): Promise<BotReply> {
     const rows = await store.list();
     const keyboard: InlineKeyboard = FLAG_KEYS.map((key) => [{ text: summary(rows, key), callback_data: callbackData.flag(key) }]);
     return { text: [note, FLAG_KEYS.map((key) => summary(rows, key)).join("\n")].filter(Boolean).join("\n\n"), keyboard };
   }
 
-  // One flag: its description and mode, the three mode buttons (the current one marked), for an allowlist or a flag with
-  // users a button that opens it, and Back to the list (AC-27).
   async function flagPanel(key: FlagKey, note?: string): Promise<BotReply> {
     const rows = await store.list();
     const mode = modeOf(rows, key);
@@ -96,7 +83,6 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
     return { text: [note, `${summary(rows, key)}\n  ${FLAGS[key].description}`].filter(Boolean).join("\n\n"), keyboard };
   }
 
-  // The users of one flag's allowlist, each with a Remove button (AC-29).
   async function usersPanel(key: FlagKey, note?: string): Promise<BotReply> {
     const users = await store.listUsers(key);
     const shown = users.slice(0, MAX_LISTED_USERS);
@@ -120,7 +106,6 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
     return `${key} is now ${mode}.`;
   }
 
-  // On is for everybody, signed-out visitors included: it takes a second message (AC-20), typed or tapped.
   function askToConfirm(key: FlagKey): string {
     pending = { key, expiresAt: now() + CONFIRM_WINDOW_MS };
     return `${key} would be on for everybody, signed-out visitors included. Send /confirm within ${CONFIRM_WINDOW_MS / 1000} seconds to do it; anything else cancels.`;
@@ -139,7 +124,6 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
     try {
       let result = await store.setUser(key, email, allowed);
       if (result === "no_flag") {
-        // The flag has no row yet: it starts from its default, then the user is listed.
         await store.setMode(key, FLAGS[key].default);
         result = await store.setUser(key, email, allowed);
       }
@@ -158,8 +142,8 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
     }
   }
 
-  // A tap on a mode button (AC-28). The button knows the mode the panel showed: when the flag is in another mode now
-  // (changed in the dashboard, or from another message) nothing is applied and the panel is shown as it is.
+  // The button knows the mode the panel showed: when the flag is in another mode now (changed in the dashboard, or
+  // from another message) nothing is applied and the panel is shown as it is.
   async function pressMode(key: FlagKey, target: FlagMode, shown: FlagMode): Promise<PressResult> {
     const current = modeOf(await store.list(), key);
     if (current !== shown) return { reply: await flagPanel(key, `${key} is ${current} now, not ${shown}: nothing was changed.`), notice: "Changed since: nothing applied" };
@@ -171,7 +155,6 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
     return { reply: await flagPanel(key, done), notice: done };
   }
 
-  // A tap on Remove (AC-29): whoever is no longer listed is only a refreshed list.
   async function pressRemove(key: FlagKey, userId: string): Promise<PressResult> {
     let result: "ok" | "not_listed";
     try {
@@ -186,11 +169,10 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
   }
 
   return {
-    // The reply to one message of the owner. Never throws: a database failure is a reply that says so.
     async handle(text: string): Promise<BotReply> {
       const [command, a, b] = words(text);
       const waiting = pending && pending.expiresAt > now() ? pending : null;
-      pending = null; // anything but /confirm cancels (and an expired one is gone)
+      pending = null;
       try {
         if (command === "/confirm") return { text: waiting ? await apply(waiting.key, "on") : "Nothing to confirm." };
         if (command === "/flags") return await panel();
@@ -204,9 +186,8 @@ export function createFlagBot({ store, now = Date.now }: { store: FlagAdminStore
       }
     },
 
-    // A tap on one of the panel's buttons, by the data it carries. Unknown or malformed data is ignored. Never throws.
     async press(data: string): Promise<PressResult> {
-      pending = null; // a tap cancels a pending /confirm like any other message
+      pending = null;
       const [kind, key, third, fourth] = data.split(":");
       try {
         if (kind === "p" && data === callbackData.panel) return { reply: await panel() };

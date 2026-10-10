@@ -1,6 +1,5 @@
 import { getTranslations } from "next-intl/server";
 
-// Marks every page of the test server (spec 0006 AC-5) so it can't be mistaken for production.
 export default async function TestBanner() {
   const t = await getTranslations("app");
 

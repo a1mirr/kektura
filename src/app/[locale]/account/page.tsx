@@ -9,8 +9,6 @@ import PageShell from "@/components/PageShell";
 import SignOutButton from "@/components/SignOutButton";
 import DeleteAccountButton from "./DeleteAccountButton";
 
-// See spec 0014 (AC-7 to AC-18). The stamps-per-month chart moved to the stats page (spec 0037).
-
 type Props = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

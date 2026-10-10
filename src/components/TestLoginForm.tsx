@@ -1,7 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { TEST_EMAIL } from "@/lib/test-login";
 
-// Dummy login of the test server (spec 0006). A plain form: works without client JS.
 export default async function TestLoginForm({ locale, next = "/dashboard" }: { locale: string; next?: string }) {
   const t = await getTranslations("home");
 

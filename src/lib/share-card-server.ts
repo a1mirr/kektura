@@ -5,9 +5,6 @@ import { isShareToken, toShareCard, type ShareCard } from "./share-card";
 import { createClient } from "./supabase/server";
 import type { Database } from "./supabase/database.types";
 
-// Spec 0039 AC-4, AC-7: the one public read of a card, through `get_share_card` (the table itself is closed to
-// visitors). Once per request (React `cache`), so the page's metadata and its body share one lookup. A token that is no
-// token, an unknown one and a failed lookup all give `null`: the caller answers 404 and no one learns which it was.
 export const loadShareCard = cache(async (token: string): Promise<ShareCard | null> => {
   if (!isShareToken(token)) return null;
   try {
@@ -21,9 +18,6 @@ export const loadShareCard = cache(async (token: string): Promise<ShareCard | nu
   }
 });
 
-// Spec 0039 AC-6, AC-13: the signed-in user's own cards, newest first, under row level security (only their own rows come
-// back). A failed read is logged as a `read` (no Telegram message, spec 0008 AC-6) and gives the empty list, which the panel
-// shows as "no cards yet"; the user's next visit reads them again.
 export async function loadOwnShareCards(supabase: SupabaseClient<Database>) {
   const { data, error } = await supabase
     .from("share_cards")

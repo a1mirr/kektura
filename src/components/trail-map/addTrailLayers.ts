@@ -4,8 +4,6 @@ import { trailLayers } from "@/lib/map-layers";
 import { emptyLines, splitRoute, type Route } from "@/lib/route-geometry";
 import type { LayerToggles, MapInputs } from "./types";
 
-// Adds the trail's sources and layers to a freshly loaded map: the walked / not-walked lines, the
-// route-planner highlight, restaurants, extra stamps and the official stamps on top.
 export function addTrailLayers(
   m: MapLibreMap,
   overview: Route,

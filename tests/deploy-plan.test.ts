@@ -1,5 +1,3 @@
-// Spec 0026 AC-12: what is deployed after a merge. The decision is a pure function; the git calls around it
-// are injected, so every case can be stated without a repository.
 import { describe, expect, it } from "vitest";
 import { needsDeploy, planDeploy } from "../scripts/lib/deploy.mjs";
 import { inspect, productionMain, Problem } from "../scripts/deploy-plan.mjs";
@@ -61,7 +59,6 @@ describe("spec 0026: which merges deploy", () => {
   });
 });
 
-// A fake `git`: answers by the arguments it is called with.
 const git = (answers: Record<string, { status: number; stdout?: string; stderr?: string }>) => (...args: string[]) => {
   const answer = answers[args.join(" ")];
   if (!answer) throw new Error(`unexpected git ${args.join(" ")}`);

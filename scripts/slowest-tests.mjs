@@ -1,8 +1,5 @@
-// Prints the slowest Playwright tests from a JSON report as a Markdown table (spec 0007 AC-7), for the CI job summary.
-// Usage: node scripts/slowest-tests.mjs [report.json] [count]
 import { readFileSync } from "node:fs";
 
-// Every test of a Playwright JSON report with its title and total time over all attempts, slowest first.
 export function slowestTests(report, count = 10) {
   const rows = [];
   const walk = (suite, file) => {

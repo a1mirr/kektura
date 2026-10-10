@@ -1,15 +1,8 @@
-// Telegram Bot API client: the feedback notifications (spec 0017) and the flag panel's messages, edits and answers to
-// taps (spec 0035).
-//
-// The request URL contains the bot token, so nothing here ever returns or logs the URL, a fetch error
-// object or a response body: failures are reduced to a short reason.
-
 export const TELEGRAM_MAX_TEXT = 4096; // characters per message
 const DEFAULT_API = "https://api.telegram.org";
 
 export type TelegramConfig = { token: string; chatId: string; apiBase?: string };
 
-// Configured only when both values are set; otherwise feedback is just stored.
 export function telegramConfig(env: Record<string, string | undefined> = process.env): TelegramConfig | null {
   const token = env.TELEGRAM_BOT_TOKEN?.trim();
   const chatId = env.TELEGRAM_CHAT_ID?.trim();
@@ -19,13 +12,11 @@ export function telegramConfig(env: Record<string, string | undefined> = process
 
 export type TelegramResult = { ok: true } | { ok: false; reason: string };
 
-// A button under a message (spec 0035 AC-27): its text and the data Telegram sends back when it is tapped.
 export type InlineButton = { text: string; callback_data: string };
 export type InlineKeyboard = InlineButton[][];
 
 type CallOptions = { fetchImpl?: typeof fetch; timeoutMs?: number };
 
-// One Bot API call. Nothing here returns or logs the URL (it holds the token), a fetch error object or the answer.
 async function callApi(
   method: string,
   body: Record<string, unknown>,
@@ -66,7 +57,6 @@ export function sendTelegramMessage(
   );
 }
 
-// Replaces the text and the buttons of a message the bot sent (the panel the owner tapped).
 export function editTelegramMessage(
   messageId: number,
   text: string,

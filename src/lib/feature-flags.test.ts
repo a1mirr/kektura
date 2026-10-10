@@ -14,7 +14,7 @@ describe("spec 0035: the registry", () => {
   it("AC-1: a key is a declared flag only if it is in the registry", () => {
     expect(isFlagKey("friends")).toBe(true);
     expect(isFlagKey("not-a-flag")).toBe(false);
-    expect(isFlagKey("toString")).toBe(false); // an inherited property is not a flag
+    expect(isFlagKey("toString")).toBe(false);
     // @ts-expect-error asking for a flag that is not declared fails typecheck
     const undeclared: keyof typeof FLAGS = "not-a-flag";
     expect(undeclared).toBe("not-a-flag");
@@ -33,14 +33,14 @@ describe("spec 0035: resolving flags", () => {
     expect(isEnabled("allowlist", true)).toBe(true);
     expect(isEnabled("allowlist", false)).toBe(false);
     expect(isEnabled("off", false)).toBe(false);
-    expect(isEnabled("off", true)).toBe(false); // an entry on the list of an `off` flag changes nothing
+    expect(isEnabled("off", true)).toBe(false);
   });
 
   it("AC-3: every declared flag is resolved from its stored row, and a missing row uses the default", () => {
     const flags = resolveFlags([{ key: "friends", mode: "on", listed: false }]);
     expect(flags.friends).toBe(true);
     expect(Object.keys(flags).sort()).toEqual([...FLAG_KEYS].sort());
-    expect(resolveFlags([]).friends).toBe(isEnabled(FLAGS.friends.default, false)); // no row: the default
+    expect(resolveFlags([]).friends).toBe(isEnabled(FLAGS.friends.default, false));
     expect(resolveFlags([{ key: "friends", mode: "allowlist", listed: true }]).friends).toBe(true);
     expect(resolveFlags([{ key: "friends", mode: "allowlist", listed: false }]).friends).toBe(false);
   });

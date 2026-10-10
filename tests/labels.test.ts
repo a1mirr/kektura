@@ -1,5 +1,3 @@
-// Spec 0004 AC-13: the number a place is shown with ("19.6") shifts when a stamp is added before it, so nothing may
-// store it, link to it or use it as a key. Source scan: a label is only ever displayed.
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";

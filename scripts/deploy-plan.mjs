@@ -1,21 +1,13 @@
-// Decides whether a commit of main is deployed (spec 0026 AC-12): compares it with the commit production runs.
-//
-//   node scripts/deploy-plan.mjs <target sha> [remote]      (remote defaults to `production`)
-//
-// Reads production's main through `git ls-remote` (so the deploy key and GIT_SSH_COMMAND must be set), looks at
-// the paths that differ and writes `deploy=true|false` to $GITHUB_OUTPUT and the reason to the job summary.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
 import { planDeploy } from "./lib/deploy.mjs";
 
-/** A problem to tell the user about. Thrown, not process.exit(): see the Windows note in CLAUDE.md. */
 export class Problem extends Error {}
 
 const git = (...args) => spawnSync("git", args, { encoding: "utf8" });
 
 /**
- * The commit production's main points to, or "" when it has none yet.
  * @param {string} remote
  * @param {(...args: string[]) => { status: number | null, stdout: string, stderr: string }} [run]
  */
@@ -29,7 +21,6 @@ export function productionMain(remote, run = git) {
 }
 
 /**
- * Everything the decision needs from the local repository.
  * @param {string} production
  * @param {string} target
  * @param {(...args: string[]) => { status: number | null, stdout: string, stderr: string }} [run]

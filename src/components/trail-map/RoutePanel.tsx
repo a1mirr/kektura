@@ -1,8 +1,6 @@
 import { useFormatter, useTranslations } from "next-intl";
 import { fmtTime, type RouteStats } from "@/lib/route-stats";
 
-// The route planner's panel (spec 0003 AC-3 to AC-8): the chosen stamps and, once both are chosen,
-// the stretch's distance, ascent, descent and walking time.
 export default function RoutePanel({
   fullscreen,
   fromName,

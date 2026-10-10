@@ -11,7 +11,6 @@ import {
 import type { MapHandleRef } from "./types";
 import { useLatest } from "./useLatest";
 
-// Remember a layer's toggle and apply it to the map layer (once the map exists).
 function useRememberedLayer(mapRef: MapHandleRef, storageKey: string, layerIds: string[], on: boolean) {
   const key = layerIds.join(",");
   useEffect(() => {
@@ -24,9 +23,7 @@ function useRememberedLayer(mapRef: MapHandleRef, storageKey: string, layerIds: 
   }, [mapRef, storageKey, key, on]);
 }
 
-// Spec 0003 AC-10: walked stretches and official stamps are on by default, extra stamps and
-// restaurants off; each choice persists in localStorage. "Walked stretches" has no layer of its own
-// (it changes what the lines show), so the map code redraws on it.
+// "Walked stretches" has no layer of its own (it changes what the lines show), so the map code redraws on it.
 export function useLayerToggles(mapRef: MapHandleRef) {
   const [showDone, setShowDone] = useState(() => readStored(STORAGE_KEY_DONE, true));
   const [showStamps, setShowStamps] = useState(() => readStored(STORAGE_KEY_STAMPS, true));
@@ -40,7 +37,6 @@ export function useLayerToggles(mapRef: MapHandleRef) {
   });
 
   useRememberedLayer(mapRef, STORAGE_KEY_DONE, [], showDone);
-  // The ring of a stamp that moved goes with the stamps (spec 0003 AC-26).
   useRememberedLayer(mapRef, STORAGE_KEY_STAMPS, [STAMPS_LAYER, MOVED_RING_LAYER], showStamps);
   useRememberedLayer(mapRef, STORAGE_KEY_EXTRAS, [EXTRAS_LAYER], showExtras);
   useRememberedLayer(mapRef, STORAGE_KEY_RESTAURANTS, [RESTAURANTS_LAYER], showRestaurants);
@@ -53,6 +49,6 @@ export function useLayerToggles(mapRef: MapHandleRef) {
       showExtras: setShowExtras,
       showRestaurants: setShowRestaurants,
     },
-    latest, // the toggles as of the last render, for the map's load callback
+    latest,
   };
 }

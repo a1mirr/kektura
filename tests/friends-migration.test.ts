@@ -1,6 +1,3 @@
-// Spec 0024 AC-1, AC-2, AC-4 to AC-6, AC-9, AC-10, AC-12 against the real local database (`npm run testdb:start`).
-// The tests skip themselves when it isn't running, and fail where CI requires it (`REQUIRE_LOCAL_DB`, spec 0007 AC-12). They talk to PostgREST the way a browser could, as
-// signed-in users, so they prove what a malicious client can and cannot do.
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { beforeAll, describe, expect, it } from "vitest";
@@ -41,7 +38,7 @@ let bob: Person;
 let cleo: Person;
 
 beforeAll(async () => {
-  if (databaseDecision(RELATIONS).action !== "run") return; // the tests skip or fail, whichever the environment asks for
+  if (databaseDecision(RELATIONS).action !== "run") return;
   local = localSupabase();
   [ana, bob, cleo] = [await signUp("Ana Maria Kovacs"), await signUp(), await signUp("Cleo")];
 }, 60_000); // `supabase status` and three sign-ups, while the whole suite runs in parallel
@@ -129,18 +126,15 @@ describe("spec 0024: friends database rules", () => {
     expect((await ana.client.from("user_stamps").insert({ user_id: ana.id, checkpoint_id: 1 })).error).toBeNull();
     expect((await bob.client.from("user_stamps").insert({ user_id: bob.id, checkpoint_id: 2 })).error).toBeNull();
 
-    // A request alone shares nothing, in either direction, and only the inviter has anything to approve.
     expect((await rpc(bob, "send_request", { token: await tokenOf(ana) })).data).toBe("ok");
     expect((await rpc(bob, "send_request", { token: await tokenOf(ana) })).data).toBe("already_pending");
     expect((await rpc(ana, "send_request", { token: await tokenOf(bob) })).data).toBe("incoming_pending");
     expect(await stampsSeenBy(bob)).toEqual([]);
     expect(await stampsSeenBy(ana)).toEqual([]);
-    // The requester cannot approve their own request.
     await rpc(bob, "approve_request", { requester_id: bob.id });
     await rpc(bob, "approve_request", { requester_id: ana.id });
     expect(await stampsSeenBy(ana)).toEqual([]);
 
-    // Someone else's approval or ignore changes nothing.
     await rpc(cleo, "approve_request", { requester_id: bob.id });
     expect(await stampsSeenBy(ana)).toEqual([]);
 
@@ -151,17 +145,14 @@ describe("spec 0024: friends database rules", () => {
     expect(await stampsSeenBy(cleo)).toEqual([]);
     expect((await rpc(bob, "send_request", { token: await tokenOf(ana) })).data).toBe("already_friends");
 
-    // AC-9: the switch is per side. Ana stops sharing: Bob sees nothing of her, she still sees him.
     await rpc(ana, "set_sharing", { other_id: bob.id, sharing: false });
     expect(await stampsSeenBy(bob)).toEqual([]);
     expect(await stampsSeenBy(ana)).toEqual([`${bob.id}:2`]);
-    // Bob cannot turn Ana's switch back on.
     await rpc(bob, "set_sharing", { other_id: ana.id, sharing: true });
     expect(await stampsSeenBy(bob)).toEqual([]);
     await rpc(ana, "set_sharing", { other_id: bob.id, sharing: true });
     expect(await stampsSeenBy(bob)).toEqual([`${ana.id}:1`]);
 
-    // AC-10: either side can remove; access ends in both directions, a new request needs a new approval.
     await rpc(bob, "remove_friend", { other_id: ana.id });
     expect(await stampsSeenBy(bob)).toEqual([]);
     expect(await stampsSeenBy(ana)).toEqual([]);
@@ -177,10 +168,8 @@ describe("spec 0024: friends database rules", () => {
     expect(fresh).toMatch(/^[0-9a-f]{32}$/);
     expect(fresh).not.toBe(old);
     expect((await rpc(cleo, "get_inviter_info", { token: old })).data).toEqual([]);
-    // Bob has a pending request with Ana: he may see her name, not her token.
     expect((await bob.client.from("profiles").select("display_name").eq("id", ana.id)).data).toEqual([{ display_name: "Anna" }]);
     expect((await bob.client.from("profiles").select("invite_token").eq("id", ana.id)).error).not.toBeNull();
-    // Strangers see no profile at all.
     const dan = await signUp("Dan");
     expect((await dan.client.from("profiles").select("id").eq("id", ana.id)).data).toEqual([]);
   });

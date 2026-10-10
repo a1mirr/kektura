@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { isCalendarDate, isValidStampDate, localToday, maxStampDate, MIN_STAMP_DATE, newStampDate } from "./stamp-date";
 
-// 2026-10-02 12:00 UTC; "tomorrow" is 2026-10-03.
 const NOW = new Date("2026-10-02T12:00:00Z");
 
 describe("spec 0016: valid stamp dates", () => {
@@ -54,7 +53,7 @@ describe("spec 0016: calendar dates", () => {
 
 describe("spec 0016: the user's own day", () => {
   it("AC-1: localToday reads the clock's local calendar day, zero padded", () => {
-    expect(localToday(new Date(2026, 9, 2, 23, 59))).toBe("2026-10-02"); // local time, whatever the zone
+    expect(localToday(new Date(2026, 9, 2, 23, 59))).toBe("2026-10-02");
     expect(localToday(new Date(2026, 0, 5, 0, 1))).toBe("2026-01-05");
     expect(localToday(new Date(2024, 1, 29, 12))).toBe("2024-02-29");
   });
@@ -69,6 +68,6 @@ describe("spec 0016: the user's own day", () => {
 
   it("AC-1: a clock set far ahead can't be noticed by the client (the server ignores such a date)", () => {
     expect(newStampDate(new Date(2999, 0, 1))).toBe("2999-01-01");
-    expect(isValidStampDate("2999-01-01", NOW)).toBe(false); // what the server decides, by its own clock
+    expect(isValidStampDate("2999-01-01", NOW)).toBe(false);
   });
 });

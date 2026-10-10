@@ -1,16 +1,8 @@
-// Tells the developer that a deploy failed (spec 0026 AC-9), through the bot of spec 0017.
-//
-//   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID  the bot and the chat (both optional: without them nothing is sent)
-//   DEPLOY_SHA, RUN_URL                    what failed and where to look
-//   MIGRATE_OUTCOME, PUSH_OUTCOME, ...     the outcome of each step (`failure` names the failed one)
-//
-// The request URL contains the token, so it is never printed, and neither is an error object (its message can
-// contain the URL): only what Telegram answers. Exits with 0 even when sending fails: the workflow has already failed.
+// Exits with 0 even when sending fails: the workflow has already failed.
 import { pathToFileURL } from "node:url";
 import { failureMessage } from "./lib/deploy.mjs";
 
 /**
- * Sends `text`; returns "sent", "skipped" (not configured) or a short description of what went wrong.
  * @param {{ token?: string, chatId?: string, text: string, base?: string, fetchFn?: typeof fetch }} options
  * @returns {Promise<string>}
  */

@@ -1,5 +1,3 @@
-// Spec 0022 AC-5: the CI job "Review recorded" and the script behind it. The decisions are a pure function; the git
-// side is exercised against a real temporary repository; the workflow's trigger and name are pinned as text.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -164,11 +162,10 @@ describe("spec 0022: Review recorded", () => {
       commit("messages/en.json", "main", "main changes code and messages");
       commit("src/shared.ts", "main version", "main changes a shared file");
       git("switch", "-q", "topic");
-      git(...ident, "merge", "--no-edit", "main"); // brings main's files in, without a conflict
+      git(...ident, "merge", "--no-edit", "main");
       afterMerge = git("rev-parse", "HEAD").trim();
       afterDocs = commit("specs/x.md", "1", "wording");
       afterCode = commit("src/topic.ts", "2", "a code change after the review");
-      // a conflict: both sides change the same file, the author resolves it by hand
       git("switch", "-q", "main");
       commit("src/conflict.ts", "main side", "main");
       git("switch", "-q", "topic");
@@ -219,7 +216,7 @@ describe("spec 0022: Review recorded", () => {
       git("switch", "-q", "main");
       commit("shared/list.txt", list({ 38: "main edit" }), "main edits near the bottom");
       git("switch", "-q", "topic");
-      git(...ident, "merge", "--no-edit", "main"); // merges cleanly: the two edits are far apart
+      git(...ident, "merge", "--no-edit", "main");
       const merged = git("rev-parse", "HEAD").trim();
       // the file differs from the reviewed commit and `--cc` would list it, but nobody changed it by hand
       expect(inspectCommit(git, reviewedHere, merged)?.changedAfter).toEqual(["shared/list.txt"]);

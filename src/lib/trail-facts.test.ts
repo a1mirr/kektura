@@ -12,7 +12,6 @@ describe("spec 0015: trail facts", () => {
   });
 
   it("AC-2: kilometres are rounded to 0.1, without floating-point noise", () => {
-    // 0.1 + 0.2 is 0.30000000000000004 in floating point.
     expect(trailFacts([{ km: 0.1, places: [] }, { km: 0.2, places: [] }]).km).toBe(0.3);
   });
 

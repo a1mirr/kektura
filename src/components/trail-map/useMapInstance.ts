@@ -9,9 +9,6 @@ import { attachStampPopups } from "./stampPopups";
 import type { LayerToggles, MapContext, MapHandleRef, MapInputs, RouteState } from "./types";
 import { watchDetailRoute } from "./watchDetailRoute";
 
-// Creates the MapLibre map once (spec 0003 AC-9): OpenStreetMap tiles, the trail overview fitted to the
-// view, then on load the layers, the zoom-dependent geometry, the popups and the list -> map listener.
-// The map lives in `mapRef` (not in React state), so later data changes update it in place.
 export function useMapInstance({
   container,
   mapRef,
@@ -31,7 +28,7 @@ export function useMapInstance({
 }) {
   useEffect(() => {
     if (!container.current) return;
-    const h = mapRef.current; // one object for the map's whole life
+    const h = mapRef.current;
     let cancelled = false;
     let stopListeningForFocus: (() => void) | undefined;
 

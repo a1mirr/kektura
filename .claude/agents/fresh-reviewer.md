@@ -64,6 +64,9 @@ not only the ACs the diff mentions.
   regenerated types (`npm run types:gen`). A merge deploys by itself, so nobody else will look at this.
 - A change users can see (texts, names, pages, behaviour) with no entry in `src/content/changelog.ts` in
   every language (spec 0018 AC-7), or an entry that says something untrue about the app as shipped. A feature flag does not excuse a missing entry while it is on in production: look up the production state (a flagged page answers 404 while the flag is off), do not accept "it is behind a flag" from the task or the description.
+- A comment that has not earned its place (see "Comments" below), in any file the diff touches: one that restates the code, its
+  names or its types, points at a spec, an AC or a task, tells the history of a change, narrates a test, or repeats `CLAUDE.md` or a
+  spec. Only a reason, a constraint or a trap that the code cannot show stays. Report each one with `file:line`.
 - Leftovers of anything renamed, moved or removed: code, routes and links, message keys and texts in every language (`messages/*.json`), the About page and the changelog, `README.md`,
   `CLAUDE.md`, other specs, test names.
 - The gotchas listed in `CLAUDE.md` that apply to the files touched (typed locale narrowing, translations in
@@ -76,6 +79,9 @@ not only the ACs the diff mentions.
 
 Skip what the linter, formatter and type checker already catch, and style preferences. Do not suggest work
 beyond the scope of the task and its specs unless it is a defect of this change.
+
+## Comments
+It is strictly FORBIDDEN to write a comment on the principle "a comment is useful if the information is true and relevant". The approach is the opposite: there is no comment by default, and a comment has to prove its right to exist by saying something the code, its names and its types cannot (a reason that is not visible, a constraint, a trap). Never earns a place: a comment that restates what the code, a name or a type says, a doc comment that describes a function, a section banner, a pointer to a spec, an AC, a task or a pull request, the history of a change ("now", "was added", "no longer"), a narration of what a test does step by step, commented-out code, and anything that CLAUDE.md or a spec already says. Compiler and linter directives (`@vitest-environment`, `eslint-disable`, `@ts-expect-error`) are code, not comments. Give subagents this whole section in their prompt, verbatim.
 
 ## Report
 

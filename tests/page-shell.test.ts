@@ -1,5 +1,3 @@
-// Spec 0036 AC-1, AC-2: one layout component sets the width, the side padding and the vertical rhythm of a page, and one CSS
-// variable holds the width, so the header strip, the pages and the footer cannot disagree.
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -15,7 +13,6 @@ function files(dir: string, match: RegExp): string[] {
   });
 }
 
-// Every file that draws a page: the routes, the localized error boundary and the root 404 page.
 const pageFiles = [
   ...files("src/app/[locale]", /^page\.tsx$/),
   "src/app/[locale]/error.tsx",
@@ -47,7 +44,6 @@ describe("spec 0036: the page shell", () => {
       expect(read(file), file).toContain("${pageWidth}");
       expect(read(file), file).not.toMatch(/\bmax-w-/);
     }
-    // the page width is spelled out once: no other file carries 64rem or max-w-5xl
     const others = files("src", /\.(tsx?|css)$/).filter((file) => !/\.test\./.test(file) && file !== "src/app/globals.css");
     expect(others.filter((file) => /64rem|max-w-5xl/.test(read(file)))).toEqual([]);
   });

@@ -10,25 +10,18 @@ import { findStamp } from "@/lib/stamp-lookup";
 import { createClient } from "@/lib/supabase/server";
 import { sendTelegramMessage, telegramConfig } from "@/lib/telegram";
 
-// See spec 0017. The form is public (it is in the footer), so everything that reaches
-// this action is untrusted.
-
 export type FeedbackResult =
   | { ok: true }
   | { ok: false; reason: "invalid" | "empty" | "too_long" | "rate_limited" | "failed" };
 
 const ok: FeedbackResult = { ok: true };
 
-// Per address and overall (AC-7). In memory: one server process, forgotten on restart.
 const perIp = createRateLimiter({ limit: 5, windowMs: 10 * 60_000 });
 const overall = createRateLimiter({ limit: 100, windowMs: 60 * 60_000 });
 
 // Caddy puts the client address first in x-forwarded-for; without a proxy everyone shares a bucket.
 const clientIp = (h: Headers) => h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "unknown";
 
-// `input` is `{ message, locale, website, stamp? }`. `website` is the honeypot: hidden from people, so a
-// filled one is a bot, which gets a success answer and nothing else. `stamp` is a stamp code from `?stamp=<code>` (spec 0017 AC-11): it is
-// checked against the seed and only then does its name go before the message; anything else is ignored.
 export async function submitFeedback(input: unknown): Promise<FeedbackResult> {
   try {
     if (typeof input !== "object" || input === null) return { ok: false, reason: "invalid" };
@@ -42,7 +35,6 @@ export async function submitFeedback(input: unknown): Promise<FeedbackResult> {
       return { ok: false, reason: "rate_limited" };
     }
 
-    // A report about a stamp: its name, looked up here, goes before the sender's words and counts in the 2000 characters.
     const stamp = rawStamp === undefined ? null : await findStamp(rawStamp);
     const message = stamp ? stampPrefix(stamp) + checked.message : checked.message;
     if ([...message].length > FEEDBACK_MAX) return { ok: false, reason: "too_long" };

@@ -6,8 +6,6 @@ import { routing } from "@/i18n/routing";
 import { LINK_GROUPS } from "@/content/links";
 import PageShell from "@/components/PageShell";
 
-// See spec 0019. The links are data in src/content/links.ts.
-
 type Props = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

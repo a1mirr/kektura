@@ -2,8 +2,6 @@
 
 import { useSyncExternalStore } from "react";
 
-// The "Show retired stamps" preference of the stage list (spec 0001 AC-24): off by default, remembered in localStorage like the
-// stage sections' open state, and shared by every row through an event so the checkbox and the rows stay in step.
 const KEY = "kektura:showRetired";
 const EVENT = "kektura:retired-toggle";
 
@@ -23,7 +21,7 @@ export function setShowRetired(show: boolean) {
     localStorage.setItem(KEY, show ? "1" : "0");
     fallback = null;
   } catch {
-    fallback = show; // not remembered, but the page still follows the choice
+    fallback = show;
   }
   window.dispatchEvent(new Event(EVENT));
 }

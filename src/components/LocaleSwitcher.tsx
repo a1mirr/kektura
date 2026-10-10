@@ -5,8 +5,6 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { LOCALE_NAMES } from "@/i18n/locale-names";
 
-// A native dropdown (spec 0005 AC-9): keyboard and screen readers work for free, and it stays one control
-// however many languages there are.
 export default function LocaleSwitcher() {
   const locale = useLocale();
   const t = useTranslations("app");
