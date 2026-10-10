@@ -47,7 +47,7 @@ const TARGETS: Target[] = [
     },
   },
   {
-    // "Change dates" (spec 0016 AC-14 to AC-21): the mode with its checkboxes, the stage buttons and the bar, one stamp chosen
+    // "Set dates" (spec 0016 AC-14 to AC-21): the mode with its checkboxes, the stage buttons and the bar, one stamp chosen
     name: "dashboard-change-dates",
     signedIn: true,
     skipAtPhone: ["color-contrast"],
@@ -60,8 +60,8 @@ const TARGETS: Target[] = [
       const add = row.getByRole("button", { name: "Add stamp" });
       if (await add.count()) await add.click(); // already stamped on the second visit, at the other width
       await expect(row.getByRole("button", { name: "Remove" })).toBeVisible();
-      await page.getByRole("button", { name: "Change dates" }).click();
-      const bar = page.getByRole("region", { name: "Change the date of several stamps" });
+      await page.getByRole("button", { name: "Set dates" }).click();
+      const bar = page.getByRole("region", { name: "Set the date of several stamps" });
       await expect(bar).toBeVisible();
       await row.getByRole("checkbox").check();
       await bar.getByLabel("New date of the selected stamps").fill("2024-03-05");

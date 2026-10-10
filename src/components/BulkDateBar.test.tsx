@@ -18,7 +18,7 @@ vi.mock("@/app/[locale]/dashboard/actions", () => ({
 }));
 
 import BulkCheckbox from "./BulkCheckbox";
-import BulkDateBar from "./BulkDateBar";
+import { BulkMessage, BulkToolbar } from "./BulkDateBar";
 import BulkDatesProvider from "./BulkDatesProvider";
 import BulkStageButton from "./BulkStageButton";
 import RequiredFrom from "./RequiredFrom";
@@ -30,26 +30,28 @@ afterEach(() => {
   setStampDates.mockImplementation(async () => ({ ok: true }));
 });
 
-const place = (key: string, stage: number, retiredOn?: string): BulkItem => ({
+const place = (key: string, stage: number, retiredOn?: string, stamped = true): BulkItem => ({
   id: placeItemId(key),
   kind: "place",
   placeKey: key,
   stage,
   name: `Place ${key}`,
+  stamped,
   ...(retiredOn ? { retiredOn } : {}),
 });
-const extra = (id: number): BulkItem => ({ id: extraItemId(id), kind: "extra", extraId: id, name: `Extra ${id}` });
+const extra = (id: number, stamped = true): BulkItem => ({ id: extraItemId(id), kind: "extra", extraId: id, name: `Extra ${id}`, stamped });
 
-// Four stamped places in two stages and an extra stamp; the page also shows a row U that is not stamped, so it has no checkbox.
-const ITEMS: BulkItem[] = [place("A", 1), place("B", 1), place("C", 1), place("D", 2), extra(7)];
-const ROWS = [place("A", 1), place("B", 1), place("U", 1), place("C", 1), place("D", 2), extra(7)];
+// Four stamped places in two stages, a place U that is not stamped yet, an extra stamp and an extra stamp that is not stamped yet.
+const ITEMS: BulkItem[] = [place("A", 1), place("B", 1), place("U", 1, undefined, false), place("C", 1), place("D", 2), extra(7), extra(8, false)];
 
-function Page({ items = ITEMS, rows = ROWS }: { items?: BulkItem[]; rows?: BulkItem[] }) {
+function Page({ items = ITEMS, rows = items }: { items?: BulkItem[]; rows?: BulkItem[] }) {
   return (
     <NextIntlClientProvider locale="en" messages={messages}>
       <BulkDatesProvider items={items} max="2999-01-01">
-        <StageControls />
-        <BulkDateBar />
+        <BulkMessage />
+        <BulkToolbar>
+          <StageControls />
+        </BulkToolbar>
         <BulkStageButton stage={1} />
         <BulkStageButton stage={2} />
         <BulkStageButton stage={3} />
@@ -66,10 +68,11 @@ function Page({ items = ITEMS, rows = ROWS }: { items?: BulkItem[]; rows?: BulkI
   );
 }
 
-const BAR = "Change the date of several stamps";
+const BAR = "Set the date of several stamps";
 const bar = () => screen.getByRole("region", { name: BAR });
 const noBar = () => screen.queryByRole("region", { name: BAR });
-const modeButton = () => screen.getByRole("button", { name: "Change dates" });
+const modeButton = () => screen.getByRole("button", { name: "Set dates" });
+const noModeButton = () => screen.queryByRole("button", { name: "Set dates" });
 const box = (name: string) => screen.getByRole("checkbox", { name: `Select ${name}` });
 const chosen = () =>
   screen
@@ -85,35 +88,87 @@ const choose = (...names: string[]) => names.forEach((n) => click(box(n)));
 const submit = () => act(async () => void fireEvent.submit(field().closest("form")!));
 
 describe("spec 0016: the mode", () => {
-  it("AC-14: outside the mode no row has a checkbox and there is no bar; the button opens the mode", () => {
+  it("AC-14: outside the mode no row has a checkbox and there is no bar, only the toolbar's button that opens the mode", () => {
     render(<Page />);
     expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
     expect(noBar()).toBeNull();
     expect(modeButton().getAttribute("aria-pressed")).toBe("false");
     enter();
-    expect(modeButton().getAttribute("aria-pressed")).toBe("true");
     expect(bar()).toBeTruthy();
+    expect(modeButton().getAttribute("aria-pressed")).toBe("true"); // still there: pressing it leaves the mode
   });
 
-  it("AC-14: in the mode every stamped row has a checkbox named after it, and a row that is not stamped has none", () => {
+  it("AC-14: the toolbar sticks to the top, under the map's block from 1024 px, and holds the bar in the mode", () => {
+    render(<Page />);
+    const toolbar = modeButton().closest("[class*='sticky']") as HTMLElement;
+    expect(toolbar.className.split(" ")).toEqual(expect.arrayContaining(["sticky", "top-0", "z-20", "lg:z-5"]));
+    enter();
+    expect(toolbar.contains(bar())).toBe(true);
+    expect(toolbar.contains(modeButton())).toBe(true);
+  });
+
+  it("AC-14: the button is a filled button of at least 36 px on a phone, not a text link", () => {
+    render(<Page />);
+    expect(modeButton().className.split(" ")).toEqual(expect.arrayContaining(["bg-blue-600", "min-h-9", "text-white"]));
+  });
+
+  describe("on a phone the toolbar hides while the page scrolls down and comes back on the way up", () => {
+    const scrollTo = (y: number) => act(() => void (Object.defineProperty(window, "scrollY", { value: y, configurable: true }), window.dispatchEvent(new Event("scroll"))));
+    const hidden = () => modeButton().closest("[class*='sticky']")!.hasAttribute("data-hidden");
+    afterEach(() => void Object.defineProperty(window, "scrollY", { value: 0, configurable: true }));
+
+    it("AC-14: hides after scrolling down past the top, shows when scrolling up, ignores a nudge and the very top", () => {
+      render(<Page />);
+      scrollTo(60);
+      expect(hidden()).toBe(false); // too near the top
+      scrollTo(400);
+      expect(hidden()).toBe(true);
+      scrollTo(404);
+      expect(hidden()).toBe(true); // a nudge changes nothing
+      scrollTo(300);
+      expect(hidden()).toBe(false);
+    });
+
+    it("AC-14: the toolbar is not hidden while the mode is open, and a focus inside it brings it back", () => {
+      render(<Page />);
+      scrollTo(500);
+      expect(hidden()).toBe(true);
+      act(() => void fireEvent.focus(modeButton()));
+      expect(hidden()).toBe(false);
+      scrollTo(900);
+      expect(hidden()).toBe(true);
+      enter();
+      expect(hidden()).toBe(false);
+    });
+  });
+
+  it("AC-14: in the mode every place and extra stamp has a checkbox named after it, stamped or not", () => {
     render(<Page />);
     enter();
     expect(screen.getAllByRole("checkbox").map((c) => c.getAttribute("aria-label"))).toEqual([
       "Select Place A",
       "Select Place B",
+      "Select Place U",
       "Select Place C",
       "Select Place D",
       "Select Extra 7",
+      "Select Extra 8",
     ]);
-    expect(screen.queryByRole("checkbox", { name: "Select Place U" })).toBeNull();
   });
 
-  it("AC-14: Cancel, Escape and the mode button leave the mode and forget the choice", () => {
+  it("AC-14: a row the page does not hand over (an unstamped retired stamp) has no checkbox", () => {
+    const old = { ...place("R", 1, "2014-11-21", false), name: "Old house" };
+    render(<Page items={ITEMS} rows={[...ITEMS, old]} />);
+    enter();
+    expect(screen.queryByRole("checkbox", { name: "Select Old house" })).toBeNull();
+    expect(screen.getAllByRole("checkbox")).toHaveLength(ITEMS.length);
+  });
+
+  it("AC-14: Cancel and Escape leave the mode and forget the choice; the button is back and has the focus", () => {
     render(<Page />);
     for (const leave of [
       () => click(screen.getByRole("button", { name: "Cancel" })),
       () => act(() => void fireEvent.keyDown(window, { key: "Escape" })),
-      () => click(modeButton()),
     ]) {
       enter();
       choose("Place A");
@@ -121,28 +176,39 @@ describe("spec 0016: the mode", () => {
       leave();
       expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
       expect(noBar()).toBeNull();
+      expect(document.activeElement).toBe(modeButton());
       enter();
       expect(chosen()).toEqual([]); // not remembered
       click(screen.getByRole("button", { name: "Cancel" }));
     }
   });
 
-  it("AC-14: the server's HTML has neither the mode button nor a stage button: without JavaScript the mode is not offered", () => {
+  it("AC-14: opening the mode moves the focus into the bar", () => {
+    render(<Page />);
+    enter();
+    expect(document.activeElement).toBe(bar());
+  });
+
+  it("AC-14: the server's HTML has neither the button, the bar, a checkbox nor a stage button: without JavaScript the mode is not offered", () => {
     const html = renderToString(<Page />);
-    expect(html).not.toContain("Change dates");
-    expect(html).not.toContain("Set date");
+    expect(html).not.toContain("Set dates");
+    expect(html).not.toContain("Select stage");
     expect(html).not.toContain("checkbox");
     expect(html).toContain("Expand all"); // the rest of the controls are there
   });
 
-  it("AC-14: a page without the provider (a friend's page) has no mode button", () => {
+  it("AC-14: a page without the provider (a friend's page) has no button", () => {
     render(
       <NextIntlClientProvider locale="en" messages={messages}>
-        <StageControls />
+        <BulkMessage />
+        <BulkToolbar>
+          <StageControls />
+        </BulkToolbar>
       </NextIntlClientProvider>,
     );
-    expect(screen.queryByRole("button", { name: "Change dates" })).toBeNull();
+    expect(noModeButton()).toBeNull();
     expect(screen.getByRole("button", { name: "Expand all" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Expand all" }).closest("[class*='sticky']")).toBeNull(); // nothing sticks there
   });
 });
 
@@ -205,8 +271,9 @@ describe("spec 0016: Escape", () => {
     render(
       <NextIntlClientProvider locale="en" messages={messages}>
         <BulkDatesProvider items={ITEMS} max="2999-01-01">
-          <StageControls />
-          <BulkDateBar />
+          <BulkToolbar>
+            <StageControls />
+          </BulkToolbar>
           <RequiredFrom requiredFrom="2022-05-01" waived={false} tolerance={false} />
           <BulkCheckbox id={placeItemId("A")} name="Place A" />
         </BulkDatesProvider>
@@ -226,7 +293,7 @@ describe("spec 0016: Escape", () => {
   });
 });
 
-describe("spec 0016: choosing stamps", () => {
+describe("spec 0016: choosing rows", () => {
   it("AC-15: a click chooses and unchooses one row, and the count is announced in a status region", () => {
     render(<Page />);
     enter();
@@ -239,46 +306,55 @@ describe("spec 0016: choosing stamps", () => {
     expect(status()).toBe("1 selected");
   });
 
+  it("AC-16: the status also says how many of the chosen rows are not stamped yet, and nothing about it when all are", () => {
+    render(<Page />);
+    enter();
+    const status = () => within(bar()).getByRole("status").textContent;
+    choose("Place A", "Place U", "Extra 8");
+    expect(status()).toBe("3 selected · 2 not stamped yet");
+    choose("Place U", "Extra 8");
+    expect(status()).toBe("1 selected");
+  });
+
   it("AC-15: a shift-click chooses the range from the last chosen row, in the page's order, across the places and the extras", () => {
     render(<Page />);
     enter();
     choose("Place B");
     click(box("Extra 7"), { shiftKey: true });
-    expect(chosen()).toEqual(["Place B", "Place C", "Place D", "Extra 7"]);
+    expect(chosen()).toEqual(["Place B", "Place U", "Place C", "Place D", "Extra 7"]); // also the place that is not stamped
     click(box("Place C"), { shiftKey: true }); // C is chosen: the range from the anchor (the extra) down to C is cleared
-    expect(chosen()).toEqual(["Place B"]);
+    expect(chosen()).toEqual(["Place B", "Place U"]);
   });
 
-  it("AC-15: the bar's Select all chooses everything stamped, Clear nothing and Clear does not leave the mode", () => {
+  it("AC-15: the bar's Select all chooses every row, stamped or not, Clear nothing and Clear does not leave the mode", () => {
     render(<Page />);
     enter();
     click(screen.getByRole("button", { name: "Select all" }));
-    expect(chosen()).toHaveLength(5);
+    expect(chosen()).toHaveLength(ITEMS.length);
     click(screen.getByRole("button", { name: "Clear" }));
     expect(chosen()).toEqual([]);
     expect(bar()).toBeTruthy();
   });
 
-  it("AC-15: in the mode a stage's button adds the stamped places of that stage to the choice, and only those", () => {
+  it("AC-15: in the mode a stage's button adds every place of that stage to the choice, stamped or not, and only those", () => {
     render(<Page />);
     enter();
     choose("Place D");
     click(screen.getByRole("button", { name: "Select stage: Stage 1" }));
-    expect(chosen()).toEqual(["Place A", "Place B", "Place C", "Place D"]);
-    expect(screen.queryByRole("button", { name: /Stage 3/ })).toBeNull(); // no stamp in stage 3: no button
+    expect(chosen()).toEqual(["Place A", "Place B", "Place U", "Place C", "Place D"]);
+    expect(screen.queryByRole("button", { name: /Stage 3/ })).toBeNull(); // nothing in stage 3: no button
     expect((box("Extra 7") as HTMLInputElement).checked).toBe(false); // the extras are not a stage's
   });
 
-  it("AC-20: outside the mode a stage's button opens the mode with that stage's stamps chosen", () => {
+  it("AC-15: outside the mode a stage has no button: the way in is the toolbar's button (AC-14)", () => {
     render(<Page />);
-    click(screen.getByRole("button", { name: "Set date: Stage 2" }));
-    expect(bar()).toBeTruthy();
-    expect(chosen()).toEqual(["Place D"]);
-    expect(screen.queryByRole("button", { name: /Set date/ })).toBeNull(); // in the mode the same place offers "Select stage"
+    expect(screen.queryByRole("button", { name: /stage/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Set date:/ })).toBeNull();
+    enter();
     expect(screen.getByRole("button", { name: "Select stage: Stage 2" })).toBeTruthy();
   });
 
-  it("AC-16: a chosen stamp that disappears from the page (removed meanwhile) is no longer chosen or counted", () => {
+  it("AC-15: a chosen row that disappears from the page (removed meanwhile) is no longer chosen or counted", () => {
     const view = render(<Page />);
     enter();
     choose("Place A", "Place B");
@@ -332,13 +408,13 @@ describe("spec 0016: the bar", () => {
     expect(setStampDates).toHaveBeenCalledOnce();
   });
 
-  it("AC-17: Apply sends the chosen places and extra stamps with the date, as one request", async () => {
+  it("AC-17: Apply sends the chosen places and extra stamps, stamped or not, with the date, as one request", async () => {
     render(<Page />);
     enter();
-    choose("Place A", "Place D", "Extra 7");
+    choose("Place A", "Place U", "Place D", "Extra 7", "Extra 8");
     type("2026-09-15");
     await act(async () => void fireEvent.click(apply()));
-    expect(setStampDates).toHaveBeenCalledWith(["A", "D"], [7], "2026-09-15");
+    expect(setStampDates).toHaveBeenCalledWith(["A", "U", "D"], [7, 8], "2026-09-15");
   });
 
   it("AC-16: Enter in the date field applies, and Enter with a date that cannot be applied sends nothing", async () => {
@@ -373,7 +449,7 @@ describe("spec 0016: the bar", () => {
     await waitFor(() => expect(noBar()).toBeNull());
   });
 
-  it("AC-19: after a save that went through the mode closes, the choice is gone and a message names how many dates changed", async () => {
+  it("AC-19: after a save that went through the mode closes, the choice is gone and a message names how many dates were set", async () => {
     render(<Page />);
     enter();
     choose("Place A", "Place B", "Extra 7");
@@ -381,19 +457,19 @@ describe("spec 0016: the bar", () => {
     await act(async () => void fireEvent.click(apply()));
     await waitFor(() => expect(noBar()).toBeNull());
     expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
-    expect(screen.getByText("3 dates changed").getAttribute("aria-live")).toBe("polite");
+    expect(screen.getByText("3 dates set").getAttribute("aria-live")).toBe("polite");
     enter(); // a new visit starts clean, without the old message
     expect(chosen()).toEqual([]);
-    expect(screen.queryByText("3 dates changed")).toBeNull();
+    expect(screen.queryByText("3 dates set")).toBeNull();
   });
 
-  it("AC-19: one date is '1 date changed'", async () => {
+  it("AC-19: one date is '1 date set'", async () => {
     render(<Page />);
     enter();
     choose("Place A");
     type("2026-09-15");
     await act(async () => void fireEvent.click(apply()));
-    await waitFor(() => expect(screen.getByText("1 date changed")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText("1 date set")).toBeTruthy());
   });
 
   it("AC-19: after a failure the choice and the typed date stay, the usual message shows, and Apply works again", async () => {
@@ -454,7 +530,8 @@ describe("spec 0016: a retired stamp in the choice", () => {
 
   it("AC-18: a retired stamp takes part in the choice like the others, also in a stage's button", () => {
     render(<Page items={rows} rows={rows} />);
-    click(screen.getByRole("button", { name: "Set date: Stage 1" }));
+    enter();
+    click(screen.getByRole("button", { name: "Select stage: Stage 1" }));
     expect(chosen()).toEqual(["Place A", "Old house"]);
   });
 });

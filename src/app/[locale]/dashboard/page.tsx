@@ -28,7 +28,7 @@ import { hasToleranceNote, requiredNote } from "@/lib/new-stamps";
 import { isRecentlyMoved, movedNote, recentlyMovedVariant, todayIso } from "@/lib/stamp-moves";
 import { TRAIL_DATA_DATE } from "@/lib/trail-meta";
 import BulkCheckbox from "@/components/BulkCheckbox";
-import BulkDateBar from "@/components/BulkDateBar";
+import { BulkMessage, BulkToolbar } from "@/components/BulkDateBar";
 import BulkDatesProvider from "@/components/BulkDatesProvider";
 import BulkStageButton from "@/components/BulkStageButton";
 import LocateButton from "@/components/LocateButton";
@@ -36,6 +36,7 @@ import MovedNote from "@/components/MovedNote";
 import PageShell from "@/components/PageShell";
 import RequiredFrom from "@/components/RequiredFrom";
 import RetiredRow from "@/components/RetiredRow";
+import RetiredToggle from "@/components/RetiredToggle";
 import RetiredStampControl from "@/components/RetiredStampControl";
 import ExtraStampButton from "@/components/ExtraStampButton";
 import StageControls from "@/components/StageControls";
@@ -98,7 +99,7 @@ export default async function Dashboard({
   }));
 
 
-  // The stamped rows that "Change dates" can choose, in the order the page lists them (spec 0016 AC-14, AC-15).
+  // The rows that "Set dates" can choose, stamped or not, in the order the page lists them (spec 0016 AC-14, AC-15).
   const bulkItems = buildBulkItems({
     stages: stages.map((st) => ({
       stage: st.stage,
@@ -181,17 +182,24 @@ export default async function Dashboard({
       }
     >
       <BulkDatesProvider items={bulkItems} max={maxDate}>
-      <BulkDateBar />
-      <section>
+      <BulkMessage />
+      {/* One box for the stage list and the extra stamps: the toolbar sticks to the top of the page for all of it (spec 0016 AC-14). */}
+      <div>
         <h2 className="mb-2 font-semibold">{t("checkpoints")}</h2>
         {placeList.length === 0 ? (
           <p className="text-stone-500">{t("empty")}</p>
         ) : (
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-sm text-stone-500">{t("stageHint")}</p>
-              <StageControls withRetired={retiredList.length > 0} />
-            </div>
+          <>
+            <p className="text-sm text-stone-500">{t("stageHint")}</p>
+            {retiredList.length > 0 && (
+              <div className="mt-2">
+                <RetiredToggle />
+              </div>
+            )}
+            <BulkToolbar>
+              <StageControls />
+            </BulkToolbar>
+            <div className="space-y-3">
             {stages.map((stage) => {
               const { stage: n, meta, places: list } = stage;
               const keys = stageStampKeys(stage);
@@ -276,7 +284,7 @@ export default async function Dashboard({
                     <li
                       id={`place-${p.key}`}
                       data-stage={p.stage}
-                      className="flex scroll-mt-24 flex-wrap items-start justify-between gap-x-2 gap-y-1 px-4 py-3"
+                      className="flex scroll-mt-24 lg:scroll-mt-44 flex-wrap items-start justify-between gap-x-2 gap-y-1 px-4 py-3 lg:scroll-mt-44"
                     >
                       <BulkCheckbox id={placeItemId(p.key)} name={p.name} />
                       <div className="min-w-0 flex-1 basis-40">
@@ -328,12 +336,12 @@ export default async function Dashboard({
                 </StageSection>
               );
             })}
-          </div>
+            </div>
+          </>
         )}
-      </section>
 
       {extraListWithStage.length > 0 && (
-        <section id="extra-stamps" className="scroll-mt-8">
+        <section id="extra-stamps" className="mt-8 scroll-mt-24 lg:scroll-mt-44">
           <h2 className="mb-1 font-semibold">
             {t("extraStamps")}{" "}
             <span className="text-sm font-normal text-stone-500">
@@ -343,7 +351,7 @@ export default async function Dashboard({
           <p className="mb-2 text-sm text-stone-500">{t("extraNote")}</p>
           <ul className="divide-y rounded-lg bg-white shadow-sm">
             {extraListWithStage.map((e) => (
-              <li id={`extra-${e.id}`} key={e.id} className="flex scroll-mt-24 flex-wrap items-start justify-between gap-x-2 gap-y-1 px-4 py-3">
+              <li id={`extra-${e.id}`} key={e.id} className="flex scroll-mt-24 lg:scroll-mt-44 flex-wrap items-start justify-between gap-x-2 gap-y-1 px-4 py-3 lg:scroll-mt-44">
                 <BulkCheckbox id={extraItemId(e.id)} name={e.name} />
                 <div className="min-w-0 flex-1 basis-40">
                   <div>
@@ -370,6 +378,7 @@ export default async function Dashboard({
           </ul>
         </section>
       )}
+      </div>
       </BulkDatesProvider>
     </PageShell>
   );

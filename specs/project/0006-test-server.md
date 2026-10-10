@@ -60,7 +60,7 @@ Google account and without touching real data. Production keeps Google sign-in o
   AC-20), and that tapping it does what it should. The feature-flag project starts only after both projects (AC-6).
 - **AC-11**: The main pages are checked with axe (`@axe-core/playwright`, `e2e/accessibility.spec.ts`), each at a desktop width
   (1280 x 800) and at the phone width (375 x 812): the landing page in every language, the dashboard (every stage open, one place
-  stamped, the map drawn), the dashboard in its "Change dates" mode (one stamp chosen and a date typed), the stats page (six months drawn, one of them empty), the settings page, the stats page with the account menu open (its list, the marked entry, Sign out), the Friends page and the Changelog page. The rules are the WCAG 2.0, 2.1 and 2.2
+  stamped, the map drawn), the dashboard in its "Set dates" mode (one stamp chosen and a date typed), the stats page (six months drawn, one of them empty), the settings page, the stats page with the account menu open (its list, the marked entry, Sign out), the Friends page and the Changelog page. The rules are the WCAG 2.0, 2.1 and 2.2
   success criteria of levels A and AA, all of them at both widths except the colour contrast of the dashboard, which is checked at
   the desktop width only (the colours do not change with the width, and the rule is half of the time axe takes on that page). A finding of impact `serious` or `critical` that the allow-list (AC-12) does not name fails
   the test of its page, with the rule, the width and the elements; findings of lower impact are attached to the test as

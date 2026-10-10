@@ -132,9 +132,10 @@ export async function setStampDate(placeKeys: string[], date: string): Promise<A
   });
 }
 
-// Changes the date of many stamps at once: places (every variant of each) and extra stamps, all or nothing (spec 0016 AC-17).
-// Update only. One database function does it in one transaction, as the caller (migration 0080); it answers false, and changes
-// nothing, when a row is missing or a retired stamp would get a date from its retirement day on (AC-18).
+// Gives many places (every variant of each) and extra stamps one date, all or nothing (spec 0016 AC-17): a stamped row is re-dated,
+// one that is not stamped yet is stamped with it. One database function does it in one transaction, as the caller (migrations 0080
+// and 0137); it answers false, and changes nothing, when a place or extra stamp does not exist or a retired stamp would get a date
+// from its retirement day on (AC-18).
 export async function setStampDates(placeKeys: string[], extraIds: number[], date: string): Promise<ActionResult> {
   if (
     !Array.isArray(placeKeys) ||
@@ -152,7 +153,7 @@ export async function setStampDates(placeKeys: string[], extraIds: number[], dat
     const { data, error } = await supabase.rpc("set_stamp_dates", { place_keys: placeKeys, extra_ids: extraIds, new_date: date });
     if (error) return fail("write", error);
     if (data !== true) {
-      logStampActionRefused("setStampDates"); // a stamp that is gone, or a retired stamp's day: expected, but worth a line
+      logStampActionRefused("setStampDates"); // a row that does not exist, or a retired stamp's day: expected, but worth a line
       return failed;
     }
     return ok;

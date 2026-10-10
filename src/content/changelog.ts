@@ -12,6 +12,26 @@ export type ChangelogEntry = { date: string; title: Localized; changes: Change[]
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-10",
+    title: {
+      en: "Set one date for many stamps, also for places you have not stamped yet",
+      ru: "Одна дата для многих печатей, в том числе для мест, где печати ещё нет",
+      hu: "Egy dátum sok bélyegzéshez, azokhoz a helyekhez is, ahol még nincs bélyegzésed",
+      de: "Ein Datum für viele Stempel, auch für Orte, die noch nicht gestempelt sind",
+    },
+    changes: [
+      {
+        kind: "improved",
+        text: {
+          en: "The bar above the list of stages, with the button \"Set dates\", now stays at the top of the page while you scroll, so it is always at hand (the button replaces the small \"Change dates\" link; on a phone the bar steps aside while you scroll down and comes back as soon as you scroll up). In this mode you can tick any place or extra stamp, also the ones you have not stamped yet: press Apply, and the stamped ones get the new date while the others are stamped with it. The bar shows how many of the ticked places are still new. \"Select stage\" and \"Select all\" tick everything, and the old \"Set date\" on a stage's header is gone, because the button is always there. A retired stamp that you have not collected is still added on its own.",
+          ru: "Панель над списком этапов с кнопкой «Задать даты» теперь остаётся вверху страницы, пока вы прокручиваете её, и всегда под рукой (кнопка заменила маленькую ссылку «Изменить даты»; на телефоне панель уходит, пока вы листаете вниз, и возвращается, как только вы листаете вверх). В этом режиме можно отметить любое место или дополнительную печать, в том числе ещё не поставленную: нажмите «Применить», и у поставленных изменится дата, а остальные будут поставлены с этой датой. Панель показывает, сколько из отмеченных мест ещё новые. «Выбрать этап» и «Выбрать все» отмечают всё подряд, а прежняя кнопка «Задать дату» на заголовке этапа исчезла: кнопка теперь всегда на виду. Упразднённую печать, которую вы не собирали, по-прежнему добавляют отдельно.",
+          hu: "A szakaszok listája feletti sáv a „Dátumok beállítása” gombbal mostantól az oldal tetején marad görgetés közben is, így mindig kéznél van (a gomb a kis „Dátumok módosítása” link helyét veszi át; telefonon a sáv lefelé görgetéskor félreáll, felfelé görgetéskor pedig azonnal visszatér). Ebben a módban bármelyik helyet vagy extra bélyegzőt kijelölheted, azokat is, amelyeket még nem pecsételtél le: az Alkalmaz gombbal a lepecsételteknek új dátuma lesz, a többit pedig ezzel a dátummal pecsételjük le. A sáv megmutatja, hogy a kijelöltek közül hány még új. A „Szakasz kijelölése” és a „Mind kijelöl” mindent kijelöl, a szakasz fejlécén lévő régi „Dátum beállítása” pedig megszűnt, mert a gomb mindig ott van. A megszűnt, általad nem begyűjtött bélyegzőt továbbra is külön kell hozzáadni.",
+          de: "Die Leiste über der Etappenliste mit der Schaltfläche „Daten setzen“ bleibt jetzt beim Scrollen oben auf der Seite stehen und ist immer zur Hand (die Schaltfläche ersetzt den kleinen Link „Daten ändern“; auf dem Handy weicht die Leiste beim Hinunterscrollen aus und kommt beim Hinaufscrollen sofort zurück). In diesem Modus kannst du jeden Ort und jeden Extra-Stempel anhaken, auch die, die du noch nicht gestempelt hast: Mit „Übernehmen“ bekommen die gestempelten das neue Datum, die anderen werden mit diesem Datum gestempelt. Die Leiste zeigt, wie viele der angehakten Orte noch neu sind. „Etappe wählen“ und „Alle auswählen“ haken alles an, das frühere „Datum setzen“ im Kopf einer Etappe entfällt, weil die Schaltfläche immer da ist. Ein eingestellter Stempel, den du nicht gesammelt hast, wird weiterhin einzeln hinzugefügt.",
+        },
+      },
+    ],
+  },
+  {
     date: "2026-10-07",
     title: {
       en: "Change the date of many stamps at once, a page of your stats, moved stamps on the map, an account menu and screenshots on the start page",

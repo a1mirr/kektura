@@ -2,16 +2,16 @@
 
 Status: Done
 Owner code: `src/lib/stamp-date.ts`, `src/app/[locale]/dashboard/actions.ts`, `src/components/StampDateInput.tsx`,
-`StampButton.tsx`, `ExtraStampButton.tsx`, `StageStampButton.tsx`, `CalendarButton.tsx`, `supabase/migrations/0007_edit_dates.sql`; for changing many dates at once
+`StampButton.tsx`, `ExtraStampButton.tsx`, `StageStampButton.tsx`, `CalendarButton.tsx`, `supabase/migrations/0007_edit_dates.sql`; for setting many dates at once
 (AC-14 to AC-22): `src/lib/bulk-dates.ts`, `BulkDatesProvider.tsx`, `BulkDateBar.tsx`, `BulkCheckbox.tsx`, `BulkStageButton.tsx`,
-`StageControls.tsx`, `supabase/migrations/0080_bulk_stamp_dates.sql`; `messages/*.json` (`dashboard.stampDate`, `dashboard.openCalendar`, `dashboard.bulk*`)
+`supabase/migrations/0080_bulk_stamp_dates.sql`, `0137_bulk_dates_everywhere.sql`; `messages/*.json` (`dashboard.stampDate`, `dashboard.openCalendar`, `dashboard.bulk*`)
 
 ## Goal
 
 Every stamp has a date, and the user can correct it ("I collected this one in June"). A new stamp gets the
 user's own day. A date is only ever saved when it is a real, complete one, never a half-typed one, and it reads
 `yyyy-mm-dd` in every language and browser (a native date field would show `10/02/2026`, which is 2 October or
-10 February depending on who looks), with a calendar one click away. A stretch walked on one day is dated in one go: the user chooses the stamps and gives one date.
+10 February depending on who looks), with a calendar one click away. A stretch walked on one day is dated in one go: the user chooses rows, stamped or not yet, and gives one date, which re-dates the stamped ones and stamps the others.
 
 ## Behaviour
 
@@ -66,45 +66,48 @@ user's own day. A date is only ever saved when it is a real, complete one, never
   it with other stamps is refused whole (changing many dates at once has its own rule, AC-18). Its date field's last day is the day before it retired: the calendar picker stops there and a later
   day typed in is never sent (it is restored on leaving the field).
 
-### Changing many dates at once
+### Setting many dates at once
 
-- **AC-14**: The dashboard has a "Change dates" mode, switched on and off by a button next to the stage controls ("Expand all"). In the
-  mode every stamped place, retired stamp and extra stamp has a checkbox whose name is "Select" and the stamp's name; a stamp that is not
-  stamped has none. Outside the mode no row has one. Leaving the mode (the button again, Cancel, Escape, or a saved change) forgets the
-  choice (an Escape that closes a row's open note is the note's: the mode stays); the next visit starts empty. Without JavaScript the mode is not offered (its button and the stage buttons of AC-20 are not
-  in the server's HTML) and the single date fields stay. The button is only on the dashboard, not on a friend's page.
+- **AC-14**: On the dashboard the stage controls ("Set dates", "Expand all", "Collapse all") are a toolbar that sticks to the top of the page
+  while the list scrolls, the extra stamps included, and "Set dates" is a filled button in it (AC-21). It opens the "Set dates" mode, which
+  the button then shows as pressed (pressing it again leaves the mode) and in which the bar (AC-16) is open. In the mode every place and extra stamp has a checkbox whose name is
+  "Select" and its name, stamped or not, and so has a retired stamp that is stamped (an unstamped retired stamp is collected on its own, AC-13).
+  Outside the mode no row has one. Leaving the mode (Cancel, Escape, or a saved change) forgets the choice, gives the focus back to the button
+  (an Escape that closes a row's open note is the note's: the mode stays); the next visit starts empty. Opening the mode moves the focus into
+  the bar. Without JavaScript the mode is not offered (the button, the bar, the checkboxes and the stage buttons of AC-15 are not in the
+  server's HTML) and the single date fields stay. The button is only on the dashboard, not on a friend's page.
 - **AC-15**: In the mode a click on a checkbox chooses or unchooses its row. A click with Shift held gives the rows from the last
   clicked one to this one the state this row gets, in the order of the page: each stage's places with a retired stamp where it stands,
-  then the extra stamps (so a range can run from a place into the extras). Each stage's header has "Select stage", which adds the
-  stamped places and retired stamps of that stage (the extra stamps are no stage's), and the bar has "Select all" and "Clear" ("Clear"
-  keeps the mode). The number chosen is in a status region ("5 selected"). A chosen stamp that is no longer on the page (removed
-  meanwhile) is no longer chosen or counted.
-- **AC-16**: In the mode a bar shows the number chosen, a date field and "Apply". The field is the `yyyy-mm-dd` text field of AC-5 with
-  its calendar button (AC-9), limited as in AC-2 (the picker offers 1938-01-01 to tomorrow, UTC). Apply is disabled for nothing chosen,
-  and for an empty, incomplete, other-format, impossible or out-of-range date, and while a retired stamp stands in the way (AC-18).
-  Nothing is sent before Apply: not while the date is typed, not on leaving the field, not when a day is picked in the calendar (a
-  pick fills the field, unlike AC-9). Enter in the date field applies. While saving the bar is busy ("Saving…"), a second press or
-  Enter sends nothing, and Escape and Cancel do not close it.
-- **AC-17**: `setStampDates(placeKeys, extraIds, date)` is one server action that only **updates** `stamped_on` of the signed-in user's
-  existing rows (every variant of each place, and the extra stamps), never inserts, and touches only the caller's rows (row level
-  security and an explicit `user_id` filter). It takes 1 to 500 places and extra stamps together (more than the 161 places and 72
-  extra stamps, so "select all" always fits) and a valid stamp date (AC-2); anything else is refused without database access
-  (`failed`, one warning); a missing session is `unauthorized`. The database function `set_stamp_dates` does the work in one transaction,
-  so it is all or nothing: when a place or extra stamp has no row of the caller (removed in another tab, or never stamped) it answers
-  false, nothing changes and the result is `failed`. A refusal by the function is logged as one warning with no input (spec 0008 AC-3: `request refused`, never sent to Telegram); a database error is `failed` and logged like the other stamp actions (spec 0008);
-  it never throws. Only a signed-in user may call the function, and it runs as the caller (`security invoker`).
+  then the extra stamps (so a range can run from a place into the extras). Each stage's header has "Select stage" (in the mode only), which
+  adds every place of that stage, stamped or not, and the stamped retired stamps (the extra stamps are no stage's), and the bar has "Select all" and "Clear" ("Clear"
+  keeps the mode). The number chosen is in a status region ("5 selected"). A chosen row that is no longer on the page is no longer chosen or counted.
+- **AC-16**: In the mode a bar shows the number chosen and, when some of them are not stamped yet, how many ("5 selected · 2 not stamped
+  yet"), a date field and "Apply". The field is the `yyyy-mm-dd` text field of AC-5 with its calendar button (AC-9), limited as in AC-2
+  (the picker offers 1938-01-01 to tomorrow, UTC). Apply is disabled for nothing chosen, and for an empty, incomplete, other-format,
+  impossible or out-of-range date, and while a retired stamp stands in the way (AC-18). Nothing is sent before Apply: not while the date is
+  typed, not on leaving the field, not when a day is picked in the calendar (a pick fills the field, unlike AC-9). Enter in the date field
+  applies. While saving the bar is busy ("Saving…"), a second press or Enter sends nothing, and Escape and Cancel do not close it.
+- **AC-17**: `setStampDates(placeKeys, extraIds, date)` is one server action that gives the signed-in user's places (every variant of
+  each) and extra stamps one date: a row that is stamped is re-dated, one that is not stamped yet is stamped with it (a new stamp is created,
+  as stamping does). It touches only the caller's rows (row level security, and the function writes the caller's own user id) and never
+  deletes. It takes 1 to 500 places and extra stamps together (more than the 161 places and 72 extra stamps, so "select all" always fits) and
+  a valid stamp date (AC-2); anything else is refused without database access (`failed`, one warning); a missing session is `unauthorized`.
+  The database function `set_stamp_dates` does the work in one transaction, so it is all or nothing: when a place or extra stamp does not exist it
+  answers false, nothing changes and the result is `failed`. A refusal by the function is logged as one warning with no input (spec 0008 AC-3:
+  `request refused`, never sent to Telegram); a database error is `failed` and logged like the other stamp actions (spec 0008); it never
+  throws. Only a signed-in user may call the function, and it runs as the caller (`security invoker`).
 - **AC-18**: A retired stamp (spec 0001 AC-22) may only get a date before the day it retired, also in a request with other stamps (a
   request that holds one with a date on or after it is refused whole, by the function too). The bar names the chosen retired stamps that
   the typed date cannot go to and keeps Apply disabled until the date is earlier or they are unchosen.
 - **AC-19**: After a save that went through, the page shows the new dates, the mode is closed, the choice is cleared and a status
-  message names the count ("12 dates changed", "1 date changed"; it is gone when the mode is opened again). After a failure the
+  message names the count ("12 dates set", "1 date set"; it is gone when the mode is opened again). After a failure the
   dates and the choice are kept, the bar shows "Couldn't save, try again." (spec 0002 AC-10) and Apply works again; an expired session
   refreshes the page (spec 0002 AC-11). The new dates are what the statistics use (AC-8).
-- **AC-20**: On a stage's header "Set date" (outside the mode) opens the mode with the stage's stamped places and retired stamps
-  chosen, so a whole stage is dated in two steps; in the mode the same place offers "Select stage" (AC-15). A stage with no stamp has
-  neither. Its accessible name says which stage ("Set date: Stage 3").
-- **AC-21**: On a phone the bar is fixed to the bottom of the screen and rides above the on-screen keyboard (the visual viewport's
-  inset); from 1024 px it sticks to the top of the list's column (spec 0036) while the stages scroll, below the map's block, so a fullscreen map covers it (spec 0003 AC-11). At 375 and 320 px the page does
+- **AC-20**: Removed. A stage's "Set date" outside the mode is gone: the way into the mode is the toolbar's button (AC-14), and "Select stage" (AC-15) is inside the mode.
+- **AC-21**: The toolbar's button is a target of at least 36 px on a phone. On a phone the toolbar goes out of the way while the page is scrolled
+  down (past the first 120 px) and comes back on the way up or when something in it takes the focus, and stays while the mode is open; from
+  1024 px it never hides. The bar is fixed to the bottom of the screen on a phone and rides above the on-screen keyboard (the visual viewport's
+  inset); from 1024 px it stands under the toolbar, in the toolbar's sticky box in the list's column (spec 0036), below the map's block, so a fullscreen map covers both (spec 0003 AC-11). At 375 and 320 px the page does
   not scroll sideways and the bar fits; its buttons, the date field and the calendar button, and the checkboxes (their label) are at
   least 44 x 44 px targets. With the keyboard: Tab reaches each checkbox, Space toggles it, Enter in the date field applies.
 - **AC-22**: The texts of the mode (`dashboard.bulk*`) exist in every language with the same placeholders; the count message has
@@ -112,8 +115,7 @@ user's own day. A date is only ever saved when it is a real, complete one, never
 
 ## Out of scope
 
-Notes on a stamp; a time of day; a different date per row or a range of dates when changing many; undo after Apply; dates for
-places that are not stamped yet (stamping with a date is AC-1); a database check on the date range (it would
+Notes on a stamp; a time of day; a different date per row or a range of dates when setting many; unstamping many; undo after Apply; a database check on the date range (it would
 need `current_date`, which can't be part of a constraint that must hold when a dump is reloaded); a custom-built
 calendar widget. Other dates on the site (the changelog's long dates, the month labels of the stats page's
 chart) keep their localized form: this spec covers the fields where a date is entered.
@@ -134,11 +136,12 @@ chart) keep their localized form: this spec covers the fields where a date is en
 - The field does not ask phones for a numeric keypad (`inputmode`): the iPhone's digits-only keypad has no hyphen,
   so the date couldn't be typed there. The calendar button is the quick way on a phone.
 
-- Many dates are one database function, not two client updates, because the places and the extra stamps are two tables and two
-  requests cannot be one transaction. The function locks the rows it counts (`for update`) and checks everything before it writes, so "nothing" needs no rollback and a row deleted by another transaction meanwhile makes it answer false instead of changing fewer rows. A request
-  with a stamp that vanished meanwhile fails whole and the page is not refreshed: the choice stays, and the stamp drops out of it the
-  next time the page is drawn.
-- The mode keeps the stage list calm for visits that do not change dates: the checkboxes exist only while it is on. `BulkCheckbox` reads
+- Many dates are one database function, not client writes, because the places and the extra stamps are two tables and two
+  requests cannot be one transaction. The function checks everything (the places and extra stamps exist, no retired stamp gets a day on or after
+  its retirement) before it writes, so "nothing" needs no rollback; it writes with `insert … on conflict do update`, so a row that another
+  transaction deleted meanwhile is simply stamped again. It replaces the update-only function of migration 0080 under the same name and signature,
+  so the code that runs while the migration is applied keeps working. A request that fails does not refresh the page: the choice stays.
+- The mode keeps the stage list calm for visits that do not set dates: the checkboxes exist only while it is on. The toolbar and the bar are one sticky box (`top-0`, z-5 from 1024 px) that holds the list's heading block's controls but not "Show retired stamps", which stands above it so that the toolbar fits one line at 375 px; the box is a child of the same wrapper as the stages and the extra stamps, so it sticks for all of them. It has no transform or filter, which would turn it into the containing block of the bar that is `position: fixed` on a phone. `BulkCheckbox` reads
   Shift from the click event (React raises a checkbox's change from the click); `BulkDateBar` does not reuse `StampDateInput`, whose
   saving after a pause is the opposite of Apply.
 - On a phone the bar is `position: fixed`; a keyboard that only shrinks the visual viewport (Chrome and Safari do) would cover it, so
@@ -157,9 +160,9 @@ chart) keep their localized form: this spec covers the fields where a date is en
 | AC-11 | `tests/messages.test.ts` (parity) |
 | AC-13 | `src/app/[locale]/dashboard/actions.test.ts` (a retired stamp's date: before the retirement day, strict, mixed requests refused), `src/components/RetiredStampControl.test.tsx` (the field never sends a later day and restores it) |
 | AC-13 (the calendar picker's last day) | manual (native browser UI, like AC-9's row): open the calendar of a collected retired stamp: days after the day before it retired cannot be picked. Last checked: never recorded. |
-| AC-14, AC-15, AC-16, AC-19, AC-20 | `src/components/BulkDateBar.test.tsx` (the mode, the checkboxes of stamped rows only, leaving it, the server's HTML without the buttons, range and stage and all/clear choices, the bar's Apply states, nothing sent before Apply, pending, success and failure messages), `src/lib/bulk-dates.test.ts` (order of the rows, ranges, the request), `e2e/stamp-dates.spec.ts` (a click, a shift-click, Space, a stage, Enter; one request; the new dates and the stats page's new month; Escape and Cancel; a vanished stamp; no JavaScript) |
-| AC-17 | `src/app/[locale]/dashboard/actions.test.ts` (what is sent to the function, the limit of 500, invalid input, `unauthorized`, a refused request, a database error and its log line), `tests/database-rules.test.ts` (the function itself: the caller's rows and every variant only, all or nothing, who may call it, no inserts, security invoker, and a stamp deleted by another transaction meanwhile makes it answer false: two sessions) |
-| AC-18 | `src/lib/bulk-dates.test.ts`, `src/components/BulkDateBar.test.tsx` (the bar names the stamps), `tests/database-rules.test.ts` (the function refuses the day it retired or later), `e2e/stamp-dates.spec.ts` |
-| AC-21 | `src/components/BulkDateBar.test.tsx` (the keyboard's gap from a stubbed visual viewport: it follows a resize and a scroll, is 0 while pinch-zoomed or without a viewport, and the listeners go with the bar), `e2e/mobile.spec.ts` (the mode at 375 and 320 px: no sideways scroll, the bar inside the window at the bottom, targets of 44 px, choosing and applying with taps), `e2e/stamp-dates.spec.ts` (Space and Enter; the fullscreen map is topmost over the bar at 1280 px), `e2e/accessibility.spec.ts` (`dashboard-change-dates`, both widths) |
-| AC-21 (the bar above a real keyboard) | manual (the unit test feeds the gap from a stub; only a real phone shows what its keyboard does to the visual viewport): on a phone, open "Change dates", tap the date field and check that the bar rides just above the keyboard with the field and Apply visible. Last checked: never recorded. |
+| AC-14, AC-15, AC-16, AC-19 | `src/components/BulkDateBar.test.tsx` (the toolbar's button, its sticky classes and the bar inside it, hiding on a phone while scrolling down, the mode, a checkbox on every row whether stamped or not and none on a row the page does not hand over, leaving it and the focus going back to the button, the focus moving into the bar, the server's HTML without the button, bar and stage buttons, no stage button outside the mode, range and stage and all/clear choices, the "not stamped yet" count, the bar's Apply states, nothing sent before Apply, pending, success and failure messages), `src/lib/bulk-dates.test.ts` (order of the rows, unstamped places and extras listed, an unstamped retired stamp left out, ranges, the request, the count of new stamps), `e2e/stamp-dates.spec.ts` (a click, a shift-click, Space, a stage, Enter; every place and extra stamp has a checkbox; one request; unstamped rows stamped with the date next to re-dated ones; the new dates and stamp count and the stats page's new month; Escape and Cancel and the focus; a stamp removed meanwhile; no checkbox for an uncollected retired stamp; no JavaScript) |
+| AC-17 | `src/app/[locale]/dashboard/actions.test.ts` (what is sent to the function, the limit of 500, invalid input, `unauthorized`, a refused request, a database error and its log line), `tests/database-rules.test.ts` (the function itself: stamps rows that are not stamped yet, every variant, and re-dates the others; only the caller's rows, all or nothing for a place or extra stamp that does not exist, who may call it, never deletes, security invoker, and a stamp deleted by another transaction meanwhile is stamped again: two sessions) |
+| AC-18 | `src/lib/bulk-dates.test.ts`, `src/components/BulkDateBar.test.tsx` (the bar names the stamps), `tests/database-rules.test.ts` (the function refuses the day it retired or later, for a stamped and for an uncollected retired stamp), `e2e/stamp-dates.spec.ts` |
+| AC-21 | `src/components/BulkDateBar.test.tsx` (the keyboard's gap from a stubbed visual viewport: it follows a resize and a scroll, is 0 while pinch-zoomed or without a viewport, and the listeners go with the bar), `e2e/mobile.spec.ts` (the toolbar and the mode at 375 and 320 px: no sideways scroll, the toolbar gone when the page is scrolled down and back on the way up, the bar inside the window at the bottom, targets of 44 px, choosing a stamped and an unstamped place and applying with taps), `e2e/stamp-dates.spec.ts` (Space and Enter; the toolbar stays at the top down to the extra stamps and holds the bar; the fullscreen map is topmost over the toolbar and over the bar at 1280 px), `e2e/accessibility.spec.ts` (`dashboard-change-dates`, both widths) |
+| AC-21 (the bar above a real keyboard) | manual (the unit test feeds the gap from a stub; only a real phone shows what its keyboard does to the visual viewport): on a phone, open "Set dates", tap the date field and check that the bar rides just above the keyboard with the field and Apply visible. Last checked: never recorded. |
 | AC-22 | `tests/messages.test.ts` (parity and placeholders; the plural forms are ICU, read by `BulkDateBar.test.tsx` for English) |

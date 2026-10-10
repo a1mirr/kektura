@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useBulk } from "./BulkDatesProvider";
 
-// The checkbox of a stamped row in "Change dates" (spec 0016 AC-14, AC-15). Nothing for a row that is not stamped, and nothing
+// The checkbox of a row in "Set dates" (spec 0016 AC-14, AC-15), stamped or not. Nothing for a row the page does not hand over, and nothing
 // outside the mode. A click with Shift held selects the range up to the last chosen row; the click's event says so (a change event
 // does not). The label is a 44 x 44 px target (AC-21).
 export default function BulkCheckbox({ id, name }: { id: string; name: string }) {

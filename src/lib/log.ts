@@ -79,7 +79,7 @@ export function logStampActionInvalidInput(action: StampAction): void {
   console.warn(`${TAG} invalid input action=${action}`);
 }
 
-// A request with valid input that the database refused (spec 0016 AC-17: a stamp that is gone, a retired stamp's day): an
+// A request with valid input that the database refused (spec 0016 AC-17: a place or extra stamp that does not exist, a retired stamp's day): an
 // expected outcome, one warning with the action name only. It is no failure of ours, so it is never sent to Telegram (spec 0008 AC-6).
 export function logStampActionRefused(action: StampAction): void {
   console.warn(`${TAG} request refused action=${action}`);

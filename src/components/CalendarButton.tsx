@@ -7,7 +7,7 @@ import { MIN_STAMP_DATE } from "@/lib/stamp-date";
 // The calendar button next to a date field (spec 0016 AC-9, AC-10): the native picker lives in a hidden date input, opened
 // from the button, and a pick is one complete date, handed to `onPick` at once. The hidden input is out of the keyboard's and
 // the screen readers' way (the text field is the only date field they meet) and keeps the browser's own range limits.
-// `large` makes the button a 44 px target, for the bar of "Change dates" (spec 0016 AC-21).
+// `large` makes the button a 44 px target, for the bar of "Set dates" (spec 0016 AC-21).
 export default function CalendarButton({
   value,
   max,

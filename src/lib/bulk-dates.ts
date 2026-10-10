@@ -1,15 +1,15 @@
-// The logic of "Change dates" (spec 0016 AC-14 to AC-21): which stamps can be chosen, in which order, what a shift-click
+// The logic of "Set dates" (spec 0016 AC-14 to AC-21): which rows can be chosen, in which order, what a shift-click
 // selects, and what a request holds. Pure, so the components and the server action stay thin.
 import { isValidStampDate } from "./stamp-date";
 
 // The most stamps one request may change: more than the 161 places and the extra stamps together, so "select all" always fits.
 export const MAX_BULK_STAMPS = 500;
 
-// A stamp the user holds, as the mode lists it. `id` is what the selection stores; the list's order is the page's order
+// A row the mode lists, stamped or not yet. `id` is what the selection stores; the list's order is the page's order
 // (the stages in trail order with the retired stamps where they stand, then the extra stamps).
 export type BulkItem =
-  | { id: string; kind: "place"; placeKey: string; stage: number; name: string; retiredOn?: string }
-  | { id: string; kind: "extra"; extraId: number; name: string };
+  | { id: string; kind: "place"; placeKey: string; stage: number; name: string; stamped: boolean; retiredOn?: string }
+  | { id: string; kind: "extra"; extraId: number; name: string; stamped: boolean };
 
 export const placeItemId = (placeKey: string) => `p:${placeKey}`;
 export const extraItemId = (extraId: number) => `e:${extraId}`;
@@ -20,9 +20,9 @@ type StageRows = {
   retired: { key: string; name: string; afterKey: string | null; retiredOn: string }[];
 };
 
-// The stamped rows of the page in the order they are shown: a retired stamp stands after the place it followed, and a
-// retired stamp whose place is not in its stage closes the stage's list (as the page lists them). Unstamped rows are
-// not here: they cannot be chosen.
+// The rows of the page that can be chosen, in the order they are shown: a retired stamp stands after the place it followed, and a
+// retired stamp whose place is not in its stage closes the stage's list (as the page lists them). Every place and extra stamp is
+// here, stamped or not; a retired stamp only once it is stamped (an unstamped one is collected on its own, spec 0016 AC-13).
 export function buildBulkItems(input: {
   stages: StageRows[];
   isStamped: (placeKey: string) => boolean;
@@ -33,7 +33,8 @@ export function buildBulkItems(input: {
   for (const { stage, places, retired } of input.stages) {
     const keys = new Set(places.map((p) => p.key));
     const add = (key: string, name: string, retiredOn?: string) => {
-      if (input.isStamped(key)) items.push({ id: placeItemId(key), kind: "place", placeKey: key, stage, name, ...(retiredOn ? { retiredOn } : {}) });
+      const stamped = input.isStamped(key);
+      if (stamped || !retiredOn) items.push({ id: placeItemId(key), kind: "place", placeKey: key, stage, name, stamped, ...(retiredOn ? { retiredOn } : {}) });
     };
     for (const p of places) {
       add(p.key, p.name);
@@ -42,7 +43,7 @@ export function buildBulkItems(input: {
     for (const r of retired.filter((r) => !r.afterKey || !keys.has(r.afterKey))) add(r.key, r.name, r.retiredOn);
   }
   for (const e of input.extras) {
-    if (input.isExtraStamped(e.id)) items.push({ id: extraItemId(e.id), kind: "extra", extraId: e.id, name: e.name });
+    items.push({ id: extraItemId(e.id), kind: "extra", extraId: e.id, name: e.name, stamped: input.isExtraStamped(e.id) });
   }
   return items;
 }
@@ -77,6 +78,9 @@ export function clickRow(
 
 // The selection as the items it still names, in the list's order: a stamp that was removed meanwhile (here or in another tab) drops out.
 export const selectedItems = (items: readonly BulkItem[], selected: ReadonlySet<string>): BulkItem[] => items.filter((i) => selected.has(i.id));
+
+// How many of the chosen rows Apply will stamp for the first time (spec 0016 AC-16).
+export const notStampedCount = (chosen: readonly BulkItem[]): number => chosen.filter((i) => !i.stamped).length;
 
 // What the server action takes.
 export function requestOf(chosen: readonly BulkItem[]): { placeKeys: string[]; extraIds: number[] } {
