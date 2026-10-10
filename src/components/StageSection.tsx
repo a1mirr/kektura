@@ -65,7 +65,7 @@ export default function StageSection({
   const pct = total ? Math.round((done / total) * 100) : 0;
 
   return (
-    <section id={`stage-${stage}`} className="scroll-mt-24 rounded-lg bg-white shadow-sm">
+    <section id={`stage-${stage}`} className="scroll-mt-24 lg:scroll-mt-44 rounded-lg bg-white shadow-sm">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 px-4 py-3">
         <button
           type="button"

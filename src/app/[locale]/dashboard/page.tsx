@@ -284,7 +284,7 @@ export default async function Dashboard({
                     <li
                       id={`place-${p.key}`}
                       data-stage={p.stage}
-                      className="flex scroll-mt-24 flex-wrap items-start justify-between gap-x-2 gap-y-1 px-4 py-3"
+                      className="flex scroll-mt-24 lg:scroll-mt-44 flex-wrap items-start justify-between gap-x-2 gap-y-1 px-4 py-3 lg:scroll-mt-44"
                     >
                       <BulkCheckbox id={placeItemId(p.key)} name={p.name} />
                       <div className="min-w-0 flex-1 basis-40">
@@ -341,7 +341,7 @@ export default async function Dashboard({
         )}
 
       {extraListWithStage.length > 0 && (
-        <section id="extra-stamps" className="mt-8 scroll-mt-24">
+        <section id="extra-stamps" className="mt-8 scroll-mt-24 lg:scroll-mt-44">
           <h2 className="mb-1 font-semibold">
             {t("extraStamps")}{" "}
             <span className="text-sm font-normal text-stone-500">
@@ -351,7 +351,7 @@ export default async function Dashboard({
           <p className="mb-2 text-sm text-stone-500">{t("extraNote")}</p>
           <ul className="divide-y rounded-lg bg-white shadow-sm">
             {extraListWithStage.map((e) => (
-              <li id={`extra-${e.id}`} key={e.id} className="flex scroll-mt-24 flex-wrap items-start justify-between gap-x-2 gap-y-1 px-4 py-3">
+              <li id={`extra-${e.id}`} key={e.id} className="flex scroll-mt-24 lg:scroll-mt-44 flex-wrap items-start justify-between gap-x-2 gap-y-1 px-4 py-3 lg:scroll-mt-44">
                 <BulkCheckbox id={extraItemId(e.id)} name={e.name} />
                 <div className="min-w-0 flex-1 basis-40">
                   <div>
