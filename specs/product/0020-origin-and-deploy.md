@@ -64,6 +64,8 @@ be tried on the server first.
   that client elsewhere (a cross-site request can't set `host`), so this is hardening, not a hole fix.
 - The hook is a copy: git hooks live in `~/kektura.git/hooks/` on the server. After changing
   `deploy/post-receive`, copy it there (README).
+- The Caddyfile is a copy too: no deploy installs it. AC-7 stays true only if a change to `deploy/Caddyfile` is
+  installed by hand after its merge (README, Caddy).
 - A failed `next build` already replaced part of `.next` when it stops, so a running instance can break
   until the next good build even when the hook stops before reloading. Roll back by pushing the last good
   commit (README).

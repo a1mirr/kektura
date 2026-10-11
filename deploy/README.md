@@ -51,11 +51,18 @@ The webhook listens for messages and for taps on the panel's buttons: after a re
    sudo mkdir -p /etc/caddy/site.d
    sudo caddy validate --config Caddyfile --adapter caddyfile && sudo cp Caddyfile /etc/caddy/Caddyfile && sudo systemctl reload caddy
    ```
-   Caddy serves HTTPS only on `127.0.0.1:8443` and expects a PROXY protocol header there: without the TCP front
-   on port 443 the site is unreachable from outside. Server-only additions to the site go into
-   `/etc/caddy/site.d/*.caddy` (imported by the site block; the folder may be empty). After changing the
-   `Caddyfile`, install it the same way: the new file is validated before it replaces `/etc/caddy/Caddyfile`, so a
-   broken file never lands there (a reload would refuse it anyway, but the next restart or reboot would not start).
+   Caddy serves HTTPS only on `127.0.0.1:8443` and takes the client's address from a PROXY protocol header sent
+   from 127.0.0.1 (a plain connection from there works too): without the TCP front on port 443 the site is
+   unreachable from outside. Server-only additions to the site go into `/etc/caddy/site.d/*.caddy` (imported by
+   the site block; the folder may be empty). The new file is validated before it replaces `/etc/caddy/Caddyfile`,
+   so a broken file never lands there (a reload would refuse it anyway, but the next restart or reboot would not
+   start).
+
+   **Deploys do not install the Caddyfile**: neither the workflow nor the hook copies it to `/etc/caddy`. After a
+   merge that changes `deploy/Caddyfile`, install it by hand from the deployed checkout, once the deploy is done:
+   ```bash
+   cd ~/kektura_app/deploy && sudo caddy validate --config Caddyfile --adapter caddyfile && sudo cp Caddyfile /etc/caddy/Caddyfile && sudo systemctl reload caddy
+   ```
 4. The repository: `git init --bare ~/kektura.git`, copy `post-receive` to `~/kektura.git/hooks/post-receive`
    and `chmod +x` it.
 5. Create `~/kektura_app/.env.local` (above).

@@ -62,7 +62,7 @@ describe("spec 0020: deployment files", () => {
     expect(hook).toContain("checkout -f main");
   });
 
-  it("AC-4: the proxy configuration is HTTPS (no HTTP-only site address) and points at the app", () => {
+  it("AC-4: the site block that points at the app has an HTTPS address (not http:// or port 80)", () => {
     const app = caddyBlocks().find((block) => block.body.includes("reverse_proxy 127.0.0.1:3000"))!;
     expect(app, "a site block that proxies to the app").toBeDefined();
     expect(app.address).toContain("kektura-tracker.com");
