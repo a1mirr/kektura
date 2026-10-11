@@ -41,6 +41,13 @@ deploy a broken build.
   there is too small for the type check of `next build`.
 - **AC-6**: The repository root holds no server scripts: there is one Caddy configuration, `deploy/Caddyfile`
   (HTTPS), and what the earlier ad-hoc setup scripts did is in the README.
+- **AC-7**: `deploy/Caddyfile` is the configuration production runs. Port 443 belongs to a TCP front on the server
+  that is not part of this repository, so Caddy serves HTTPS for `kektura-tracker.com` and `www.` only on
+  `127.0.0.1:8443`, accepts the PROXY protocol there from `127.0.0.1` alone (the client's address still reaches
+  the app as `x-forwarded-for`, spec 0017), and speaks HTTP/1.1 and HTTP/2 only (no HTTP/3, which would announce
+  the unreachable port 8443). Port 80 redirects both names to HTTPS and answers Let's Encrypt. The site block
+  imports `/etc/caddy/site.d/*.caddy`, server-only additions that the repository does not hold (the folder may
+  be empty). The README installs the file with `caddy validate` before the reload.
 
 ## Out of scope
 
@@ -68,4 +75,6 @@ be tried on the server first.
 | AC-1, AC-2 | `src/lib/origin.test.ts` |
 | AC-3 | `e2e/auth.spec.ts` (sign-out and dummy login redirect to the right place; the callback's failure path on the address the user is on, with a forwarded host); the callback's success path needs a real Google sign-in: manual (a real OAuth round trip). Last checked: never recorded. |
 | AC-4, AC-5, AC-6 | `tests/deploy.test.ts` (files in place and no server script at the repository root, the hook fails fast and deploys only main, HTTPS proxy config, the README's contents; `bash -n` on both scripts) |
+| AC-7 | `tests/deploy.test.ts` (listens on 127.0.0.1:8443 with PROXY protocol from 127.0.0.1, h1/h2 only, the port-80 redirect, the `site.d` import, the README's validate step) |
+| AC-7 (production runs this file) | manual (needs the server): `/etc/caddy/Caddyfile` is the repository's `deploy/Caddyfile`, `caddy validate` passes, the site answers 200 through port 443, no `Alt-Svc` header, and port 8443 is closed from outside. Last checked: never recorded. |
 | AC-5 (the hook's branch filter) | manual (it needs a bare repository and the server's tools): a dry run of the hook's branch filter: main deploys, another branch and a tag don't. Last checked: never recorded. |

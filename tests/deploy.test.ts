@@ -5,6 +5,21 @@ import { describe, expect, it } from "vitest";
 const read = (path: string) => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const exists = (path: string) => fs.existsSync(new URL(`../${path}`, import.meta.url));
 
+/** The top-level blocks of deploy/Caddyfile: the global options block has the address "". */
+function caddyBlocks() {
+  const blocks: { address: string; body: string }[] = [];
+  let current: { address: string; lines: string[] } | null = null;
+  for (const line of read("deploy/Caddyfile").split(/\r?\n/)) {
+    if (!current && /^\S.*\{$/.test(line) && !line.startsWith("#")) current = { address: line.slice(0, -1).trim(), lines: [] };
+    else if (!current && line === "{") current = { address: "", lines: [] };
+    else if (current && line === "}") {
+      blocks.push({ address: current.address, body: current.lines.join("\n") });
+      current = null;
+    } else if (current) current.lines.push(line);
+  }
+  return blocks;
+}
+
 describe("spec 0020: deployment files", () => {
   it("AC-4, AC-6: everything for the server is in deploy/, and the root has no server scripts", () => {
     for (const file of ["post-receive", "Caddyfile", "server-setup.sh", "README.md"]) expect(exists(`deploy/${file}`), file).toBe(true);
@@ -48,11 +63,42 @@ describe("spec 0020: deployment files", () => {
   });
 
   it("AC-4: the proxy configuration is HTTPS (no HTTP-only site address) and points at the app", () => {
-    const caddy = read("deploy/Caddyfile");
-    const siteLine = caddy.split("\n").find((line) => line.includes("kektura-tracker.com") && line.includes("{"))!;
-    expect(siteLine).not.toContain("http://");
-    expect(siteLine).not.toMatch(/:80\b/);
-    expect(caddy).toContain("reverse_proxy 127.0.0.1:3000");
+    const app = caddyBlocks().find((block) => block.body.includes("reverse_proxy 127.0.0.1:3000"))!;
+    expect(app, "a site block that proxies to the app").toBeDefined();
+    expect(app.address).toContain("kektura-tracker.com");
+    expect(app.address).not.toContain("http://");
+    expect(app.address).not.toMatch(/:80\b/);
+  });
+
+  it("AC-7: HTTPS only on 127.0.0.1:8443, PROXY protocol from 127.0.0.1 alone, no HTTP/3", () => {
+    const blocks = caddyBlocks();
+    const global = blocks.find((block) => block.address === "")!;
+    expect(global.body).toMatch(/^\s*https_port 8443$/m);
+    expect(global.body).toMatch(/^\s*servers 127\.0\.0\.1:8443 \{$/m);
+    expect(global.body).toMatch(/^\s*protocols h1 h2$/m);
+    expect(global.body).toMatch(/proxy_protocol \{\s*allow 127\.0\.0\.1\/32\s*\}/);
+    // The proxy_protocol wrapper must come before tls, or the PROXY header reaches the TLS handshake.
+    expect(global.body.indexOf("proxy_protocol")).toBeLessThan(global.body.indexOf("tls"));
+    const app = blocks.find((block) => block.body.includes("reverse_proxy 127.0.0.1:3000"))!;
+    expect(app.address).toBe("kektura-tracker.com:8443, www.kektura-tracker.com:8443");
+    expect(app.body).toMatch(/^\s*bind 127\.0\.0\.1$/m);
+  });
+
+  it("AC-7: port 80 redirects both names to HTTPS", () => {
+    const redirect = caddyBlocks().find((block) => block.address.startsWith("http://"))!;
+    expect(redirect.address).toBe("http://kektura-tracker.com, http://www.kektura-tracker.com");
+    expect(redirect.body).toMatch(/^\s*redir https:\/\/\{host\}\{uri\} permanent$/m);
+    // Caddy's own redirect would send people to :8443, the port HTTPS listens on.
+    expect(caddyBlocks().find((block) => block.address === "")!.body).toMatch(/^\s*auto_https disable_redirects$/m);
+  });
+
+  it("AC-7: the site imports server-only additions before proxying to the app, and the README validates first", () => {
+    const app = caddyBlocks().find((block) => block.body.includes("reverse_proxy 127.0.0.1:3000"))!;
+    expect(app.body).toMatch(/^\s*import \/etc\/caddy\/site\.d\/\*\.caddy$/m);
+    expect(app.body.indexOf("import /etc/caddy/site.d/")).toBeLessThan(app.body.indexOf("reverse_proxy"));
+    const readme = read("deploy/README.md");
+    expect(readme).toContain("sudo mkdir -p /etc/caddy/site.d");
+    expect(readme).toMatch(/sudo cp Caddyfile \/etc\/caddy\/Caddyfile && sudo caddy validate --config \/etc\/caddy\/Caddyfile && sudo systemctl reload caddy/);
   });
 
   it("AC-4: the swap script refuses to run as a normal user and can be run again", () => {

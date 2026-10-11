@@ -1,9 +1,36 @@
-# The production proxy (spec 0020): Caddy terminates HTTPS and forwards to the app on port 3000. It gets
-# and renews the Let's Encrypt certificate by itself. Install: sudo cp Caddyfile /etc/caddy/Caddyfile
-# && sudo systemctl reload caddy.
+# The production proxy (spec 0020): Caddy terminates HTTPS for both names and forwards to the app on port 3000.
+# It gets and renews the Let's Encrypt certificate by itself (HTTP-01 on port 80).
+#
+# Port 443 on the server belongs to a TCP front that is not part of this repository: it passes HTTPS connections
+# on to Caddy at 127.0.0.1:8443 with a PROXY protocol header, so the app still sees the client's address in
+# x-forwarded-for. HTTP/3 is off: the front speaks TCP only, and HTTP/3 would announce port 8443 (Alt-Svc),
+# which nobody outside can reach. Additions that live only on the server go into /etc/caddy/site.d/*.caddy.
+#
+# Install: sudo cp Caddyfile /etc/caddy/Caddyfile && sudo caddy validate --config /etc/caddy/Caddyfile
+# && sudo systemctl reload caddy (deploy/README.md).
 #
 # Needs DNS records for both names pointing at the server. On Cloudflare the proxy must be OFF (grey
-# cloud) so Let's Encrypt can reach the server, or the SSL mode must be "Full (strict)".
-kektura-tracker.com, www.kektura-tracker.com {
+# cloud) so Let's Encrypt can reach the server.
+{
+	https_port 8443
+	auto_https disable_redirects
+	servers 127.0.0.1:8443 {
+		protocols h1 h2
+		listener_wrappers {
+			proxy_protocol {
+				allow 127.0.0.1/32
+			}
+			tls
+		}
+	}
+}
+
+http://kektura-tracker.com, http://www.kektura-tracker.com {
+	redir https://{host}{uri} permanent
+}
+
+kektura-tracker.com:8443, www.kektura-tracker.com:8443 {
+	bind 127.0.0.1
+	import /etc/caddy/site.d/*.caddy
 	reverse_proxy 127.0.0.1:3000
 }

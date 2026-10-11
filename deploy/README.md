@@ -8,7 +8,8 @@ root README and spec 0006: they have nothing to do with this.)
 | Part | Where |
 | --- | --- |
 | App | DigitalOcean droplet `188.166.117.212`, Ubuntu 22.04, 1 GB RAM plus 2 GB swap, Node 22 (nvm), PM2 process `kektura` on port 3000 |
-| Proxy and HTTPS | Caddy: `deploy/Caddyfile`, ports 80 and 443 to `127.0.0.1:3000` |
+| Proxy and HTTPS | Caddy: `deploy/Caddyfile`, HTTPS on `127.0.0.1:8443` (PROXY protocol, from the TCP front on port 443) and port 80, to `127.0.0.1:3000` |
+| Port 443 | a TCP front that is not part of this repository: it passes HTTPS connections to Caddy with a PROXY protocol header |
 | DNS | Cloudflare, proxy **off** (grey cloud) so Caddy can get its certificate |
 | Database and sign-in | Supabase cloud project (not on the server) |
 | Code on the server | `~/kektura.git` (bare repository, receives pushes) and `~/kektura_app` (checked out and built by the hook) |
@@ -47,8 +48,13 @@ The webhook listens for messages and for taps on the panel's buttons: after a re
    curl -1sLf "https://dl.cloudsmith.io/public/caddy/stable/gpg.key" | sudo gpg --dearmor --yes -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
    curl -1sLf "https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt" | sudo tee /etc/apt/sources.list.d/caddy-stable.list
    sudo apt-get update && sudo apt-get install -y caddy
-   sudo cp Caddyfile /etc/caddy/Caddyfile && sudo systemctl reload caddy
+   sudo mkdir -p /etc/caddy/site.d
+   sudo cp Caddyfile /etc/caddy/Caddyfile && sudo caddy validate --config /etc/caddy/Caddyfile && sudo systemctl reload caddy
    ```
+   Caddy serves HTTPS only on `127.0.0.1:8443` and expects a PROXY protocol header there: without the TCP front
+   on port 443 the site is unreachable from outside. Server-only additions to the site go into
+   `/etc/caddy/site.d/*.caddy` (imported by the site block; the folder may be empty). After changing the
+   `Caddyfile`, install it the same way: `caddy validate` first, so a broken file never replaces the running one.
 4. The repository: `git init --bare ~/kektura.git`, copy `post-receive` to `~/kektura.git/hooks/post-receive`
    and `chmod +x` it.
 5. Create `~/kektura_app/.env.local` (above).
@@ -180,6 +186,10 @@ minutes are free, but a scheduled workflow is not guaranteed to start on time, s
 
 - Logs: `pm2 logs kektura` (stamp and feedback failures are `[stamp-action]`, `[feedback]`,
   `[account-delete]` lines), `pm2 status`, `sudo journalctl -u caddy`.
+- The site does not answer on 443 but the app does (`curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3000/en`
+  on the server): look at the TCP front on port 443 (`sudo ss -ltnp | grep ':443'`) and at Caddy on
+  `127.0.0.1:8443`. A request straight to 8443 needs the PROXY header:
+  `curl --haproxy-protocol --resolve kektura-tracker.com:8443:127.0.0.1 https://kektura-tracker.com:8443/en`.
 - Roll back: revert the pull request on `main` and merge the revert: the workflow deploys it. By hand: `git revert <sha> && git push production main`. In an
   emergency `git push --force production <good-sha>:main` redeploys an older commit; the force only
   concerns this deploy remote, not GitHub. After such a rollback the next merge deploys `main` again, the bad
@@ -195,7 +205,5 @@ minutes are free, but a scheduled workflow is not guaranteed to start on time, s
 - `HOSTNAME=188.166.117.212` is set by the hook when it (re)starts PM2. It stops Next.js from rewriting
   `request.url` to `localhost` during the auth callbacks. With `SITE_URL` set (see above) the redirects no
   longer depend on it; it can be removed once that has been tried on the server.
-- An Xray VPN used to listen on port 443. It was disabled (`sudo systemctl disable --now xray`) so that
-  Caddy can serve HTTPS there. The earlier `caddy_setup.sh`, `caddy_fix.sh` and `final_caddy.sh` at the root
-  of the repository did the Caddy install, a temporary HTTP-only configuration and that switch; they are
-  replaced by the steps and the `Caddyfile` here.
+- The earlier `caddy_setup.sh`, `caddy_fix.sh` and `final_caddy.sh` at the root of the repository did the Caddy
+  install and a temporary HTTP-only configuration; they are replaced by the steps and the `Caddyfile` here.
