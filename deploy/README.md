@@ -8,7 +8,7 @@ root README and spec 0006: they have nothing to do with this.)
 | Part | Where |
 | --- | --- |
 | App | DigitalOcean droplet `188.166.117.212`, Ubuntu 22.04, 1 GB RAM plus 2 GB swap, Node 22 (nvm), PM2 process `kektura` on port 3000 |
-| Proxy and HTTPS | Caddy: `deploy/Caddyfile`, HTTPS on `127.0.0.1:8443` (PROXY protocol, from the TCP front on port 443) and port 80, to `127.0.0.1:3000` |
+| Proxy and HTTPS | Caddy: `deploy/Caddyfile`, HTTPS on `127.0.0.1:8443` (PROXY protocol, from the TCP front on port 443) to `127.0.0.1:3000`; port 80 only redirects to HTTPS and answers Let's Encrypt |
 | Port 443 | a TCP front that is not part of this repository: it passes HTTPS connections to Caddy with a PROXY protocol header |
 | DNS | Cloudflare, proxy **off** (grey cloud) so Caddy can get its certificate |
 | Database and sign-in | Supabase cloud project (not on the server) |
