@@ -47,7 +47,7 @@ deploy a broken build.
   the app as `x-forwarded-for`, spec 0017), and speaks HTTP/1.1 and HTTP/2 only (no HTTP/3, which would announce
   the unreachable port 8443). Port 80 redirects both names to HTTPS and answers Let's Encrypt. The site block
   imports `/etc/caddy/site.d/*.caddy`, server-only additions that the repository does not hold (the folder may
-  be empty). The README installs the file with `caddy validate` before the reload.
+  be empty). The README validates the new file (`caddy validate`) before it replaces the installed one.
 
 ## Out of scope
 
@@ -76,5 +76,5 @@ be tried on the server first.
 | AC-3 | `e2e/auth.spec.ts` (sign-out and dummy login redirect to the right place; the callback's failure path on the address the user is on, with a forwarded host); the callback's success path needs a real Google sign-in: manual (a real OAuth round trip). Last checked: never recorded. |
 | AC-4, AC-5, AC-6 | `tests/deploy.test.ts` (files in place and no server script at the repository root, the hook fails fast and deploys only main, HTTPS proxy config, the README's contents; `bash -n` on both scripts) |
 | AC-7 | `tests/deploy.test.ts` (listens on 127.0.0.1:8443 with PROXY protocol from 127.0.0.1, h1/h2 only, the port-80 redirect, the `site.d` import, the README's validate step) |
-| AC-7 (production runs this file) | manual (needs the server): `/etc/caddy/Caddyfile` is the repository's `deploy/Caddyfile`, `caddy validate` passes, the site answers 200 through port 443, no `Alt-Svc` header, and port 8443 is closed from outside. Last checked: never recorded. |
+| AC-7 (production runs this file) | manual (needs the server): `/etc/caddy/Caddyfile` is the repository's `deploy/Caddyfile`, `caddy validate` passes, the site answers 200 through port 443, no `Alt-Svc` header, port 8443 is closed from outside, port 80 redirects without `:8443`, and the certificate has more than 20 days left (Caddy renews about 30 days before expiry, over HTTP-01 on port 80, so less means renewal is failing). Last checked: never recorded. |
 | AC-5 (the hook's branch filter) | manual (it needs a bare repository and the server's tools): a dry run of the hook's branch filter: main deploys, another branch and a tag don't. Last checked: never recorded. |

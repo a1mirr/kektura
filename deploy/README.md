@@ -49,12 +49,13 @@ The webhook listens for messages and for taps on the panel's buttons: after a re
    curl -1sLf "https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt" | sudo tee /etc/apt/sources.list.d/caddy-stable.list
    sudo apt-get update && sudo apt-get install -y caddy
    sudo mkdir -p /etc/caddy/site.d
-   sudo cp Caddyfile /etc/caddy/Caddyfile && sudo caddy validate --config /etc/caddy/Caddyfile && sudo systemctl reload caddy
+   sudo caddy validate --config Caddyfile --adapter caddyfile && sudo cp Caddyfile /etc/caddy/Caddyfile && sudo systemctl reload caddy
    ```
    Caddy serves HTTPS only on `127.0.0.1:8443` and expects a PROXY protocol header there: without the TCP front
    on port 443 the site is unreachable from outside. Server-only additions to the site go into
    `/etc/caddy/site.d/*.caddy` (imported by the site block; the folder may be empty). After changing the
-   `Caddyfile`, install it the same way: `caddy validate` first, so a broken file never replaces the running one.
+   `Caddyfile`, install it the same way: the new file is validated before it replaces `/etc/caddy/Caddyfile`, so a
+   broken file never lands there (a reload would refuse it anyway, but the next restart or reboot would not start).
 4. The repository: `git init --bare ~/kektura.git`, copy `post-receive` to `~/kektura.git/hooks/post-receive`
    and `chmod +x` it.
 5. Create `~/kektura_app/.env.local` (above).
@@ -188,7 +189,8 @@ minutes are free, but a scheduled workflow is not guaranteed to start on time, s
   `[account-delete]` lines), `pm2 status`, `sudo journalctl -u caddy`.
 - The site does not answer on 443 but the app does (`curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3000/en`
   on the server): look at the TCP front on port 443 (`sudo ss -ltnp | grep ':443'`) and at Caddy on
-  `127.0.0.1:8443`. A request straight to 8443 needs the PROXY header:
+  `127.0.0.1:8443`. To test 8443 the way the front reaches it, send the PROXY header (Caddy also accepts a
+  plain connection from 127.0.0.1, so a plain `curl` succeeding does not show the header is used):
   `curl --haproxy-protocol --resolve kektura-tracker.com:8443:127.0.0.1 https://kektura-tracker.com:8443/en`.
 - Roll back: revert the pull request on `main` and merge the revert: the workflow deploys it. By hand: `git revert <sha> && git push production main`. In an
   emergency `git push --force production <good-sha>:main` redeploys an older commit; the force only

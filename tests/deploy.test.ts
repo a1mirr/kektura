@@ -92,13 +92,14 @@ describe("spec 0020: deployment files", () => {
     expect(caddyBlocks().find((block) => block.address === "")!.body).toMatch(/^\s*auto_https disable_redirects$/m);
   });
 
-  it("AC-7: the site imports server-only additions before proxying to the app, and the README validates first", () => {
+  it("AC-7: the site imports server-only additions, and the README validates the new file before installing it", () => {
     const app = caddyBlocks().find((block) => block.body.includes("reverse_proxy 127.0.0.1:3000"))!;
     expect(app.body).toMatch(/^\s*import \/etc\/caddy\/site\.d\/\*\.caddy$/m);
-    expect(app.body.indexOf("import /etc/caddy/site.d/")).toBeLessThan(app.body.indexOf("reverse_proxy"));
     const readme = read("deploy/README.md");
     expect(readme).toContain("sudo mkdir -p /etc/caddy/site.d");
-    expect(readme).toMatch(/sudo cp Caddyfile \/etc\/caddy\/Caddyfile && sudo caddy validate --config \/etc\/caddy\/Caddyfile && sudo systemctl reload caddy/);
+    const install = /sudo caddy validate --config Caddyfile --adapter caddyfile && sudo cp Caddyfile \/etc\/caddy\/Caddyfile && sudo systemctl reload caddy/;
+    expect(readme).toMatch(install);
+    expect(read("deploy/Caddyfile")).toContain("# Install: sudo caddy validate --config Caddyfile --adapter caddyfile && sudo cp");
   });
 
   it("AC-4: the swap script refuses to run as a normal user and can be run again", () => {

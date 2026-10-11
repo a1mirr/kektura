@@ -6,7 +6,7 @@
 # x-forwarded-for. HTTP/3 is off: the front speaks TCP only, and HTTP/3 would announce port 8443 (Alt-Svc),
 # which nobody outside can reach. Additions that live only on the server go into /etc/caddy/site.d/*.caddy.
 #
-# Install: sudo cp Caddyfile /etc/caddy/Caddyfile && sudo caddy validate --config /etc/caddy/Caddyfile
+# Install: sudo caddy validate --config Caddyfile --adapter caddyfile && sudo cp Caddyfile /etc/caddy/Caddyfile
 # && sudo systemctl reload caddy (deploy/README.md).
 #
 # Needs DNS records for both names pointing at the server. On Cloudflare the proxy must be OFF (grey
