@@ -1,0 +1,45 @@
+name: Site diagnose
+
+on:
+  push:
+    branches: [ccr-3dcdaf97-arzuot]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: DNS
+        run: |
+          set +e
+          for t in A AAAA NS CNAME; do echo "== $t"; dig +short kektura-tracker.com $t; done
+          echo "== www A"; dig +short www.kektura-tracker.com A
+          echo "== A via 1.1.1.1"; dig +short @1.1.1.1 kektura-tracker.com A
+          echo "== A via 8.8.8.8"; dig +short @8.8.8.8 kektura-tracker.com A
+          echo "== RDAP (registration status and expiry)"
+          curl -s --max-time 15 https://rdap.verisign.com/com/v1/domain/kektura-tracker.com | jq -c '{status, events: [.events[] | {eventAction, eventDate}], ns: [.nameservers[].ldhName]}'
+      - name: Ports on the droplet
+        run: |
+          set +e
+          for p in 22 80 443 3000 8443; do timeout 6 bash -c "echo > /dev/tcp/188.166.117.212/$p" && echo "port $p open" || echo "port $p closed or filtered"; done
+      - name: HTTP through DNS
+        run: |
+          set +e
+          for u in https://kektura-tracker.com/en https://www.kektura-tracker.com/en http://kektura-tracker.com/; do
+            echo "== $u"
+            curl -sS -o /tmp/body -D - --max-time 20 "$u"; echo "exit $?"
+            head -c 400 /tmp/body; echo
+          done
+      - name: HTTPS straight to the droplet's IP
+        run: |
+          set +e
+          curl -sSv -o /tmp/body --max-time 20 --resolve kektura-tracker.com:443:188.166.117.212 https://kektura-tracker.com/en 2>&1 | grep -E "^\*|^< HTTP|^< (server|alt-svc|location)" | head -40
+          head -c 400 /tmp/body; echo
+      - name: Certificate
+        run: |
+          set +e
+          echo | timeout 15 openssl s_client -connect 188.166.117.212:443 -servername kektura-tracker.com 2>&1 | openssl x509 -noout -subject -issuer -dates 2>&1
+          echo | timeout 15 openssl s_client -connect 188.166.117.212:443 -servername kektura-tracker.com 2>&1 | grep -E "Verify return code|alert|errno|error|CONNECTED|no peer" | head -8
